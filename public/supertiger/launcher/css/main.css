@@ -1,0 +1,264 @@
+html, body {
+    font-family: 'Roboto', sans-serif;
+    height: 100%;
+    margin: 0;
+    background: #09a1e2;
+}
+
+
+header {
+    width: 100%;
+    margin-top: -100px;
+    opacity: 0;
+    background: rgb(24, 125, 207);
+    display: flex;
+    animation: showHeader;
+    animation-duration: 0.3s;
+    animation-delay: 0.3s;
+    animation-direction: forwards;
+    animation-fill-mode: forwards;
+}
+
+@keyframes showHeader {
+    from {
+        margin-top: -100px;
+        opacity: 0;
+    }
+    to {
+        margin-top:0;
+        opacity: 1;
+    }
+}
+
+
+
+.logo-container {
+    display: flex;
+    flex: 1;
+}
+
+header .logo{
+    background-image: url(../assets/logo.png);
+    height: 70px;
+    width: 70px;
+    background-size: 100%;
+    border-radius: 50%;
+    margin: auto;
+    margin-left: 20px;
+    margin-right: 0;
+    flex-shrink: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+
+}
+header .logo-container span {
+    display: block;
+    margin: auto;
+    margin-left: 10px;
+    font-size: 25px;
+    font-weight: bold;
+    color: white;
+}
+
+.links {
+    margin: auto;
+    color: rgba(255, 255, 255, 0.541);
+    font-size: 18px;
+    margin-right: 15px;
+    user-select: none;
+    display: flex;
+}
+
+.link {
+    margin: 5px;
+    transition: color 0.3s;
+}
+
+.link:hover{
+    color: rgb(255, 255, 255)
+}
+
+.link.active {
+    color: white;
+}
+
+.sub-header{
+    width: 100%;
+    height: 700px;
+    background: rgb(191, 231, 255);
+    display: flex;
+    flex-direction: column;
+
+    animation: showSubHeader;
+    animation-duration: 0.5s;
+    animation-delay: 0.4s;
+    animation-direction: forwards;
+    animation-fill-mode: forwards;
+    opacity: 0;
+}
+
+@keyframes showSubHeader {
+    from {
+        opacity: 0;
+        margin-top: -200px
+    }
+    to {
+        opacity: 1;
+        margin-top: 0;
+    }
+}
+
+
+.sub-header .video{
+    display: table;
+    background-size: 100%;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 0;
+}
+.sub-header .title {
+    margin: auto;
+    margin-top: 20px;
+    margin-bottom: 0px;
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(24, 125, 207);
+}
+.sub-header .information{
+    margin:auto;
+    margin-top: 10px;
+    text-align: center;
+}
+.screenshots {
+    animation: showSubHeader;
+    animation-duration: 0.5s;
+    animation-delay: 0.4s;
+    animation-direction: forwards;
+    animation-fill-mode: forwards;
+    opacity: 0;
+    padding-top: 50px;
+}
+.close-view {
+    display: table;
+    margin: auto;
+}
+.download-button{
+    padding: 10px;
+    background: rgba(27, 152, 255, 0.589);
+    border-radius: 20px;
+    transition: 0.3s;
+    display: inline-block;
+    color: white;
+    user-select: none;
+    text-align: center;
+    margin: auto;
+}
+.download-button:hover{
+    background: rgb(27, 152, 255);
+}
+.changelog-button{
+    background: rgba(0, 133, 18, 0.589);
+}
+.changelog-button:hover {
+    background: rgba(0, 133, 18, 0.342);
+}
+
+.source-button {
+    background: rgba(65, 65, 65, 0.685);
+}
+
+.source-button:hover {
+    background: rgb(65, 65, 65);
+}
+
+.download-card{
+    display: table;
+    margin: auto;
+    margin-top: 50px;
+    margin-bottom: 100px;
+    background: rgba(30, 211, 69, 0.363);
+    padding: 50px;
+}
+.download-card .download-button {
+    margin-left: 30px;
+    background: green;
+}
+a {
+    text-decoration: none;
+    font-style: none;
+    color: inherit;
+}
+
+
+
+.sub-header.changelog {
+    height: 150px;
+}
+.changelogs{
+    display: table;
+    margin: auto;
+    margin-top: 50px;
+    width: 600px;
+    background: rgba(255, 255, 255, 0.514);
+    color: rgb(46, 46, 46);
+
+    
+}
+.change{
+    border-bottom: solid 2px rgb(46, 46, 46);
+    margin: 10px;
+    padding: 10px;
+}
+.title-change{
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+.title-change .date {
+    font-size: 15px;
+    color: rgb(85, 85, 85);
+    font-weight: normal;
+}
+
+@media only screen and (max-width: 695px) {
+    .links {
+        flex-direction: column;
+        margin: auto;
+        text-align: center;
+    }
+    header{
+        flex-direction: column;
+    }
+}
+
+
+@media only screen and (max-width: 765px) {
+    .sub-header .video{
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%;
+    }
+    
+    iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+@media only screen and (max-width: 1060px) {
+    .screenshots img {
+        width: 100%;
+        height: auto;
+    }
+}
+
+@media only screen and (max-width: 637px) {
+    .changelogs{
+        width: 100%;
+    }
+}
+
