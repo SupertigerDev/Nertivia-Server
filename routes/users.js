@@ -17,6 +17,7 @@ const relationshipController = require ('../controllers/relationshipController')
 const channelsController = require('../controllers/channelsController');
 const messagesController = require('../controllers/messagesController');
 const userSettingsController = require('../controllers/userSettingsController');
+const typingController = require('./../controllers/TypingController')
 
 const passportLogin = (req, res, next) => {
   passport.authenticate('local', { session: false }, (err, data) => {
@@ -78,6 +79,9 @@ router.route('/messages/:channelID')
 
 router.route('/messages/:channelID')
   .post(passportJWT, messagesController.post)
+
+router.route('/messages/:channelID/typing')
+.post(passportJWT, typingController)
   
 // settings
 

@@ -28,7 +28,7 @@ passport.use(new JwtStrategy({
     secretOrKey: config.jwtSecret
 }, async (payload, done) => {
   try {
-    // Find the user specified in token
+    // Find the user specified in token  // TODO use redis somehow
     const user = await User.findOne({uniqueID: payload.sub});
     // If user doesn't exists, handle it
     if (!user) {
