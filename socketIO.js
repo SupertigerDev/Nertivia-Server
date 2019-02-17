@@ -3,6 +3,7 @@ const controller = require('./socketController');
 const jwtAuth = require('socketio-jwt-auth');
 const User = require('./models/users');
 const channels = require('./models/channels');
+const Notifications = require('./models/notifications');
 const config = require('./config');
 const {newUser} = require('./passport');
 const jwt = require('jsonwebtoken');
@@ -31,12 +32,19 @@ io.use(async (socket, next) => {
       next(new Error('Authentication error'))
       return;
     }
-
-    const dms = await channels.findOne({creator: user._id}).populate({
+    const dms = channels.find({creator: user._id}).populate({
       path: 'recipients',
       select: '-_id -id -password -__v -email -friends -status -created -lastSeen'
-    });
-    socket.request.dms = dms
+    }).lean();
+
+    const notifications = Notifications.find({recipient: user.uniqueID}).populate({
+      path: 'sender',
+      select: '-_id -id -password -__v -email -friends -status -created -lastSeen'
+    }).lean();
+
+    const result = await Promise.all([dms, notifications]);
+    socket.request.dms = result[0]
+    socket.request.notifications = result[1];
     socket.request._id = user._id
     socket.request.user = newUser(user);
     socket.request.user.friends = user.friends
@@ -60,6 +68,7 @@ module.exports = async (client) => {
       message: "Logged in!",
       user: client.request.user,
       dms: client.request.dms,
+      notifications: client.request.notifications,
       currentFriendStatus: result
     })
   }

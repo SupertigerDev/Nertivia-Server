@@ -64,7 +64,7 @@ module.exports = {
       { $push: { friends: docRecipient._id }}
     )
     
-    const {io} = require('../app')
+    const io = req.io
     io.in(requester.uniqueID).emit('relationshipAdd', docRequester);
     io.in(recipient.uniqueID).emit('relationshipAdd', docRecipient);
 
@@ -108,7 +108,7 @@ module.exports = {
       ).lean()
       docRecipient.recipient = newUser(accepter)
 
-    const {io} = require('../app')
+    const io = req.io
     io.in(accepter.uniqueID).emit('relationshipAccept', recipient.uniqueID);
 
     io.in(recipient.uniqueID).emit('relationshipAccept', accepter.uniqueID);
@@ -143,7 +143,7 @@ module.exports = {
     const updateUserA = await User.findOneAndUpdate({ _id: decliner },{ $pull: { friends: docA._id }});
     const updateUserB = await User.findOneAndUpdate({ _id: recipient },{ $pull: { friends: docB._id }});
 
-    const {io} = require('../app')
+    const io = req.io
     io.in(decliner.uniqueID).emit('relationshipRemove', recipient.uniqueID);
 
     io.in(recipient.uniqueID).emit('relationshipRemove', decliner.uniqueID);

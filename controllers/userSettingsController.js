@@ -19,6 +19,15 @@ const upload = multer({
   limits: {
     fileSize: 10490000
   },
+  fileFilter: function (req, file, cb) {
+    const filetypes = /jpeg|jpg|gif|png/;
+    const mimeType = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    if (mimeType && extname){
+      return cb(null, true);
+    } 
+    cb("incorrect file type.")
+  },
   storage
 }).single('avatar')
 
@@ -27,7 +36,7 @@ module.exports = {
   changeStatus: async (req, res, next) => {
     const redis = require ('./../redis');
     const emitStatus = require ('../socketController/emitUserStatus');
-    const io = require('../app').io;
+    const io = req.io
     const {status} = req.body;
 
     // change the status in redis.
@@ -43,9 +52,6 @@ module.exports = {
       if (err) return res.status(403)
         .json({ status: false, message: "Something went wrong. try again later."});
 
-      const allowedFormats = ['.png', '.jpeg', '.gif', '.jpg' ];
-      if (!allowedFormats.includes(path.extname(req.file.originalname).toLowerCase())) return res.status(403)
-        .json({ status: false, message: "Something went wrong. try again later."});
       const filename = req.file.filename;
       const user = await User
         .updateOne( { _id: req.user.id}, { $set: { avatar : filename  } });
@@ -61,7 +67,7 @@ module.exports = {
       // emit new profile pictures
       const friends = await Friends.find({requester: req.user.id}).populate('recipient');
       
-      const io = require('../app').io;
+      const io = req.io
       for (let friend of friends) {
 
         io.in(friend.recipient.uniqueID).emit('userAvatarChange', {

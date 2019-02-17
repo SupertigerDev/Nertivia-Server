@@ -10,6 +10,7 @@ const relationshipPolicies = require ('../policies/relationshipPolicies');
 const authenticationPolicies = require ('../policies/authenticationPolicies');
 const settingsPolicies = require ('../policies/settingsPolicies');
 const reCaptchaPolicie = require('../policies/reCaptchaPolicie');
+const messagePolicie = require('../policies/messagePolicies');
 
 const UsersController = require('../controllers/users');
 const authenticationController = require ('../controllers/authenticationController')
@@ -78,10 +79,10 @@ router.route('/messages/:channelID')
   .get(passportJWT, messagesController.get)
 
 router.route('/messages/:channelID')
-  .post(passportJWT, messagesController.post)
+  .post(messagePolicie.post, passportJWT, messagesController.post)
 
 router.route('/messages/:channelID/typing')
-.post(passportJWT, typingController)
+  .post(passportJWT, typingController)
   
 // settings
 

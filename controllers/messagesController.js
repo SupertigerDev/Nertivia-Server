@@ -2,6 +2,7 @@ const Friends = require("../models/friends");
 const Users = require("../models/users");
 const Messages = require("../models/messages");
 const Channels = require("../models/channels");
+const Notifications = require('./../models/notifications');
 
 module.exports = {
   get: async (req, res, next) => {
@@ -87,24 +88,22 @@ module.exports = {
       tag: req.user.tag,
       avatar: req.user.avatar
     }
-
     messageCreated = {
       channelID,
       message,
       creator: user,
-      created: messageCreated.created
+      created: messageCreated.created,
+      messageID: messageCreated.messageID
     }
 
 
     res.json( { status: true,tempID, messageCreated} );
 
-    // emit to users
-
-    const {io} = require('../app')
-
+    // emit
+    const io = req.io
     // Loop for other users logged in to the same account and emit (exclude the sender account.).
+    //TODO: move this to client side for more performance.
     const clients = io.sockets.adapter.rooms[req.user.uniqueID].sockets;  
-     
     for (var clientId in clients ) {
       if (clientId !== socketID) {
         const clientSocket = io.sockets.connected[clientId];
@@ -115,5 +114,28 @@ module.exports = {
     // TODO: for group messaging, do a loop instead of [0]
     io.in(channel.recipients[0].uniqueID).emit('receiveMessage', {message: messageCreated});
 
+    //change lastMessage timeStamp
+    const updateChannelTimeStap = Channels.updateMany(
+      {channelID},
+      { $set: { lastMessaged: Date.now()}},
+      { upsert: true})
+
+      // sends notification to a user.
+      const sendNotificaiton = Notifications.findOneAndUpdate({
+        recipient : channel.recipients[0].uniqueID,
+        channelID
+      }, { 
+        $set :{
+          recipient : channel.recipients[0].uniqueID,
+          channelID,
+          type: "MESSAGE_CREATED",
+          lastMessageID: messageCreated.messageID,
+          sender: req.user.id
+        },
+        $inc : { count : 1 }
+      }, {
+        upsert : true
+      });
+      await Promise.all([updateChannelTimeStap, sendNotificaiton]);
   }
 }

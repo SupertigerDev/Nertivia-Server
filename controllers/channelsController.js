@@ -33,15 +33,18 @@ module.exports = {
     let newChannel = await channels.create({
       channelID: channelID,
       creator: user,
-      recipients: [relationship.recipient._id]
+      recipients: [relationship.recipient._id],
+      lastMessaged: Date.now()
     })
     newChannel = await channels.findOne(newChannel).populate({
       path: 'recipients',
       select: '-_id -id -password -__v -email -friends -status -created -lastSeen'
     });
     
-    return res
+    res
     .json( { status: true, channel: newChannel } );
+    // sends the open channel to other clients.
+    req.io.in(req.user.uniqueID).emit('channel:created', {channel: newChannel});
   },
 
   delete: async (req, res, next) => {

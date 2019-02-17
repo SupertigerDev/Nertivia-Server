@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
 
     // emit to users
 
-    const {io} = require('../app')
+    const io = req.io
 
 
     for (let recipients of channel.recipients) {

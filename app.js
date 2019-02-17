@@ -27,6 +27,11 @@ const cors = require('cors');
 //Middlewares
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(function(req,res,next){
+  req.io = io;
+  next();
+})
+
 // Allows certain hosts.
 const allowedOrigins = config.allowedOrigins;
 app.use(cors({
