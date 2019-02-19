@@ -1,4 +1,4 @@
-const events = require('./socketEvents');
+const events = require('./socketEvents/index');
 const controller = require('./socketController');
 const jwtAuth = require('socketio-jwt-auth');
 const User = require('./models/users');
@@ -9,8 +9,6 @@ const {newUser} = require('./passport');
 const jwt = require('jsonwebtoken');
 const {io} = require('./app');
 const redis = require('./redis');
-
-
 
 
 // Authendicate token
@@ -80,4 +78,7 @@ module.exports = async (client) => {
       controller.emitUserStatus(client.request.user.uniqueID, client.request._id, 0, io);
     }
   })
+
+  client.on('notification:dismiss', (data) => events.notificationDismiss(data, client, io));
+
 }
