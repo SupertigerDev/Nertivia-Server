@@ -14,6 +14,7 @@ function signToken(user) {
 
 module.exports = {
   register: async (req, res, next) => {
+    req.session.destroy()
     // Validate information
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -50,6 +51,7 @@ module.exports = {
   },
 
   login: async (req, res, next) => {
+    req.session.destroy()
     // Validate information
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

@@ -18,7 +18,7 @@ io.use(async (socket, next) => {
   
   try {
     const decryptedToken = await jwt.verify(token, config.jwtSecret)
-    const user = await User.findOne({uniqueID: decryptedToken.sub}).populate({
+    const user = await User.findOne({uniqueID: decryptedToken.sub}).select('+GDriveRefreshToken').populate({
       path: 'friends',
       populate: [{
         path: 'recipient',
@@ -44,8 +44,12 @@ io.use(async (socket, next) => {
     socket.request.dms = result[0]
     socket.request.notifications = result[1];
     socket.request._id = user._id
-    socket.request.user = newUser(user);
+    socket.request.user = user;
     socket.request.user.friends = user.friends
+    socket.request.settings = {
+      GDriveLinked: user.GDriveRefreshToken ? true : false
+    }
+    socket.request.user.GDriveRefreshToken = undefined;
     socket.join(user.uniqueID);
     next();
   } catch (error) {
@@ -65,6 +69,7 @@ module.exports = async (client) => {
     client.emit('success', {
       message: "Logged in!",
       user: client.request.user,
+      settings: client.request.settings,
       dms: client.request.dms,
       notifications: client.request.notifications,
       currentFriendStatus: result

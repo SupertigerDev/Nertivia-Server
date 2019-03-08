@@ -6,17 +6,7 @@ const config = require('./config');
 const User = require('./models/users')
 
 const newUser = (user) => {
-  return {
-    uniqueID: user.uniqueID,
-    username: user.username,
-    email: user.email,
-    tag: user.tag,
-    avatar: user.avatar,
-    status: user.status,
-    lastSeen: user.lastSeen,
-    created: user.created,
-    id: user._id
-  }
+  return user
 }
 
 module.exports = {newUser}
@@ -28,8 +18,8 @@ passport.use(new JwtStrategy({
     secretOrKey: config.jwtSecret
 }, async (payload, done) => {
   try {
-    // Find the user specified in token  // TODO use redis somehow
-    const user = await User.findOne({uniqueID: payload.sub});
+    // Find the user specified in token 
+    const user = await User.findOne({uniqueID: payload.sub}).select('-password -friends +GDriveRefreshToken');
     // If user doesn't exists, handle it
     if (!user) {
       return done(null, {status: false, message: "You are not permitted to do this action."});
@@ -48,7 +38,7 @@ passport.use(new LocalStrategy({
 }, async (email, password, done) => {
   try {
     // Find the user given the email
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select('+password -friends +GDriveRefreshToken');
     
     // If not, handle it
     if (!user) {
@@ -62,7 +52,7 @@ passport.use(new LocalStrategy({
     if (!isMatch) {
       return done(null, { status: false, errors: [{msg: "Password is incorrect.", param: "password"}] });
     }
-    
+    user.password = undefined;
     // Otherwise, return the user
     done(null, newUser(user));
     } catch(error) {

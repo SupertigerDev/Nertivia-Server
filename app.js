@@ -5,6 +5,15 @@ redisClient.flushall();
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
+const redis = require('redis');
+const client  = redis.createClient({url: config.redisURL});
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const vhost = require('vhost');
+const bodyParser = require('body-parser')
+const mongoose = require('mongoose');
+const cors = require('cors');
+const api = require('./routes/api');
 const io = require('socket.io')(http, {
   handlePreflightRequest: function (req, res) {
     var headers = {
@@ -16,21 +25,27 @@ const io = require('socket.io')(http, {
     res.end();
   }
 });
-const vhost = require('vhost');
-const history = require('connect-history-api-fallback');
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const mongoose = require('mongoose');
-const cors = require('cors');
 
+
+app.set('trust proxy', 1) // trust first proxy
 
 //Middlewares
 app.use(bodyParser.json());
-app.use(cookieParser());
+//store socket io
 app.use(function(req,res,next){
   req.io = io;
   next();
 })
+app.use(session({
+  secret: config.sessionSecret,
+  // create new redis store.
+  store: new RedisStore({
+    client,
+    ttl: 600
+  }),
+  saveUninitialized: false,
+  resave: false
+}));
 
 // Allows certain hosts.
 const allowedOrigins = config.allowedOrigins;
@@ -42,12 +57,12 @@ app.use(cors({
       return callback(new Error(msg), false);
     }
     return callback(null, true);
-  }
+  }, credentials: true
 }));
 
 
 //routes
-app.use(vhost('api.' + config.domain, require('./routes/users')));
+app.use(vhost('api.' + config.domain, api));
 app.use(vhost('musica.' + config.domain, express.static('public/musica')))
 
 app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))
@@ -64,6 +79,10 @@ mongoose.connect(config.mongoDBAddress, {useNewUrlParser: true}, function (err) 
     }
     console.log('\x1b[32m' + 'MongoDB> ' + '\x1b[1m' + 'Connected!\x1b[0m')
 })
+
+//disable deperacation warnings
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
 
 
 module.exports = {

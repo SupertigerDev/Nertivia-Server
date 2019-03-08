@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
  
     if (!channel.result){
       // mongodb
-      channel = await Channels.findOne({channelID, creator: req.user.id}).populate('recipients');
+      channel = await Channels.findOne({channelID, creator: req.user._id}).populate('recipients');
       if ( !channel ){
         return res.status(403)
           .json( { status: false, message: "Channel does not exist."} );

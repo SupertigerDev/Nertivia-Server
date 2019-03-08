@@ -11,6 +11,7 @@ const usersSchema = new Schema({
         required: [true, "Email has not been entered."],
         minlength: [5, "Email must be more than 5 characters long."],
         unique: 'This email is already used!',
+        select: false
     },
     username: {
         type: String,
@@ -50,12 +51,11 @@ const usersSchema = new Schema({
             4 // Looking to play
         ]
     },
-    friends: [{type: Schema.Types.ObjectId, ref: 'friends'}],
+    friends: [{type: Schema.Types.ObjectId, ref: 'friends', select: false}],
     created: {
         type: Number
-    }
-
-
+    },
+    GDriveRefreshToken: {type: String, required: false, select: false}
 });
 
 usersSchema.pre('save', async function(next) {

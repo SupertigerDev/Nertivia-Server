@@ -7,10 +7,11 @@ const {
 
 const messagesSchema = new Schema({
   channelID: { type: String, required: true },
-  messageID: {type: String, required: true, unique: true},
-  message: {type: String, required: true},
-  creator: { type: Schema.Types.ObjectId, ref: 'users'},
-  created: {type: Number}
+  messageID: { type: String, required: true, unique: true },
+  files: { type: Array, required: false },
+  message: { type: String, required: false  },
+  creator: { type: Schema.Types.ObjectId, ref: 'users' },
+  created: { type: Number }
 })
 
 messagesSchema.pre('save', function() {
