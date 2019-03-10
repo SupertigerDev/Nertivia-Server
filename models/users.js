@@ -51,6 +51,17 @@ const usersSchema = new Schema({
             4 // Looking to play
         ]
     },
+    admin: {
+      type: Number,
+      default: 0,
+      enum: [
+          0, // Peasant 
+          1, // Admin
+          2, // Mod
+          3, // Creator,
+          4, // cute
+      ]
+  },
     friends: [{type: Schema.Types.ObjectId, ref: 'friends', select: false}],
     created: {
         type: Number

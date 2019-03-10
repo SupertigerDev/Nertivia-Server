@@ -274,7 +274,8 @@ module.exports = {
       uniqueID: req.user.uniqueID,
       username: req.user.username,
       tag: req.user.tag,
-      avatar: req.user.avatar
+      avatar: req.user.avatar,
+      admin: req.user.admin
     }
     messageCreated = {
       channelID,
