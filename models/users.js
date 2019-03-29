@@ -34,7 +34,8 @@ const usersSchema = new Schema({
     },
     lastSeen: {
         type: Number,
-        default: 0
+        default: 0,
+        select: false
     },
     avatar: {
         type: String,

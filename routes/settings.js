@@ -2,8 +2,10 @@
 const express = require('express');
 const router = express.Router();
 
+//Polciies
 const settingsPolicies = require ('../policies/settingsPolicies');
 
+// routes
 const userSettingsController = require('../controllers/userSettingsController');
 const GDriveSettings = require('./GDriveSettings')
 
@@ -25,7 +27,13 @@ router.use('/drive',
 router.route('/avatar')
   .post( passportJWT, GDriveOauthClient, busboy(), userSettingsController.changeAvatar)
 
+router.route('/emoji')
+  .post( passportJWT, GDriveOauthClient, busboy(), userSettingsController.addEmojis)
 
+  router.route('/emoji')
+  .delete( passportJWT, userSettingsController.removeEmoji )
 
+  router.route('/emoji')
+  .put( passportJWT, userSettingsController.renameEmoji );
 
 module.exports = router;

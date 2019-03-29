@@ -3,8 +3,9 @@ const controller = require('./socketController');
 const jwtAuth = require('socketio-jwt-auth');
 const User = require('./models/users');
 const channels = require('./models/channels');
-const Notifications = require('./models/notifications');
 const config = require('./config');
+const Notifications = require('./models/notifications');
+const customEmojis = require('./models/customEmojis');
 const {newUser} = require('./passport');
 const jwt = require('jsonwebtoken');
 const {io} = require('./app');
@@ -40,14 +41,17 @@ io.use(async (socket, next) => {
       select: '-_id -id -password -__v -email -friends -status -created -lastSeen'
     }).lean();
 
-    const result = await Promise.all([dms, notifications]);
+    const customEmojisList = customEmojis.find({user: user._id});
+
+    const result = await Promise.all([dms, notifications, customEmojisList]);
     socket.request.dms = result[0]
     socket.request.notifications = result[1];
     socket.request._id = user._id
     socket.request.user = user;
     socket.request.user.friends = user.friends
     socket.request.settings = {
-      GDriveLinked: user.GDriveRefreshToken ? true : false
+      GDriveLinked: user.GDriveRefreshToken ? true : false,
+      customEmojis: result[2]
     }
     socket.request.user.GDriveRefreshToken = undefined;
     socket.join(user.uniqueID);
