@@ -36,9 +36,16 @@ module.exports = {
           .json({ status: false, errors: [{param: "all", msg: "Request already sent."}] });
       }
     }
+
+    let channelID = generateNum(19);
+    // check if the channel has already been created before.
+    const checkChannelExists = await channels.findOne({creator: req.user._id, recipients: recipient._id});
+    if(checkChannelExists) {
+      channelID = checkChannelExists.channelID;
+    }
+
     
     // all checks done above, add to friend model
-    const channelID = generateNum(19);
 
     const docRequester = await Friend.findOneAndUpdate(
       { requester: requester, recipient: recipient },

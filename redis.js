@@ -26,7 +26,9 @@ module.exports = {
   checkFriendsOnline: async (array) => {
     const multi = redisClient.multi();
     for (let friend of array) {
-      multi.hmget(`user:${friend.recipient.uniqueID}`, "uniqueID", "status")
+
+      if (friend.recipient) 
+        multi.hmget(`user:${friend.recipient.uniqueID}`, "uniqueID", "status")
     }
     return multiWrapper(multi) 
   },

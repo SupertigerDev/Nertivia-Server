@@ -23,9 +23,6 @@ router.route('/register')
 router.route('/login')
   .post(reCaptchaPolicie, authenticationPolicies.login, passportLogin, authenticationController.login)
 
-router.route('/details')
-  .get(passportJWT, UsersController.details);
-
 router.route('/relationship')
   .post(relationshipPolicies.post, passportJWT, relationshipController.addRecipient);
 
@@ -35,5 +32,9 @@ router.route('/relationship')
 router.route('/relationship')
   .delete(relationshipPolicies.delete, passportJWT, relationshipController.removeRecipient);
 
+router.route('/:uniqueID')
+.get(passportJWT, UsersController.details);
+
+router.route('/').get(passportJWT, UsersController.details);
 
 module.exports = router;

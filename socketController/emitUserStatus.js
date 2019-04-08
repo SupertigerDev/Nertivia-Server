@@ -11,12 +11,12 @@ module.exports = async (uniqueID, id, status, io, modifyDB) => {
   const friends = await Friends.find({requester: id}).populate('recipient');
 
   for (let friend of friends) {
+    if (friend.recipient)
     io.in(friend.recipient.uniqueID).emit('userStatusChange', {
       uniqueID: uniqueID,
       status
     });
   }
-
   // send owns status to every connected device 
   io.in(uniqueID).emit('multiDeviceStatus', {status});
     
