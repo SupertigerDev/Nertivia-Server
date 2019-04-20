@@ -62,12 +62,23 @@ const usersSchema = new Schema({
           3, // Creator,
           4, // cute
       ]
-  },
+    },
     friends: [{type: Schema.Types.ObjectId, ref: 'friends', select: false}],
     created: {
         type: Number
     },
-    GDriveRefreshToken: {type: String, required: false, select: false}
+    settings: {
+      type: [{
+        apperance: {
+          type: [{
+            own_message_right: {type: Boolean, default: false, required: false}, // make own messages appear on the right (for own client) settings
+          }]
+        }
+      }],
+      select: false
+    },
+
+    GDriveRefreshToken: {type: String, required: false, select: false} // TODO move this to settings 
 });
 
 usersSchema.pre('save', async function(next) {

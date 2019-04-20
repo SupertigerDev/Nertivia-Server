@@ -6,7 +6,6 @@ const {
 } = mongoose;
 
 const friendsSchema = new Schema({
-    channelID: { type: String, unique: true, required: true },
     requester: { type: Schema.Types.ObjectId, ref: 'users'},
     recipient: { type: Schema.Types.ObjectId, ref: 'users'},
     status: {
@@ -14,7 +13,7 @@ const friendsSchema = new Schema({
       enums: [
           0, //'requested',
           1, //'pending',
-          2, //'friends'
+          2, //'friends',
       ]
     }
 })

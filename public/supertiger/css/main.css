@@ -2,14 +2,15 @@ html, body {
     font-family: 'Roboto', sans-serif;
     height: 100%;
     margin: 0;
-    color: rgb(56, 56, 56);
+    color: rgb(214, 214, 214);
+    background: rgb(61, 61, 61);
 }
 
 header {
     width: 100%;
     margin-top: -100px;
     opacity: 0;
-    background: rgb(17, 153, 69);
+    background: rgb(31, 31, 31);
     display: flex;
     animation: showHeader;
     animation-duration: 0.3s;
@@ -84,7 +85,7 @@ header .logo-container span {
 .sub-header{
     width: 100%;
     height: 400px;
-    background: rgba(17, 153, 69, 0.233);
+    background: rgba(39, 39, 39, 0.233);
     display: flex;
     flex-direction: column;
 
@@ -125,7 +126,7 @@ header .logo-container span {
     margin-bottom: 0px;
     font-size: 30px;
     font-weight: bold;
-    color: rgb(17, 153, 69);
+    color: rgb(211, 211, 211);
 }
 .sub-header .information{
     margin:auto;
@@ -154,13 +155,15 @@ header .logo-container span {
 .project{
     display: flex;
     margin: auto;
-    border: solid 2px grey;
     border-radius: 20px;
-    background: rgba(0, 128, 0, 0.233);
+    background: rgba(0, 128, 0, 0.651);
     padding: 10px;
     user-select: none;
     margin-bottom: 30px;
     transition: 0.3s;
+}
+.nertivia{
+    background: rgba(34, 185, 255, 0.788);
 }
 .project .title {
     text-align: left;
@@ -174,7 +177,7 @@ margin-right: 20px;
 }
 
 .project:hover {
-    box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.383);
+    box-shadow: inset 0 0 100px 100px rgba(77, 77, 77, 0.383);
 }
 a{
     text-decoration: none;

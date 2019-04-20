@@ -8,7 +8,7 @@ const {
 	passportJWT
 } = require('./../middlewares/passport');
 
-router.route('/:channelID')
+router.route('/:recipient_id')
 	.post(passportJWT, channelsController.post)
 
 module.exports = router;

@@ -10,7 +10,15 @@ const channelsSchema = new Schema({
   visibility: {type: Boolean},
   creator: { type: Schema.Types.ObjectId, ref: 'users'},
   recipients: [{type: Schema.Types.ObjectId, ref: 'users'}],
-  lastMessaged: {type: Number}
+  lastMessaged: {type: Number},
+  status: {
+    type: Number,
+    default: 0,
+    enums: [
+        0, //'requested',
+        1, //'blocked',
+    ]
+  }
 })
 
 

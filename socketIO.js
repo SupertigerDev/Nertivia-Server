@@ -19,7 +19,7 @@ io.use(async (socket, next) => {
   
   try {
     const decryptedToken = await jwt.verify(token, config.jwtSecret)
-    const user = await User.findOne({uniqueID: decryptedToken.sub}).select('+GDriveRefreshToken').populate({
+    const user = await User.findOne({uniqueID: decryptedToken.sub}).select('+GDriveRefreshToken +settings').populate({
       path: 'friends',
       populate: [{
         path: 'recipient',
@@ -42,7 +42,6 @@ io.use(async (socket, next) => {
     }).lean();
 
     const customEmojisList = customEmojis.find({user: user._id});
-
     const result = await Promise.all([dms, notifications, customEmojisList]);
     socket.request.dms = result[0]
     socket.request.notifications = result[1];
@@ -50,6 +49,7 @@ io.use(async (socket, next) => {
     socket.request.user = user;
     socket.request.user.friends = user.friends
     socket.request.settings = {
+      ...user.settings,
       GDriveLinked: user.GDriveRefreshToken ? true : false,
       customEmojis: result[2]
     }

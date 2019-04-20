@@ -36,4 +36,7 @@ router.route('/emoji')
   router.route('/emoji')
   .put( passportJWT, userSettingsController.renameEmoji );
 
+  router.route('/apperance')
+  .put( passportJWT, userSettingsController.apperance );
+
 module.exports = router;

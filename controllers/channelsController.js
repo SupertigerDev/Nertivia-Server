@@ -4,17 +4,18 @@ const channels = require("../models/channels");
 
 module.exports = {
   post: async (req, res, next) => {
-    const {channelID} = req.params;
+    const {recipient_id} = req.params;
     
-    // get current user
-    const user = await users.findOne({uniqueID: req.user.uniqueID});
-    if ( !user ) {
-      return res.status(403)
-        .json( { status: false, message: "Something went wrong." } );
-    }
 
+    // Check if recipient_id is valid
+    const recipient = await users.findOne({uniqueID: recipient_id});
+    if (!recipient) {
+      return res.status(403)
+      .json( { status: false, message: "recipient_id is invalid."} );
+    }
+    
     // check if channel exists
-    const channel = await channels.findOne({channelID, creator: user}).populate({
+    let channel = await channels.findOne({recipients: recipient._id, creator: req.user._id}).populate({
       path: 'recipients',
       select: '-_id -id -password -__v -email -friends -status -created -lastSeen'
     });
@@ -23,17 +24,25 @@ module.exports = {
         .json( { status: true, channel } );
     }
 
-    // search through friends
-    const relationship = await friends.findOne({requester: user.id, channelID}).populate('recipient').lean();
-    if ( !relationship ) {
-      return res.status(403)
-      .json( { status: false, message: "Channel not found."} );
+    // check if channel exists
+    channel = await channels.findOne({recipients: req.user._id, creator: recipient._id}).populate({
+      path: 'recipients',
+      select: '-_id -id -password -__v -email -friends -status -created -lastSeen'
+    });
+
+    // create channel because it doesnt exist.
+    let channelID;
+
+    if (channel) {
+      channelID = channel.channelID;
+    } else {
+      channelID = generateNum(19);
     }
-    // create channel
+
     let newChannel = await channels.create({
-      channelID: channelID,
-      creator: user,
-      recipients: [relationship.recipient._id],
+      channelID,
+      creator: req.user._id,
+      recipients: [recipient._id],
       lastMessaged: Date.now()
     })
     newChannel = await channels.findOne(newChannel).populate({
@@ -51,4 +60,17 @@ module.exports = {
     const {channelID} = req.params;
     
   },
+}
+
+function generateNum(n) {
+  var add = 1, max = 12 - add;   // 15 is the min safe number Math.random() can generate without it starting to pad the end with zeros.   
+
+  if ( n > max ) {
+      return generateNum(max) + generateNum(n - max);
+  }
+  max = Math.pow(10, n+add);
+  var min = max/10; // Math.pow(10, n) basically
+  var number = Math.floor( Math.random() * (max - min + 1) ) + min;
+
+  return ("" + number).substring(add); 
 }

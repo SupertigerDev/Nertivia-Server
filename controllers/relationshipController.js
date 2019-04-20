@@ -37,26 +37,19 @@ module.exports = {
       }
     }
 
-    let channelID = generateNum(19);
-    // check if the channel has already been created before.
-    const checkChannelExists = await channels.findOne({creator: req.user._id, recipients: recipient._id});
-    if(checkChannelExists) {
-      channelID = checkChannelExists.channelID;
-    }
-
     
     // all checks done above, add to friend model
 
     const docRequester = await Friend.findOneAndUpdate(
       { requester: requester, recipient: recipient },
-      { $set: { status: 0, channelID }},
+      { $set: { status: 0 }},
       { upsert: true, new: true }
     ).lean()
     docRequester.recipient = newUser(recipient)
 
     const docRecipient = await Friend.findOneAndUpdate(
       { requester: recipient, recipient: requester },
-      { $set: { status: 1, channelID }},
+      { $set: { status: 1 }},
       { upsert: true, new: true }
     ).lean()
     docRecipient.recipient = newUser(requester)
@@ -159,15 +152,3 @@ module.exports = {
   }
 }
 
-function generateNum(n) {
-  var add = 1, max = 12 - add;   // 15 is the min safe number Math.random() can generate without it starting to pad the end with zeros.   
-
-  if ( n > max ) {
-      return generateNum(max) + generateNum(n - max);
-  }
-  max = Math.pow(10, n+add);
-  var min = max/10; // Math.pow(10, n) basically
-  var number = Math.floor( Math.random() * (max - min + 1) ) + min;
-
-  return ("" + number).substring(add); 
-}
