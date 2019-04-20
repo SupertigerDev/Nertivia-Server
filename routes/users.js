@@ -4,12 +4,14 @@ const router = express.Router();
 const UsersController = require('../controllers/users');
 const authenticationController = require('../controllers/authenticationController')
 const relationshipController = require('../controllers/relationshipController')
+const surveyController = require('../controllers/surveyController');
 
 
 //middlewares
 const relationshipPolicies = require('../policies/relationshipPolicies');
 const authenticationPolicies = require('../policies/authenticationPolicies');
 const reCaptchaPolicie = require('../policies/reCaptchaPolicie');
+const surveyPolicie = require('../policies/surveyPolicies')
 const {
   passportLogin,
   passportJWT
@@ -31,6 +33,9 @@ router.route('/relationship')
 
 router.route('/relationship')
   .delete(relationshipPolicies.delete, passportJWT, relationshipController.removeRecipient);
+
+router.route('/survey')
+  .put(surveyPolicie.put, passportJWT, surveyController.put)
 
 router.route('/:uniqueID')
 .get(passportJWT, UsersController.details);

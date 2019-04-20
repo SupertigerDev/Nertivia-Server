@@ -5,6 +5,17 @@ const {
     Schema
 } = mongoose;
 
+
+const aboutMeSchema = new Schema({
+  name: {type: String},
+  gender: {type: Number}, 
+  age: {type: Number}, 
+  continent: {type: Number}, 
+  country: {type: Number}, 
+  about_me: {type: String}
+})
+
+
 const usersSchema = new Schema({
     email: {
         type: String,
@@ -67,6 +78,10 @@ const usersSchema = new Schema({
     created: {
         type: Number
     },
+    about_me: {
+      type: aboutMeSchema,
+      select: false
+    },
     settings: {
       type: [{
         apperance: {
@@ -77,7 +92,6 @@ const usersSchema = new Schema({
       }],
       select: false
     },
-
     GDriveRefreshToken: {type: String, required: false, select: false} // TODO move this to settings 
 });
 
