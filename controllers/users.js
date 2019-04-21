@@ -12,7 +12,7 @@ module.exports = {
 
     const user = await Users.findOne({
       uniqueID
-    }).select('-status -__v -_id -friends').lean();
+    }).select('-status -__v -_id -friends +about_me').lean();
     if (!user) return res.status(404).json({
       message: "That user was not found."
     });

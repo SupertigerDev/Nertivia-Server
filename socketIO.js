@@ -19,7 +19,7 @@ io.use(async (socket, next) => {
   
   try {
     const decryptedToken = await jwt.verify(token, config.jwtSecret)
-    const user = await User.findOne({uniqueID: decryptedToken.sub}).select('+GDriveRefreshToken +settings').populate({
+    const user = await User.findOne({uniqueID: decryptedToken.sub}).select('+GDriveRefreshToken +settings +survey_completed').populate({
       path: 'friends',
       populate: [{
         path: 'recipient',

@@ -78,6 +78,11 @@ const usersSchema = new Schema({
     created: {
         type: Number
     },
+    survey_completed: { //if about_me is completed or not.
+      type: Boolean,
+      default: false,
+      select: false
+    },
     about_me: {
       type: aboutMeSchema,
       select: false

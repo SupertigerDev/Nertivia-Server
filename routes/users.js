@@ -37,6 +37,12 @@ router.route('/relationship')
 router.route('/survey')
   .put(surveyPolicie.put, passportJWT, surveyController.put)
 
+router.route('/survey/skip')
+  .delete(passportJWT, surveyController.skip)
+
+router.route('/survey')
+  .get(passportJWT, surveyController.get)
+
 router.route('/:uniqueID')
 .get(passportJWT, UsersController.details);
 
