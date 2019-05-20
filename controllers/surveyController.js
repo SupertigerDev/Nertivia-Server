@@ -9,7 +9,7 @@ module.exports = {
 
     if (!result.about_me) {
       return res.status(403).json({
-        message: "Status is not defined"
+        message: "about_me does not exist."
       });
     }
 

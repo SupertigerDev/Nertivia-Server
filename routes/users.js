@@ -23,7 +23,7 @@ router.route('/register')
   .post(reCaptchaPolicie, authenticationPolicies.register, authenticationController.register);
 
 router.route('/login')
-  .post(reCaptchaPolicie, authenticationPolicies.login, passportLogin, authenticationController.login)
+  .post(authenticationPolicies.login, reCaptchaPolicie, passportLogin, authenticationController.login)
 
 router.route('/relationship')
   .post(relationshipPolicies.post, passportJWT, relationshipController.addRecipient);

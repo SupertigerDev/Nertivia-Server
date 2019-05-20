@@ -16,6 +16,14 @@ const aboutMeSchema = new Schema({
 })
 
 
+const apperanceSchema = new Schema({
+  own_message_right: {type: Boolean, default: false, required: false}, // make own messages appear on the right (for own client) settings
+})
+
+const settingsSchema = new Schema({
+  apperance: {type: apperanceSchema}
+})
+
 const usersSchema = new Schema({
     email: {
         type: String,
@@ -74,7 +82,14 @@ const usersSchema = new Schema({
           4, // cute
       ]
     },
-    friends: [{type: Schema.Types.ObjectId, ref: 'friends', select: false}],
+    friends: {
+      type: [{type: Schema.Types.ObjectId, ref: 'friends'}],
+      select: false
+    },
+    servers: {
+      type: [{type: Schema.Types.ObjectId, ref: 'servers'}],
+      select: false
+    },
     created: {
         type: Number
     },
@@ -87,16 +102,7 @@ const usersSchema = new Schema({
       type: aboutMeSchema,
       select: false
     },
-    settings: {
-      type: [{
-        apperance: {
-          type: [{
-            own_message_right: {type: Boolean, default: false, required: false}, // make own messages appear on the right (for own client) settings
-          }]
-        }
-      }],
-      select: false
-    },
+    settings: {type: settingsSchema, select: false},
     GDriveRefreshToken: {type: String, required: false, select: false} // TODO move this to settings 
 });
 
@@ -115,6 +121,7 @@ usersSchema.pre('save', async function(next) {
     this.tag = generateString(4);
     // Date created
     this.created = Date.now();
+    next();
 
   } catch(error) {
     next(error);

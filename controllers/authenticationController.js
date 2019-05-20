@@ -45,7 +45,6 @@ module.exports = {
       status: true,
       message: "Account was successfully created and logged in.",
       action: "account_created",
-      user: passport.newUser(user),
       token,
     })
   },
@@ -64,7 +63,6 @@ module.exports = {
       status: true,
       message: "You were logged in.",
       action: "logged_in",
-      user: req.user,
       token
     })
   }

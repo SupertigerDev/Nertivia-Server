@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
     token === null ||
     token === ''
   ) {
-    return res.status(403).json({status: false, errors: [{msg: "ReCaptcha is not provided", param: "all"}]});
+    return res.status(403).json({status: false, errors: [{msg: "ReCaptcha is not provided", param: "reCaptcha"}]});
   }
 
   const verifyUrl = `https://google.com/recaptcha/api/siteverify?secret=${config.reCaptchaKey}&response=${token}&remoteip=${req.connection.remoteAddress}`;
@@ -19,7 +19,7 @@ module.exports = (req, res, next) => {
 
     // If Not Successful
     if(body.success !== undefined && !body.success){
-      return res.status(403).json({status: false, errors: [{msg: "Invalid ReCaptcha ", param: "all"}]});
+      return res.status(403).json({status: false, errors: [{msg: "Invalid ReCaptcha ", param: "reCaptcha"}]});
     }
     //If Successful
     next();

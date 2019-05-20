@@ -18,7 +18,7 @@ const policies = {
   login: [
     check('email').not().isEmpty().withMessage('Email is required.'),
     check('password').not().isEmpty().withMessage('Password is required.'),
-    check('token').not().isEmail().withMessage('ReCaptcha is not checked!'),
+    check('token').not().isEmpty().withMessage('Are you a bot?'),
     policyHandler
   ]
 }

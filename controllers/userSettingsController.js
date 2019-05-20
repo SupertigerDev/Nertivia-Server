@@ -344,8 +344,7 @@ module.exports = {
         });
       }
       res.json({
-        changed: {[settingName]: settingsValue},
-        success: true
+        changed: { [settingName]: settingsValue }
       });
     });
   }
