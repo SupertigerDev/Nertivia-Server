@@ -11,7 +11,12 @@ const messagesSchema = new Schema({
   files: { type: Array, required: false },
   message: { type: String, required: false  },
   creator: { type: Schema.Types.ObjectId, ref: 'users' },
-  created: { type: Number }
+  created: { type: Number },
+  type: {type: Number, default: 0, enum: [
+    0, // Message
+    1, // Join message
+    2, // leave message
+  ]}
 })
 
 messagesSchema.pre('save', function() {

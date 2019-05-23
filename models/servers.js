@@ -20,7 +20,8 @@ const serversSchema = new Schema({
     },
     created: {
       type: Number
-    }
+    },
+    default_channel_id: {type: String}
 });
 
 serversSchema.pre('save', async function(next) {

@@ -143,54 +143,77 @@ module.exports = {
         //emit
         const io = req.io;
 
-        //sender
-        io.in(req.user.uniqueID).emit("receiveMessage", {
-          message: messageCreatedLean
-        });
+        if (req.channel.server) {
+          return serverMessage();
+        } else {
+          return directMessage();
+        }
 
-        // for group messaging, do a loop instead of [0]
-        io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
-          message: messageCreatedLean
-        });
 
-        //change lastMessage timeStamp
-        const updateChannelTimeStap = Channels.updateMany(
-          {
-            channelID
-          },
-          {
-            $set: {
-              lastMessaged: Date.now()
-            }
-          },
-          {
-            upsert: true
+        function serverMessage() {
+          const clients =
+            io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
+              .sockets;
+          for (let clientId in clients) {
+            io.to(clientId).emit("receiveMessage", {
+              message: messageCreatedLean
+            });
           }
-        );
-
-        // sends notification to a user.
-        const sendNotificaiton = Notifications.findOneAndUpdate(
-          {
-            recipient: req.channel.recipients[0].uniqueID,
-            channelID
-          },
-          {
-            $set: {
-              recipient: req.channel.recipients[0].uniqueID,
-              channelID,
-              type: "MESSAGE_CREATED",
-              lastMessageID: messageCreated.messageID,
-              sender: req.user._id
+    
+          return;
+        }
+        async function directMessage() {
+           //sender
+           io.in(req.user.uniqueID).emit("receiveMessage", {
+            message: messageCreatedLean
+          });
+    
+          // for group messaging, do a loop instead of [0]
+          io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
+            message: messageCreatedLean
+          });
+    
+          //change lastMessage timeStamp
+          const updateChannelTimeStap = Channels.updateMany(
+            {
+              channelID
             },
-            $inc: {
-              count: 1
+            {
+              $set: {
+                lastMessaged: Date.now()
+              }
+            },
+            {
+              upsert: true
             }
-          },
-          {
-            upsert: true
-          }
-        );
-        await Promise.all([updateChannelTimeStap, sendNotificaiton]);
+          );
+    
+          // sends notification to a user.
+          const sendNotificaiton = Notifications.findOneAndUpdate(
+            {
+              recipient: req.channel.recipients[0].uniqueID,
+              channelID
+            },
+            {
+              $set: {
+                recipient: req.channel.recipients[0].uniqueID,
+                channelID,
+                type: "MESSAGE_CREATED",
+                lastMessageID: messageCreated.messageID,
+                sender: req.user._id
+              },
+              $inc: {
+                count: 1
+              }
+            },
+            {
+              upsert: true
+            }
+          );
+          await Promise.all([updateChannelTimeStap, sendNotificaiton]);
+        }
+
+
       }
     );
 

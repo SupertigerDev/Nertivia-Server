@@ -34,7 +34,7 @@ router.route('/:server_id')
 
 
 router.route('/invite/:invite_code')
-	.get( passportJWT, ServerController.getInviteDetail )
+	.get(ServerController.getInviteDetail )
 
 router.route('/invite/:invite_code')
 	.post( passportJWT, ServerController.joinServer )
