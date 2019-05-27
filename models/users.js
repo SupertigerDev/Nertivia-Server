@@ -80,6 +80,7 @@ const usersSchema = new Schema({
           2, // Mod
           3, // Creator,
           4, // cute
+          5, // supporter
       ]
     },
     friends: {

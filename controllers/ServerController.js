@@ -64,6 +64,16 @@ module.exports = {
     res.json(channels);
   },
   createInvite: async (req, res) => {
+
+
+    //check if invite limit reached.
+    const invites = await ServerInvites.find( { server: req.server._id, creator: req.user._id} );
+    if (invites.length >= 30) {
+      return res.status(403).json({
+        message: "You have reached the maximum limit of invites for this server."
+      });
+    }
+
     const inviteCode = generateString(6);
 
     const create = await ServerInvites.create({
