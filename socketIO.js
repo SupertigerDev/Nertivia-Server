@@ -32,12 +32,19 @@ io.use(async (socket, next) => {
           ],
           select: "-requester -__v"
         }
-      ).populate({path: "servers", populate: [{path: "creator", select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"}], select: "-_id -__v"})
+      ).populate({path: "servers", populate: [{path: "creator", select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"}], select: "-__v"})
       .lean();
     if (!user) {
       next(new Error("Authentication error"));
       return;
     }
+
+    //TODO check if accounts with no servers will crash the server.
+    const serverIDs = user.servers.map(a => a._id);
+
+    // find channels for servers.
+    const serverChannels = await channels.find({server: {$in: serverIDs}});
+
     const dms = channels
       .find({ creator: user._id })
       .populate({
