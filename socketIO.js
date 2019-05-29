@@ -43,8 +43,26 @@ io.use(async (socket, next) => {
     const serverIDs = user.servers.map(a => a._id);
 
     // find channels for servers.
-    const serverChannels = await channels.find({server: {$in: serverIDs}});
+    let serverChannels = await channels.find({server: {$in: serverIDs}}).lean();
 
+
+    user.servers = user.servers.map(server => {
+      const filteredChannels = serverChannels.filter(channel => channel.server.equals(server._id));
+      server.channels = filteredChannels;
+      return server
+    })
+
+    console.log(user.servers)
+
+
+    // serverChannels = serverChannels.map(channel => {
+    //   const server = user.servers.find(server => channel.server.equals(server._id));
+    //   channel.server = undefined;
+    //   channel.server_id = server.server_id
+    //   return channel;
+    // })
+
+    
     const dms = channels
       .find({ creator: user._id })
       .populate({
