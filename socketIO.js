@@ -52,15 +52,6 @@ io.use(async (socket, next) => {
       return server
     })
 
-    console.log(user.servers)
-
-
-    // serverChannels = serverChannels.map(channel => {
-    //   const server = user.servers.find(server => channel.server.equals(server._id));
-    //   channel.server = undefined;
-    //   channel.server_id = server.server_id
-    //   return channel;
-    // })
 
     
     const dms = channels

@@ -51,6 +51,8 @@ module.exports = {
 
     const io = req.io;
     // send owns status to every connected device
+    createServerObj.channels = [createChannel];
+
     io.in(req.user.uniqueID).emit("server:joined", createServerObj);
     // join room
     const clients = io.sockets.adapter.rooms[req.user.uniqueID].sockets;
@@ -131,6 +133,7 @@ module.exports = {
       server: invite.server._id,
       member: req.user._id
     });
+    let serverChannels = await Channels.find({server: invite.server._id}).lean();
 
     const createServerObj = invite.server;
     createServerObj.creator = { uniqueID: createServerObj.creator.uniqueID };
@@ -138,8 +141,11 @@ module.exports = {
     createServerObj._id = undefined;
     res.json(createServerObj);
 
+
+
     const io = req.io;
     // send owns status to every connected device
+    createServerObj.channels = serverChannels;
     io.in(req.user.uniqueID).emit("server:joined", createServerObj);
     // join room
     const clients = io.sockets.adapter.rooms[req.user.uniqueID].sockets;
