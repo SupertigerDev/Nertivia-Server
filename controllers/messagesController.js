@@ -1,6 +1,7 @@
 const config = require("../config");
 const Friends = require("../models/friends");
 const Users = require("../models/users");
+const ServerMembers = require("../models/ServerMembers");
 const Messages = require("../models/messages");
 const Servers = require("../models/servers");
 const Channels = require("../models/channels");
@@ -150,7 +151,7 @@ module.exports = {
         }
 
 
-        function serverMessage() {
+        async function serverMessage() {
           const clients =
             io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
               .sockets;
@@ -160,6 +161,41 @@ module.exports = {
             });
           }
     
+          //send notification
+          //find all members in the server.
+          const members = await ServerMembers.find({server: req.channel.server._id}).populate('member');
+
+          const members_uniqueID = members.map(m => m.member.uniqueID).filter(m => m !== req.user.uniqueID);
+          
+          let notificationPromises = []
+          for await (const memberUniqueID of members_uniqueID) {
+            
+            const sendNotificaiton = Notifications.findOneAndUpdate(
+              {
+                recipient: memberUniqueID,
+                channelID
+              },
+              {
+                $set: {
+                  recipient: memberUniqueID,
+                  channelID,
+                  type: "MESSAGE_CREATED",
+                  lastMessageID: messageCreated.messageID,
+                  sender: req.user._id
+                },
+                $inc: {
+                  count: 1
+                }
+              },
+              {
+                upsert: true
+              }
+            );
+            notificationPromises.push(sendNotificaiton);
+          }
+          await Promise.all(notificationPromises);
+
+
           return;
         }
         async function directMessage() {
@@ -272,7 +308,7 @@ module.exports = {
       return directMessage();
     }
 
-    function serverMessage() {
+    async function serverMessage() {
       const clients =
         io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
           .sockets;
@@ -283,6 +319,42 @@ module.exports = {
           });
         }
       }
+
+
+      //send notification
+      //find all members in the server.
+      const members = await ServerMembers.find({server: req.channel.server._id}).populate('member');
+
+      const members_uniqueID = members.map(m => m.member.uniqueID).filter(m => m !== req.user.uniqueID);
+      
+      let notificationPromises = []
+      for await (const memberUniqueID of members_uniqueID) {
+        
+      const sendNotificaiton = Notifications.findOneAndUpdate(
+        {
+          recipient: memberUniqueID,
+          channelID
+        },
+        {
+          $set: {
+            recipient: memberUniqueID,
+            channelID,
+            type: "MESSAGE_CREATED",
+            lastMessageID: messageCreated.messageID,
+            sender: req.user._id
+          },
+          $inc: {
+            count: 1
+          }
+        },
+        {
+          upsert: true
+        }
+      );
+      notificationPromises.push(sendNotificaiton);
+     }
+     await Promise.all(notificationPromises);
+
 
       return;
     }
@@ -320,6 +392,7 @@ module.exports = {
         }
       );
 
+      
       // sends notification to a user.
       const sendNotificaiton = Notifications.findOneAndUpdate(
         {

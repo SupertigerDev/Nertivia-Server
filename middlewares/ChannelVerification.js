@@ -9,9 +9,9 @@ module.exports = async (req, res, next) => {
   //Check if channel already exists in redis
   let channel = await redis.getChannel(channelID, req.user.uniqueID);
 
-
-
+  
   if (channel.result){
+
     req.channel = JSON.parse(channel.result);
     next();
     return;
@@ -45,7 +45,7 @@ module.exports = async (req, res, next) => {
       .json({ status: false, message: "Channel does not exist." });
 	}
 	
-	req.channel = channel.result;
+  req.channel = channel;
   await redis.addChannel(channelID, channel, req.user.uniqueID);
   next();
 
