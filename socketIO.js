@@ -39,18 +39,19 @@ io.use(async (socket, next) => {
       return;
     }
 
-    //TODO check if accounts with no servers will crash the server.
-    const serverIDs = user.servers.map(a => a._id);
+    const serverIDs = []
+    if (user.servers)
+      serverIDs = user.servers.map(a => a._id);
 
     // find channels for servers.
     let serverChannels = await channels.find({server: {$in: serverIDs}}).lean();
 
-
-    user.servers = user.servers.map(server => {
-      const filteredChannels = serverChannels.filter(channel => channel.server.equals(server._id));
-      server.channels = filteredChannels;
-      return server
-    })
+    if (user.servers)
+      user.servers = user.servers.map(server => {
+        const filteredChannels = serverChannels.filter(channel => channel.server.equals(server._id));
+        server.channels = filteredChannels;
+        return server
+      })
 
 
     
@@ -96,6 +97,7 @@ io.use(async (socket, next) => {
 
     next();
   } catch (error) {
+    console.log(error)
     next(new Error("Authentication error"));
   }
 });
