@@ -39,7 +39,7 @@ io.use(async (socket, next) => {
       return;
     }
 
-    const serverIDs = []
+    let serverIDs = []
     if (user.servers)
       serverIDs = user.servers.map(a => a._id);
 
