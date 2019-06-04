@@ -55,10 +55,11 @@ module.exports = {
 
     io.in(req.user.uniqueID).emit("server:joined", createServerObj);
     // join room
-    const clients = io.sockets.adapter.rooms[req.user.uniqueID].sockets;
-    for (let clientId in clients) {
-      io.sockets.connected[clientId].join("server:" + createServer.server_id);
-    }
+    const room = io.sockets.adapter.rooms[req.user.uniqueID];
+    if (room)
+      for (let clientId in room.sockets || []) {
+        io.sockets.connected[clientId].join("server:" + createServer.server_id);
+      }
   },
   getChannels: async (req, res) => {
     // find all channels
@@ -148,12 +149,13 @@ module.exports = {
     createServerObj.channels = serverChannels;
     io.in(req.user.uniqueID).emit("server:joined", createServerObj);
     // join room
-    const clients = io.sockets.adapter.rooms[req.user.uniqueID].sockets;
-    for (let clientId in clients) {
-      io.sockets.connected[clientId].join(
-        "server:" + createServerObj.server_id
-      );
-    }
+    const room = io.sockets.adapter.rooms[req.user.uniqueID];
+    if (room)
+      for (let clientId in room.sockets || []) {
+        io.sockets.connected[clientId].join(
+          "server:" + createServerObj.server_id
+        );
+      }
 
     // send join message
 
@@ -175,12 +177,13 @@ module.exports = {
     messageCreated = messageCreated.toObject();
     messageCreated.creator = user;
     // emit message
-    const serverClients = io.sockets.adapter.rooms["server:" + createServerObj.server_id].sockets;
-    for (let clientId in serverClients) {
-      io.to(clientId).emit("receiveMessage", {
-        message: messageCreated
-      });
-    }
+    const serverRooms = io.sockets.adapter.rooms["server:" + createServerObj.server_id];
+    if (serverRooms)
+      for (let clientId in serverRooms.sockets || []) {
+        io.to(clientId).emit("receiveMessage", {
+          message: messageCreated
+        });
+      }
   },
   deleteLeaveServer: async (req, res) => {
     // check if its the creator and delete the server.
@@ -204,14 +207,14 @@ module.exports = {
 
       //EMIT
       const io = req.io;
-      const clients =
-        io.sockets.adapter.rooms["server:" + req.server.server_id].sockets;
-      for (let clientId in clients) {
-        io.sockets.connected[clientId].emit("server:leave", {
-          server_id: req.server.server_id
-        });
-        io.sockets.connected[clientId].leave("server:" + req.server.server_id);
-      }
+      const rooms = io.sockets.adapter.rooms["server:" + req.server.server_id];
+      if (rooms)
+        for (let clientId in rooms.sockets || []) {
+          io.sockets.connected[clientId].emit("server:leave", {
+            server_id: req.server.server_id
+          });
+          io.sockets.connected[clientId].leave("server:" + req.server.server_id);
+        }
       return;
     }
     // Leave server
@@ -219,13 +222,14 @@ module.exports = {
     await ServerMembers.deleteMany({member: req.user._id, server: req.server._id });
     const io = req.io;
 
-    const clients = io.sockets.adapter.rooms[req.user.uniqueID].sockets;
-    for (let clientId in clients) {
-      io.sockets.connected[clientId].emit("server:leave", {
-        server_id: req.server.server_id
-      });
-      io.sockets.connected[clientId].leave("server:" + req.server.server_id);
-    }
+    const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
+    if (rooms)
+      for (let clientId in rooms.sockets || []) {
+        io.sockets.connected[clientId].emit("server:leave", {
+          server_id: req.server.server_id
+        });
+        io.sockets.connected[clientId].leave("server:" + req.server.server_id);
+      }
 
 
 
@@ -249,12 +253,13 @@ module.exports = {
     messageCreated = messageCreated.toObject();
     messageCreated.creator = user;
     // emit message
-    const serverClients = io.sockets.adapter.rooms["server:" + req.server.server_id].sockets;
-    for (let clientId in serverClients) {
-      io.to(clientId).emit("receiveMessage", {
-        message: messageCreated
-      });
-    }
+    const roomsMsg = io.sockets.adapter.rooms["server:" + req.server.server_id];
+    if (roomsMsg)
+      for (let clientId in roomsMsg.sockets || []) {
+        io.to(clientId).emit("receiveMessage", {
+          message: messageCreated
+        });
+      }
 
 
   }

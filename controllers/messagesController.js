@@ -152,14 +152,13 @@ module.exports = {
 
 
         async function serverMessage() {
-          const clients =
-            io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
-              .sockets;
-          for (let clientId in clients) {
-            io.to(clientId).emit("receiveMessage", {
-              message: messageCreatedLean
-            });
-          }
+          const rooms = io.sockets.adapter.rooms["server:" + req.channel.server.server_id];
+          if (rooms)
+            for (let clientId in rooms.sockets || []) {
+              io.to(clientId).emit("receiveMessage", {
+                message: messageCreatedLean
+              });
+            }
     
           //send notification
           //find all members in the server.
@@ -367,15 +366,16 @@ module.exports = {
 
       // Loop for other users logged in to the same account and emit (exclude the sender account.).
       //TODO: move this to client side for more performance.
-      const clients = io.sockets.adapter.rooms[req.user.uniqueID].sockets;
-      for (let clientId in clients) {
-        if (clientId !== socketID) {
-          io.to(clientId).emit("receiveMessage", {
-            message: messageCreated,
-            tempID
-          });
+      const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
+      if (rooms)
+        for (let clientId in rooms.sockets || []) {
+          if (clientId !== socketID) {
+            io.to(clientId).emit("receiveMessage", {
+              message: messageCreated,
+              tempID
+            });
+          }
         }
-      }
 
       //change lastMessage timeStamp
       const updateChannelTimeStap = Channels.updateMany(
