@@ -152,9 +152,11 @@ module.exports = {
     const room = io.sockets.adapter.rooms[req.user.uniqueID];
     if (room)
       for (let clientId in room.sockets || []) {
-        io.sockets.connected[clientId].join(
-          "server:" + createServerObj.server_id
-        );
+        if (io.sockets.connected[clientId]) {
+          io.sockets.connected[clientId].join(
+            "server:" + createServerObj.server_id
+          );
+        }
       }
 
     // send join message
@@ -186,8 +188,10 @@ module.exports = {
       }
   },
   deleteLeaveServer: async (req, res) => {
+    const redis = require("../redis");
     // check if its the creator and delete the server.
     if (req.server.creator.equals(req.user._id)) {
+      await redis.delServer(req.server.server_id)
       await Servers.deleteOne({ _id: req.server._id });
       const channels = await Channels.find({ server: req.server._id });
       let channelIDArray = [];
@@ -218,6 +222,8 @@ module.exports = {
       return;
     }
     // Leave server
+
+    await redis.remServerMember(req.user.uniqueID, req.server.server_id)
     await User.updateOne({_id: req.user._id}, {$pullAll: { servers: [req.server._id] } });
     await ServerMembers.deleteMany({member: req.user._id, server: req.server._id });
     const io = req.io;
@@ -225,10 +231,12 @@ module.exports = {
     const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
     if (rooms)
       for (let clientId in rooms.sockets || []) {
-        io.sockets.connected[clientId].emit("server:leave", {
-          server_id: req.server.server_id
-        });
-        io.sockets.connected[clientId].leave("server:" + req.server.server_id);
+        if (io.sockets.connected[clientId]) {
+          io.sockets.connected[clientId].emit("server:leave", { 
+            server_id: req.server.server_id
+          });
+          io.sockets.connected[clientId].leave("server:" + req.server.server_id);
+        }
       }
 
 

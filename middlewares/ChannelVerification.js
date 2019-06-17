@@ -9,10 +9,24 @@ module.exports = async (req, res, next) => {
   //Check if channel already exists in redis
   let channel = await redis.getChannel(channelID, req.user.uniqueID);
 
-  
-  if (channel.result){
 
-    req.channel = JSON.parse(channel.result);
+  if (channel.result){
+    const result = JSON.parse(channel.result);
+    if (result.server) {
+      //check if still in server
+      let isInServer = await redis.serverMemberExists(req.user.uniqueID, result.server.server_id);
+      if (isInServer.result) {
+        req.channel = result;
+        next();
+        return;
+      }
+      return res.status(403).json({
+        message: "You have not joined that server."
+      });
+      
+    }
+
+    req.channel = result;
     next();
     return;
   }
@@ -34,6 +48,7 @@ module.exports = async (req, res, next) => {
           message: "You have not joined that server."
         });
       }
+      await redis.addServerMember(req.user.uniqueID, channel.server.server_id);
     } else {
       channel = null;
     }

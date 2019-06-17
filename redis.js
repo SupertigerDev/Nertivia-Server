@@ -35,11 +35,23 @@ module.exports = {
   changeStatus: async (uniqueID, status) => {
     return wrapper('hset', `user:${uniqueID}`, 'status', status);
   },
-  addChannel: (channelID,channelData, uniqueID,) => {
+  addChannel: (channelID, channelData, uniqueID) => {
     return wrapper('hset', `user:${uniqueID}`, `channel:${channelID}`, JSON.stringify(channelData));
   },
   getChannel: (channelID, uniqueID) => {
     return wrapper('hget', `user:${uniqueID}`, `channel:${channelID}`);
+  },
+  addServerMember: (uniqueID, serverID) => {
+    return wrapper('sadd', `server:${serverID}`, `user:${uniqueID}`);
+  },
+  serverMemberExists: (uniqueID, serverID) => {
+    return wrapper('sismember', `server:${serverID}`, `user:${uniqueID}`);
+  },
+  remServerMember: (uniqueID, serverID) => {
+    return wrapper('srem', `server:${serverID}`, `user:${uniqueID}`);
+  },
+  delServer: (serverID) => {
+    return wrapper('del', `server:${serverID}`);
   }
 }
 

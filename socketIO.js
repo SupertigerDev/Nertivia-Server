@@ -2,6 +2,7 @@ const events = require("./socketEvents/index");
 const controller = require("./socketController");
 const jwtAuth = require("socketio-jwt-auth");
 const User = require("./models/users");
+const ServerMembers = require("./models/ServerMembers");
 const channels = require("./models/channels");
 const config = require("./config");
 const Notifications = require("./models/notifications");
@@ -11,7 +12,7 @@ const jwt = require("jsonwebtoken");
 const { io } = require("./app");
 const redis = require("./redis");
 
-// Authendicate token
+// Authenticate token
 io.use(async (socket, next) => {
   const token = socket.handshake.headers["authorization"];
   if (!token || token === "null")
@@ -39,20 +40,40 @@ io.use(async (socket, next) => {
       return;
     }
 
-    let serverIDs = []
-    if (user.servers)
+
+    let serverMembers = []
+    
+    if (user.servers) {
+      let serverIDs = []
       serverIDs = user.servers.map(a => a._id);
+      // find channels for servers.
+      let serverChannels = await channels.find({server: {$in: serverIDs}}).lean();
 
-    // find channels for servers.
-    let serverChannels = await channels.find({server: {$in: serverIDs}}).lean();
-
-    if (user.servers)
       user.servers = user.servers.map(server => {
         const filteredChannels = serverChannels.filter(channel => channel.server.equals(server._id));
         server.channels = filteredChannels;
         return server
       })
 
+      serverMembers = await ServerMembers.find({server: {$in: serverIDs}}).populate('member').lean();
+      
+
+      serverMembers = serverMembers.map(sm => {
+      const server = user.servers.find(s => s._id.toString() == sm.server.toString() );
+
+      delete sm.server;
+      delete sm._id
+      delete sm.__v
+      delete sm.member._id
+      delete sm.member.__v
+      delete sm.member.status
+      delete sm.member.created  
+
+      sm.server_id = server.server_id
+      return sm
+    })
+
+    }
 
     
     const dms = channels
@@ -78,6 +99,7 @@ io.use(async (socket, next) => {
     socket.request.notifications = result[1];
     socket.request._id = user._id;
     socket.request.user = user;
+    socket.request.serverMembers = serverMembers;
     socket.request.settings = {
       ...user.settings,
       GDriveLinked: user.GDriveRefreshToken ? true : false,
@@ -124,6 +146,7 @@ module.exports = async client => {
     client.emit("success", {
       message: "Logged in!",
       user: client.request.user,
+      serverMembers: client.request.serverMembers,
       settings: client.request.settings,
       dms: client.request.dms,
       notifications: client.request.notifications,
