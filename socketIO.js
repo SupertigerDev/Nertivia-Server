@@ -59,19 +59,20 @@ io.use(async (socket, next) => {
       
 
       serverMembers = serverMembers.map(sm => {
-      const server = user.servers.find(s => s._id.toString() == sm.server.toString() );
+        const server = user.servers.find(s => s._id.toString() == sm.server.toString() );
 
-      delete sm.server;
-      delete sm._id
-      delete sm.__v
-      delete sm.member._id
-      delete sm.member.__v
-      delete sm.member.status
-      delete sm.member.created  
-
-      sm.server_id = server.server_id
-      return sm
-    })
+        delete sm.server;
+        delete sm._id
+        delete sm.__v
+        sm.member = {
+          username: sm.member.username,
+          tag: sm.member.tag,
+          avatar: sm.member.avatar,
+          uniqueID: sm.member.avatar,
+        }
+        sm.server_id = server.server_id
+        return sm
+      })
 
     }
 

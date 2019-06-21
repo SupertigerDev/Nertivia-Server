@@ -9,6 +9,11 @@ module.exports = async (uniqueID, id, status, io, modifyDB) => {
   }
 
   const friends = await Friends.find({requester: id}).populate('recipient');
+  const user = await Users.findById(id).populate('servers');
+
+  for (let server of user.servers) {
+    server.server_id
+  }
 
   for (let friend of friends) {
     if (friend.recipient)

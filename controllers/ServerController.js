@@ -136,15 +136,27 @@ module.exports = {
     });
     let serverChannels = await Channels.find({server: invite.server._id}).lean();
 
-    const createServerObj = invite.server;
+    const createServerObj = Object.assign({}, invite.server);
     createServerObj.creator = { uniqueID: createServerObj.creator.uniqueID };
     createServerObj.__v = undefined;
     createServerObj._id = undefined;
     res.json(createServerObj);
 
-
-
     const io = req.io;
+
+    const serverMember = {
+      server_id: invite.server.server_id,
+      type: "MEMBER",
+      member: {
+        username: req.user.username,
+        tag: req.user.tag,
+        avatar: req.user.avatar,
+        uniqueID: req.user.uniqueID,
+      }
+    }
+    io.in("server:" + invite.server.server_id).emit("server:member_add", {serverMember})
+
+
     // send owns status to every connected device
     createServerObj.channels = serverChannels;
     io.in(req.user.uniqueID).emit("server:joined", createServerObj);
@@ -180,12 +192,34 @@ module.exports = {
     messageCreated.creator = user;
     // emit message
     const serverRooms = io.sockets.adapter.rooms["server:" + createServerObj.server_id];
-    if (serverRooms)
+    if (serverRooms){
       for (let clientId in serverRooms.sockets || []) {
         io.to(clientId).emit("receiveMessage", {
           message: messageCreated
         });
       }
+    }
+
+    // send members list 
+
+    let serverMembers = await ServerMembers.find({server: invite.server._id}).populate('member').lean();
+    serverMembers = serverMembers.map(sm => {
+
+      delete sm.server;
+      delete sm._id
+      delete sm.__v
+      sm.member = {
+        username: sm.member.username,
+        tag: sm.member.tag,
+        avatar: sm.member.avatar,
+        uniqueID: sm.member.avatar,
+      }
+      sm.server_id = invite.server.server_id
+      return sm
+    })
+    io.to(req.user.uniqueID).emit('server:members', {serverMembers})
+
+    
   },
   deleteLeaveServer: async (req, res) => {
     const redis = require("../redis");
@@ -208,6 +242,7 @@ module.exports = {
       await ServerInvites.deleteMany({ server: req.server._id });
 
       await User.updateMany({ $pullAll: { servers: [req.server._id] } });
+      res.json({status: "Done!"})
 
       //EMIT
       const io = req.io;
@@ -226,18 +261,23 @@ module.exports = {
     await redis.remServerMember(req.user.uniqueID, req.server.server_id)
     await User.updateOne({_id: req.user._id}, {$pullAll: { servers: [req.server._id] } });
     await ServerMembers.deleteMany({member: req.user._id, server: req.server._id });
+    res.json({status: "Done!"});
     const io = req.io;
 
+
+    
     const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
     if (rooms)
-      for (let clientId in rooms.sockets || []) {
-        if (io.sockets.connected[clientId]) {
-          io.sockets.connected[clientId].emit("server:leave", { 
-            server_id: req.server.server_id
-          });
-          io.sockets.connected[clientId].leave("server:" + req.server.server_id);
-        }
+    for (let clientId in rooms.sockets || []) {
+      if (io.sockets.connected[clientId]) {
+        io.sockets.connected[clientId].emit("server:leave", { 
+          server_id: req.server.server_id
+        });
+        io.sockets.connected[clientId].leave("server:" + req.server.server_id);
       }
+    }
+
+    io.in("server:" + req.server.server_id).emit("server:member_remove", {uniqueID: req.user.uniqueID, server_id: req.server.server_id})
 
 
 
