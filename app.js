@@ -36,7 +36,8 @@ app.use(function(req,res,next){
   req.io = io;
   next();
 })
-app.use(session({
+
+const sessionMiddleware = session({
   secret: config.sessionSecret,
   // create new redis store.
   store: new RedisStore({
@@ -45,7 +46,14 @@ app.use(session({
   }),
   saveUninitialized: false,
   resave: false
-}));
+});
+
+
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, socket.request.res, next);
+})
+
+app.use(sessionMiddleware);
 
 // Allows certain hosts.
 const allowedOrigins = config.allowedOrigins;

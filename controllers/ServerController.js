@@ -212,7 +212,7 @@ module.exports = {
         username: sm.member.username,
         tag: sm.member.tag,
         avatar: sm.member.avatar,
-        uniqueID: sm.member.avatar,
+        uniqueID: sm.member.uniqueID,
       }
       sm.server_id = invite.server.server_id
       return sm

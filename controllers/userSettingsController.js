@@ -161,7 +161,21 @@ module.exports = {
       async (fieldName, fileStream, fileName, encoding, mimeType) => {
         //replaceAccents = remove special characters.
         //replace convert space to underscope
-        const emojiName = replaceAccents(path.parse(fileName).name)
+        let emojiName = replaceAccents(path.parse(fileName).name).trim();
+
+
+        if (emojiName.length < 1)
+        return res.status(403).json({
+          status: false,
+          message: "Minimum: 1 characters are required."
+        });
+  
+      if (emojiName.length > 30)
+        return res.status(403).json({
+          status: false,
+          message: "Maximum: 30 characters are required."
+        });
+        emojiName = emojiName
           .replace(/[^A-Z0-9]+/gi, "_")
           .trim();
 
@@ -275,16 +289,16 @@ module.exports = {
     const { emojiID, name } = req.body;
     const userID = req.user._id;
 
-    if (name.length < 3)
+    if (name.trim().length < 1)
       return res.status(403).json({
         status: false,
-        message: "Minimum: 3 characters are required."
+        message: "Minimum: 1 characters are required."
       });
 
-    if (name.length > 10)
+    if (name.trim().length > 30)
       return res.status(403).json({
         status: false,
-        message: "Maximum: 10 characters are required."
+        message: "Maximum: 30 characters are required."
       });
 
     CustomEmojis.findOneAndUpdate(

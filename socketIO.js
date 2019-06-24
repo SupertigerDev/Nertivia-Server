@@ -68,7 +68,7 @@ io.use(async (socket, next) => {
           username: sm.member.username,
           tag: sm.member.tag,
           avatar: sm.member.avatar,
-          uniqueID: sm.member.avatar,
+          uniqueID: sm.member.uniqueID,
         }
         sm.server_id = server.server_id
         return sm
