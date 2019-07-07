@@ -12,13 +12,16 @@ module.exports = async (uniqueID, id, status, io, modifyDB) => {
   const user = await Users.findById(id).populate('servers');
 
   for (let server of user.servers) {
-    server.server_id
+    io.in("server:" + server.server_id).emit('userStatusChange', {
+      uniqueID,
+      status,
+    })
   }
 
   for (let friend of friends) {
     if (friend.recipient)
     io.in(friend.recipient.uniqueID).emit('userStatusChange', {
-      uniqueID: uniqueID,
+      uniqueID,
       status
     });
   }

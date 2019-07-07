@@ -140,9 +140,12 @@ module.exports = async client => {
   );
 
   // get list of current online friends.
-  const { ok, error, result } = await redis.checkFriendsOnline(
-    client.request.user.friends
-  );
+  const friendUniqueIDs = client.request.user.friends.map(m => {
+    if (m.recipient)
+      return m.recipient.uniqueID
+  })
+  const serverMemberUniqueIDs = client.request.serverMembers.map(m => m.member.uniqueID )
+  const { ok, error, result } = await redis.getPresences([...friendUniqueIDs, ...serverMemberUniqueIDs]);
   if (ok) {
     client.emit("success", {
       message: "Logged in!",

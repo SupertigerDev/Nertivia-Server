@@ -23,14 +23,15 @@ module.exports = {
       return response
     }
   },
-  checkFriendsOnline: async (array) => {
+  getPresences: async (array) => {
     const multi = redisClient.multi();
-    for (let friend of array) {
-
-      if (friend.recipient) 
-        multi.hmget(`user:${friend.recipient.uniqueID}`, "uniqueID", "status")
+    for (let uniqueID of array) {
+        multi.hmget(`user:${uniqueID}`, "uniqueID", "status")
     }
     return multiWrapper(multi) 
+  },
+  getPresence: async (uniqueID) => {
+    return wrapper('hmget', `user:${uniqueID}`, 'uniqueID', 'status'); 
   },
   changeStatus: async (uniqueID, status) => {
     return wrapper('hset', `user:${uniqueID}`, 'status', status);

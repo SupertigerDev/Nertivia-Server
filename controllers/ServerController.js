@@ -125,6 +125,7 @@ module.exports = {
     });
 
     if (joined) return res.status(409).json({ message: "Already joined!" });
+    const redis = require('./../redis');
 
     const addServerUser = await User.updateOne(
       { _id: req.user._id },
@@ -154,7 +155,9 @@ module.exports = {
         uniqueID: req.user.uniqueID,
       }
     }
-    io.in("server:" + invite.server.server_id).emit("server:member_add", {serverMember})
+    // get user presence 
+    const presence = await redis.getPresence(serverMember.member.uniqueID);
+    io.in("server:" + invite.server.server_id).emit("server:member_add", {serverMember, presence: presence.result[1]})
 
 
     // send owns status to every connected device
@@ -203,6 +206,8 @@ module.exports = {
     // send members list 
 
     let serverMembers = await ServerMembers.find({server: invite.server._id}).populate('member').lean();
+
+    const memberPresences = await redis.getPresences(serverMembers.map(sm => sm.member.uniqueID));
     serverMembers = serverMembers.map(sm => {
 
       delete sm.server;
@@ -217,7 +222,7 @@ module.exports = {
       sm.server_id = invite.server.server_id
       return sm
     })
-    io.to(req.user.uniqueID).emit('server:members', {serverMembers})
+    io.to(req.user.uniqueID).emit('server:members', {serverMembers, memberPresences: memberPresences.result})
 
     
   },
