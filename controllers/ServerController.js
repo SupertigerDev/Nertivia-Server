@@ -52,8 +52,17 @@ module.exports = {
     const io = req.io;
     // send owns status to every connected device
     createServerObj.channels = [createChannel];
+    const serverMember = addServerMember.toObject();
+    serverMember.member = {
+      username: req.user.username,
+      tag: req.user.tag,
+      avatar: req.user.avatar,
+      uniqueID: req.user.uniqueID
+    }
+    serverMember.server_id = createServer.server_id;
 
     io.in(req.user.uniqueID).emit("server:joined", createServerObj);
+    io.in(req.user.uniqueID).emit("server:member_add", {serverMember: serverMember});
     // join room
     const room = io.sockets.adapter.rooms[req.user.uniqueID];
     if (room)
@@ -315,8 +324,75 @@ module.exports = {
       }
 
 
+  },
+  createChannel: async ( req, res ) => {
+    // check if this function is executed by the guild owner.
+    if (!req.server.creator.equals(req.user._id))
+      return res.status(403).json({ message: "You do not have permission to create channels!" });
+    const { name } = req.body;
+    if (!name || name.trim() === "") 
+      return res.status(403).json({ message: "Enter a channel name!" });
+    
+    const createChannel = await Channels.create({
+      name: name,
+      channelID: generateNum(19),
+      server: req.server._id,
+      lastMessaged: Date.now()
+    });
+    const io = req.io;
+
+    const channelObj = {
+      channelID: createChannel.channelID,
+      lastMessaged: createChannel.lastMessaged,
+      name: createChannel.name,
+      server_id: req.server.server_id,
+      status: 0,
+      recipients: createChannel.recipients
+    }
+    io.in("server:" + req.server.server_id).emit('server:add_channel', {channel: channelObj});
+    
+    res.json({channel: channelObj});
+ 
+  },
+  updateChannel: async (req, res) => {
+    // check if this function is executed by the guild owner.
+    if (!req.server.creator.equals(req.user._id))
+      return res.status(403).json({ message: "You do not have permission to update channels!" });
+    const data = req.body;
+    const server = req.server
+    const channelID = req.params.channel_id
+    try {
+      await Channels.updateOne({channelID}, {name: data.name});
+      const io = req.io;
+      io.in("server:" + req.server.server_id).emit('server:update_channel', {name: data.name, channelID});
+      res.json({name: data.name, channelID})
+    } catch (e) {
+      res.status(403).json({message: 'Something went wrong. Try again later.'})
+    }
+
+  },
+  deleteChannel: async (req, res) => {
+    // check if this function is executed by the guild owner.
+    if (!req.server.creator.equals(req.user._id))
+      return res.status(403).json({ message: "You do not have permission to delete channels!" });
+    
+    const server = req.server;
+    const channelID = req.params.channel_id
+    // check if its default channel
+    if (req.server.default_channel_id.toString() === channelID.toString()){
+      return res.status(403).json({message: "Cannot delete default channel."})
+    }
+    try {
+      await Channels.deleteOne({channelID})
+      const io = req.io;
+      io.in("server:" + req.server.server_id).emit('server:remove_channel', {channelID, server_id: server.server_id});
+      res.json({channelID, server_id: server.server_id})
+    } catch(e) {
+      return res.status(403).json({message: "Something went wrong. Try again later."})
+    }
+    
   }
-};
+}
 
 function generateString(n) {
   var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";

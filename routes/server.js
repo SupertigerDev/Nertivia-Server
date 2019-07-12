@@ -28,9 +28,18 @@ router.route('/:server_id/invite')
 	.post( passportJWT, UserPresentVerification, ServerController.createInvite )
 router.route('/:server_id/invites')
 	.get( passportJWT, UserPresentVerification, ServerController.getInvites )
+
+router.route('/:server_id/channel')
+	.put( passportJWT, UserPresentVerification, ServerController.createChannel )
+	
+router.route('/:server_id/channels/:channel_id')
+	.patch( passportJWT, UserPresentVerification, ServerController.updateChannel )
+
+router.route('/:server_id/channels/:channel_id')
+	.delete( passportJWT, UserPresentVerification, ServerController.deleteChannel )
 	
 router.route('/:server_id')
-.delete( passportJWT, UserPresentVerification, ServerController.deleteLeaveServer )
+	.delete( passportJWT, UserPresentVerification, ServerController.deleteLeaveServer )
 
 
 router.route('/invite/:invite_code')
