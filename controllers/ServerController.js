@@ -384,6 +384,9 @@ module.exports = {
     }
     try {
       await Channels.deleteOne({channelID})
+      await Messages.deleteMany({channelID});
+      const redis = require('./../redis');
+      await redis.removeServerChannel(channelID);
       const io = req.io;
       io.in("server:" + req.server.server_id).emit('server:remove_channel', {channelID, server_id: server.server_id});
       res.json({channelID, server_id: server.server_id})

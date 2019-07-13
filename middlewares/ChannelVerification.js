@@ -6,16 +6,18 @@ module.exports = async (req, res, next) => {
 
   const { channelID } = req.params;
 
-  //Check if channel already exists in redis
+  //Check if channel already exists in redis, in user
   let channel = await redis.getChannel(channelID, req.user.uniqueID);
 
 
   if (channel.result){
     const result = JSON.parse(channel.result);
     if (result.server) {
+      //check if channel still exists in the server
+      let channelExists = await redis.serverChannelExists(channelID);
       //check if still in server
       let isInServer = await redis.serverMemberExists(req.user.uniqueID, result.server.server_id);
-      if (isInServer.result) {
+      if (isInServer.result && channelExists.result) {
         req.channel = result;
         next();
         return;

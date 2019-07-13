@@ -36,8 +36,17 @@ module.exports = {
   changeStatus: async (uniqueID, status) => {
     return wrapper('hset', `user:${uniqueID}`, 'status', status);
   },
-  addChannel: (channelID, channelData, uniqueID) => {
+  addChannel: async (channelID, channelData, uniqueID) => {
+    if (channelData.server) {
+      await wrapper('set', 'channels', `channel:${channelID}`);
+    }
     return wrapper('hset', `user:${uniqueID}`, `channel:${channelID}`, JSON.stringify(channelData));
+  },
+  serverChannelExists: (channelID) => {
+    return wrapper('exists', 'channels', `channel:${channelID}`);
+  },
+  removeServerChannel: (channelID) => {
+    return wrapper('del', 'channels', `channel:${channelID}`);
   },
   getChannel: (channelID, uniqueID) => {
     return wrapper('hget', `user:${uniqueID}`, `channel:${channelID}`);
