@@ -5,6 +5,7 @@ const ServerInvites = require("../models/ServerInvites");
 const Messages = require("../models/messages");
 const ServerMembers = require("../models/ServerMembers");
 const mongoose = require("mongoose");
+const { matchedData } = require('express-validator/filter');
 
 module.exports = {
   post: async (req, res, next) => {
@@ -394,6 +395,23 @@ module.exports = {
       return res.status(403).json({message: "Something went wrong. Try again later."})
     }
     
+  },
+  updateServer: async (req, res) => {
+
+    // check if this function is executed by the guild owner.
+    if (!req.server.creator.equals(req.user._id))
+      return res.status(403).json({ message: "You do not have permission to update this server!" });
+    // filtered data
+    const data = matchedData(req);
+    const server = req.server;
+    try {
+      await Servers.updateOne({server_id: server.server_id}, data);
+      const io = req.io;
+      io.in("server:" + req.server.server_id).emit('server:update_server', Object.assign(data, {server_id: server.server_id}));
+      res.json(Object.assign(data, {server_id: server.server_id}));
+    } catch (e) {
+      res.status(403).json({message: 'Something went wrong. Try again later.'})
+    }
   }
 }
 

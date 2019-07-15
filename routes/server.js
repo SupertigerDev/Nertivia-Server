@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const messagePolicie = require('../policies/messagePolicies');
+const serverPolicie = require('../policies/ServerPolicies')
 
 const ServerController = require('../controllers/ServerController');
 
@@ -34,6 +35,9 @@ router.route('/:server_id/channel')
 	
 router.route('/:server_id/channels/:channel_id')
 	.patch( passportJWT, UserPresentVerification, ServerController.updateChannel )
+
+router.route('/:server_id')
+	.patch( passportJWT,serverPolicie.updateServer, UserPresentVerification, ServerController.updateServer )
 
 router.route('/:server_id/channels/:channel_id')
 	.delete( passportJWT, UserPresentVerification, ServerController.deleteChannel )
