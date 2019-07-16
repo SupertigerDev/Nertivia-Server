@@ -35,8 +35,8 @@ module.exports = {
 
   changeAvatar: async (req, res) => {
     const oauth2Client = req.oauth2Client;
-    // 10490000 = 10mb
-    const maxSize = 10490000;
+    // 2092000 = 2mb
+    const maxSize = 2092000;
     if (req.headers["content-length"] >= maxSize)
       return res.status(403).json({
         status: false,

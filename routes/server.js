@@ -13,6 +13,7 @@ const UserPresentVerification = require ('./../middlewares/UserPresentVerificati
 const ChannelVerification = require ('./../middlewares/ChannelVerification')
 const GDriveOauthClient = require('./../middlewares/GDriveOauthClient');
 const busboy = require('connect-busboy');
+
 const {
 	passportLogin,
 	passportJWT
@@ -37,7 +38,7 @@ router.route('/:server_id/channels/:channel_id')
 	.patch( passportJWT, UserPresentVerification, ServerController.updateChannel )
 
 router.route('/:server_id')
-	.patch( passportJWT,serverPolicie.updateServer, UserPresentVerification, ServerController.updateServer )
+	.patch( passportJWT,serverPolicie.updateServer, GDriveOauthClient, UserPresentVerification, ServerController.updateServer )
 
 router.route('/:server_id/channels/:channel_id')
 	.delete( passportJWT, UserPresentVerification, ServerController.deleteChannel )

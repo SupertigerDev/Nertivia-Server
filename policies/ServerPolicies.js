@@ -5,6 +5,7 @@ const policies = {
   updateServer: [
     check('name').isString().withMessage('Invalid Format.').optional({checkFalsy: true}),
     check('default_channel_id').isString().withMessage('Invalid Format.').optional({checkFalsy: true}),
+    check('avatar').isString().withMessage('Invalid Format.').optional({checkFalsy: true}),
     policyHandler
   ],
 

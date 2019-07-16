@@ -30,7 +30,7 @@ const io = require('socket.io')(http, {
 app.set('trust proxy', 1) // trust first proxy
 
 //Middlewares
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '10mb'}));
 //store socket io
 app.use(function(req,res,next){
   req.io = io;
