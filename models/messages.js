@@ -1,9 +1,19 @@
 const mongoose = require("mongoose");
-
+const FlakeId = require('flakeid');
+const flake = new FlakeId();
 
 const {
   Schema
 } = mongoose;
+
+const embedSchema = new Schema({
+  title: {type: String},
+  type: {type: String},
+  url: {type: String},
+  image: {type: String},
+  site_name: {type: String},
+  description: {type: String},
+})
 
 const messagesSchema = new Schema({
   channelID: { type: String, required: true },
@@ -12,6 +22,7 @@ const messagesSchema = new Schema({
   message: { type: String, required: false  },
   creator: { type: Schema.Types.ObjectId, ref: 'users' },
   created: { type: Number },
+  embed: {type: embedSchema},
   type: {type: Number, default: 0, enum: [
     0, // Message
     1, // Join message
@@ -20,23 +31,10 @@ const messagesSchema = new Schema({
 })
 
 messagesSchema.pre('save', function() {
-  this.messageID = generateNum(22);
+  this.messageID = flake.gen();
   this.created = Date.now();
 })
 
 
-function generateNum(n) {
-  var add = 1, max = 12 - add;   // 12 is the min safe number Math.random() can generate without it starting to pad the end with zeros.   
-
-  if ( n > max ) {
-    return generateNum(max) + generateNum(n - max);
-  }
-
-  max        = Math.pow(10, n+add);
-  var min    = max/10; // Math.pow(10, n) basically
-  var number = Math.floor( Math.random() * (max - min + 1) ) + min;
-
-  return ("" + number).substring(add); 
-}
 
 module.exports = mongoose.model('messages', messagesSchema);

@@ -7,6 +7,9 @@ const ServerMembers = require("../models/ServerMembers");
 const mongoose = require("mongoose");
 const { matchedData } = require('express-validator/filter');
 
+const FlakeId = require('flakeid');
+const flake = new FlakeId();
+
 const GDriveApi = require('./../API/GDrive');
 const stream = require('stream');
 const fs = require('fs');
@@ -23,7 +26,7 @@ module.exports = {
         message: "Reached the maximum limit of servers."
       });
       
-    const channelID = generateNum(19);
+    const channelID = flake.gen();
     const createServer = await Servers.create({
       name: name.trim(),
       creator: user_id,

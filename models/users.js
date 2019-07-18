@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const beautifyUnique = require('mongoose-beautiful-unique-validation');
 const bcrypt = require('bcryptjs');
+const FlakeId = require('flakeid');
+const flake = new FlakeId();
 const {
     Schema
 } = mongoose;
@@ -117,7 +119,7 @@ usersSchema.pre('save', async function(next) {
     this.password = passwordHash;
 
     // generate uniqueID
-    this.uniqueID = generateNum(18);
+    this.uniqueID = flake.gen();
     // generate tag
     this.tag = generateString(4);
     // Date created
@@ -137,19 +139,6 @@ usersSchema.methods.isValidPassword = async function(newPassword) {
   }
 }
 
-function generateNum(n) {
-  var add = 1, max = 12 - add;   // 12 is the min safe number Math.random() can generate without it starting to pad the end with zeros.   
-
-  if ( n > max ) {
-          return generateNum(max) + generateNum(n - max);
-  }
-
-  max        = Math.pow(10, n+add);
-  var min    = max/10; // Math.pow(10, n) basically
-  var number = Math.floor( Math.random() * (max - min + 1) ) + min;
-
-  return ("" + number).substring(add); 
-}
 
 function generateString(n) {
   var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";

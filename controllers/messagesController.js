@@ -68,7 +68,7 @@ module.exports = {
   //uploading files
   postFormData: async (req, res, next) => {
     //if formdata is not present.
-    if (!req.busboy) return next();
+    if (!req.busboy) return res.status(403).json({message: "?????"})
 
     const redis = require("../redis");
     const { channelID } = req.params;
@@ -268,6 +268,7 @@ module.exports = {
       });
     }
 
+
     const messageCreate = new Messages({
       channelID,
       message,
@@ -297,6 +298,10 @@ module.exports = {
       tempID,
       messageCreated
     });
+  
+    req.message_status = true;
+    req.message_id = messageCreated.messageID
+    next();
 
     // emit
     const io = req.io;

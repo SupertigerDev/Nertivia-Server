@@ -10,6 +10,7 @@ const typingController = require('./../controllers/TypingController')
 //Middlewares
 const channelVerification = require('./../middlewares/ChannelVerification');
 const GDriveOauthClient = require('./../middlewares/GDriveOauthClient');
+const URLEmbed = require('./../middlewares/URLEmbed');
 const busboy = require('connect-busboy');
 const {
 	passportLogin,
@@ -21,7 +22,7 @@ router.route('/:channelID')
 	.get(passportJWT, channelVerification, messagesController.get)
 
 router.route('/:channelID')
-	.post(passportJWT, channelVerification, messagesController.post, GDriveOauthClient, busboy(), messagesController.postFormData, messagePolicie.post )
+	.post(passportJWT, messagePolicie.post, channelVerification, messagesController.post, URLEmbed, GDriveOauthClient, busboy(), messagesController.postFormData,  )
 
 router.route('/:channelID/typing')
 	.post(passportJWT,channelVerification, typingController)
