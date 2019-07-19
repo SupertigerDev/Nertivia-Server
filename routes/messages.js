@@ -18,10 +18,13 @@ const {
 } = require('./../middlewares/passport');
 
 
-router.route('/:channelID')
+router.route('/channels/:channelID')
 	.get(passportJWT, channelVerification, messagesController.get)
 
-router.route('/:channelID')
+	router.route('/:messageID/channels/:channelID')
+	.delete(passportJWT, channelVerification, messagesController.delete)
+
+router.route('/channels/:channelID')
 	.post(passportJWT, messagePolicie.post, channelVerification, messagesController.post, URLEmbed, GDriveOauthClient, busboy(), messagesController.postFormData,  )
 
 router.route('/:channelID/typing')
