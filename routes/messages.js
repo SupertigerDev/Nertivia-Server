@@ -24,6 +24,9 @@ router.route('/channels/:channelID')
 	router.route('/:messageID/channels/:channelID')
 	.delete(passportJWT, channelVerification, messagesController.delete)
 
+	router.route('/:messageID/channels/:channelID')
+	.patch(passportJWT, messagePolicie.update, channelVerification, messagesController.update, URLEmbed)
+
 router.route('/channels/:channelID')
 	.post(passportJWT, messagePolicie.post, channelVerification, messagesController.post, URLEmbed, GDriveOauthClient, busboy(), messagesController.postFormData,  )
 

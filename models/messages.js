@@ -23,6 +23,7 @@ const messagesSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: 'users' },
   created: { type: Number },
   embed: {type: embedSchema},
+  timeEdited: { type: Number, required: false},
   type: {type: Number, default: 0, enum: [
     0, // Message
     1, // Join message

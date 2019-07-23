@@ -5,9 +5,13 @@ const policyHandler = require('./policyHandler');
 
 const policies = {
   post: [
-    check('message').not().isEmpty().withMessage('message is required.').trim(),
+    check('message').isString().withMessage('message must be a string!').optional(),
     check('socketID').optional(),
     check('tempID').optional(),
+    policyHandler
+  ],
+  update: [
+    check('message').isString().withMessage('message must be a string!').optional({checkFalsy: true}),
     policyHandler
   ]
 }

@@ -15,15 +15,15 @@ module.exports = (req, res, next) => {
     encoding: null
   };
  request(requestSettings, (err, resp, buffer) => {
-    if (resp.statusCode !== 200) return next()
-   if (err) return next()
+   if (resp && resp.statusCode !== 200) return res.status(404).end();
+   if (err) return res.status(404).end();
    res.set('Cache-Control', 'public, max-age=31536000');
     if (type && type === 'png') {
       sharp(buffer)
         .png()
         .toBuffer()
         .then( data => { res.end(data); })
-        .catch( err => {next()});
+        .catch( err => { console.log(err); res.status(404).end();});
     } else {
       res.end(buffer); 
     }

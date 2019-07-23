@@ -6,6 +6,7 @@ module.exports = (req, res, next) => {
   if (!req.message_status) next();
   const message = req.body.message;
   const message_id = req.message_id
+  if (!message) return;
 
   const urls = message.match(/(https?:\/\/[^\s]+)/g);
   

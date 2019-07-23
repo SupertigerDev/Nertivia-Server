@@ -3,6 +3,7 @@ const Channels = require("../models/channels");
 const User = require("../models/users");
 const ServerInvites = require("../models/ServerInvites");
 const Messages = require("../models/messages");
+const Notifications = require('./../models/notifications');
 const ServerMembers = require("../models/ServerMembers");
 const mongoose = require("mongoose");
 const { matchedData } = require('express-validator/filter');
@@ -246,18 +247,20 @@ module.exports = {
   deleteLeaveServer: async (req, res) => {
     const redis = require("../redis");
     // check if its the creator and delete the server.
+
+    const channels = await Channels.find({ server: req.server._id });
+    let channelIDArray = [];
+
+    for (let index = 0; index < channels.length; index++) {
+      channelIDArray.push(channels[index].channelID);
+    }
+
     if (req.server.creator.equals(req.user._id)) {
       await redis.delServer(req.server.server_id)
       await Servers.deleteOne({ _id: req.server._id });
-      const channels = await Channels.find({ server: req.server._id });
-      let channelIDArray = [];
-
-      for (let index = 0; index < channels.length; index++) {
-        const channel = channels[index];
-        channelIDArray.push(channel.channelID);
-      }
       if (channelIDArray) {
         await Messages.deleteMany({ channelID: { $in: channelIDArray } });
+        await Notifications.deleteMany({channelID: {$in: channelIDArray}})
       }
       await Channels.deleteMany({ server: req.server._id });
       await ServerMembers.deleteMany({ server: req.server._id });
@@ -279,7 +282,9 @@ module.exports = {
       return;
     }
     // Leave server
-
+    if (channelIDArray) {
+      await Notifications.deleteMany({channelID: {$in: channelIDArray}, recipient: req.user.uniqueID})
+    }
     await redis.remServerMember(req.user.uniqueID, req.server.server_id)
     await User.updateOne({_id: req.user._id}, {$pullAll: { servers: [req.server._id] } });
     await ServerMembers.deleteMany({member: req.user._id, server: req.server._id });
@@ -391,6 +396,7 @@ module.exports = {
       return res.status(403).json({message: "Cannot delete default channel."})
     }
     try {
+      await Notifications.remove({channelID});
       await Channels.deleteOne({channelID})
       await Messages.deleteMany({channelID});
       const redis = require('./../redis');
@@ -510,6 +516,7 @@ async function uploadAvatar(base64, oauth2Client, res, req) {
   
     // get nertivia_uploads folder id
     const requestFolderID = await GDriveApi.findFolder(oauth2Client);
+    if (!requestFolderID.result) return res.status(404).json({message: "If you're seeing this message, please contact Fishie@azK0 in Nertivia (Error: Google Drive folder missing.)"})
     const folderID = requestFolderID.result.id;
   
     const requestUploadFile = await GDriveApi.uploadFile(

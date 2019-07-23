@@ -13,11 +13,13 @@ module.exports = (req, res, next) => {
     encoding: null
   };
 	const reqImages = request(requestSettings)
-		.on('response', resp => {
-      if (resp.statusCode !== 200) {
+		.on('response', (resp, body) => {
+      if (resp && resp.statusCode !== 200) {
         reqImages.abort();
         next();
+        return;
       }
+      res.set('Cache-Control', 'public, max-age=31536000');
 		})
     .on("complete", () => {
       res.end();

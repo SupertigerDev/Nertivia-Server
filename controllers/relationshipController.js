@@ -85,7 +85,7 @@ module.exports = {
     
     const request = await Friend.findOne({ requester: accepter, recipient: recipient });
     if (!request) return res.status(403)
-      .json({ status: false, errors: [{param: "all", msg: "Request doesnt exist."}] });
+      .json({ status: false, errors: [{param: "all", msg: "Request doesn't exist."}] });
       // if the requester is accepting the invite
 
     if (request.status == 0) return res.status(403)
