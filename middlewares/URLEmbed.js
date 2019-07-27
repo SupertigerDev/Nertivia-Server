@@ -1,18 +1,26 @@
+const urlRegex = require('url-regex');
 const request = require('request')
 const cheerio = require('cheerio')
 const Messages = require('./../models/messages');
 
+const URL = require('url').URL
 module.exports = (req, res, next) => {
   if (!req.message_status) next();
   const message = req.body.message;
   const message_id = req.message_id
   if (!message) return;
 
-  const urls = message.match(/(https?:\/\/[^\s]+)/g);
+  const urls = message.match(urlRegex({strict: false}));
   
   if (!urls) return;
-  const firstURL = urls[0]
-  
+
+  let firstURL = urls[0]
+
+  if (!/^https?:\/\//i.test(firstURL)) {
+    firstURL = 'http://' + firstURL;
+  }
+
+
   request(firstURL, async (error, response, responseHtml) => {
     if (error) return;
     const resObj = {
