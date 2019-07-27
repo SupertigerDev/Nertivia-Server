@@ -1,4 +1,4 @@
-const urlRegex = require('url-regex');
+const linkifyIt = require('linkify-it')();
 const request = require('request')
 const cheerio = require('cheerio')
 const Messages = require('./../models/messages');
@@ -10,15 +10,11 @@ module.exports = (req, res, next) => {
   const message_id = req.message_id
   if (!message) return;
 
-  const urls = message.match(urlRegex({strict: false}));
+  const urls = linkifyIt.match(message)
   
   if (!urls) return;
 
-  let firstURL = urls[0]
-
-  if (!/^https?:\/\//i.test(firstURL)) {
-    firstURL = 'http://' + firstURL;
-  }
+  let firstURL = urls[0].url
 
 
   request(firstURL, async (error, response, responseHtml) => {
