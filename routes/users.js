@@ -12,6 +12,8 @@ const relationshipPolicies = require('../policies/relationshipPolicies');
 const authenticationPolicies = require('../policies/authenticationPolicies');
 const reCaptchaPolicie = require('../policies/reCaptchaPolicie');
 const surveyPolicie = require('../policies/surveyPolicies')
+const UserPolicies = require('../policies/UserPolicies')
+const GDriveOauthClient = require('./../middlewares/GDriveOauthClient');
 const {
   passportLogin,
   passportJWT
@@ -24,6 +26,10 @@ router.route('/register')
 
 router.route('/login')
   .post(authenticationPolicies.login, reCaptchaPolicie, passportLogin, authenticationController.login)
+
+router.route('/')
+  .patch(passportJWT, GDriveOauthClient, UserPolicies.updateUser, UsersController.updateUser)
+
 
 router.route('/relationship')
   .post(relationshipPolicies.post, passportJWT, relationshipController.addRecipient);
