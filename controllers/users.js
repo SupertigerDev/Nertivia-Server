@@ -1,6 +1,9 @@
 const Users = require('../models/users');
 const { matchedData } = require('express-validator/filter');
 const bcrypt = require('bcryptjs');
+const GDriveApi = require('./../API/GDrive');
+const stream = require('stream');
+
 module.exports = {
   details: async (req, res, next) => {
     const uniqueID = req.params.uniqueID;
@@ -53,15 +56,19 @@ module.exports = {
       if (!passwordValid) {
         return res.status(403).json({errors: [{param: 'password', msg: 'Password is invalid.'}]})
       }
-
+      delete data.password;
     }
 
+    //change password if new_password exists
     if (data.new_password) {
       const salt = await bcrypt.genSalt(10);
       // Generate a password hash
       const passwordHash = await bcrypt.hash(data.new_password, salt)
+      if (!passwordHash) {
+        return res.status(403).json({message: "Something went wrong, try again later. (hash password fail)"})
+      }
       data.password = passwordHash;
-      // delete password on reponse
+      delete data.new_password;
     }
 
 
@@ -76,15 +83,18 @@ module.exports = {
 
     try {
       await Users.updateOne({_id: user._id}, data);
+      const resObj = Object.assign({}, data);
+      delete resObj.password;
+      Object.assign(req.user, resObj)
+      resObj.uniqueID = user.uniqueID;
       const io = req.io;
-      io.in("server:" + req.server.server_id).emit('server:update_server', Object.assign(data, {server_id: server.server_id}));
-      res.json(data, {server_id: server.server_id});
+
+      //io.in("server:" + req.server.server_id).emit('server:update_server', resObj);
+      res.json(resObj);
     } catch (e) {
+      console.log(e)
       res.status(403).json({message: 'Something went wrong. Try again later.'})
     }
-
-
-    res.end();
   }
 }
 
@@ -129,4 +139,30 @@ async function uploadAvatar(base64, oauth2Client, res, req) {
     resolve(requestUploadFile);
   })
 
+}
+
+
+
+function base64MimeType(encoded) {
+  var result = null;
+
+  if (typeof encoded !== 'string') {
+    return result;
+  }
+
+  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+
+  if (mime && mime.length) {
+    result = mime[1];
+  }
+
+  return result;
+}
+function checkMimeType(mimeType) {
+  const filetypes = /jpeg|jpg|gif|png/;
+  const mime = filetypes.test(mimeType);
+  if (mime) {
+    return true;
+  }
+  return false;
 }
