@@ -29,22 +29,22 @@ module.exports = {
     const oauth2Client = req.oauth2Client;
     const data = matchedData(req);
     const user = req.user;
-    // if password isnt supplied and user wants to change their username || tag || password || email.
+    // if password is not supplied and user wants to change their username || tag || password || email.
     if (!data.password && (data.username || data.tag || data.new_password || data.email)){
       return res.status(403).json({errors: [{param: 'password', msg: 'Password is required.'}]})
     }
+
     // check if tag + username already exists || email already exists
     if (data.email || data.username || data.tag) {
       const userTagExists = await Users.findOne({username: data.username || user.username, tag: data.tag || user.tag, uniqueID: {$ne: user.uniqueID}})
       const userEmailExists = await Users.findOne({email: data.email, uniqueID: {$ne: user.uniqueID}})
       if (userTagExists) {
-        return res.status(403).json({errors: [{param: 'tag', msg: 'Username with that tag already exists!'}]})
+        return res.status(403).json({errors: [{param: 'tag', msg: 'Username with that tag is already used.'}]})
       }
       if (userEmailExists) {
-        return res.status(403).json({errors: [{param: 'email', msg: 'That email already exists!'}]})
+        return res.status(403).json({errors: [{param: 'email', msg: 'Email already used.'}]})
       }
     }
-
 
     // Verify password
     if (data.password) {
@@ -85,12 +85,14 @@ module.exports = {
       await Users.updateOne({_id: user._id}, data);
       const resObj = Object.assign({}, data);
       delete resObj.password;
-      Object.assign(req.user, resObj)
+      const updateSession = Object.assign({}, req.session["user"], resObj);
+      req.session["user"] = updateSession;
       resObj.uniqueID = user.uniqueID;
       const io = req.io;
-
-      //io.in("server:" + req.server.server_id).emit('server:update_server', resObj);
       res.json(resObj);
+
+      io.in(req.user.uniqueID).emit("update_member", resObj)
+
     } catch (e) {
       console.log(e)
       res.status(403).json({message: 'Something went wrong. Try again later.'})
