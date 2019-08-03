@@ -2,7 +2,7 @@ const Friends = require("../models/friends");
 const User = require("../models/users");
 const Messages = require("../models/messages");
 const Channels = require("../models/channels");
-
+const { matchedData } = require('express-validator/filter');
 module.exports = {
   get: async (req, res, next) => {
     const result = await User.findById(req.user._id, 'about_me').lean();
@@ -21,7 +21,7 @@ module.exports = {
 
   },
   put: async (req, res, next) => {
-    const data = req.body;
+    const data = matchedData(req);
     User.findOneAndUpdate({ _id: req.user._id }, { about_me: data }).exec(
       async function(err, item) {
         if (err) {

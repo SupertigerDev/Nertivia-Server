@@ -9,12 +9,12 @@ const {
 
 
 const aboutMeSchema = new Schema({
-  name: {type: String},
-  gender: {type: Number}, 
-  age: {type: Number}, 
-  continent: {type: Number}, 
-  country: {type: Number}, 
-  about_me: {type: String}
+  name: { type: String },
+  gender: { type: String }, 
+  age: { type: String }, 
+  continent: { type: String}, 
+  country: { type: String }, 
+  about_me: { type: String }
 })
 
 
@@ -25,6 +25,7 @@ const apperanceSchema = new Schema({
 const settingsSchema = new Schema({
   apperance: {type: apperanceSchema}
 })
+
 
 const usersSchema = new Schema({
     email: {
@@ -100,6 +101,10 @@ const usersSchema = new Schema({
       type: Boolean,
       default: false,
       select: false
+    },
+    badges: {
+      type: [{type: Number}],
+      select: false,
     },
     about_me: {
       type: aboutMeSchema,
