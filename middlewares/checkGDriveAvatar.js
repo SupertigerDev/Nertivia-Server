@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
     encoding: null
   };
  request(requestSettings, (err, resp, buffer) => {
-    if (resp.statusCode !== 200) return next()
+    if (!resp || resp.statusCode !== 200) return next()
    if (err) return next()
    res.set('Cache-Control', 'public, max-age=31536000');
     if (type && type === 'png') {

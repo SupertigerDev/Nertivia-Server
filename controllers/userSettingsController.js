@@ -189,12 +189,7 @@ module.exports = {
             message: "Emoji with that name already exists!"
           });
 
-        if (
-          !checkMimeType({
-            fileName,
-            mimeType
-          })
-        )
+        if ( !checkMimeType({ fileName, mimeType }) )
           return res.status(403).json({
             status: false,
             message: "Invalid image."

@@ -8,6 +8,8 @@ const Channels = require("../models/channels");
 const Notifications = require("./../models/notifications");
 const GDriveApi = require("./../API/GDrive");
 const { matchedData } = require('express-validator/filter');
+const path = require('path')
+const sharp = require('sharp')
 
 module.exports = {
   get: async (req, res, next) => {
@@ -90,6 +92,8 @@ module.exports = {
       }
     });
 
+
+
     req.busboy.on(
       "file",
       async (fieldName, fileStream, fileName, encoding, mimeType) => {
@@ -100,17 +104,23 @@ module.exports = {
         const requestFolderID = await GDriveApi.findFolder(oauth2Client);
         const folderID = requestFolderID.result.id;
 
-        const requestUploadFile = await GDriveApi.uploadFile(
-          {
-            fileName,
-            mimeType,
-            fileStream
-          },
-          folderID,
-          oauth2Client
-        );
-        req.unpipe(req.busboy);
+        let chunks = [];
+        let metadata = null;
+        if ( checkMimeType({ fileName, mimeType }) )
+          fileStream.on('data', onData);
 
+        async function onData(chunk) {
+          if (chunks.length === 0) {
+            chunks.push(chunk);
+          }
+          const buffer = Buffer.concat(chunks);
+          if (metadata) return;
+          metadata = await sharp(buffer).metadata()
+          fileStream.removeListener('data', onData);
+        }
+
+        const requestUploadFile = await GDriveApi.uploadFile ({fileName,mimeType,fileStream}, folderID, oauth2Client);
+        req.unpipe(req.busboy);
         if (requestUploadFile.ok) {
           fileID = requestUploadFile.result.data.id;
         } else
@@ -120,13 +130,12 @@ module.exports = {
           });
 
         //upload to mongodb
+        const file = { fileName, fileID }
+        if (metadata) {
+          file.dimensions = {width: metadata.width, height: metadata.height}
+        }
         const messageCreate = new Messages({
-          files: [
-            {
-              fileName,
-              fileID
-            }
-          ],
+          files: [file],
           channelID,
           message,
           creator: req.user._id,
@@ -254,6 +263,7 @@ module.exports = {
     );
 
     req.pipe(req.busboy);
+
   },
   post: async (req, res, next) => {
     const redis = require("../redis");
@@ -496,3 +506,15 @@ module.exports = {
 
   }
 };
+
+function checkMimeType(file) {
+  const filetypes = /jpeg|jpg|gif|png/;
+  const mimeType = filetypes.test(file.mimeType);
+  const extname = filetypes.test(
+    path.extname(file.fileName).toLowerCase()
+  );
+  if (mimeType && extname) {
+    return true;
+  }
+  return false;
+}
