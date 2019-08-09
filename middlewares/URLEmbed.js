@@ -2,6 +2,7 @@ const linkifyIt = require('linkify-it')();
 const request = require('request')
 const cheerio = require('cheerio')
 const Messages = require('./../models/messages');
+const sharp = require('sharp');
 
 const URL = require('url').URL
 module.exports = (req, res, next) => {
@@ -39,10 +40,29 @@ module.exports = (req, res, next) => {
     const keys = Object.keys(resObj.embed);
     if (!keys.length || keys.length === 1) return;
 
-
     if (!resObj.embed.url){
       resObj.embed.url = firstURL;
     }
+
+    // Get image dimensions.   
+    if (resObj.embed.image){
+      const {ok, result} = await getMetadata(resObj.embed.image)
+      if (ok == false) {
+        delete resObj.embed.image;
+      } else {
+        const newObj = {
+          url: resObj.embed.image,
+          dimensions: {
+            height: result.height,
+            width: result.width
+          }
+        }
+        resObj.embed.image = newObj;
+      }
+    }
+
+      
+
 
     await Messages.updateOne({messageID: resObj.messageID}, resObj);
 
@@ -57,4 +77,31 @@ module.exports = (req, res, next) => {
 
   })
   
+}
+
+
+function getMetadata(url) {
+  return new Promise(resolve => {
+    const requestSettings = {
+      url,
+      method: "GET",
+      encoding: null
+    };
+    const reqImages = request(requestSettings)
+      .on('error', _ => resolve({ok: false}))
+      .on('response', resp => {
+        if (resp.statusCode !== 200) {
+          reqImages.abort();
+          return resolve({ok: false});
+        }
+      })
+      .on("data", async (chunk) => {
+        reqImages.abort();
+        try {
+          resolve({ok: true, result: await sharp(chunk).metadata()})
+        } catch {
+          resolve({ok: false})
+        }
+      })
+  })
 }

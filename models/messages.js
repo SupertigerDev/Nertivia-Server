@@ -6,11 +6,12 @@ const {
   Schema
 } = mongoose;
 
+
 const embedSchema = new Schema({
   title: {type: String},
   type: {type: String},
   url: {type: String},
-  image: {type: String},
+  image: {type: Object},
   site_name: {type: String},
   description: {type: String},
 })
