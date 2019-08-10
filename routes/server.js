@@ -21,7 +21,7 @@ const {
 
 
 router.route('/')
-	.post( passportJWT, ServerController.post )
+	.post( passportJWT, serverPolicie.createServer, ServerController.post )
 
 router.route('/channels/:server_id')
 	.get( passportJWT, UserPresentVerification,ServerController.getChannels )
@@ -32,10 +32,10 @@ router.route('/:server_id/invites')
 	.get( passportJWT, UserPresentVerification, ServerController.getInvites )
 
 router.route('/:server_id/channel')
-	.put( passportJWT, UserPresentVerification, ServerController.createChannel )
+	.put( passportJWT, UserPresentVerification, serverPolicie.createChannel, ServerController.createChannel )
 	
 router.route('/:server_id/channels/:channel_id')
-	.patch( passportJWT, UserPresentVerification, ServerController.updateChannel )
+	.patch( passportJWT, UserPresentVerification, serverPolicie.updateChannel, ServerController.updateChannel )
 
 router.route('/:server_id')
 	.patch( passportJWT,serverPolicie.updateServer, GDriveOauthClient, UserPresentVerification, ServerController.updateServer )
