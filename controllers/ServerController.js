@@ -343,8 +343,12 @@ module.exports = {
     if (!req.server.creator.equals(req.user._id))
       return res.status(403).json({ message: "You do not have permission to create channels!" });
     const { name } = req.body;
-    if (!name || name.trim() === "") 
-      return res.status(403).json({ message: "Enter a channel name!" });
+    // check if channels exceeded limit
+
+    const channels = await Channels.find({ server: req.server._id });
+    if (channels.length >= 50) {
+      return res.status(403).json({message: 'Channel limit reached (50 channels)'})
+    }
     
     const createChannel = await Channels.create({
       name: name,
@@ -374,6 +378,8 @@ module.exports = {
     const data = req.body;
     const server = req.server
     const channelID = req.params.channel_id
+
+
     try {
       await Channels.updateOne({channelID}, {name: data.name});
       const io = req.io;
