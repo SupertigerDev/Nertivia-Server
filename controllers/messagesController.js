@@ -14,14 +14,15 @@ const sharp = require('sharp')
 module.exports = {
   get: async (req, res, next) => {
     const { channelID } = req.params;
-    const continueChannelID = req.query.continue;
+    const continueMessageID = req.query.continue;
+    const beforeMessageID = req.query.before;
 
     // Get messages
     let messages;
-    if (continueChannelID) {
+    if (continueMessageID) {
       // check if continue param is entered
       const continueFromMessage = await Messages.findOne({
-        messageID: continueChannelID
+        messageID: continueMessageID
       });
       if (!continueFromMessage) {
         return res.status(403).json({
@@ -38,6 +39,29 @@ module.exports = {
         .sort({
           _id: -1
         })
+        .populate({
+          path: "creator",
+          select: "-_id -id  -__v -email -friends -status -created -lastSeen"
+        })
+        .limit(50)
+        .lean();
+    } else if(beforeMessageID) {
+      // check if continue param is entered
+      const beforeFromMessage = await Messages.findOne({
+        messageID: beforeMessageID
+      });
+      if (!beforeFromMessage) {
+        return res.status(403).json({
+          status: false,
+          message: "before message was not found."
+        });
+      }
+      messages = await Messages.find({
+        channelID,
+        _id: {
+          $gt: beforeFromMessage.id
+        }
+      })
         .populate({
           path: "creator",
           select: "-_id -id  -__v -email -friends -status -created -lastSeen"
