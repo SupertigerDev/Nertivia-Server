@@ -7,7 +7,6 @@ module.exports = async (req, res, next) => {
   if (!uniqueID) {
     uniqueID = req.user.uniqueID
   }
-  console.log("test")
 
   const user = await Users.findOne({
     uniqueID
