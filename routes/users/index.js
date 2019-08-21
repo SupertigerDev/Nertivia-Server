@@ -21,11 +21,11 @@ MainUserRouter.route("/").patch(
   passportJWT,
   userPolicy.updateUser,
   GDriveOauthClient,
-  require("./update")
+  require("./userUpdate")
 );
 
 // Details
-MainUserRouter.route("/:uniqueID?").get(passportJWT, require("./details"));
+MainUserRouter.route("/:uniqueID?").get(passportJWT, require("./userDetails"));
 
 // Register
 MainUserRouter.route("/register").post(
