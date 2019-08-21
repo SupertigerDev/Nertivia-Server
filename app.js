@@ -13,7 +13,7 @@ const vhost = require('vhost');
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose');
 const cors = require('cors');
-const api = require('./routes/api');
+
 const io = require('socket.io')(http, {
   handlePreflightRequest: function (req, res) {
     var headers = {
@@ -71,7 +71,7 @@ app.use(cors({
 
 
 //routes
-app.use(vhost('api.' + config.domain, api));
+app.use(vhost('api.' + config.domain, require('./routes/api')));
 app.use(vhost('musica.' + config.domain, express.static('public/musica')))
 
 app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))
