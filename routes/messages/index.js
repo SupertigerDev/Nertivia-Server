@@ -1,0 +1,50 @@
+const MainMessageRouter = require("express").Router();
+
+// Policies
+const messagePolicy = require('./../../policies/messagePolicies');
+
+// Middleware
+const { passportJWT } = require("../../middlewares/passport");
+const channelVerification = require('./../../middlewares/ChannelVerification');
+const GDriveOauthClient = require('./../../middlewares/GDriveOauthClient');
+const URLEmbed = require('./../../middlewares/URLEmbed');
+const busboy = require('connect-busboy');
+
+MainMessageRouter.route("/channels/:channelID").get(
+  passportJWT,
+  channelVerification,
+  require('./getMessages')
+);
+
+MainMessageRouter.route("/:messageID/channels/:channelID").delete(
+  passportJWT,
+  channelVerification,
+  require('./deleteMessage')
+);
+
+MainMessageRouter.route("/:messageID/channels/:channelID").patch(
+  passportJWT,
+  messagePolicy.update,
+  channelVerification,
+  require('./updateMessage'),
+  URLEmbed
+);
+
+MainMessageRouter.route("/channels/:channelID").post(
+  passportJWT,
+  messagePolicy.post,
+  channelVerification,
+  require('./sendMessage'),
+  URLEmbed,
+  GDriveOauthClient,
+  busboy(),
+  require('./sendFileMessage'),
+);
+
+MainMessageRouter.route("/:channelID/typing").post(
+  passportJWT,
+  channelVerification,
+  require('./sendTypingIndicator'),
+);
+
+module.exports = MainMessageRouter;
