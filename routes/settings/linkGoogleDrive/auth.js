@@ -1,24 +1,9 @@
-const Users = require('./../models/users');
+const Users = require('./../../../models/users');
 
-const express = require('express');
-const router = express.Router();
-const DriveAPI = require('./../API/GDrive');
 
-//send consent url to client.
-router.route('/url').get((req, res) => {
-	const oauth2Client = req.oauth2Client;
-	const scopes = [
-		'https://www.googleapis.com/auth/drive.file'
-	];
-	const url = oauth2Client.generateAuthUrl({
-		access_type: 'offline',
-		scope: scopes,
-		prompt: 'consent'
-	});
-	res.json({url: url});
-})
+const DriveAPI = require('./../../../API/GDrive');
 
-router.route('/auth').post( async (req, res) => {
+module.exports = async (req, res, next) => {
 	const oauth2Client = req.oauth2Client;
 	const {code} = req.body;
 	try {
@@ -47,6 +32,4 @@ router.route('/auth').post( async (req, res) => {
 	} catch (e) {
 		return res.status(403).json ({ success: false })
 	}
-})
-
-module.exports = router;
+};
