@@ -11,167 +11,190 @@ const { newUser } = require("./passport");
 const jwt = require("jsonwebtoken");
 const { io } = require("./app");
 const redis = require("./redis");
+const sio = require("socket.io");
+const mongoose = require('mongoose');
 
-// Authenticate token
-io.use(async (socket, next) => {
-  const token = socket.handshake.headers["authorization"];
-  if (!token || token === "null")
-    return next(new Error("Authentication error"));
+/**
+ *
+ * @param {sio.Socket} client
+ */
+module.exports = async client => {
 
-  try {
-    const decryptedToken = await jwt.verify(token, config.jwtSecret);
-    const user = await User.findOne({ uniqueID: decryptedToken.sub })
-      .select("+GDriveRefreshToken +settings +servers +survey_completed +email")
-      .populate(
-        {
+
+  client.on("authentication", async data => {
+    const { token } = data;
+
+    try {
+      const decryptedToken = await jwt.verify(token, config.jwtSecret);
+
+      // get the user
+      const user = await User.findOne({ uniqueID: decryptedToken.sub })
+        .select(
+          "avatar username email uniqueID tag settings servers survey_completed GDriveRefreshToken"
+        )
+        .populate({
           path: "friends",
           populate: [
             {
-              path: "recipient",
-              select: "-_id -id -password -__v -email -friends -status"
+              path: "recipient",     
+              select: "username uniqueID tag admin -_id",
+  
             }
           ],
-          select: "-requester -__v"
-        }
-      ).populate({path: "servers", populate: [{path: "creator", select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"}], select: "-__v"})
-      .lean();
-    if (!user) {
-      next(new Error("Authentication error"));
-      return;
-    }
+          select: "recipient status -_id"
+        })
+        .populate({
+          path: "servers",
+          populate: [
+            {
+              path: "creator",
+              select: "uniqueID -_id"
+              //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
+            }
+          ],
+          select: "name creator default_channel_id server_id avatar"
+        })
+        .lean();
 
 
-    let serverMembers = []
-    
-    if (user.servers) {
-      let serverIDs = []
-      serverIDs = user.servers.map(a => a._id);
-      // find channels for servers.
-      let serverChannels = await channels.find({server: {$in: serverIDs}}).lean();
+      // disconnect user if not found.
+      if (!user) {
+        client.emit("auth_err", "Invalid Token");
+        client.disconnect(true);
+        return;
+      }
 
-      user.servers = user.servers.map(server => {
-        const filteredChannels = serverChannels.filter(channel => channel.server.equals(server._id));
-        server.channels = filteredChannels;
-        return server
-      })
+      let serverMembers = [];
 
-      serverMembers = await ServerMembers.find({server: {$in: serverIDs}}).populate('member').lean();
+      if (user.servers) {
+        let serverIDs = user.servers.map(a => a._id);
+        let serverChannels = await channels
+          .find({ server: { $in: serverIDs } })
+          .select('name channelID server')
+          .lean();
+
+
       
 
-      serverMembers = serverMembers.map(sm => {
-        const server = user.servers.find(s => s._id.toString() == sm.server.toString() );
+        user.servers = user.servers.map(server => {
+          const filteredChannels = serverChannels.filter(channel =>
+            channel.server.equals(server._id)
+          );
+          server.channels = filteredChannels;
+          return server;
+        });
 
-        delete sm.server;
-        delete sm._id
-        delete sm.__v
-        sm.member = {
-          username: sm.member.username,
-          tag: sm.member.tag,
-          avatar: sm.member.avatar,
-          uniqueID: sm.member.uniqueID,
+        serverMembers = await ServerMembers.find({ server: { $in: serverIDs } })
+          .populate("member")
+          .lean();
+
+          //console.log(serverChannels)
+
+        serverMembers = serverMembers.map(sm => {
+          const server = user.servers.find(
+            s => s._id.toString() == sm.server.toString()
+          );
+
+          
+
+          delete sm.server;
+          delete sm._id;
+          delete sm.__v;
+          sm.member = {
+            username: sm.member.username,
+            tag: sm.member.tag,
+            avatar: sm.member.avatar,
+            uniqueID: sm.member.uniqueID
+          };
+          sm.server_id = server.server_id;
+          return sm;
+        });
+       }
+
+      const dms = channels
+        .find({ creator: user._id })
+        .populate({
+          path: "recipients",
+          select:
+            "-_id -id -password -__v -email -friends -status -created -lastSeen"
+        })
+        .lean();
+
+      const notifications = Notifications.find({ recipient: user.uniqueID })
+        .populate({
+          path: "sender",
+          select:
+            "-_id -id -password -__v -email -friends -status -created -lastSeen"
+        })
+        .lean();
+
+      let resObj = {};
+
+      const customEmojisList = customEmojis.find({ user: user._id });
+      resObj.result = await Promise.all([dms, notifications, customEmojisList]);
+      resObj.dms = resObj.result[0];
+      resObj.notifications = resObj.result[1];
+      resObj.settings = {
+        ...user.settings,
+        GDriveLinked: user.GDriveRefreshToken ? true : false,
+        customEmojis: resObj.result[2]
+      };
+      resObj.result = null;
+      delete resObj.result;
+      resObj._id = user._id;
+      resObj.user = user;
+      resObj.serverMembers = serverMembers;
+
+      user.GDriveRefreshToken = undefined;
+      client.join(user.uniqueID);
+
+      if (user.servers && user.servers.length) {
+        for (let index = 0; index < user.servers.length; index++) {
+          const element = user.servers[index];
+          client.join("server:" + element.server_id);
         }
-        sm.server_id = server.server_id
-        return sm
-      })
-
-    }
-
-    
-    const dms = channels
-      .find({ creator: user._id })
-      .populate({
-        path: "recipients",
-        select:
-          "-_id -id -password -__v -email -friends -status -created -lastSeen"
-      })
-      .lean();
-
-    const notifications = Notifications.find({ recipient: user.uniqueID })
-      .populate({
-        path: "sender",
-        select:
-          "-_id -id -password -__v -email -friends -status -created -lastSeen"
-      })
-      .lean();
-
-    const customEmojisList = customEmojis.find({ user: user._id });
-    const result = await Promise.all([dms, notifications, customEmojisList]);
-    socket.request.dms = result[0];
-    socket.request.notifications = result[1];
-    socket.request._id = user._id;
-    socket.request.user = user;
-    socket.request.serverMembers = serverMembers;
-    socket.request.settings = {
-      ...user.settings,
-      GDriveLinked: user.GDriveRefreshToken ? true : false,
-      customEmojis: result[2]
-    };
-    socket.request.user.GDriveRefreshToken = undefined;
-    socket.join(user.uniqueID);
-
-    if (socket.request.user.servers && socket.request.user.servers.length) {
-      for (let index = 0; index <  socket.request.user.servers.length; index++) {
-        const element =  socket.request.user.servers[index];
-        socket.join('server:' + element.server_id)
-        
       }
+
+      let friendUniqueIDs = resObj.user.friends.map(m => {
+        if (m.recipient)
+          return m.recipient.uniqueID
+      })
+      let serverMemberUniqueIDs = resObj.serverMembers.map(m => m.member.uniqueID )
+
+
+      let { ok, error, result } = await redis.getPresences([...friendUniqueIDs, ...serverMemberUniqueIDs]);
+
+      client.emit("success", {
+        message: "Logged in!",
+        user: resObj.user,
+        serverMembers: resObj.serverMembers,
+        settings: resObj.settings,
+        dms: resObj.dms,
+        notifications: resObj.notifications,
+        currentFriendStatus: result
+      });
+      resObj = null;
+      delete resObj;
+
+      result = null;
+      delete result;
+
+      friendUniqueIDs = null;
+      delete friendUniqueIDs;
+
+      serverMemberUniqueIDs = null;
+      delete serverMemberUniqueIDs;
+
+
+    } catch (e) {
+      console.log(e);
+      client.emit("auth_err", "Invalid Token");
+      client.disconnect(true);
     }
-
-
-    next();
-  } catch (error) {
-    console.log(error)
-    next(new Error("Authentication error"));
-  }
-});
-module.exports = async client => {
-  // set client status to redis and emit user status to friends.
-  await redis.connected(
-    client.request.user.uniqueID,
-    client.request._id.toString(),
-    client.request.user.status,
-    client.id
-  );
-  controller.emitUserStatus(
-    client.request.user.uniqueID,
-    client.request._id,
-    client.request.user.status,
-    io
-  );
-
-  // get list of current online friends.
-  const friendUniqueIDs = client.request.user.friends.map(m => {
-    if (m.recipient)
-      return m.recipient.uniqueID
-  })
-  const serverMemberUniqueIDs = client.request.serverMembers.map(m => m.member.uniqueID )
-  const { ok, error, result } = await redis.getPresences([...friendUniqueIDs, ...serverMemberUniqueIDs]);
-  if (ok) {
-    client.emit("success", {
-      message: "Logged in!",
-      user: client.request.user,
-      serverMembers: client.request.serverMembers,
-      settings: client.request.settings,
-      dms: client.request.dms,
-      notifications: client.request.notifications,
-      currentFriendStatus: result
-    });
-  }
+  });
 
   client.on("disconnect", async () => {
-    const response = await redis.disconnected(
-      client.request.user.uniqueID,
-      client.id
-    );
-    if (response.result === 1) {
-      // if all clients are offline
-      controller.emitUserStatus(
-        client.request.user.uniqueID,
-        client.request._id,
-        0,
-        io
-      );
-    }
+
   });
 
   client.on("notification:dismiss", data =>

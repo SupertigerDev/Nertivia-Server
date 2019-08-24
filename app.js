@@ -15,6 +15,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 
 const io = require('socket.io')(http, {
+  perMessageDeflate: false,
   handlePreflightRequest: function (req, res) {
     var headers = {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -48,10 +49,9 @@ const sessionMiddleware = session({
   resave: false
 });
 
-
-io.use((socket, next) => {
-  sessionMiddleware(socket.request, socket.request.res, next);
-})
+// io.use((socket, next) => {
+//   sessionMiddleware(socket.request, socket.request.res, next);
+// })
 
 app.use(sessionMiddleware);
 
