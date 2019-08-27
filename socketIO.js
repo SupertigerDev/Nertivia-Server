@@ -110,19 +110,19 @@ module.exports = async client => {
       }
 
       const dms = channels
-        .find({ creator: user._id })
+        .find({ creator: user._id }, {_id: 0}).select('recipients channelID lastMessaged')
         .populate({
           path: "recipients",
           select:
-            "-_id -id -password -__v -email -friends -status -created -lastSeen"
+            "avatar username uniqueID tag -_id"
         })
         .lean();
 
-      const notifications = Notifications.find({ recipient: user.uniqueID })
+      const notifications = Notifications.find({ recipient: user.uniqueID }).select('type sender lastMessageID count recipient channelID -_id')
         .populate({
           path: "sender",
           select:
-            "-_id -id -password -__v -email -friends -status -created -lastSeen"
+            "avatar username uniqueID tag -_id"
         })
         .lean();
 
@@ -165,6 +165,9 @@ module.exports = async client => {
         ...friendUniqueIDs,
         ...serverMemberUniqueIDs
       ]);
+
+
+      console.log(resObj.notifications[0])
 
       client.emit("success", {
         message: "Logged in!",
