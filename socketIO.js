@@ -167,8 +167,6 @@ module.exports = async client => {
       ]);
 
 
-      console.log(resObj.notifications[0])
-
       client.emit("success", {
         message: "Logged in!",
         user: resObj.user,
