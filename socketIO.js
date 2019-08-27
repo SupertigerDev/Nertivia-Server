@@ -12,15 +12,13 @@ const jwt = require("jsonwebtoken");
 const { io } = require("./app");
 const redis = require("./redis");
 const sio = require("socket.io");
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 /**
  *
  * @param {sio.Socket} client
  */
 module.exports = async client => {
-
-
   client.on("authentication", async data => {
     const { token } = data;
 
@@ -28,33 +26,35 @@ module.exports = async client => {
       const decryptedToken = await jwt.verify(token, config.jwtSecret);
 
       // get the user
+      const populateFriends = {
+        path: "friends",
+        populate: [
+          {
+            path: "recipient",
+            select: "username uniqueID tag admin -_id"
+          }
+        ],
+        select: "recipient status -_id"
+      };
+      const populateServers = {
+        path: "servers",
+        populate: [
+          {
+            path: "creator",
+            select: "uniqueID -_id"
+            //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
+          }
+        ],
+        select: "name creator default_channel_id server_id avatar"
+      };
+      const userSelect = "avatar username email uniqueID tag settings servers survey_completed GDriveRefreshToken"
+
       const user = await User.findOne({ uniqueID: decryptedToken.sub })
-        .select(
-          "avatar username email uniqueID tag settings servers survey_completed GDriveRefreshToken"
-        )
-        .populate({
-          path: "friends",
-          populate: [
-            {
-              path: "recipient",     
-              select: "username uniqueID tag admin -_id",
-  
-            }
-          ],
-          select: "recipient status -_id"
-        })
-        .populate({
-          path: "servers",
-          populate: [
-            {
-              path: "creator",
-              select: "uniqueID -_id"
-              //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
-            }
-          ],
-          select: "name creator default_channel_id server_id avatar"
-        })
+        .select(userSelect)
+        .populate(populateFriends)
+        .populate(populateServers)
         .lean();
+
 
 
       // disconnect user if not found.
@@ -67,14 +67,14 @@ module.exports = async client => {
       let serverMembers = [];
 
       if (user.servers) {
-        let serverIDs = user.servers.map(a => a._id);
+        // Map serverIDs
+        const serverIDs = user.servers.map(a => a._id);
+
+
         let serverChannels = await channels
           .find({ server: { $in: serverIDs } })
-          .select('name channelID server')
+          .select("name channelID server")
           .lean();
-
-
-      
 
         user.servers = user.servers.map(server => {
           const filteredChannels = serverChannels.filter(channel =>
@@ -88,14 +88,12 @@ module.exports = async client => {
           .populate("member")
           .lean();
 
-          //console.log(serverChannels)
+        //console.log(serverChannels)
 
         serverMembers = serverMembers.map(sm => {
           const server = user.servers.find(
             s => s._id.toString() == sm.server.toString()
           );
-
-          
 
           delete sm.server;
           delete sm._id;
@@ -109,7 +107,7 @@ module.exports = async client => {
           sm.server_id = server.server_id;
           return sm;
         });
-       }
+      }
 
       const dms = channels
         .find({ creator: user._id })
@@ -156,13 +154,17 @@ module.exports = async client => {
       }
 
       let friendUniqueIDs = resObj.user.friends.map(m => {
-        if (m.recipient)
-          return m.recipient.uniqueID
-      })
-      let serverMemberUniqueIDs = resObj.serverMembers.map(m => m.member.uniqueID )
+        if (m.recipient) return m.recipient.uniqueID;
+      });
 
+      let serverMemberUniqueIDs = resObj.serverMembers.map(
+        m => m.member.uniqueID
+      );
 
-      let { ok, error, result } = await redis.getPresences([...friendUniqueIDs, ...serverMemberUniqueIDs]);
+      let { ok, error, result } = await redis.getPresences([
+        ...friendUniqueIDs,
+        ...serverMemberUniqueIDs
+      ]);
 
       client.emit("success", {
         message: "Logged in!",
@@ -184,8 +186,6 @@ module.exports = async client => {
 
       serverMemberUniqueIDs = null;
       delete serverMemberUniqueIDs;
-
-
     } catch (e) {
       console.log(e);
       client.emit("auth_err", "Invalid Token");
@@ -193,9 +193,7 @@ module.exports = async client => {
     }
   });
 
-  client.on("disconnect", async () => {
-
-  });
+  client.on("disconnect", async () => {});
 
   client.on("notification:dismiss", data =>
     events.notificationDismiss(data, client, io)
