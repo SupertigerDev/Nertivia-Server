@@ -8,14 +8,22 @@ module.exports = {
       .hset(`user:${uniqueID}`, 'status', status)
       .hset(`user:${uniqueID}`, 'id', _id.toString())
       .hset(`user:${uniqueID}`, 'uniqueID', uniqueID)
-      .sadd(`connected:${uniqueID}`, socketID)
+
+      .hset(`connected:${socketID}`, 'u_id' , uniqueID)
+      .hset(`connected:${socketID}`, '_id',  _id.toString())
+      .sadd(`uniqueID:${uniqueID}`, socketID)
+      
     )
+  },
+  getConnectedBySocketID: (socketID) => {
+    return wrapper('hgetall',`connected:${socketID}`); 
   },
   disconnected: async (uniqueID, socketID) => {
     const response = await multiWrapper(
       redisClient.multi()
-      .srem(`connected:${uniqueID}`, socketID)
-      .scard(`connected:${uniqueID}`)
+      .srem(`uniqueID:${uniqueID}`, socketID)
+      .scard(`uniqueID:${uniqueID}`)
+      .del(`connected:${socketID}`)
     );
     if(response.result[1] == 0) {
       return wrapper("del", `user:${uniqueID}`)

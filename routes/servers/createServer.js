@@ -42,6 +42,7 @@ module.exports = async (req, res, next) => {
   );
   const addServerMember = await ServerMembers.create({
     server: createServer._id,
+    server_id: createServer.server_id,
     member: user_id,
     type: "OWNER"
   });

@@ -27,7 +27,6 @@ const io = require('socket.io')(http, {
   }
 });
 
-
 app.set('trust proxy', 1) // trust first proxy
 
 //Middlewares

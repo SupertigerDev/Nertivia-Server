@@ -12,6 +12,7 @@ const serverMembersSchema = new Schema({
 
   member: { type: Schema.Types.ObjectId, ref: 'users'},
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
+  server_id: {type: String},
   type: {type: String, default: "MEMBER", enum: ['MEMBER','OWNER', 'ADMIN']}
 
 });

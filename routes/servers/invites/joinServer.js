@@ -31,7 +31,8 @@ module.exports = async (req, res, next) => {
   );
   const addServerMember = await ServerMembers.create({
     server: invite.server._id,
-    member: req.user._id
+    member: req.user._id,
+    server_id: invite.server.server_id,
   });
   let serverChannels = await Channels.find({
     server: invite.server._id

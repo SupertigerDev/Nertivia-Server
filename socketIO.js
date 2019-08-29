@@ -14,6 +14,17 @@ const redis = require("./redis");
 const sio = require("socket.io");
 const mongoose = require("mongoose");
 
+
+// nsps = namespaces.
+// disable socket events when not authorized .
+for (let key in io.nsps){
+  const nsp = io.nsps[key]
+  nsp.on('connect', function(socket){
+    if (!socket.auth) {
+      delete nsp.connected[socket.id];
+    }
+  })
+}
 /**
  *
  * @param {sio.Socket} client
@@ -24,6 +35,7 @@ module.exports = async client => {
 
     try {
       const decryptedToken = await jwt.verify(token, config.jwtSecret);
+      client.auth = true;
 
       // get the user
       const populateFriends = {
@@ -31,7 +43,7 @@ module.exports = async client => {
         populate: [
           {
             path: "recipient",
-            select: "username uniqueID tag admin -_id"
+            select: "username uniqueID tag admin -_id avatar"
           }
         ],
         select: "recipient status -_id"
@@ -47,7 +59,8 @@ module.exports = async client => {
         ],
         select: "name creator default_channel_id server_id avatar"
       };
-      const userSelect = "avatar username email uniqueID tag settings servers survey_completed GDriveRefreshToken"
+      const userSelect =
+        "avatar username email uniqueID tag settings servers survey_completed GDriveRefreshToken status";
 
       const user = await User.findOne({ uniqueID: decryptedToken.sub })
         .select(userSelect)
@@ -55,14 +68,15 @@ module.exports = async client => {
         .populate(populateServers)
         .lean();
 
-
-
       // disconnect user if not found.
       if (!user) {
+        delete client.auth;
         client.emit("auth_err", "Invalid Token");
         client.disconnect(true);
         return;
       }
+
+      await redis.connected(user.uniqueID, user._id, user.status, client.id);
 
       let serverMembers = [];
 
@@ -70,8 +84,7 @@ module.exports = async client => {
         // Map serverIDs
         const serverIDs = user.servers.map(a => a._id);
 
-
-        let serverChannels = await channels
+        const serverChannels = await channels
           .find({ server: { $in: serverIDs } })
           .select("name channelID server")
           .lean();
@@ -84,66 +97,39 @@ module.exports = async client => {
           return server;
         });
 
-        serverMembers = await ServerMembers.find({ server: { $in: serverIDs } })
-          .populate("member")
+        // Get server members TODO: add server_id to all serverMembers in the database.
+        serverMembers = await ServerMembers.find(
+          { server: { $in: serverIDs } },
+          { _id: 0 }
+        )
+          .select("type member server_id")
+          .populate({
+            path: "member",
+            select: "username tag avatar uniqueID member -_id "
+          })
           .lean();
-
-        //console.log(serverChannels)
-
-        serverMembers = serverMembers.map(sm => {
-          const server = user.servers.find(
-            s => s._id.toString() == sm.server.toString()
-          );
-
-          delete sm.server;
-          delete sm._id;
-          delete sm.__v;
-          sm.member = {
-            username: sm.member.username,
-            tag: sm.member.tag,
-            avatar: sm.member.avatar,
-            uniqueID: sm.member.uniqueID
-          };
-          sm.server_id = server.server_id;
-          return sm;
-        });
       }
 
       const dms = channels
-        .find({ creator: user._id }, {_id: 0}).select('recipients channelID lastMessaged')
+        .find({ creator: user._id }, { _id: 0 })
+        .select("recipients channelID lastMessaged")
         .populate({
           path: "recipients",
-          select:
-            "avatar username uniqueID tag -_id"
+          select: "avatar username uniqueID tag -_id"
         })
         .lean();
 
-      const notifications = Notifications.find({ recipient: user.uniqueID }).select('type sender lastMessageID count recipient channelID -_id')
+      const notifications = Notifications.find({ recipient: user.uniqueID })
+        .select("type sender lastMessageID count recipient channelID -_id")
         .populate({
           path: "sender",
-          select:
-            "avatar username uniqueID tag -_id"
+          select: "avatar username uniqueID tag -_id"
         })
         .lean();
 
-      let resObj = {};
-
       const customEmojisList = customEmojis.find({ user: user._id });
-      resObj.result = await Promise.all([dms, notifications, customEmojisList]);
-      resObj.dms = resObj.result[0];
-      resObj.notifications = resObj.result[1];
-      resObj.settings = {
-        ...user.settings,
-        GDriveLinked: user.GDriveRefreshToken ? true : false,
-        customEmojis: resObj.result[2]
-      };
-      resObj.result = null;
-      delete resObj.result;
-      resObj._id = user._id;
-      resObj.user = user;
-      resObj.serverMembers = serverMembers;
+      results = await Promise.all([dms, notifications, customEmojisList]);
 
-      user.GDriveRefreshToken = undefined;
       client.join(user.uniqueID);
 
       if (user.servers && user.servers.length) {
@@ -153,48 +139,86 @@ module.exports = async client => {
         }
       }
 
-      let friendUniqueIDs = resObj.user.friends.map(m => {
+      let friendUniqueIDs = user.friends.map(m => {
         if (m.recipient) return m.recipient.uniqueID;
       });
 
-      let serverMemberUniqueIDs = resObj.serverMembers.map(
-        m => m.member.uniqueID
-      );
+      let serverMemberUniqueIDs = serverMembers.map(m => m.member.uniqueID);
 
       let { ok, error, result } = await redis.getPresences([
         ...friendUniqueIDs,
         ...serverMemberUniqueIDs
       ]);
 
+      const settings = {
+        ...user.settings,
+        GDriveLinked: user.GDriveRefreshToken ? true : false,
+        customEmojis: results[2]
+      };
+      user.GDriveRefreshToken = undefined;
 
+
+      controller.emitUserStatus(
+        user.uniqueID,
+        user._id,
+        user.status,
+        io
+      );
+
+
+      // nsps = namespaces.
+      // enabled socket events when authorized.
+      for (let key in io.nsps){
+        const nsp = io.nsps[key]
+        for (_key in nsp.sockets){
+          if (_key === client.id) {
+            nsp.connected[client.id] = client;
+          }
+        }
+      }
+
+      
       client.emit("success", {
         message: "Logged in!",
-        user: resObj.user,
-        serverMembers: resObj.serverMembers,
-        settings: resObj.settings,
-        dms: resObj.dms,
-        notifications: resObj.notifications,
-        currentFriendStatus: result
+        user,
+        serverMembers,
+        dms: results[0],
+        notifications: results[1],
+        currentFriendStatus: result,
+        settings
       });
-      resObj = null;
-      delete resObj;
-
-      result = null;
-      delete result;
-
-      friendUniqueIDs = null;
-      delete friendUniqueIDs;
-
-      serverMemberUniqueIDs = null;
-      delete serverMemberUniqueIDs;
     } catch (e) {
       console.log(e);
+      delete client.auth;
       client.emit("auth_err", "Invalid Token");
       client.disconnect(true);
     }
   });
 
-  client.on("disconnect", async () => {});
+  //If the socket didn't authenticate, disconnect it
+  setTimeout(function() {
+    if (!client.auth) {
+      client.emit("auth_err", "Invalid Token");
+      client.disconnect(true);
+    }
+  }, 10000);
+
+  client.on("disconnect", async () => {
+    if (!client.auth) return;
+    const { ok, result, error } = await redis.getConnectedBySocketID(client.id);
+    if (!ok) return;
+
+    const response = await redis.disconnected(result.u_id, client.id);
+
+    if (response.result === 1) {
+      controller.emitUserStatus(
+        result.u_id,
+        result._id,
+        0,
+        io
+      );
+    }
+  });
 
   client.on("notification:dismiss", data =>
     events.notificationDismiss(data, client, io)
