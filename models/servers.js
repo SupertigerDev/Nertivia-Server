@@ -24,7 +24,8 @@ const serversSchema = new Schema({
     created: {
       type: Number
     },
-    default_channel_id: {type: String}
+    default_channel_id: {type: String},
+    public: {type: Boolean}
 });
 
 serversSchema.pre('save', async function(next) {

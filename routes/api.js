@@ -9,6 +9,8 @@ router.use('/user', require('./users'));
 router.use('/servers', require('./servers'));
 router.use('/channels', require('./channels'));
 
+router.use('/explore', require('./explore'))
+
 router.use('/messages', require('./messages'));
 
 router.use('/settings', require('./settings'));
