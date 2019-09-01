@@ -20,6 +20,7 @@ module.exports = async (req, res, next) => {
         server_id: 1,
         invite_code: 1,
         description: 1,
+        verified: 1,
         _id: 0,
         server: { avatar: 1, name: 1, server_id: 1, public: 1  }
       }

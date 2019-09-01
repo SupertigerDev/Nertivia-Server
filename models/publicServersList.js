@@ -13,7 +13,8 @@ const serversListSchema = new Schema({
   id: {type: String},
   description: {type: String},
   created: {type: Number, default: 0},
-  creator: {type: Schema.Types.ObjectId, ref: 'users'}
+  creator: {type: Schema.Types.ObjectId, ref: 'users'},
+  verified: {type: Boolean}
 });
 
 
