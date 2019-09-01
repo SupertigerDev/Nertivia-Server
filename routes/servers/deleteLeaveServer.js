@@ -6,7 +6,7 @@ const User = require("../../models/users");
 const ServerInvites = require("../../models/ServerInvites");
 const Messages = require("../../models/messages");
 const Notifications = require('../../models/notifications');
-
+const PublicServersList = require("../../models/publicServersList");
 
 module.exports = async (req, res, next) => {
   const redis = require("../../redis");
@@ -22,6 +22,8 @@ module.exports = async (req, res, next) => {
   if (req.server.creator.equals(req.user._id)) {
     await redis.delServer(req.server.server_id);
     await Servers.deleteOne({ _id: req.server._id });
+    await PublicServersList.deleteOne({ server: req.server._id });
+
     if (channelIDArray) {
       await Messages.deleteMany({ channelID: { $in: channelIDArray } });
       await Notifications.deleteMany({ channelID: { $in: channelIDArray } });

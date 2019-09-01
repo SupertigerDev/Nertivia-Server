@@ -26,5 +26,11 @@ MainInviteRouter.route("/invite/:invite_code").post(
   passportJWT,
   require("./joinServer")
 );
+// Join by server_id
+MainInviteRouter.route("/invite/servers/:server_id").post(
+  passportJWT,
+  require("./joinServer")
+);
+
 
 module.exports = MainInviteRouter;

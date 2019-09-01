@@ -25,7 +25,7 @@ module.exports = async (req, res, next) => {
       }
     },
     { $sort: { "server.name": 1 } },
-    { $limit: 10 }
+    // { $limit: 10 } //TODO: add lazy loading
   ]);
 
   res.json(serversList);
