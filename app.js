@@ -1,7 +1,7 @@
 const config = require('./config.js');
 process.env.REDISCLOUD_URL = config.redisURL;
 const redisClient = require('redis-connection')();
-//redisClient.flushall();
+redisClient.flushall();
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);

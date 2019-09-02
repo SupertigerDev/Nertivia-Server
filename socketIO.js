@@ -158,12 +158,19 @@ module.exports = async client => {
       user.GDriveRefreshToken = undefined;
 
 
-      controller.emitUserStatus(
-        user.uniqueID,
-        user._id,
-        user.status,
-        io
-      );
+      // check if user is already online on other clients
+      const checkAlready = await redis.connectedUserCount(user.uniqueID);
+      // if multiple users are still online
+      if (!checkAlready || checkAlready.result !== 1) {
+        controller.emitUserStatus(
+          user.uniqueID,
+          user._id,
+          user.status,
+          io
+        );
+      }
+
+
 
 
       // nsps = namespaces.
@@ -210,6 +217,7 @@ module.exports = async client => {
 
     const response = await redis.disconnected(result.u_id, client.id);
 
+    // if all users have gone offline, emit offline status to friends.
     if (response.result === 1) {
       controller.emitUserStatus(
         result.u_id,

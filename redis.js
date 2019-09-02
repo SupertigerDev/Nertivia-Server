@@ -18,6 +18,9 @@ module.exports = {
   getConnectedBySocketID: (socketID) => {
     return wrapper('hgetall',`connected:${socketID}`); 
   },
+  connectedUserCount: async (uniqueID) => {
+    await wrapper('scard', `uniqueID:${uniqueID}`);
+  },
   disconnected: async (uniqueID, socketID) => {
     const response = await multiWrapper(
       redisClient.multi()
