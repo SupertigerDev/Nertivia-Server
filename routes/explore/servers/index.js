@@ -6,13 +6,13 @@ const { passportJWT } = require("./../../../middlewares/passport");
 
 // get public servers list
 MainServersRouter.route('/').get(
-  // passportJWT,
+  passportJWT,
   require("./getPublicServersList")
 );
 
 // get a server
 MainServersRouter.route('/:server_id').get(
-  // passportJWT,
+  passportJWT,
   require("./getServer")
 );
 

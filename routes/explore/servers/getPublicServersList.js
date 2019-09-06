@@ -42,8 +42,6 @@ module.exports = async (req, res, next) => {
         as: "serverMembers"
       }
     },
-    { $match: match },
-    { $sort: sort || { "server.name": 1 } },
     {
       $project: {
         id: 1,
@@ -52,11 +50,14 @@ module.exports = async (req, res, next) => {
         invite_code: 1,
         description: 1,
         verified: 1,
-        _id: 0,
+        created: 1,
         server: { avatar: 1, name: 1, server_id: 1, public: 1 },
-        total_members: { $size: "$serverMembers" }
+        total_members: { $size: "$serverMembers" },
+        _id: 0,
       }
     },
+    { $match: match },
+    { $sort: sort || { "server.name": 1 } },
     // { $limit: 10 } //TODO: add lazy loading
   ]);
 
