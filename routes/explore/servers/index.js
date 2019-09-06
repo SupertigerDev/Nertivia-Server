@@ -6,7 +6,7 @@ const { passportJWT } = require("./../../../middlewares/passport");
 
 // get public servers list
 MainServersRouter.route('/').get(
-  passportJWT,
+  // passportJWT,
   require("./getPublicServersList")
 );
 
