@@ -3,6 +3,7 @@ const config = require('../config');
 module.exports = (req, res, next) => {
 
   const {android} = req.query;
+  console.log(android === "true")
   const {token} = req.body;
   if (
     token === undefined ||
