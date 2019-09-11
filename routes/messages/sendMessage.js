@@ -170,11 +170,11 @@ module.exports = async (req, res, next) => {
     );
 
     await Promise.all([updateChannelTimeStap, sendNotificaiton]);
-    sendPushNotification(req.channel.recipients[0], messageCreated);
+    sendPushNotification(req.user, messageCreated, req.channel.recipients[0]);
   }
 };
-async function sendPushNotification(user, msg) {
-  const _id = user._id;
+async function sendPushNotification(user, msg, recipient) {
+  const _id = recipient._id;
 
   // check if notification token exists
   const requestToken = await Devices.find({user: _id});
@@ -185,7 +185,6 @@ async function sendPushNotification(user, msg) {
 
   const msgContent = msg.message;
 
-
   const message = {
     //this may vary according to the message type (single recipient, multicast, topic, et cetera)
     registration_ids: tokens,
@@ -193,7 +192,7 @@ async function sendPushNotification(user, msg) {
     notification: {
       title: user.username,
       body: msgContent.length >= 500 ? msgContent.substring(0, 500) + '...' : msgContent,
-      image: 'https://api.' + config.IPs[1].domain + "/avatars/" + user.avatar,
+      image: 'https://' + config.IPs[1].domain + "/api/avatars/" + user.avatar,
     },
 
     data: {
@@ -208,7 +207,6 @@ async function sendPushNotification(user, msg) {
       // remove all expired tokens from db.
       const failedTokens = response.results.map((r, i) => r.error && tokens[i]).filter(r => r);
       await Devices.deleteMany({ token: { $in: failedTokens } });
-      console.log("Successfully sent with response: ", response);
     }
   });
 }
