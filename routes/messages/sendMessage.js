@@ -2,7 +2,12 @@ const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
 const Channels = require("../../models/channels");
 const Notifications = require("./../../models/notifications");
+const Devices = require("../../models/Devices");
+const FCM = require("fcm-node");
+const config = require('./../../config');
 
+const serverKey = require("./../../fb-fcm.json");
+const fcm = new FCM(serverKey);
 
 module.exports = async (req, res, next) => {
   const { channelID } = req.params;
@@ -165,5 +170,45 @@ module.exports = async (req, res, next) => {
     );
 
     await Promise.all([updateChannelTimeStap, sendNotificaiton]);
+    sendPushNotification(req.channel.recipients[0], messageCreated);
   }
 };
+async function sendPushNotification(user, msg) {
+  const _id = user._id;
+
+  // check if notification token exists
+  const requestToken = await Devices.find({user: _id});
+
+  if (!requestToken || !requestToken.length) return;
+
+  const tokens = requestToken.map(t => t.token);
+
+  const msgContent = msg.message;
+
+
+  const message = {
+    //this may vary according to the message type (single recipient, multicast, topic, et cetera)
+    registration_ids: tokens,
+
+    notification: {
+      title: user.username,
+      body: msgContent.length >= 500 ? msgContent.substring(0, 500) + '...' : msgContent,
+      image: 'https://api.' + config.IPs[1].domain + "/avatars/" + user.avatar,
+    },
+
+    data: {
+      channel_id: msg.channelID,
+    },
+  };
+
+  fcm.send(message, async function(err, response) {
+    if (err) {
+      console.log("Something has gone wrong!");
+    } else {
+      // remove all expired tokens from db.
+      const failedTokens = response.results.map((r, i) => r.error && tokens[i]).filter(r => r);
+      await Devices.deleteMany({ token: { $in: failedTokens } });
+      console.log("Successfully sent with response: ", response);
+    }
+  });
+}

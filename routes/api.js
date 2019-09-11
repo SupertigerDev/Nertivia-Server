@@ -6,6 +6,7 @@ const loadFiles = require('./../middlewares/loadFiles');
 const loadMedia = require('./../middlewares/loadMedia');
 
 router.use('/user', require('./users'));
+router.use('/devices', require('./devices'));
 router.use('/servers', require('./servers'));
 router.use('/channels', require('./channels'));
 

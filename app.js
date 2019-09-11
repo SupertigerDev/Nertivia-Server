@@ -70,7 +70,7 @@ app.use(cors({
 
 
 //routes
-app.use(vhost('api.' + config.domain, require('./routes/api')));
+app.use('/api', require('./routes/api'));
 app.use(vhost('musica.' + config.domain, express.static('public/musica')))
 
 app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))

@@ -24,6 +24,7 @@
     "express-session": "^1.16.2",
     "express-socket.io-session": "^1.3.5",
     "express-validator": "^5.3.1",
+    "fcm-node": "^1.5.2",
     "flakeid": "^1.0.0",
     "googleapis": "^41.0.1",
     "joi": "^14.3.1",
