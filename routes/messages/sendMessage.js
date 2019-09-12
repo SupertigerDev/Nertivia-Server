@@ -177,7 +177,7 @@ async function sendPushNotification(user, msg, recipient) {
   const _id = recipient._id;
 
   // check if notification token exists
-  const requestToken = await Devices.find({user: _id});
+  const requestToken = await Devices.find({ user: _id });
 
   if (!requestToken || !requestToken.length) return;
 
@@ -191,13 +191,16 @@ async function sendPushNotification(user, msg, recipient) {
 
     notification: {
       title: user.username,
-      body: msgContent.length >= 500 ? msgContent.substring(0, 500) + '...' : msgContent,
-      image: 'https://' + config.IPs[1].domain + "/api/avatars/" + user.avatar,
+      body:
+        msgContent.length >= 500
+          ? msgContent.substring(0, 500) + "..."
+          : msgContent,
+      image: "https://" + config.IPs[1].domain + "/api/avatars/" + user.avatar
     },
 
     data: {
-      channel_id: msg.channelID,
-    },
+      channel_id: msg.channelID
+    }
   };
 
   fcm.send(message, async function(err, response) {
@@ -205,7 +208,9 @@ async function sendPushNotification(user, msg, recipient) {
       console.log("Something has gone wrong!");
     } else {
       // remove all expired tokens from db.
-      const failedTokens = response.results.map((r, i) => r.error && tokens[i]).filter(r => r);
+      const failedTokens = response.results
+        .map((r, i) => r.error && tokens[i])
+        .filter(r => r);
       await Devices.deleteMany({ token: { $in: failedTokens } });
     }
   });
