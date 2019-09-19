@@ -9,6 +9,7 @@ const Servers = require("../../../models/servers");
 
 module.exports = async (req, res, next) => {
   const {invite_code, server_id} = req.params;
+  const {socketID} = req.body;
 
   let invite, server;
 
@@ -75,7 +76,8 @@ module.exports = async (req, res, next) => {
   
     // send owns status to every connected device
     createServerObj.channels = serverChannels;
-    io.in(req.user.uniqueID).emit("server:joined", createServerObj);
+
+    io.in(req.user.uniqueID).emit("server:joined", Object.assign({}, createServerObj, {socketID}));
     // join room
     const room = io.sockets.adapter.rooms[req.user.uniqueID];
     if (room)
