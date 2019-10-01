@@ -3,7 +3,7 @@ html, body {
     height: 100%;
     margin: 0;
     color: rgb(214, 214, 214);
-    background: rgb(61, 61, 61);
+    background: rgb(41, 41, 41);
 }
 
 header {
@@ -30,8 +30,6 @@ header {
     }
 }
 
-
-
 .logo-container {
     display: flex;
     flex: 1;
@@ -39,8 +37,8 @@ header {
 
 header .logo{
     background-image: url(../assets/logo.png);
-    height: 70px;
-    width: 70px;
+    height: 40px;
+    width: 40px;
     background-size: 100%;
     border-radius: 50%;
     margin: auto;
@@ -55,14 +53,14 @@ header .logo-container span {
     display: block;
     margin: auto;
     margin-left: 10px;
-    font-size: 25px;
+    font-size: 20px;
     font-weight: bold;
     color: white;
 }
 
 .links {
     margin: auto;
-    color: rgba(255, 255, 255, 0.541);
+    color: rgba(255, 255, 255, 0);
     font-size: 18px;
     margin-right: 15px;
     user-select: none;
@@ -82,116 +80,88 @@ header .logo-container span {
     color: white;
 }
 
-.sub-header{
-    width: 100%;
-    height: 400px;
-    background: rgba(39, 39, 39, 0.233);
+.sub-header {
     display: flex;
-    flex-direction: column;
-
-    animation: showSubHeader;
-    animation-duration: 0.5s;
-    animation-delay: 0.4s;
-    animation-direction: forwards;
-    animation-fill-mode: forwards;
-    opacity: 0;
+    background: rgba(51, 51, 51, 0.986);
+    height: 350px;
 }
-
-@keyframes showSubHeader {
-    from {
-        opacity: 0;
-        margin-top: -200px
-    }
-    to {
-        opacity: 1;
-        margin-top: 0;
-    }
-}
-
-
-.sub-header .logo{
-    background-image: url(../assets/logo.png);
-    height: 150px;
-    width: 150px;
-    background-size: 100%;
-    border-radius: 50%;
+.sub-header .center {
+    align-self: center;
     margin: auto;
-    margin-top: 50px;
-    margin-bottom: 0;
-    border: solid 5px rgb(17, 153, 69);
+    margin-top: 70px;
 }
-.sub-header .title {
-    margin: auto;
-    margin-top: 20px;
-    margin-bottom: 0px;
-    font-size: 30px;
-    font-weight: bold;
-    color: rgb(211, 211, 211);
-}
-.sub-header .information{
-    margin:auto;
-    margin-top: 10px;
+.sub-header .center .title {
     text-align: center;
+    font-size: 40px;
+    margin-bottom: 20px;
+    color: white;
 }
-
-.recent-projects{
-    display: table;
-    margin: auto;
-    margin-top: 20px;
-
-    animation: showSubHeader;
-    animation-duration: 0.5s;
-    animation-delay: 0.4s;
-    animation-direction: forwards;
-    animation-fill-mode: forwards;
-    opacity: 0;
-}
-.recent-projects .title{
-    font-size: 30px;
+.sub-header .center .sub-title {
     text-align: center;
-    margin-bottom: 10px;
-    margin-top: 10px;
+    font-size: 20px;
+    opacity: 0.9;
 }
-.project{
+
+.projects {
     display: flex;
+    flex-wrap: wrap;
     margin: auto;
-    border-radius: 20px;
-    background: rgba(0, 128, 0, 0.651);
-    padding: 10px;
-    user-select: none;
-    margin-bottom: 30px;
-    transition: 0.3s;
-}
-.nertivia{
-    background: rgba(34, 185, 255, 0.788);
-}
-.project .title {
-    text-align: left;
-    margin-top: 0px;
-}
-.project .icon {
-margin-right: 20px;
-}
-.project .details {
-    max-width: 400px;
+    justify-content: center;
+    margin-top: -100px;
 }
 
+.project {
+    background: rgb(31, 31, 31);
+    width: 240px;
+    border-radius: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: 0.2s;
+    margin: 10px;
+}
 .project:hover {
-    box-shadow: inset 0 0 100px 100px rgba(77, 77, 77, 0.383);
+    opacity: 1;
 }
-a{
-    text-decoration: none;
-    color: inherit;
+.project .image {
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 150px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 20px;
+    padding-top: 10px;
+    border-radius: 5px;
+
+}
+.project.nertivia .image {
+    background-color: #3fa9f5;
+    background-position-y: -10px;
 }
 
-@media only screen and (max-width: 519px) {
-    .project{
-        flex-direction: column;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+.project.github .image {
+    background-color: white;
+    background-size: 45%;
 }
+.project.supertiger-launcher .image {
+    background-color: #04c120;
+    background-size: 50%;
+}
+
+.project .details {
+    padding: 10px;
+}
+.project .details .title {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 5px
+}
+.project .details .sub-title {
+    opacity: 0.9;
+}
+
 
 @media only screen and (max-width: 547px) {
     .links {

@@ -9,6 +9,10 @@ const FlakeId = require('flakeid');
 const flake = new FlakeId();
 
 
+const userBansSchema = new Schema({
+  user: {type: Schema.Types.ObjectId, ref: 'users'},
+  reason: {type: String, required: false}
+})
 
 const serversSchema = new Schema({
     name: {
@@ -25,7 +29,8 @@ const serversSchema = new Schema({
       type: Number
     },
     default_channel_id: {type: String},
-    public: {type: Boolean}
+    public: {type: Boolean},
+    user_bans: { type: [userBansSchema], select:false}
 });
 
 serversSchema.pre('save', async function(next) {

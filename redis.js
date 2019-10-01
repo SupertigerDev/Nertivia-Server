@@ -56,6 +56,14 @@ module.exports = {
   serverChannelExists: (channelID) => {
     return wrapper('exists', 'channels', `channel:${channelID}`);
   },
+  remServerChannels: (uniqueID, channelIDArr) => {
+    const multi = redisClient.multi();
+    for (let index = 0; index < channelIDArr.length; index++) {
+      const channelID = channelIDArr[index];
+      multi.hdel(`user:${uniqueID}`, `channel:${channelID}`)
+    }
+    return multiWrapper(multi) 
+  },
   removeServerChannel: (channelID) => {
     return wrapper('del', 'channels', `channel:${channelID}`);
   },

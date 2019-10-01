@@ -28,7 +28,9 @@ const messagesSchema = new Schema({
   type: {type: Number, default: 0, enum: [
     0, // Message
     1, // Join message
-    2, // leave message
+    2, // leave message,
+    3, // kick message,
+    4, // ban message
   ]}
 })
 

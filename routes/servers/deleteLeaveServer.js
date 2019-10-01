@@ -8,6 +8,8 @@ const Messages = require("../../models/messages");
 const Notifications = require('../../models/notifications');
 const PublicServersList = require("../../models/publicServersList");
 
+const sendMessageNotification = require('./../../utils/SendMessageNotification')
+
 module.exports = async (req, res, next) => {
   const redis = require("../../redis");
   // check if its the creator and delete the server.
@@ -47,25 +49,39 @@ module.exports = async (req, res, next) => {
       }
     return;
   }
+
+
   // Leave server
+
+  // delete all leavers notification from the server 
   if (channelIDArray) {
     await Notifications.deleteMany({
       channelID: { $in: channelIDArray },
       recipient: req.user.uniqueID
     });
   }
+
+
   await redis.remServerMember(req.user.uniqueID, req.server.server_id);
+  await redis.remServerChannels(req.user.uniqueID, channelIDArray)
+  
+  // remove server from users server list.
   await User.updateOne(
     { _id: req.user._id },
     { $pullAll: { servers: [req.server._id] } }
   );
+
+  // delete member from server members
   await ServerMembers.deleteMany({
     member: req.user._id,
     server: req.server._id
   });
+  
   res.json({ status: "Done!" });
   const io = req.io;
 
+
+  // leave room
   const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
   if (rooms)
     for (let clientId in rooms.sockets || []) {
@@ -77,13 +93,13 @@ module.exports = async (req, res, next) => {
       }
     }
 
+  // emit leave event 
   io.in("server:" + req.server.server_id).emit("server:member_remove", {
     uniqueID: req.user.uniqueID,
     server_id: req.server.server_id
   });
 
   // send leave message
-
   const messageCreate = new Messages({
     channelID: req.server.default_channel_id,
     creator: req.user._id,
@@ -101,6 +117,15 @@ module.exports = async (req, res, next) => {
   };
   messageCreated = messageCreated.toObject();
   messageCreated.creator = user;
+
+  // save notification 
+  await sendMessageNotification({
+    message: messageCreated,
+    channelID: req.server.default_channel_id,
+    server_id: req.server._id,
+    sender: req.user,
+  })
+
   // emit message
   const roomsMsg = io.sockets.adapter.rooms["server:" + req.server.server_id];
   if (roomsMsg)
@@ -109,4 +134,6 @@ module.exports = async (req, res, next) => {
         message: messageCreated
       });
     }
+
+
 };

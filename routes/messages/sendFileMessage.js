@@ -8,6 +8,9 @@ const GDriveApi = require("./../../API/GDrive");
 const path = require('path')
 const sharp = require('sharp')
 
+const sendMessageNotification = require('./../../utils/SendMessageNotification');
+
+
 module.exports = async (req, res, next) => {
   //if formdata is not present.
   if (!req.busboy) return res.status(403).json({ message: "?????" });
@@ -110,41 +113,13 @@ module.exports = async (req, res, next) => {
           }
 
         //send notification
-        //find all members in the server.
-        const members = await ServerMembers.find({
-          server: req.channel.server._id
-        }).populate("member");
-
-        const members_uniqueID = members
-          .map(m => m.member.uniqueID)
-          .filter(m => m !== req.user.uniqueID);
-
-        let notificationPromises = [];
-        for await (const memberUniqueID of members_uniqueID) {
-          const sendNotificaiton = Notifications.findOneAndUpdate(
-            {
-              recipient: memberUniqueID,
-              channelID
-            },
-            {
-              $set: {
-                recipient: memberUniqueID,
-                channelID,
-                type: "MESSAGE_CREATED",
-                lastMessageID: messageCreated.messageID,
-                sender: req.user._id
-              },
-              $inc: {
-                count: 1
-              }
-            },
-            {
-              upsert: true
-            }
-          );
-          notificationPromises.push(sendNotificaiton);
-        }
-        await Promise.all(notificationPromises);
+        await sendMessageNotification({
+          message: messageCreatedLean,
+          channelID,
+          server_id: req.channel.server._id,
+          sender: req.user,
+        })
+    
 
         return;
       }
@@ -160,7 +135,7 @@ module.exports = async (req, res, next) => {
         });
 
         //change lastMessage timeStamp
-        const updateChannelTimeStap = Channels.updateMany(
+        const updateChannelTimeStamp = Channels.updateMany(
           {
             channelID
           },
@@ -175,28 +150,15 @@ module.exports = async (req, res, next) => {
         );
 
         // sends notification to a user.
-        const sendNotificaiton = Notifications.findOneAndUpdate(
-          {
-            recipient: req.channel.recipients[0].uniqueID,
-            channelID
-          },
-          {
-            $set: {
-              recipient: req.channel.recipients[0].uniqueID,
-              channelID,
-              type: "MESSAGE_CREATED",
-              lastMessageID: messageCreated.messageID,
-              sender: req.user._id
-            },
-            $inc: {
-              count: 1
-            }
-          },
-          {
-            upsert: true
-          }
-        );
-        await Promise.all([updateChannelTimeStap, sendNotificaiton]);
+        const sendNotification = sendMessageNotification({
+          message: messageCreated,
+          recipient_uniqueID: req.channel.recipients[0].uniqueID,
+          channelID,
+          sender: req.user,
+        })
+
+
+        await Promise.all([updateChannelTimeStamp, sendNotification]);
       }
     }
   );

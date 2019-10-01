@@ -5,7 +5,7 @@ const Messages = require("../../../models/messages");
 const ServerMembers = require("../../../models/ServerMembers");
 const Servers = require("../../../models/servers");
 
-
+const sendMessageNotification = require('./../../../utils/SendMessageNotification')
 
 module.exports = async (req, res, next) => {
   const {invite_code, server_id} = req.params;
@@ -19,8 +19,23 @@ module.exports = async (req, res, next) => {
     invite = await ServerInvites.findOne({ invite_code })
     .populate({ path: "server", populate: [{ path: "creator" }] })
     .lean();
+    // check if banned
+    const checkBanned = await Servers.findOne({
+      _id: invite.server._id,
+      "user_bans.user":
+      {
+        "$ne": req.user._id
+      }
+    }) 
+    if (!checkBanned)  invite = undefined;
   } else if (server_id) {
-    server = await Servers.findOne({server_id: server_id}).populate('creator').lean();
+    server = await Servers.findOne({
+      server_id: server_id,
+      "user_bans.user":
+      {
+        "$ne": req.user._id
+      }
+    }).populate('creator').lean();
   }
 
   if (!invite && !server) return res.status(404).json({ message: "Invalid server." });
@@ -108,6 +123,17 @@ module.exports = async (req, res, next) => {
     };
     messageCreated = messageCreated.toObject();
     messageCreated.creator = user;
+
+
+    // save notification 
+    await sendMessageNotification({
+      message: messageCreated,
+      channelID: server.default_channel_id,
+      server_id: server._id,
+      sender: req.user,
+    })
+
+
     // emit message
     const serverRooms =
       io.sockets.adapter.rooms["server:" + createServerObj.server_id];
@@ -119,6 +145,7 @@ module.exports = async (req, res, next) => {
       }
     }
   
+
     // send members list
   
     let serverMembers = await ServerMembers.find({ server: server._id })

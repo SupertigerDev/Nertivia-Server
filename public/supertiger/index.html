@@ -11,6 +11,7 @@
 </head>
 
 <body>
+    <!-- Header -->
     <header>
         <div class="logo-container">
             <div class="logo"></div>
@@ -21,45 +22,35 @@
         </div>
     </header>
     <div class="sub-header">
-        <div class="logo"></div>
-        <div class="title">
-            About me
-        </div>
-        <div class="information">
-            <p>A kid who loves to code and play games! :D</p>
-            <p>Browse this website to see what projects I have created and more.</p>
+        <div class="center">
+            <div class="title">My Projects</div>
+            <div class="sub-title">Here are some of my projects I have been working on</div>
         </div>
     </div>
-    <div class="recent-projects">
-				<div class="title">My recent projects</div>
-				
-        <a href="https://nertivia.supertiger.tk">
-            <div class="project nertivia">
-                <div class="icon">
-                    <img src="assets/logo.svg" width="200px" height="200px">
-                </div>
-                <div class="information">
-                    <div class="title">Nertivia (Chat Client)</div>
-                    <div class="details">The best chat client that wont restrict you from important and fun features.</div>
-                </div>
+    <div class="projects">
+        <div class="project nertivia" onclick="window.open('https://nertivia.tk/','_blank');">
+            <div class="image" style="background-image: url(./../assets/nertiviaLogo.svg)"></div>
+            <div class="details">
+                <div class="title">Nertivia - Chat Client</div>
+                <div class="sub-title">I have been working on this project for a year. I added features such as public servers, direct messaging, custom emojis. More features coming soon!</div>
             </div>
-				</a>
-				
-        <a href="launcher/">
-            <div class="project">
-                <div class="icon">
-                    <img src="launcher/assets/logo2.png" width="200px" height="200px">
-                </div>
-                <div class="information">
-                    <div class="title">Supertiger Launcher</div>
-                    <div class="details">Supertiger Launcher allows you to quickly launch games without finding them
-                        right
-                        on your desktop. Click here for more information.</div>
-                </div>
+        </div>
+        <div class="project supertiger-launcher" onclick="window.open('./launcher/index.html','_blank');">
+            <div class="image" style="background-image: url(./../launcher/assets/logo2.png)"></div>
+            <div class="details">
+                <div class="title">Supertiger Launcher</div>
+                <div class="sub-title">Supertiger Launcher allows you to quickly launch games without finding them right on your desktop.</div>
             </div>
-        </a>
+        </div>
+        <div class="project github" onclick="window.open('https://github.com/supertiger1234','_blank');">
+            <div class="image" style="background-image: url(./../assets/GitHubLogo.svg)"></div>
+            <div class="details">
+                <div class="title">GitHub</div>
+                <div class="sub-title">See more projects on my GitHub page!</div>
+            </div>
+        </div>
+    </div>
 
-    </div>
 </body>
 <script src="js/main.js"></script>
 

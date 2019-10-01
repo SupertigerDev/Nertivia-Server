@@ -6,6 +6,8 @@ const Devices = require("../../models/Devices");
 const FCM = require("fcm-node");
 const config = require('./../../config');
 
+const sendMessageNotification = require('./../../utils/SendMessageNotification');
+
 const serverKey = require("./../../fb-fcm.json");
 const fcm = new FCM(serverKey);
 
@@ -66,6 +68,16 @@ module.exports = async (req, res, next) => {
   }
 
   async function serverMessage() {
+
+
+    //send notification
+    await sendMessageNotification({
+      message: messageCreated,
+      channelID,
+      server_id: req.channel.server._id,
+      sender: req.user,
+    })
+
     const clients =
       io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
         .sockets;
@@ -77,47 +89,38 @@ module.exports = async (req, res, next) => {
       }
     }
 
-    //send notification
-    //find all members in the server.
-    const members = await ServerMembers.find({
-      server: req.channel.server._id
-    }).populate("member");
-
-    const members_uniqueID = members
-      .map(m => m.member.uniqueID)
-      .filter(m => m !== req.user.uniqueID);
-
-    let notificationPromises = [];
-    for await (const memberUniqueID of members_uniqueID) {
-      const sendNotificaiton = Notifications.findOneAndUpdate(
-        {
-          recipient: memberUniqueID,
-          channelID
-        },
-        {
-          $set: {
-            recipient: memberUniqueID,
-            channelID,
-            type: "MESSAGE_CREATED",
-            lastMessageID: messageCreated.messageID,
-            sender: req.user._id
-          },
-          $inc: {
-            count: 1
-          }
-        },
-        {
-          upsert: true
-        }
-      );
-      notificationPromises.push(sendNotificaiton);
-    }
-    await Promise.all(notificationPromises);
-
     return;
   }
 
   async function directMessage() {
+
+    //change lastMessage timeStamp
+    const updateChannelTimeStamp = Channels.updateMany(
+      {
+        channelID
+      },
+      {
+        $set: {
+          lastMessaged: Date.now()
+        }
+      },
+      {
+        upsert: true
+      }
+    );
+
+    // sends notification to a user.
+    const sendNotification = sendMessageNotification({
+      message: messageCreated,
+      recipient_uniqueID: req.channel.recipients[0].uniqueID,
+      channelID,
+      sender: req.user,
+    })
+
+
+    await Promise.all([updateChannelTimeStamp, sendNotification]);
+
+
     // for group messaging, do a loop instead of [0]
     io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
       message: messageCreated
@@ -136,40 +139,7 @@ module.exports = async (req, res, next) => {
         }
       }
 
-    //change lastMessage timeStamp
-    const updateChannelTimeStap = Channels.updateMany(
-      {
-        channelID
-      },
-      {
-        $set: {
-          lastMessaged: Date.now()
-        }
-      },
-      {
-        upsert: true
-      }
-    );
 
-    // sends notification to a user.
-    const sendNotificaiton = Notifications.findOneAndUpdate(
-      { recipient: req.channel.recipients[0].uniqueID, channelID },
-      {
-        $set: {
-          recipient: req.channel.recipients[0].uniqueID,
-          channelID,
-          type: "MESSAGE_CREATED",
-          lastMessageID: messageCreated.messageID,
-          sender: req.user._id
-        },
-        $inc: {
-          count: 1
-        }
-      },
-      { upsert: true }
-    );
-
-    await Promise.all([updateChannelTimeStap, sendNotificaiton]);
     sendPushNotification(req.user, messageCreated, req.channel.recipients[0]);
   }
 };
