@@ -3,6 +3,7 @@ function Permission(permission, defaultAllowed) {
     if (!req.channel.server) return next();
     const permissions = req.channel.permissions;
 
+    if (req.channel.server.creator.toString() == req.user._id) return next()
 
     if (defaultAllowed === false) {
       if (!permissions) {
