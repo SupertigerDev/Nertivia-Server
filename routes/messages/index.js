@@ -8,6 +8,7 @@ const { passportJWT } = require("../../middlewares/passport");
 const channelVerification = require('./../../middlewares/ChannelVerification');
 const GDriveOauthClient = require('./../../middlewares/GDriveOauthClient');
 const URLEmbed = require('./../../middlewares/URLEmbed');
+const serverChannelPermissions = require('./../../middlewares/serverChannelPermissions');
 const busboy = require('connect-busboy');
 
 MainMessageRouter.route("/channels/:channelID").get(
@@ -34,6 +35,7 @@ MainMessageRouter.route("/channels/:channelID").post(
   passportJWT,
   messagePolicy.post,
   channelVerification,
+  serverChannelPermissions('send_message', true),
   require('./sendMessage'),
   URLEmbed,
   GDriveOauthClient,
@@ -44,6 +46,7 @@ MainMessageRouter.route("/channels/:channelID").post(
 MainMessageRouter.route("/:channelID/typing").post(
   passportJWT,
   channelVerification,
+  serverChannelPermissions('send_message', true),
   require('./sendTypingIndicator'),
 );
 

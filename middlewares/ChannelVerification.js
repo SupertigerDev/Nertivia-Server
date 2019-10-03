@@ -8,8 +8,10 @@ module.exports = async (req, res, next) => {
 
   //Check if channel already exists in redis, in user
   let channel = await redis.getChannel(channelID, req.user.uniqueID);
+  if (!channel.result) {
+    channel = await redis.getServerChannel(channelID);
+  }
 
-  
 
   if (channel.result){
     const result = JSON.parse(channel.result);

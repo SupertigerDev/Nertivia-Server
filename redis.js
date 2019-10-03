@@ -49,38 +49,41 @@ module.exports = {
   },
   addChannel: async (channelID, channelData, uniqueID) => {
     if (channelData.server) {
-      await wrapper('set', 'channels', `channel:${channelID}`);
-    }
+      return wrapper('set', `channels:${channelID}`,JSON.stringify(channelData)); 
+    } 
     return wrapper('hset', `user:${uniqueID}`, `channel:${channelID}`, JSON.stringify(channelData));
   },
   serverChannelExists: (channelID) => {
-    return wrapper('exists', 'channels', `channel:${channelID}`);
+    return wrapper('exists', `channels:${channelID}`);
   },
-  remServerChannels: (uniqueID, channelIDArr) => {
+  remServerChannels: (channelIDArr) => {
     const multi = redisClient.multi();
     for (let index = 0; index < channelIDArr.length; index++) {
       const channelID = channelIDArr[index];
-      multi.hdel(`user:${uniqueID}`, `channel:${channelID}`)
+      multi.del(`channels:${channelID}`)
     }
     return multiWrapper(multi) 
   },
   removeServerChannel: (channelID) => {
-    return wrapper('del', 'channels', `channel:${channelID}`);
+    return wrapper('del', `channels:${channelID}`); 
   },
   getChannel: (channelID, uniqueID) => {
     return wrapper('hget', `user:${uniqueID}`, `channel:${channelID}`);
   },
+  getServerChannel: (channelID) => {
+    return wrapper('get', `channels:${channelID}`);
+  },
   addServerMember: (uniqueID, serverID) => {
-    return wrapper('sadd', `server:${serverID}`, `user:${uniqueID}`);
+    return wrapper('sadd', `serverMembers:${serverID}`, `user:${uniqueID}`);
   },
   serverMemberExists: (uniqueID, serverID) => {
-    return wrapper('sismember', `server:${serverID}`, `user:${uniqueID}`);
+    return wrapper('sismember', `serverMembers:${serverID}`, `user:${uniqueID}`);
   },
   remServerMember: (uniqueID, serverID) => {
-    return wrapper('srem', `server:${serverID}`, `user:${uniqueID}`);
+    return wrapper('srem', `serverMembers:${serverID}`, `user:${uniqueID}`);
   },
   delServer: (serverID) => {
-    return wrapper('del', `server:${serverID}`);
+    return wrapper('del', `serverMembers:${serverID}`);
   }
 }
 

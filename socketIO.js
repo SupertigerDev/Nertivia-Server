@@ -25,6 +25,30 @@ for (let key in io.nsps){
     }
   })
 }
+
+const populateFriends = {
+  path: "friends",
+  populate: [
+    {
+      path: "recipient",
+      select: "username uniqueID tag admin -_id avatar"
+    }
+  ],
+  select: "recipient status -_id"
+};
+
+const populateServers = {
+  path: "servers",
+  populate: [
+    {
+      path: "creator",
+      select: "uniqueID -_id"
+      //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
+    }
+  ],
+  select: "name creator default_channel_id server_id avatar"
+};
+
 /**
  *
  * @param {sio.Socket} client
@@ -38,27 +62,7 @@ module.exports = async client => {
       client.auth = true;
 
       // get the user
-      const populateFriends = {
-        path: "friends",
-        populate: [
-          {
-            path: "recipient",
-            select: "username uniqueID tag admin -_id avatar"
-          }
-        ],
-        select: "recipient status -_id"
-      };
-      const populateServers = {
-        path: "servers",
-        populate: [
-          {
-            path: "creator",
-            select: "uniqueID -_id"
-            //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
-          }
-        ],
-        select: "name creator default_channel_id server_id avatar"
-      };
+
       const userSelect =
         "avatar username email uniqueID tag settings servers survey_completed GDriveRefreshToken status";
 

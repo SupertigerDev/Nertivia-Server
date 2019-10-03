@@ -63,6 +63,7 @@ module.exports = async (req, res, next) => {
     let serverChannels = await Channels.find({
       server: server._id
     }).lean();
+    await redis.addServerMember(req.user.uniqueID, server.server_id);
   
     const createServerObj = Object.assign({}, server);
     createServerObj.creator = { uniqueID: createServerObj.creator.uniqueID };
