@@ -1,15 +1,13 @@
-
 const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
 const Channels = require("../../models/channels");
 const Notifications = require("./../../models/notifications");
 const GDriveApi = require("./../../API/GDrive");
 
-const path = require('path')
-const sharp = require('sharp')
+const path = require("path");
+const sharp = require("sharp");
 
-const sendMessageNotification = require('./../../utils/SendMessageNotification');
-
+const sendMessageNotification = require("./../../utils/SendMessageNotification");
 
 module.exports = async (req, res, next) => {
   //if formdata is not present.
@@ -24,12 +22,23 @@ module.exports = async (req, res, next) => {
 
   req.busboy.on("field", function(fieldName, fieldValue) {
     if (fieldName === "message") message = fieldValue;
-    if (message.length > 5000) {
-      stop = true;
-      return res.status(403).json({
-        status: false,
-        message: "Message must contain characters less than 5,000"
-      });
+
+    if (message) {
+      if (typeof message !== "string") {
+        stop = true;
+        return res.status(403).json({
+          status: false,
+          message: "message must be a string."
+        });
+      }
+
+      if (message.length >= 5000) {
+        stop = true;
+        return res.status(403).json({
+          status: false,
+          message: "Message must contain characters less than 5,000"
+        });
+      }
     }
   });
 
@@ -117,9 +126,8 @@ module.exports = async (req, res, next) => {
           message: messageCreatedLean,
           channelID,
           server_id: req.channel.server._id,
-          sender: req.user,
-        })
-    
+          sender: req.user
+        });
 
         return;
       }
@@ -154,9 +162,8 @@ module.exports = async (req, res, next) => {
           message: messageCreated,
           recipient_uniqueID: req.channel.recipients[0].uniqueID,
           channelID,
-          sender: req.user,
-        })
-
+          sender: req.user
+        });
 
         await Promise.all([updateChannelTimeStamp, sendNotification]);
       }
