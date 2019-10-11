@@ -1,6 +1,7 @@
 const {
 	google
 } = require('googleapis');
+const User = require('./../models/users');
 const config = require('./../config');
 
 module.exports = async (req, res, next) => {
@@ -10,6 +11,15 @@ module.exports = async (req, res, next) => {
 		config.googleDrive.url
 	);
 	req.oauth2Client = oauth2Client;
+
+	// check if GDriveRefreshToken exists in db
+	if (!req.session['user'].GDriveRefreshToken) {
+		const user = await User.findById(req.session['user']._id, {_id: 0}).select('GDriveRefreshToken');
+		if (user && user.GDriveRefreshToken) {
+			req.session['user'].GDriveRefreshToken = GDriveRefreshToken
+		}
+	}
+
 	if (req.session['user'].GDriveRefreshToken && !req.session['GDriveTokens']) {
 		try {
 			oauth2Client.setCredentials({

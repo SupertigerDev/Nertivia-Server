@@ -23,7 +23,6 @@ module.exports = async (req, res, next) => {
 				GDriveRefreshToken: refresh_token
 			}
 		})
-		req.session['user'].GDriveRefreshToken = refresh_token;
 		oauth2Client.setCredentials({refresh_token})
 
 		//create a folder.
