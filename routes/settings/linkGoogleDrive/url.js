@@ -4,7 +4,8 @@ module.exports = async (req, res, next) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: "offline",
     scope: scopes,
-    prompt: "consent"
+    prompt: "consent",
+    state: req.headers.authorization
   });
   res.json({ url: url });
 };
