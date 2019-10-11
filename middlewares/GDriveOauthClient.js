@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
 	if (!req.session['user'].GDriveRefreshToken) {
 		const user = await User.findById(req.session['user']._id, {_id: 0}).select('GDriveRefreshToken');
 		if (user && user.GDriveRefreshToken) {
-			req.session['user'].GDriveRefreshToken = GDriveRefreshToken
+			req.session['user'].GDriveRefreshToken = user.GDriveRefreshToken
 		}
 	}
 
