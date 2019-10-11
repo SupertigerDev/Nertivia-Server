@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
 
 		
 
-		const addToken = await Users.updateOne ({ _id: decryptedToken.sub }, {
+		const addToken = await Users.updateOne ({ uniqueID: decryptedToken.sub }, {
 			$set: {
 				GDriveRefreshToken: refresh_token
 			}
