@@ -31,7 +31,6 @@ MainSettingsRouter.route("/emoji")
 // Link Google Drive
 MainSettingsRouter.use(
   "/drive",
-  passportJWT,
   GDriveOauthClient,
   require("./linkGoogleDrive")
 );
