@@ -12,6 +12,7 @@ module.exports = async (req, res, next) => {
 	);
 	req.oauth2Client = oauth2Client;
 
+	if (!req.session || !req.session['user']) return next()
 	// check if GDriveRefreshToken exists in db
 	if (!req.session['user'].GDriveRefreshToken) {
 		const user = await User.findById(req.session['user']._id, {_id: 0}).select('GDriveRefreshToken');
