@@ -19,7 +19,7 @@ const io = require('socket.io')(http, {
   handlePreflightRequest: function (req, res) {
     var headers = {
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Origin': config.allowedOrigins[0],
+      'Access-Control-Allow-Origin': config.allowedOrigins,
       'Access-Control-Allow-Credentials': true
     };
     res.writeHead(200, headers);
@@ -72,8 +72,10 @@ app.use(cors({
 //routes
 app.use('/api', require('./routes/api'));
 app.use(vhost('musica.' + config.domain, express.static('public/musica')))
+app.use(vhost('reddit.' + config.domain, express.static('public/reddit')))
 
 app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))
+app.use(vhost('nertiviabeta.' + config.domain, require('./routes/chatBeta')))
 
 app.use('/', express.static('public/supertiger/'))
   
