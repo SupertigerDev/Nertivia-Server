@@ -1,5 +1,6 @@
 
 const Servers = require("../../models/servers");
+const Channels = require("../../models/channels");
 
 const GDriveApi = require('./../../API/GDrive');
 const stream = require('stream');
@@ -21,6 +22,15 @@ module.exports = async (req, res, next) => {
   const oauth2Client = req.oauth2Client;
   // filtered data
   const data = matchedData(req);
+  if (data && data.default_channel_id) {
+    // check if channel id is in the server
+    const checkChannel = await Channels.findOne({channelID: data.default_channel_id, server: req.server._id});
+    if (!checkChannel) {
+      return res
+        .status(404)
+        .json({ message: "Channel ID does not exist in your server." });
+    }
+  }
 
   if (data.avatar && oauth2Client) {
     const { ok, error, result } = await uploadAvatar(
