@@ -14,7 +14,5 @@ module.exports = function (options) {
     }
     next();
     await redis.rateLimitSetExpire(key, expire, ttl);
-    console.log(count, ttl);
-
   }
 }
