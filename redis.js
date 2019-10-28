@@ -84,6 +84,22 @@ module.exports = {
   },
   delServer: (serverID) => {
     return wrapper('del', `serverMembers:${serverID}`);
+  },
+  rateLimitSetExpire: async (key, expire, currentTTL) => {
+    if (currentTTL === 1 || currentTTL === -1){
+      const expiryMs = Math.round(1000 * expire);
+      const test =  await wrapper('pexpire', `rateLimit:${key}`, expiryMs);
+    }
+    return;
+  },
+  rateLimitIncr: async (key) => {
+    const response = await multiWrapper(
+      redisClient.multi()
+      .incr(`rateLimit:${key}`)
+      .pttl(`rateLimit:${key}`)
+    );
+    if (!response.ok) return null;
+    return response.result;
   }
 }
 
