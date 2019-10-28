@@ -16,6 +16,11 @@ module.exports = async (req, res, next) => {
     .status(403)
     .json({ message: "You do not have permission to kick members!" });
   }
+  if (unique_id === req.user.uniqueID) {
+    return res
+    .status(403)
+    .json({ message: "Why would you kick yourself?" });
+  }
   const redis = require("../../redis");
   const server = req.server;
 
