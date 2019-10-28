@@ -3,6 +3,7 @@ const User = require("../../../models/users");
 const ServerInvites = require("../../../models/ServerInvites");
 const Messages = require("../../../models/messages");
 const ServerMembers = require("../../../models/ServerMembers");
+const publicServersList = require("../../../models/publicServersList");
 const Servers = require("../../../models/servers");
 
 const sendMessageNotification = require('./../../../utils/SendMessageNotification')
@@ -36,6 +37,14 @@ module.exports = async (req, res, next) => {
         "$ne": req.user._id
       }
     }).populate('creator').lean();
+    // check if server is in public list
+    if (server) {
+      const checkPublicList = await publicServersList.findOne({server: server._id});
+      if (!checkPublicList) {
+        return res.status(403).json({ message: "Server is not public." });
+      }
+
+    }
   }
 
   if (!invite && !server) return res.status(404).json({ message: "Invalid server." });
