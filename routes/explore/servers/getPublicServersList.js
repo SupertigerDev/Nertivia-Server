@@ -15,13 +15,12 @@ module.exports = async (req, res, next) => {
   }
 
   if (most_users && most_users == "true") {
-    sort = {'total_members': -1 }
+    sort = { total_members: -1 };
   } else if (most_users && most_users == "false") {
-    sort = {'total_members': 1 }
+    sort = { total_members: 1 };
   } else if (date_added && date_added == "true") {
-    sort = {'created': -1 }
-  } 
-  
+    sort = { created: -1 };
+  }
 
   const serversList = await publicServersList.aggregate([
     {
@@ -51,13 +50,13 @@ module.exports = async (req, res, next) => {
         description: 1,
         verified: 1,
         created: 1,
-        server: { avatar: 1, name: 1, server_id: 1, public: 1 },
+        server: { avatar: 1, banner: 1, name: 1, server_id: 1, public: 1 },
         total_members: { $size: "$serverMembers" },
-        _id: 0,
+        _id: 0
       }
     },
     { $match: match },
-    { $sort: sort || { "server.name": 1 } },
+    { $sort: sort || { "server.name": 1 } }
     // { $limit: 10 } //TODO: add lazy loading
   ]);
 

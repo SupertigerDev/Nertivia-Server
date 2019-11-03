@@ -14,16 +14,15 @@ const redis = require("./redis");
 const sio = require("socket.io");
 const mongoose = require("mongoose");
 
-
 // nsps = namespaces.
 // disable socket events when not authorized .
-for (let key in io.nsps){
-  const nsp = io.nsps[key]
-  nsp.on('connect', function(socket){
+for (let key in io.nsps) {
+  const nsp = io.nsps[key];
+  nsp.on("connect", function(socket) {
     if (!socket.auth) {
       delete nsp.connected[socket.id];
     }
-  })
+  });
 }
 
 const populateFriends = {
@@ -46,7 +45,7 @@ const populateServers = {
       //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
     }
   ],
-  select: "name creator default_channel_id server_id avatar"
+  select: "name creator default_channel_id server_id avatar banner"
 };
 
 /**
@@ -161,34 +160,24 @@ module.exports = async client => {
       };
       user.GDriveRefreshToken = undefined;
 
-
       // check if user is already online on other clients
       const checkAlready = await redis.connectedUserCount(user.uniqueID);
       // if multiple users are still online
       if (!checkAlready || checkAlready.result !== 1) {
-        controller.emitUserStatus(
-          user.uniqueID,
-          user._id,
-          user.status,
-          io
-        );
+        controller.emitUserStatus(user.uniqueID, user._id, user.status, io);
       }
-
-
-
 
       // nsps = namespaces.
       // enabled socket events when authorized.
-      for (let key in io.nsps){
-        const nsp = io.nsps[key]
-        for (_key in nsp.sockets){
+      for (let key in io.nsps) {
+        const nsp = io.nsps[key];
+        for (_key in nsp.sockets) {
           if (_key === client.id) {
             nsp.connected[client.id] = client;
           }
         }
       }
 
-      
       client.emit("success", {
         message: "Logged in!",
         user,
@@ -223,12 +212,7 @@ module.exports = async client => {
 
     // if all users have gone offline, emit offline status to friends.
     if (response.result === 1) {
-      controller.emitUserStatus(
-        result.u_id,
-        result._id,
-        0,
-        io
-      );
+      controller.emitUserStatus(result.u_id, result._id, 0, io);
     }
   });
 
