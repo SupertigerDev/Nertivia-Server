@@ -28,11 +28,16 @@ MainSettingsRouter.route("/emoji")
   .put(passportJWT, require("./renameCustomEmoji"))
   .delete(passportJWT, require("./deleteCustomEmoji"));
 
+// Server Position
+MainSettingsRouter.route("/server_position")
+  .put(passportJWT, require("./serverPosition"))
+
 // Link Google Drive
 MainSettingsRouter.use(
   "/drive",
   GDriveOauthClient,
   require("./linkGoogleDrive")
 );
+
 
 module.exports = MainSettingsRouter;

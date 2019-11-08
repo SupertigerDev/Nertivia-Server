@@ -23,7 +23,8 @@ const apperanceSchema = new Schema({
 })
 
 const settingsSchema = new Schema({
-  apperance: {type: apperanceSchema}
+  apperance: {type: apperanceSchema},
+  server_position: [{type: String, required: false}]
 })
 
 
