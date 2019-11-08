@@ -25,10 +25,12 @@ module.exports = async (req, res, next) => {
       { _id: req.user._id },
       {'settings.server_position': server_position},
       {upsert: true},
-    );
-    return res.json({
-      server_position
-    });
+      );
+      res.json({
+        server_position
+      });
+      io.in(req.user.uniqueID).emit("self:server_position", {server_position} );
+      return;
   } catch {
     return res.status(403).json({
       message: 'Something went wrong, try again later.',
