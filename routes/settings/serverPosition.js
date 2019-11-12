@@ -31,7 +31,7 @@ module.exports = async (req, res, next) => {
       });
       io.in(req.user.uniqueID).emit("self:server_position", {server_position} );
       return;
-  } catch {
+  } catch(e) {
     return res.status(403).json({
       message: 'Something went wrong, try again later.',
     });

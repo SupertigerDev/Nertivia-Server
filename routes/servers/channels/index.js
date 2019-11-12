@@ -35,4 +35,11 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
   require("./deleteServerChannel")
 );
 
+// position
+MainChannelRouter.route('/:server_id/channels/position').put(
+  passportJWT,
+  UserPresentVerification,
+  require("./channelPositions")
+);
+
 module.exports = MainChannelRouter;

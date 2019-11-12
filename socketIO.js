@@ -45,7 +45,7 @@ const populateServers = {
       //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
     }
   ],
-  select: "name creator default_channel_id server_id avatar banner"
+  select: "name creator default_channel_id server_id avatar banner channel_position"
 };
 
 /**

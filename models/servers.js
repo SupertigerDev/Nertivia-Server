@@ -28,7 +28,8 @@ const serversSchema = new Schema({
   },
   default_channel_id: { type: String },
   public: { type: Boolean },
-  user_bans: { type: [userBansSchema], select: false }
+  user_bans: { type: [userBansSchema], select: false },
+  channel_position: [{type: String, required: false, select: false}]
 });
 
 serversSchema.pre("save", async function(next) {
