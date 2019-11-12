@@ -34,8 +34,6 @@ const serversSchema = new Schema({
 
 serversSchema.pre("save", async function(next) {
   try {
-    this.server_id = flake.gen();
-
     // Date created
     this.created = Date.now();
     next();

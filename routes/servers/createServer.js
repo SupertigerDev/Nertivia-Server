@@ -21,10 +21,12 @@ module.exports = async (req, res, next) => {
     });
 
   const channelID = flake.gen();
+  const serverID = flake.gen();
   const createServer = await Servers.create({
     name: name.trim(),
     creator: user_id,
-    default_channel_id: channelID
+    default_channel_id: channelID,
+    server_id: serverID,
   });
 
   const createServerObj = createServer.toObject();
@@ -33,6 +35,7 @@ module.exports = async (req, res, next) => {
     name: "General",
     channelID: channelID,
     server: createServer._id,
+    server_id: serverID,
     lastMessaged: Date.now()
   });
 

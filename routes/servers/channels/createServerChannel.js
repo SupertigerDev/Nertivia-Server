@@ -23,6 +23,7 @@ module.exports = async (req, res, next) => {
     name: name,
     channelID: flake.gen(),
     server: req.server._id,
+    server_id:  req.server.server_id,
     lastMessaged: Date.now()
   });
   const io = req.io;

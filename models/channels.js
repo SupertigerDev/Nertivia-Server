@@ -16,6 +16,7 @@ const channelsSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: 'users'},
   recipients: [{type: Schema.Types.ObjectId, ref: 'users'}],
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
+  server_id: {type: String, required: false},
   lastMessaged: {type: Number},
   status: {
     type: Number,
