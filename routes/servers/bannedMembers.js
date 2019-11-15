@@ -26,14 +26,7 @@ module.exports = async (req, res, next) => {
     select: 'username tag uniqueID avatar -_id'
   }).lean()
 
-
-
   res.json(serversList.user_bans);
-
-
-
-
-
   
 };
 
