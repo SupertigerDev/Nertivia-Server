@@ -14,9 +14,16 @@ const rateLimit = require('./../../middlewares/rateLimit');
 
 MainMessageRouter.route("/channels/:channelID").get(
   passportJWT,
-  rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
+  rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
   require('./getMessages')
+);
+
+MainMessageRouter.route("/channels/:channelID/messages/:messageID").get(
+  passportJWT,
+  rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
+  channelVerification,
+  require('./getMessage')
 );
 
 MainMessageRouter.route("/:messageID/channels/:channelID").delete(
