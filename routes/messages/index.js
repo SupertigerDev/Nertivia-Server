@@ -19,7 +19,7 @@ MainMessageRouter.route("/channels/:channelID").get(
   require('./getMessages')
 );
 
-MainMessageRouter.route("/channels/:channelID/messages/:messageID").get(
+MainMessageRouter.route("/:messageID/channels/:channelID").get(
   passportJWT,
   rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
