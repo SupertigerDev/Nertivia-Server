@@ -17,5 +17,11 @@ module.exports = async (req, res, next) => {
     })
     .lean();
 
+  if (!message) {
+    return res.status(404).json({
+      message: "Invalid channelID or messageID"
+    });
+  }
+
   return res.json(message);
 };
