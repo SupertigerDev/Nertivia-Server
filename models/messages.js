@@ -25,6 +25,7 @@ const messagesSchema = new Schema({
   created: { type: Number },
   embed: {type: embedSchema},
   timeEdited: { type: Number, required: false},
+  color: {type: String, required: false},
   type: {type: Number, default: 0, enum: [
     0, // Message
     1, // Join message

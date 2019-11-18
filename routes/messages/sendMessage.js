@@ -13,7 +13,11 @@ const fcm = new FCM(serverKey);
 
 module.exports = async (req, res, next) => {
   const { channelID } = req.params;
-  const { tempID, message, socketID } = req.body;
+  const { tempID, message, socketID, color } = req.body;
+  let _color;
+  if (typeof color === 'string' && color.startsWith('#')) {
+    _color = color.substring(0, 7);
+  }
 
   if (!message || message.trim() === "") return next();
 
@@ -24,12 +28,15 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  const messageCreate = new Messages({
+  let query = {
     channelID,
     message,
     creator: req.user._id,
     messageID: "placeholder"
-  });
+  }
+  if (_color) query['color'] = _color;
+
+  const messageCreate = new Messages(query)
 
   let messageCreated = await messageCreate.save();
 
@@ -43,6 +50,7 @@ module.exports = async (req, res, next) => {
   messageCreated = {
     channelID,
     message,
+    color: _color,
     creator: user,
     created: messageCreated.created,
     messageID: messageCreated.messageID

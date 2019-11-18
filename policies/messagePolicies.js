@@ -12,6 +12,7 @@ const policies = {
   ],
   update: [
     check('message').isString().withMessage('message must be a string!').optional({checkFalsy: true}),
+    check('color').optional({checkFalsy: true}),
     policyHandler
   ]
 }

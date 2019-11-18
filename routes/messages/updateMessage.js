@@ -13,13 +13,33 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({ message: "Message is not created by you." });
 
   // filtered data
-  const data = matchedData(req);
-  const resObj = { ...data, timeEdited: Date.now(), messageID, channelID };
+  let data = matchedData(req);
+
+
+  let _color;
+  if (typeof data.color === 'string' && data.color.startsWith('#')) {
+    _color = data.color.substring(0, 7);
+  }
+
+  if (data.color && data.color === -1) {
+    _color = undefined
+  }
+
+  data.color = _color;
+
+  let resObj = { ...data, timeEdited: Date.now(), messageID, channelID };
+  let query = {$unset: { embed: "" }}
+  if (!data.color) {
+    query['$unset'].color = 0;
+  }
+
+  
   try {
     await Messages.updateOne(
       { messageID },
-      { ...resObj, $unset: { embed: "" } }
+      { ...resObj, query }
     );
+    resObj.color = data.color || -2;
     res.json({ ...resObj, embed: 0 });
     const io = req.io;
     if (server) {
