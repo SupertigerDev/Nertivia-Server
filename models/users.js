@@ -20,6 +20,8 @@ const aboutMeSchema = new Schema({
 
 const apperanceSchema = new Schema({
   own_message_right: {type: Boolean, default: false, required: false}, // make own messages appear on the right (for own client) settings
+  "12h_time": {type: Boolean, default: false, required: false}, // Change time to 12 hour.
+  
 })
 
 const settingsSchema = new Schema({
