@@ -4,7 +4,7 @@ const {
 } = require("mongoose");
 
 
-const messagesSchema = new Schema({
+const themesSchema = new Schema({
   id: {type: String, required: true},
   name: {type: String, required: true},
   css: {type: String, required: true},
@@ -13,4 +13,4 @@ const messagesSchema = new Schema({
 
 
 
-module.exports = model('themes', messagesSchema);
+module.exports = model('themes', themesSchema);
