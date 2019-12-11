@@ -19,5 +19,7 @@ router.use('/settings', require('./settings'));
 router.use('/avatars', require('./avatars'));
 router.use('/files/*', loadMedia);
 router.use('/media/*', loadMedia);
+
+router.use('/admin', require('./admin'));
  
 module.exports = router;

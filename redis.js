@@ -19,7 +19,11 @@ module.exports = {
     return wrapper('hgetall',`connected:${socketID}`); 
   },
   connectedUserCount: async (uniqueID) => {
-    await wrapper('scard', `uniqueID:${uniqueID}`);
+    return await wrapper('scard', `uniqueID:${uniqueID}`);
+  },
+  // only to be used for admins.
+  connectedUserIds: async () => {
+    return await wrapper('keys', `uniqueID:*`);
   },
   disconnected: async (uniqueID, socketID) => {
     const response = await multiWrapper(
@@ -88,7 +92,7 @@ module.exports = {
   rateLimitSetExpire: async (key, expire, currentTTL) => {
     if (currentTTL === 1 || currentTTL === -1){
       const expiryMs = Math.round(1000 * expire);
-      const test =  await wrapper('pexpire', `rateLimit:${key}`, expiryMs);
+      const addExpire =  await wrapper('pexpire', `rateLimit:${key}`, expiryMs);
     }
     return;
   },

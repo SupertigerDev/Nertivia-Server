@@ -63,7 +63,7 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar username email uniqueID tag settings servers survey_completed GDriveRefreshToken status";
+        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status";
 
       const user = await User.findOne({ uniqueID: decryptedToken.sub })
         .select(userSelect)

@@ -1,5 +1,7 @@
 const Users = require("../../models/users");
 const Themes = require("../../models/themes");
+const PublicThemes = require("../../models/publicThemes");
+
 
 module.exports = async (req, res, next) => {
   const { id } = req.params;
@@ -7,7 +9,7 @@ module.exports = async (req, res, next) => {
 
 
   // check if theme exists
-  const exists = await Themes.findOne({ id, creator: _id }, { _id: 0 }).select(
+  const exists = await Themes.findOne({ id, creator: _id }).select(
     "name id"
   );
   if (!exists) {
@@ -15,6 +17,7 @@ module.exports = async (req, res, next) => {
   }
 
   await Themes.deleteOne({id});
+  await PublicThemes.deleteOne({theme: exists._id});
 
 
   res.json({message: 'deleted'});
