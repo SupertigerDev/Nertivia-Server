@@ -1,0 +1,34 @@
+const Roles = require('./../../../models/Roles');
+const { matchedData } = require("express-validator/filter");
+
+module.exports = async (req, res, next) => {
+  const roleID = req.params.role_id;
+
+  const dataMatched = matchedData(req);
+
+  // check if this function is executed by the guild owner.
+  if (!req.server.creator.equals(req.user._id)){
+    return res
+    .status(403)
+    .json({ message: "You do not have permission to update roles!" });
+  }
+
+  // check if role exists.
+  const role = await Roles.findOne({id: roleID, server: req.server._id});
+
+  if (!role) {
+    return res
+    .status(403)
+    .json({ message: "Role does not exist in that server." });
+  }
+
+
+  const update = await Roles.updateOne({_id: role._id}, dataMatched);
+
+  const data = Object.assign({}, dataMatched, {id: roleID, server_id: req.server.server_id});
+  const io = req.io;
+  io.in("server:" + req.server.server_id).emit("server:update_role", data);
+
+  res.json(data);
+  
+};

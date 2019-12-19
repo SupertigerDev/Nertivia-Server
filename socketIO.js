@@ -3,6 +3,7 @@ const controller = require("./socketController");
 const jwtAuth = require("socketio-jwt-auth");
 const User = require("./models/users");
 const ServerMembers = require("./models/ServerMembers");
+const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 const config = require("./config");
 const Notifications = require("./models/notifications");
@@ -83,6 +84,8 @@ module.exports = async client => {
 
       let serverMembers = [];
 
+      let serverRoles = [];
+
       if (user.servers) {
         // Map serverIDs
         const serverIDs = user.servers.map(a => a._id);
@@ -105,12 +108,18 @@ module.exports = async client => {
           { server: { $in: serverIDs } },
           { _id: 0 }
         )
-          .select("type member server_id")
+          .select("type member server_id roles")
           .populate({
             path: "member",
-            select: "username tag avatar uniqueID member -_id "
+            select: "username tag avatar uniqueID member -_id"
           })
           .lean();
+
+        // get roles from all servers
+        serverRoles = await ServerRoles.find(
+          {server: {$in : serverIDs}},
+          {_id: 0}
+        ).select("name id color permissions server_id deletable")
       }
 
       const dms = channels
@@ -163,7 +172,7 @@ module.exports = async client => {
       // check if user is already online on other clients
       const checkAlready = await redis.connectedUserCount(user.uniqueID);
       // if multiple users are still online
-      if (!checkAlready || checkAlready.result !== 1) {
+      if (checkAlready && checkAlready.result === 1) {
         controller.emitUserStatus(user.uniqueID, user._id, user.status, io);
       }
 
@@ -182,6 +191,7 @@ module.exports = async client => {
         message: "Logged in!",
         user,
         serverMembers,
+        serverRoles: serverRoles,
         dms: results[0],
         notifications: results[1],
         currentFriendStatus: result,

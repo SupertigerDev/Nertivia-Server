@@ -69,6 +69,9 @@ MainServerRouter.use('/', require('./channels'));
 // Invites
 MainServerRouter.use('/', require('./invites'));
 
+// roles
+MainServerRouter.use('/', require('./roles'));
+
 
 
 module.exports = MainServerRouter;
