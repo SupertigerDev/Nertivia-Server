@@ -2,14 +2,14 @@ const MainThemesRouter = require("express").Router();
 
 // Middleware
 const GDriveOauthClient = require("./../../../middlewares/GDriveOauthClient");
-const { passportJWT } = require("./../../../middlewares/passport");
+const authenticate = require("../../../middlewares/authenticate");
 const policies = require('../../../policies/publicThemePolicies');
 const rateLimit = require('../../../middlewares/rateLimit');
 
 
 // add theme
 MainThemesRouter.route('/:id').post(
-  passportJWT,
+  authenticate,
   policies.submit,
   GDriveOauthClient,
   require("./addThemePublic")
@@ -17,7 +17,7 @@ MainThemesRouter.route('/:id').post(
 
 // update theme
 MainThemesRouter.route('/:id').patch(
-  passportJWT,
+  authenticate,
   policies.update,
   GDriveOauthClient,
   require("./saveThemePublic")
@@ -26,7 +26,7 @@ MainThemesRouter.route('/:id').patch(
 
 // apply a theme
 MainThemesRouter.route('/:id/apply').get(
-  passportJWT,
+  authenticate,
   rateLimit({name: 'public_theme_apply', expire: 60, requestsLimit: 120 }),
   require("./applyThemePublic")
 );
@@ -34,13 +34,13 @@ MainThemesRouter.route('/:id/apply').get(
 
 // get a theme
 MainThemesRouter.route('/:id').get(
-  passportJWT,
+  authenticate,
   require("./getThemePublic")
 );
 
 // get all themes
 MainThemesRouter.route('/').get(
-  passportJWT,
+  authenticate,
   require("./getAllThemes")
 );
 

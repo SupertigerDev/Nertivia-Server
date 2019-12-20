@@ -2,37 +2,37 @@ const MainThemeRouter = require("express").Router();
 const themePolicy = require ('../../policies/ThemePolicies');
 
 // Middleware
-const { passportJWT } = require("../../middlewares/passport");
+const authenticate = require("../../middlewares/authenticate");
 
 
 // get single theme
 MainThemeRouter.route("/:id").get(
-  passportJWT,
+  authenticate,
   require("./getTheme")
 );
 
 // get single theme
 MainThemeRouter.route("/:id").delete(
-  passportJWT,
+  authenticate,
   require("./deleteTheme")
 );
 
 // get themes
 MainThemeRouter.route("/").get(
-  passportJWT,
+  authenticate,
   require("./getThemes")
 );
 
 // save theme
 MainThemeRouter.route("/").post(
-  passportJWT,
+  authenticate,
   themePolicy.save,
   require("./saveTheme")
 );
 
 // update theme
 MainThemeRouter.route("/:id").patch(
-  passportJWT,
+  authenticate,
   themePolicy.save,
   require("./updateTheme")
 );

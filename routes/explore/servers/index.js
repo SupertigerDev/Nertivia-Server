@@ -1,36 +1,36 @@
 const MainServersRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("./../../../middlewares/passport");
+const authenticate = require("../../../middlewares/authenticate");
 
 
 // get public servers list
 MainServersRouter.route('/').get(
-  passportJWT,
+  authenticate,
   require("./getPublicServersList")
 );
 
 // get a server
 MainServersRouter.route('/:server_id').get(
-  passportJWT,
+  authenticate,
   require("./getServer")
 );
 
 // update  public server
 MainServersRouter.route('/:server_id').patch(
-  passportJWT,
+  authenticate,
   require("./updatePublicServersList")
 );
 
 // delete  public server
 MainServersRouter.route('/:server_id').delete(
-  passportJWT,
+  authenticate,
   require("./deletePublicServersList")
 );
 
 // add to public servers list
 MainServersRouter.route('/').post(
-  passportJWT,
+  authenticate,
   require("./addPublicServersList")
 );
 

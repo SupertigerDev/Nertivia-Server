@@ -1,8 +1,6 @@
 
 const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
-const passport = require('../../../passport');
-const newUser = passport.newUser;
 
 module.exports = async (req, res, next) => {
   const {username, tag} = req.body;
@@ -43,14 +41,14 @@ module.exports = async (req, res, next) => {
     { $set: { status: 0 }},
     { upsert: true, new: true }
   ).lean()
-  docRequester.recipient = newUser(recipient)
+  docRequester.recipient = recipient
 
   const docRecipient = await Friend.findOneAndUpdate(
     { requester: recipient, recipient: requester },
     { $set: { status: 1 }},
     { upsert: true, new: true }
   ).lean()
-  docRecipient.recipient = newUser(requester)
+  docRecipient.recipient = requester
 
   // update user model
   const updateUserRequester = await User.findOneAndUpdate(

@@ -1,6 +1,5 @@
 const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
-const passport = require('../../../passport');
 
 module.exports = async (req, res, next) => {
   const recipientUniqueID = req.body.uniqueID; 

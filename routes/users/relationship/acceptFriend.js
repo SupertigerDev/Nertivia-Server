@@ -1,7 +1,5 @@
 const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
-const passport = require('../../../passport');
-const newUser = passport.newUser;
 
 module.exports = async (req, res, next) => {
   const recipientUniqueID = req.body.uniqueID;
@@ -32,13 +30,13 @@ module.exports = async (req, res, next) => {
       { requester: accepter, recipient: recipient },
       { $set: { status: 2 }}
     ).lean()
-    docAccepter.recipient = newUser(recipient)
+    docAccepter.recipient = recipient
 
     const docRecipient = await Friend.findOneAndUpdate(
       { requester: recipient, recipient: accepter },
       { $set: { status: 2 }}
     ).lean()
-    docRecipient.recipient = newUser(accepter)
+    docRecipient.recipient = accepter
 
   const io = req.io
   io.in(accepter.uniqueID).emit('relationshipAccept', recipient.uniqueID);

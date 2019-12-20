@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
 	const {code, token} = req.body;
 	try {
 		// jwt token
-		const decryptedToken = await jwt.verify(token, config.jwtSecret);
+		const decryptedToken = await jwt.verify(config.jwtHeader + token, config.jwtSecret);
 
 
 		const {tokens} = await oauth2Client.getToken (code);
@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
 
 		
 
-		const addToken = await Users.updateOne ({ uniqueID: decryptedToken.sub }, {
+		const addToken = await Users.updateOne ({ uniqueID: decryptedToken }, {
 			$set: {
 				GDriveRefreshToken: refresh_token
 			}
@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
 		const {ok, error, result} = await DriveAPI.createFolder( oauth2Client );
 		if ( ok ) {
 			const io = req.io
-			io.in(decryptedToken.sub).emit('googleDrive:linked');
+			io.in(decryptedToken).emit('googleDrive:linked');
 			return res.json ({ success: true })
 		} else {
 			return res.json ({ success: false })

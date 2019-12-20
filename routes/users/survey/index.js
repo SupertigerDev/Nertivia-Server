@@ -1,7 +1,7 @@
 const MainSurveyRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("./../../../middlewares/passport");
+const authenticate = require("../../../middlewares/authenticate");
 
 // Policies
 const surveyPolicy = require("./../../../policies/surveyPolicies");
@@ -9,16 +9,16 @@ const surveyPolicy = require("./../../../policies/surveyPolicies");
 
 // Details
 MainSurveyRouter.route('/')
-  .get(passportJWT, require('./surveyDetails'));
+  .get(authenticate, require('./surveyDetails'));
 
 // Update
 MainSurveyRouter.route('/')
-  .put(passportJWT, surveyPolicy.put, require('./surveyUpdate'));
+  .put(authenticate, surveyPolicy.put, require('./surveyUpdate'));
 
 
 // Skip
 MainSurveyRouter.route('/skip')
-  .delete(passportJWT, require('./surveySkip'));
+  .delete(authenticate, require('./surveySkip'));
 
 
 module.exports = MainSurveyRouter;

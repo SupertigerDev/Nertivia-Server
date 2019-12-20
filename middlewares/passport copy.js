@@ -10,7 +10,7 @@ module.exports = {
 			}
 		})(req, res, next)
 	},
-	passportJWT: (req, res, next) => {
+	authenticate: (req, res, next) => {
 		// check if details exist in redis session
 		if (req.session["user"]) {
 			req.user = req.session["user"];

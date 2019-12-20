@@ -4,7 +4,7 @@ const MainMessageRouter = require("express").Router();
 const messagePolicy = require('./../../policies/messagePolicies');
 
 // Middleware
-const { passportJWT } = require("../../middlewares/passport");
+const authenticate = require("../../middlewares/authenticate");
 const channelVerification = require('./../../middlewares/ChannelVerification');
 const GDriveOauthClient = require('./../../middlewares/GDriveOauthClient');
 const URLEmbed = require('./../../middlewares/URLEmbed');
@@ -13,28 +13,28 @@ const busboy = require('connect-busboy');
 const rateLimit = require('./../../middlewares/rateLimit');
 
 MainMessageRouter.route("/channels/:channelID").get(
-  passportJWT,
+  authenticate,
   rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
   require('./getMessages')
 );
 
 MainMessageRouter.route("/:messageID/channels/:channelID").get(
-  passportJWT,
+  authenticate,
   rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
   require('./getMessage')
 );
 
 MainMessageRouter.route("/:messageID/channels/:channelID").delete(
-  passportJWT,
+  authenticate,
   rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
   channelVerification,
   require('./deleteMessage')
 );
 
 MainMessageRouter.route("/:messageID/channels/:channelID").patch(
-  passportJWT,
+  authenticate,
   messagePolicy.update,
   rateLimit({name: 'message_update', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -43,7 +43,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").patch(
 );
 
 MainMessageRouter.route("/channels/:channelID").post(
-  passportJWT,
+  authenticate,
   messagePolicy.post,
   rateLimit({name: 'message_send', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -56,7 +56,7 @@ MainMessageRouter.route("/channels/:channelID").post(
 );
 
 MainMessageRouter.route("/:channelID/typing").post(
-  passportJWT,
+  authenticate,
   rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
   channelVerification,
   serverChannelPermissions('send_message', true),

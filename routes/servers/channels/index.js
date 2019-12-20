@@ -1,20 +1,20 @@
 const MainChannelRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("./../../../middlewares/passport");
+const authenticate = require("../../../middlewares/authenticate");
 const UserPresentVerification = require ('./../../../middlewares/UserPresentVerification')
 const serverPolicy = require("../../../policies/ServerPolicies");
 
 // Channels
 MainChannelRouter.route('/:server_id/channels').get(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./getServerChannels")
 );
 
 // Create
 MainChannelRouter.route('/:server_id/channels').put(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   serverPolicy.createChannel,
   require("./createServerChannel")
@@ -22,7 +22,7 @@ MainChannelRouter.route('/:server_id/channels').put(
 
 // Update
 MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   serverPolicy.updateChannel,
   require("./updateServerChannel")
@@ -30,14 +30,14 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
 
 // Delete
 MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./deleteServerChannel")
 );
 
 // position
 MainChannelRouter.route('/:server_id/channels/position').put(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./channelPositions")
 );

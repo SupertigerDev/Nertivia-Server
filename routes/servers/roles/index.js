@@ -1,21 +1,21 @@
 const MainRolesRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("./../../../middlewares/passport");
+const authenticate = require("../../../middlewares/authenticate");
 const UserPresentVerification = require("./../../../middlewares/UserPresentVerification");
 
 const rolePolicies = require('./../../../policies/RolesPolicies');
 
 // create role
 MainRolesRouter.route("/:server_id/roles").post(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./createRole")
 );
 
 // update role
 MainRolesRouter.route("/:server_id/roles/:role_id").patch(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   rolePolicies.updateRole,
   require("./updateRole")
@@ -23,7 +23,7 @@ MainRolesRouter.route("/:server_id/roles/:role_id").patch(
 
 // delete role
 MainRolesRouter.route("/:server_id/roles/:role_id").delete(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./deleteRole")
 );
@@ -31,13 +31,13 @@ MainRolesRouter.route("/:server_id/roles/:role_id").delete(
 
 // applyRoleToMember
 MainRolesRouter.route("/:server_id/members/:member_id/roles/:role_id").patch(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./applyRoleToMember")
 );
 // removeRoleFromMember
 MainRolesRouter.route("/:server_id/members/:member_id/roles/:role_id").delete(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./removeRoleFromMember")
 );

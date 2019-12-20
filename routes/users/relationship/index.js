@@ -1,7 +1,7 @@
 const MainRelationshipRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("./../../../middlewares/passport");
+const authenticate = require("../../../middlewares/authenticate");
 
 // Policies
 const relationshipPolicy = require("./../../../policies/relationshipPolicies");
@@ -9,16 +9,16 @@ const relationshipPolicy = require("./../../../policies/relationshipPolicies");
 
 // Add
 MainRelationshipRouter.route('/')
-  .post(passportJWT, relationshipPolicy.post, require('./addFriend'));
+  .post(authenticate, relationshipPolicy.post, require('./addFriend'));
 
 // Accept
 MainRelationshipRouter.route('/')
-  .put(passportJWT, relationshipPolicy.put, require('./acceptFriend'));
+  .put(authenticate, relationshipPolicy.put, require('./acceptFriend'));
 
 
 // Remove
 MainRelationshipRouter.route('/')
-  .delete(passportJWT, relationshipPolicy.delete, require('./removeFriend'));
+  .delete(authenticate, relationshipPolicy.delete, require('./removeFriend'));
 
 
 module.exports = MainRelationshipRouter;

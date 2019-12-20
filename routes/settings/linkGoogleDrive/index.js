@@ -1,9 +1,9 @@
 const MainGoogleDriveLinkRouter = require("express").Router();
 
-const { passportJWT } = require("../../../middlewares/passport");
+const authenticate = require("../../../middlewares/authenticate");
 
 //send consent url to client.
-MainGoogleDriveLinkRouter.route("/url").get(passportJWT, require("./url"));
+MainGoogleDriveLinkRouter.route("/url").get(authenticate, require("./url"));
 
 MainGoogleDriveLinkRouter.route("/auth").post(require("./auth"));
 

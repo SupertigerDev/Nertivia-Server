@@ -1,13 +1,9 @@
 const User = require('../../models/users');
-const passport = require('../../passport');
 const JWT = require('jsonwebtoken');
 const config = require('./../../config')
 
 function signToken(user) {
-  return JWT.sign({
-    sub: user.uniqueID,
-    iat: new Date().getTime()
-  }, config.jwtSecret);
+  return JWT.sign( user.uniqueID, config.jwtSecret);
 }
 
 module.exports = async (req, res, next) => {
@@ -27,8 +23,8 @@ module.exports = async (req, res, next) => {
   const newUser = new User({ username, email, password });
   const user = await newUser.save();
 
-  // Generate the token
-  const token = signToken(newUser);
+  // Generate the token without header information
+  const token = signToken(newUser).split('.').splice(1).join('.');
 
 
   // Respond with user

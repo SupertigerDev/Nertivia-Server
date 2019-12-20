@@ -1,12 +1,12 @@
 const MainDevicesRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("../../middlewares/passport");
+const authenticate = require("../../middlewares/authenticate");
 
 
 // register device
 MainDevicesRouter.route("/").post(
-  passportJWT,
+  authenticate,
   require("./registerDevice")
 );
 

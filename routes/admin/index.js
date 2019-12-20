@@ -1,33 +1,33 @@
 const MainAdminRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("../../middlewares/passport");
+const authenticate = require("../../middlewares/authenticate");
 const isAdmin = require('../../middlewares/isAdmin');
 
 // recently Created Accounts
 MainAdminRouter.route("/users/recent").get(
-  passportJWT,
+  authenticate,
   isAdmin,
   require("./recentUsers")
 );
 
 // Online Users
 MainAdminRouter.route("/users/online").get(
-  passportJWT,
+  authenticate,
   isAdmin,
   require("./onlineUsers")
 );
 
 // waiting for appeal themes
 MainAdminRouter.route("/themes/waiting").get(
-  passportJWT,
+  authenticate,
   isAdmin,
   require("./waitingThemes")
 );
 
 // get full theme information
 MainAdminRouter.route("/themes/:id").get(
-  passportJWT,
+  authenticate,
   isAdmin,
   require("./getTheme")
 );
@@ -35,7 +35,7 @@ MainAdminRouter.route("/themes/:id").get(
 
 // Approve theme
 MainAdminRouter.route("/themes/:id/approve").patch(
-  passportJWT,
+  authenticate,
   isAdmin,
   require("./approveTheme")
 );

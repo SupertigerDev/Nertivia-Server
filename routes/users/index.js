@@ -1,7 +1,7 @@
 const MainUserRouter = require("express").Router();
 
 // Middleware
-const { passportLogin, passportJWT } = require("./../../middlewares/passport");
+const authenticate = require("../../middlewares/authenticate");
 const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
 
 // Policies
@@ -18,14 +18,14 @@ MainUserRouter.use("/survey", require("./survey"));
 
 // Update
 MainUserRouter.route("/").patch(
-  passportJWT,
+  authenticate,
   userPolicy.updateUser,
   GDriveOauthClient,
   require("./userUpdate")
 );
 
 // Details
-MainUserRouter.route("/:uniqueID?").get(passportJWT, require("./userDetails"));
+MainUserRouter.route("/:uniqueID?").get(authenticate, require("./userDetails"));
 
 // Register
 MainUserRouter.route("/register").post(
@@ -38,7 +38,6 @@ MainUserRouter.route("/register").post(
 MainUserRouter.route("/login").post(
   authPolicy.login,
   reCaptchaPolicy,
-  passportLogin,
   require("./login")
 );
 

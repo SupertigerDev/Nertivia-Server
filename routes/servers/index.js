@@ -1,7 +1,7 @@
 const MainServerRouter = require("express").Router();
 
 // Middleware
-const { passportJWT } = require("./../../middlewares/passport");
+const authenticate = require("../../middlewares/authenticate");
 const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
 
 // Policies
@@ -10,14 +10,14 @@ const serverPolicy = require("../../policies/ServerPolicies");
 
 // Create
 MainServerRouter.route('/').post(
-  passportJWT,
+  authenticate,
   serverPolicy.createServer,
   require("./createServer")
 );
 
 // Update
 MainServerRouter.route('/:server_id').patch(
-  passportJWT,
+  authenticate,
   serverPolicy.updateServer,
   GDriveOauthClient,
   UserPresentVerification,
@@ -26,14 +26,14 @@ MainServerRouter.route('/:server_id').patch(
 
 // Delete
 MainServerRouter.route('/:server_id').delete(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./deleteLeaveServer")
 );
 
 // kick member
 MainServerRouter.route('/:server_id/members/:unique_id').delete(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./kickMember")
 );
@@ -41,7 +41,7 @@ MainServerRouter.route('/:server_id/members/:unique_id').delete(
 // banned members
 http://192.168.1.8/api/servers/6583302963345756160/bans
 MainServerRouter.route('/:server_id/bans').get(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./bannedMembers")
 )
@@ -49,7 +49,7 @@ MainServerRouter.route('/:server_id/bans').get(
 // ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:unique_id').put(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./banMember")
 )
@@ -57,7 +57,7 @@ MainServerRouter.route('/:server_id/bans/:unique_id').put(
 // un ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:unique_id').delete(
-  passportJWT,
+  authenticate,
   UserPresentVerification,
   require("./unBanMember")
 )

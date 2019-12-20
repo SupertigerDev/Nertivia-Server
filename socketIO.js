@@ -1,6 +1,5 @@
 const events = require("./socketEvents/index");
 const controller = require("./socketController");
-const jwtAuth = require("socketio-jwt-auth");
 const User = require("./models/users");
 const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
@@ -8,12 +7,10 @@ const channels = require("./models/channels");
 const config = require("./config");
 const Notifications = require("./models/notifications");
 const customEmojis = require("./models/customEmojis");
-const { newUser } = require("./passport");
 const jwt = require("jsonwebtoken");
 const { io } = require("./app");
 const redis = require("./redis");
 const sio = require("socket.io");
-const mongoose = require("mongoose");
 
 // nsps = namespaces.
 // disable socket events when not authorized .
@@ -58,7 +55,7 @@ module.exports = async client => {
     const { token } = data;
 
     try {
-      const decryptedToken = await jwt.verify(token, config.jwtSecret);
+      const decryptedToken = await jwt.verify(config.jwtHeader + token, config.jwtSecret);
       client.auth = true;
 
       // get the user
@@ -66,7 +63,7 @@ module.exports = async client => {
       const userSelect =
         "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status";
 
-      const user = await User.findOne({ uniqueID: decryptedToken.sub })
+      const user = await User.findOne({ uniqueID: decryptedToken })
         .select(userSelect)
         .populate(populateFriends)
         .populate(populateServers)
