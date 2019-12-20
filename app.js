@@ -63,7 +63,9 @@ app.use(cors({
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       callback(new Error(msg), false);
     } else {
-      callback(null, true);
+      callback(null, {
+        maxAge: 600
+      });
     }
   }, credentials: true
 }));
