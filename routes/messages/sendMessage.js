@@ -166,18 +166,14 @@ async function sendPushNotification(user, msg, recipient) {
   const message = {
     //this may vary according to the message type (single recipient, multicast, topic, et cetera)
     registration_ids: tokens,
-
-    notification: {
-      title: user.username,
-      body:
-        msgContent.length >= 500
-          ? msgContent.substring(0, 500) + "..."
-          : msgContent,
-      image: "https://" + config.IPs[1].domain + "/api/avatars/" + user.avatar
-    },
-
+ 
     data: {
-      channel_id: msg.channelID
+      username: user.username,
+      channel_id: msg.channelID,
+      avatar: user.avatar,
+      message: msgContent.length >= 500
+      ? msgContent.substring(0, 500) + "..."
+      : msgContent,
     }
   };
 
