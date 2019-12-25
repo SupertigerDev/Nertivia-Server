@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if roles limit reached
-  const rolesCount = Roles.countDocuments({ server: req.server._id });
+  const rolesCount = await Roles.countDocuments({ server: req.server._id });
 
   if (rolesCount >= 30) {
     return res.status(403).json({ message: "Role limit reached! (>= 30)" });
@@ -25,7 +25,8 @@ module.exports = async (req, res, next) => {
     name: "New Role",
     id: id,
     server: req.server._id,
-    server_id: req.server.server_id
+    server_id: req.server.server_id,
+    order: rolesCount
   };
   const create = await Roles.create(doc);
 
@@ -34,7 +35,8 @@ module.exports = async (req, res, next) => {
     permissions: 0,
     deletable: true,
     id: id,
-    server_id: doc.server_id
+    server_id: doc.server_id,
+    order: rolesCount
   };
   const io = req.io;
   io.in("server:" + req.server.server_id).emit("server:create_role", data);

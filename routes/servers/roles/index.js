@@ -13,6 +13,13 @@ MainRolesRouter.route("/:server_id/roles").post(
   require("./createRole")
 );
 
+// update role position
+MainRolesRouter.route("/:server_id/roles").patch(
+  authenticate,
+  UserPresentVerification,
+  require("./updateRolePosition")
+);
+
 // update role
 MainRolesRouter.route("/:server_id/roles/:role_id").patch(
   authenticate,
