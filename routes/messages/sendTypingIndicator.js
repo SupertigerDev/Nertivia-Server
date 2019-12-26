@@ -1,7 +1,7 @@
 
 module.exports = async (req, res, next) => {
   const { channelID } = req.params;
-  res.end();
+  res.status(204).end();
 
   // emit to users
   const io = req.io;

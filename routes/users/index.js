@@ -41,5 +41,11 @@ MainUserRouter.route("/login").post(
   require("./login")
 );
 
+// Logout
+MainUserRouter.route("/logout").delete(
+  authenticate,
+  require("./logout")
+);
+
 
 module.exports = MainUserRouter;
