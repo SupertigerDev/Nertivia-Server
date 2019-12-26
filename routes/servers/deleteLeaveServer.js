@@ -7,6 +7,7 @@ const ServerInvites = require("../../models/ServerInvites");
 const Messages = require("../../models/messages");
 const Notifications = require('../../models/notifications');
 const PublicServersList = require("../../models/publicServersList");
+const Roles = require("../../models/Roles");
 
 const sendMessageNotification = require('./../../utils/SendMessageNotification')
 
@@ -34,6 +35,7 @@ module.exports = async (req, res, next) => {
     await Channels.deleteMany({ server: req.server._id });
     await ServerMembers.deleteMany({ server: req.server._id });
     await ServerInvites.deleteMany({ server: req.server._id });
+    await Roles.deleteMany({ server: req.server._id });
 
     await User.updateMany({ $pullAll: { servers: [req.server._id] } });
     res.json({ status: "Done!" });
