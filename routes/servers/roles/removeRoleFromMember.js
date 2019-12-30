@@ -45,7 +45,9 @@ module.exports = async (req, res, next) => {
   }
 
   await ServerMembers.updateOne({_id: serverMember._id}, {$pull: { roles: role_id } });
-  
+  const redis = require("../../../redis");
+  redis.remServerMember(member_id, req.server.server_id);
+
   const io = req.io;
   io.in("server:" + req.server.server_id).emit("server_member:remove_role", {
     role_id: role_id,

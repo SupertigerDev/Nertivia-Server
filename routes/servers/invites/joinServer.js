@@ -5,6 +5,7 @@ const Messages = require("../../../models/messages");
 const ServerMembers = require("../../../models/ServerMembers");
 const publicServersList = require("../../../models/publicServersList");
 const Servers = require("../../../models/servers");
+const ServerRoles = require("../../../models/Roles");
 
 const sendMessageNotification = require('./../../../utils/SendMessageNotification')
 
@@ -72,7 +73,6 @@ module.exports = async (req, res, next) => {
     let serverChannels = await Channels.find({
       server: server._id
     }).lean();
-    await redis.addServerMember(req.user.uniqueID, server.server_id);
   
     const createServerObj = Object.assign({}, server);
     createServerObj.creator = { uniqueID: createServerObj.creator.uniqueID };
@@ -154,10 +154,20 @@ module.exports = async (req, res, next) => {
         });
       }
     }
-  
+
+
+    // send roles
+    let serverRoles = await ServerRoles.find(
+      {server: server._id},
+      {_id: 0}
+    ).select("name id color permissions server_id deletable order default")
+    
+    io.to(req.user.uniqueID).emit("server:roles", {
+      server_id: server.server_id,
+      roles: serverRoles,
+    });
 
     // send members list
-  
     let serverMembers = await ServerMembers.find({ server: server._id })
       .populate("member")
       .lean();
@@ -182,7 +192,6 @@ module.exports = async (req, res, next) => {
       serverMembers,
       memberPresences: memberPresences.result
     });
-  }
-  
+  }  
 };
 

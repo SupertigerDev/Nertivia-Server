@@ -13,8 +13,8 @@ const policies = {
       .isNumeric()
       .withMessage("Invalid Format.")
       .isLength({ min: 0, max: 30 })
-      .withMessage("Name must be shorter than 30 characters")
-      .optional({ checkFalsy: true }),
+      .withMessage("permissions must be shorter than 30 characters")
+      .optional({ checkFalsy: false }),
     check("color")
       .isString()
       .withMessage("Invalid Format.")

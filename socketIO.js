@@ -116,7 +116,7 @@ module.exports = async client => {
         serverRoles = await ServerRoles.find(
           {server: {$in : serverIDs}},
           {_id: 0}
-        ).select("name id color permissions server_id deletable order")
+        ).select("name id color permissions server_id deletable order default")
       }
 
       const dms = channels

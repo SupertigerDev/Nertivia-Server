@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
       .json({ message: "You do not have permission to create roles!" });
   }
 
-  const roles = await Roles.find({ server: req.server._id }).select("name id color permissions server_id deletable order").lean();
+  const roles = await Roles.find({ server: req.server._id }).select("name id color permissions server_id deletable order default").lean();
 
   // order roles
   let ordered = roles.sort((a, b) => a.order - b.order);

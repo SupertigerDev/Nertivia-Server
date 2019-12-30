@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
 
   if (req.server.creator.equals(req.user._id)) {
     await redis.remServerChannels(channelIDArray)
-    await redis.delServer(req.server.server_id);
+    await redis.delAllServerMembers(req.server.server_id);
     await Servers.deleteOne({ _id: req.server._id });
     await PublicServersList.deleteOne({ server: req.server._id });
 

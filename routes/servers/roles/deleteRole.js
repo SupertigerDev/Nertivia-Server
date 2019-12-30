@@ -16,9 +16,16 @@ module.exports = async (req, res, next) => {
   // check if role exists.
   const role = await Roles.findOne({id: roleID, server: req.server._id});
 
-  if (!role) {
+  // check if default
+  if (role.default) {
     return res
     .status(403)
+    .json({ message: "Default role cannot be deleted." });
+  }
+
+  if (!role) {
+    return res
+    .status(404)
     .json({ message: "Role does not exist in that server." });
   }
 

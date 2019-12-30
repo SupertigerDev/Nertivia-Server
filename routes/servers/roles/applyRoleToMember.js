@@ -22,7 +22,13 @@ module.exports = async (req, res, next) => {
   }
 
   // check if role exists in that server
-  const roleExists = await Roles.exists({id: role_id, server_id: server_id});
+  const roleExists = await Roles.findOne({id: role_id, server_id: server_id});
+
+  if (roleExists.default === true) {
+    return res
+    .status(404)
+    .json({ message: "Role does not exist." });
+  }
 
   if (!roleExists) {
     return res
@@ -41,6 +47,9 @@ module.exports = async (req, res, next) => {
   }
 
   await ServerMembers.updateOne({_id: serverMember._id}, {$addToSet: { roles: role_id } });
+
+  const redis = require("../../../redis");
+  redis.remServerMember(member_id, req.server.server_id);
   
   const io = req.io;
   io.in("server:" + req.server.server_id).emit("server_member:add_role", {

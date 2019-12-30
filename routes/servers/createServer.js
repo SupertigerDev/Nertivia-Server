@@ -4,10 +4,17 @@ const ServerMembers = require("../../models/ServerMembers");
 const Channels = require("../../models/channels");
 const Servers = require("../../models/servers");
 const User = require("../../models/users");
+const Roles = require("../../models/Roles");
+const rolePerms = require("../../utils/rolePermConstants");
 
 // Imports
 const FlakeId = require('flakeid');
 const flake = new FlakeId();
+
+const flakeRole = new FlakeId({
+  timeOffset: (2013 - 1970) * 11636000 * 1000
+});
+
 
 module.exports = async (req, res, next) => {
   const { name } = req.body;
@@ -50,12 +57,43 @@ module.exports = async (req, res, next) => {
     type: "OWNER"
   });
 
+
+  
+  const io = req.io;
+
+  // create default role
+  const roleID = flakeRole.gen();
+
+  const roleDoc = {
+    name: "Online",
+    id: roleID,
+    permissions: rolePerms.SEND_MESSAGES,
+    server: createServer._id,
+    server_id: createServer.server_id,
+    default: true,
+    deletable: false,
+    order: 0
+  };
+  const createRole = await Roles.create(roleDoc);
+
+  const roleData = {
+    name: roleDoc.name,
+    permissions: roleDoc.permissions,
+    default: true,
+    deletable: false,
+    id: roleID,
+    server_id: roleDoc.server_id,
+    order: 0
+  };
+
+  io.in(req.user.uniqueID).emit("server:create_role", roleData);
+
+
   createServerObj.creator = { uniqueID: req.user.uniqueID };
   createServerObj.__v = undefined;
   createServerObj._id = undefined;
   res.json(createServerObj);
 
-  const io = req.io;
   // send owns status to every connected device
   createServerObj.channels = [createChannel];
   const serverMember = addServerMember.toObject();

@@ -11,6 +11,8 @@ const URLEmbed = require('./../../middlewares/URLEmbed');
 const serverChannelPermissions = require('./../../middlewares/serverChannelPermissions');
 const busboy = require('connect-busboy');
 const rateLimit = require('./../../middlewares/rateLimit');
+const permissions = require('../../utils/rolePermConstants');
+const checkRolePerms = require('../../middlewares/checkRolePermissions');
 
 MainMessageRouter.route("/channels/:channelID").get(
   authenticate,
@@ -48,6 +50,7 @@ MainMessageRouter.route("/channels/:channelID").post(
   rateLimit({name: 'message_send', expire: 60, requestsLimit: 120 }),
   channelVerification,
   serverChannelPermissions('send_message', true),
+  checkRolePerms('Send Message', permissions.SEND_MESSAGES),
   require('./sendMessage'),
   URLEmbed,
   GDriveOauthClient,
@@ -60,6 +63,7 @@ MainMessageRouter.route("/:channelID/typing").post(
   rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
   channelVerification,
   serverChannelPermissions('send_message', true),
+  checkRolePerms('Send Message', permissions.SEND_MESSAGES),
   require('./sendTypingIndicator'),
 );
 

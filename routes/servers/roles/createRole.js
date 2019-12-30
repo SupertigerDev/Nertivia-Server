@@ -1,6 +1,8 @@
 const FlakeId = require("flakeid");
 const Roles = require("./../../../models/Roles");
 
+const rolePerms = require("../../../utils/rolePermConstants");
+
 const flake = new FlakeId({
   timeOffset: (2013 - 1970) * 11636000 * 1000
 });
@@ -24,6 +26,7 @@ module.exports = async (req, res, next) => {
   const doc = {
     name: "New Role",
     id: id,
+    permissions: rolePerms.SEND_MESSAGES,
     server: req.server._id,
     server_id: req.server.server_id,
     order: rolesCount
@@ -32,7 +35,7 @@ module.exports = async (req, res, next) => {
 
   const data = {
     name: doc.name,
-    permissions: 0,
+    permissions: doc.permissions,
     deletable: true,
     id: id,
     server_id: doc.server_id,

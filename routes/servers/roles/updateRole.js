@@ -22,8 +22,12 @@ module.exports = async (req, res, next) => {
     .json({ message: "Role does not exist in that server." });
   }
 
-
   const update = await Roles.updateOne({_id: role._id}, dataMatched);
+  
+  const redis = require("../../../redis");
+  redis.delAllServerMembers(req.server.server_id);
+
+
 
   const data = Object.assign({}, dataMatched, {id: roleID, server_id: req.server.server_id});
   const io = req.io;

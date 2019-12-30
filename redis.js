@@ -77,18 +77,29 @@ module.exports = {
   getServerChannel: (channelID) => {
     return wrapper('get', `channels:${channelID}`);
   },
-  addServerMember: (uniqueID, serverID) => {
-    return wrapper('sadd', `serverMembers:${serverID}`, `user:${uniqueID}`);
+
+  //member
+
+// for setting: hset serverMembers:S_ID u_id "{perm: 2}"
+// for exists: hexists serverMembers:S_ID u_id
+// for deleting a member: hdel serverMembers:S_ID u_id
+// for deleting all: del serverMembers:S_ID
+// getting hget serverMembers:6604056106056552448 184288888616859408
+
+  addServerMember: (uniqueID, serverID, data) => {
+    return wrapper('hset', `serverMembers:${serverID}`, uniqueID, data || "{}");
   },
-  serverMemberExists: (uniqueID, serverID) => {
-    return wrapper('sismember', `serverMembers:${serverID}`, `user:${uniqueID}`);
+  getServerMember: (uniqueID, serverID) => {
+    return wrapper('hget', `serverMembers:${serverID}`, uniqueID);
   },
   remServerMember: (uniqueID, serverID) => {
-    return wrapper('srem', `serverMembers:${serverID}`, `user:${uniqueID}`);
+    return wrapper('hdel', `serverMembers:${serverID}`, uniqueID);
   },
-  delServer: (serverID) => {
+  delAllServerMembers: (serverID) => {
     return wrapper('del', `serverMembers:${serverID}`);
   },
+  //member
+
   rateLimitSetExpire: async (key, expire, currentTTL) => {
     if (currentTTL === 1 || currentTTL === -1){
       const expiryMs = Math.round(1000 * expire);
