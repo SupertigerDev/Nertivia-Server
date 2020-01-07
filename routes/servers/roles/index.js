@@ -13,7 +13,7 @@ MainRolesRouter.route("/:server_id/roles").post(
   authenticate,
   UserPresentVerification,
   // redis and UserPresentVerification needs work in order for this to work.
-  //checkRolePerms('Roles', MANAGE_ROLES),
+  checkRolePerms('Roles', MANAGE_ROLES),
   require("./createRole")
 );
 

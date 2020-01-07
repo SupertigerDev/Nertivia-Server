@@ -9,6 +9,7 @@ module.exports = async (req, res, next) => {
   // check if exists in redis
   // check dm channel
   const dmChannel = await redis.getChannel(channelID, req.user.uniqueID);
+  
   if (dmChannel.result) {
     const channel = JSON.parse(dmChannel.result);
     req.channel = channel;
@@ -20,17 +21,20 @@ module.exports = async (req, res, next) => {
   if (serverChannel.result) {
     const channel = JSON.parse(serverChannel.result);
     //check if member in server
-    let isInServer = await redis.getServerMember(req.user.uniqueID, channel.server.server_id);
+    let isInServer = await redis.getServerMember(req.user.uniqueID, channel.server_id);
     if (isInServer.result) {
       req.channel = channel;
       req.permissions = JSON.parse(isInServer.result).permissions
-      next();
-      return;
+      // get server
+      const server = await redis.getServer(channel.server_id);
+      if (server.result) {
+        req.channel.server = JSON.parse(server.result);
+        next();
+        return;
+      }
     }
-
   }
-
-
+  
   // check in database
 
   const channel = await Channels.findOne({
@@ -53,6 +57,7 @@ module.exports = async (req, res, next) => {
         message: "You have not joined that server."
       });
     }
+
     
     let permissions = 0;
 
@@ -74,8 +79,12 @@ module.exports = async (req, res, next) => {
     req.permissions = permissions;
     next();
     await redis.addServerMember(req.user.uniqueID, channel.server.server_id, JSON.stringify({permissions}));
+
+    await redis.addServer(channel.server.server_id, channel.server);
+
+  
     	
-    await redis.addChannel(channelID, channel, req.user.uniqueID);
+    await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.uniqueID);
   } else {
     req.channel = channel;
     next();

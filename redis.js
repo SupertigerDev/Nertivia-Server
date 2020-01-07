@@ -52,39 +52,48 @@ module.exports = {
     return wrapper('hset', `user:${uniqueID}`, 'status', status);
   },
   addChannel: async (channelID, channelData, uniqueID) => {
-    if (channelData.server) {
-      return wrapper('set', `channels:${channelID}`,JSON.stringify(channelData)); 
+    if (channelData.server_id) {
+      return wrapper('set', `serverChannels:${channelID}`,JSON.stringify(channelData)); 
     } 
     return wrapper('hset', `user:${uniqueID}`, `channel:${channelID}`, JSON.stringify(channelData));
   },
   serverChannelExists: (channelID) => {
-    return wrapper('exists', `channels:${channelID}`);
+    return wrapper('exists', `serverChannels:${channelID}`);
   },
   remServerChannels: (channelIDArr) => {
     const multi = redisClient.multi();
     for (let index = 0; index < channelIDArr.length; index++) {
       const channelID = channelIDArr[index];
-      multi.del(`channels:${channelID}`)
+      multi.del(`serverChannels:${channelID}`)
     }
     return multiWrapper(multi) 
   },
   removeServerChannel: (channelID) => {
-    return wrapper('del', `channels:${channelID}`); 
+    return wrapper('del', `serverChannels:${channelID}`); 
   },
   getChannel: (channelID, uniqueID) => {
     return wrapper('hget', `user:${uniqueID}`, `channel:${channelID}`);
   },
   getServerChannel: (channelID) => {
-    return wrapper('get', `channels:${channelID}`);
+    return wrapper('get', `serverChannels:${channelID}`);
+  },
+  addServer: async (serverID, data) => {
+    return wrapper('set', `servers:${serverID}`, JSON.stringify(data)); 
+  },
+  getServer: async (serverID) => {
+    return wrapper('get', `servers:${serverID}`); 
+  },
+  deleteServer: async (serverID) => {
+    return wrapper('del', `servers:${serverID}`); 
   },
 
   //member
 
-// for setting: hset serverMembers:S_ID u_id "{perm: 2}"
-// for exists: hexists serverMembers:S_ID u_id
-// for deleting a member: hdel serverMembers:S_ID u_id
-// for deleting all: del serverMembers:S_ID
-// getting hget serverMembers:6604056106056552448 184288888616859408
+  // for setting: hset serverMembers:S_ID u_id "{perm: 2}"
+  // for exists: hexists serverMembers:S_ID u_id
+  // for deleting a member: hdel serverMembers:S_ID u_id
+  // for deleting all: del serverMembers:S_ID
+  // getting hget serverMembers:6604056106056552448 184288888616859408
 
   addServerMember: (uniqueID, serverID, data) => {
     return wrapper('hset', `serverMembers:${serverID}`, uniqueID, data || "{}");

@@ -22,14 +22,14 @@ module.exports = async (req, res, next) => {
 
     const user = await Users.findOne({ uniqueID: decryptedToken }).select(
       "avatar status admin _id username uniqueID tag created GDriveRefreshToken"
-    );
+    ).lean();
     // If user doesn't exists, handle it
     if (!user) {
       return res.status(401).send({
         message: "Invalid Token."
       });
     }
-    req.user = user
+    req.user = JSON.parse(JSON.stringify(user));
     req.session["user"] = user;
 
     next();

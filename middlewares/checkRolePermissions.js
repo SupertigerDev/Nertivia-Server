@@ -1,6 +1,7 @@
 const {containsPerm, ADMIN} = require('../utils/rolePermConstants');
 module.exports = function (name, flag) {
   return async function (req, res, next) {
+    
     if (!req.channel) {
       if (!req.server) {
         res.status(403).json({
@@ -11,7 +12,6 @@ module.exports = function (name, flag) {
       return next();
     }
 
-    console.log(req.permissions)
     if (req.permissions === undefined) {
       return res.status(403).json({
         message: `Missing permission! (${name})`,

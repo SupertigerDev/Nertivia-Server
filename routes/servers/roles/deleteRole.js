@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
   const roleID = req.params.role_id;
 
   // check if this function is executed by the guild owner.
-  if (!req.server.creator.equals(req.user._id)){
+  if (req.server.creator !== req.user._id){
     return res
     .status(403)
     .json({ message: "You do not have permission to delete roles!" });
