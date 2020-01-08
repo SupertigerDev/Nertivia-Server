@@ -18,6 +18,7 @@ module.exports = async (req, res, next) => {
     // check if member is in cache
     const cacheMember = JSON.parse((await redis.getServerMember(req.user.uniqueID, serverID)).result || null);
     if (cacheMember) {
+      req.permissions = cacheMember.permissions;
       req.server = cacheServer;
       if (channelID) {
         // check if channel is in cache

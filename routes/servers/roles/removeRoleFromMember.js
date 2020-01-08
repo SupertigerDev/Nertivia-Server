@@ -11,12 +11,7 @@ const flake = new FlakeId({
 // /:server_id/members/:member_id/roles/:role_id
 module.exports = async (req, res, next) => {
   const { server_id, member_id, role_id } = req.params;
-  // check if this function is executed by the guild owner.
-  if (req.server.creator !== req.user._id){
-    return res
-    .status(403)
-    .json({ message: "You do not have permission to create roles!" });
-  }
+
   const user = await Users.findOne({uniqueID: member_id});
 
   if (!user) {

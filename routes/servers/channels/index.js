@@ -4,7 +4,8 @@ const MainChannelRouter = require("express").Router();
 const authenticate = require("../../../middlewares/authenticate");
 const UserPresentVerification = require ('./../../../middlewares/UserPresentVerification')
 const serverPolicy = require("../../../policies/ServerPolicies");
-
+const checkRolePerms = require('./../../../middlewares/checkRolePermissions');
+const {MANAGE_CHANNELS} = require("./../../../utils/rolePermConstants");
 // Channels
 MainChannelRouter.route('/:server_id/channels').get(
   authenticate,
@@ -16,6 +17,7 @@ MainChannelRouter.route('/:server_id/channels').get(
 MainChannelRouter.route('/:server_id/channels').put(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.createChannel,
   require("./createServerChannel")
 );
@@ -24,6 +26,7 @@ MainChannelRouter.route('/:server_id/channels').put(
 MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.updateChannel,
   require("./updateServerChannel")
 );
@@ -32,6 +35,7 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
 MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Channels', MANAGE_CHANNELS),
   require("./deleteServerChannel")
 );
 
@@ -39,6 +43,7 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
 MainChannelRouter.route('/:server_id/channels/position').put(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Channels', MANAGE_CHANNELS),
   require("./channelPositions")
 );
 

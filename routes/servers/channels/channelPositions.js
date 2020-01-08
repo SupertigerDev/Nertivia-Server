@@ -1,11 +1,6 @@
 const Servers = require('../../../models/servers');
 module.exports = async (req, res, next) => {
 
-  // check if this function is executed by the guild owner.
-  if (req.server.creator !== req.user._id)
-  return res
-    .status(403)
-    .json({ message: "You do not have permission to update channels!" });
 
   const io = req.io;
   const { channel_position } = req.body;

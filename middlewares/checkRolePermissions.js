@@ -1,6 +1,7 @@
 const {containsPerm, ADMIN} = require('../utils/rolePermConstants');
 module.exports = function (name, flag) {
   return async function (req, res, next) {
+
     
     if (!req.channel) {
       if (!req.server) {
@@ -9,6 +10,10 @@ module.exports = function (name, flag) {
         })
       }
     } else if (!req.channel.server) {
+      return next();
+    }
+    // owner always has the permission
+    if (req.server.creator === req.user._id){
       return next();
     }
 

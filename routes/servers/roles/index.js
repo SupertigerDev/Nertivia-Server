@@ -21,6 +21,7 @@ MainRolesRouter.route("/:server_id/roles").post(
 MainRolesRouter.route("/:server_id/roles").patch(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Roles', MANAGE_ROLES),
   require("./updateRolePosition")
 );
 
@@ -29,6 +30,7 @@ MainRolesRouter.route("/:server_id/roles/:role_id").patch(
   authenticate,
   UserPresentVerification,
   rolePolicies.updateRole,
+  checkRolePerms('Roles', MANAGE_ROLES),
   require("./updateRole")
 );
 
@@ -36,6 +38,7 @@ MainRolesRouter.route("/:server_id/roles/:role_id").patch(
 MainRolesRouter.route("/:server_id/roles/:role_id").delete(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Roles', MANAGE_ROLES),
   require("./deleteRole")
 );
 
@@ -44,12 +47,14 @@ MainRolesRouter.route("/:server_id/roles/:role_id").delete(
 MainRolesRouter.route("/:server_id/members/:member_id/roles/:role_id").patch(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Roles', MANAGE_ROLES),
   require("./applyRoleToMember")
 );
 // removeRoleFromMember
 MainRolesRouter.route("/:server_id/members/:member_id/roles/:role_id").delete(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Roles', MANAGE_ROLES),
   require("./removeRoleFromMember")
 );
 

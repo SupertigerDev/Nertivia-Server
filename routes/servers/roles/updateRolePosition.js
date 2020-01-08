@@ -4,13 +4,6 @@ module.exports = async (req, res, next) => {
 
   const {roleID, order} = req.body
 
-  // check if this function is executed by the guild owner.
-  if (req.server.creator !== req.user._id){
-    return res
-      .status(403)
-      .json({ message: "You do not have permission to create roles!" });
-  }
-
   const roles = await Roles.find({ server: req.server._id }).select("name id color permissions server_id deletable order default").lean();
 
   // order roles
