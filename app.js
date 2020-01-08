@@ -85,7 +85,7 @@ app.use('/', express.static('public/supertiger/'))
 
 
 // Connect to MongoDB Database.
-mongoose.connect(config.mongoDBAddress, {useNewUrlParser: true}, function (err) {
+mongoose.connect(config.mongoDBAddress, {useNewUrlParser: true, useUnifiedTopology: true}, function (err) {
     if (err) {
         throw err;
     }

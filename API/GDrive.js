@@ -96,7 +96,7 @@ module.exports = {
               resource: body
             })
             .then(() => resolve({ ok: true, result }))
-            .catch(err => resolve({ ok: false, error }));
+            .catch(error => resolve({ ok: false, error }));
         })
         .catch(error => resolve({ ok: false, error }));
     });

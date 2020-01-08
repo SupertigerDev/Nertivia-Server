@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({ message: "Cannot delete default channel." });
   }
   try {
-    await Notifications.remove({ channelID });
+    await Notifications.deleteMany({ channelID });
     await Channels.deleteOne({ channelID });
     await Messages.deleteMany({ channelID });
     const redis = require("./../../../redis");
