@@ -13,7 +13,8 @@ module.exports = function (name, flag) {
       return next();
     }
     // owner always has the permission
-    if (req.server.creator === req.user._id){
+    const creator = req.server ? req.server.creator : req.channel.server ? req.channel.server.creator : undefined;
+    if (creator === req.user._id){
       return next();
     }
 
