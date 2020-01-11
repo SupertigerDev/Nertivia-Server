@@ -3,6 +3,7 @@ const { matchedData } = require('express-validator/filter');
 const bcrypt = require('bcryptjs');
 const GDriveApi = require('./../../API/GDrive');
 const stream = require('stream');
+const cropImage = require('../../utils/cropImage');
 
 module.exports = async (req, res, next) => {
   const oauth2Client = req.oauth2Client;
@@ -74,13 +75,13 @@ module.exports = async (req, res, next) => {
   }
 
   if (data.avatar && oauth2Client) {
-    const { ok, error, result } = await uploadAvatar(
+    const { resp, mime } = await uploadAvatar(
       data.avatar,
       oauth2Client,
       res,
       req
     );
-    if (!ok) {
+    if (!resp.ok) {
       return res
         .status(403)
         .json({
@@ -89,7 +90,7 @@ module.exports = async (req, res, next) => {
         });
     }
     delete data.avatar;
-    data.avatar = result.data.id;
+    data.avatar = resp.result.data.id + `/${user.uniqueID}.${mime !== 'gif' ? 'webp' : 'gif'}`;
   }
 
   try {
@@ -112,13 +113,13 @@ module.exports = async (req, res, next) => {
 
 async function uploadAvatar(base64, oauth2Client, res, req) {
   return new Promise(async resolve => {
-    const buffer = Buffer.from(base64.split(',')[1], 'base64');
+    let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
-    // 2092000 = 2mb
-    const maxSize = 2092000; 
+    // 8092000 = 8mb
+    const maxSize = 8092000; 
     if (buffer.byteLength > maxSize) {
       return res.status(403).json({
-        message: "Image is larger than 2MB."
+        message: "Image is larger than 8MB."
       });
     }
     const mimeType = base64MimeType(base64);
@@ -128,7 +129,15 @@ async function uploadAvatar(base64, oauth2Client, res, req) {
         message: "Invalid avatar."
       });
     }
-  
+
+    buffer = await cropImage(buffer, mimeType);
+
+    if (!buffer) {
+      return res.status(403).json({
+        message: "Something went wrong while cropping image."
+      });
+    }
+
     const readable = new stream.Readable()
     readable._read = () => {} // _read is required but you can noop it
     readable.push(buffer)
@@ -148,7 +157,7 @@ async function uploadAvatar(base64, oauth2Client, res, req) {
       folderID,
       oauth2Client
     );
-    resolve(requestUploadFile);
+    resolve({resp: requestUploadFile, mime: type});
   })
 
 }
