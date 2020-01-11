@@ -3,23 +3,27 @@ const config = require("./../config");
 const path = require("path");
 const sharp = require("sharp");
 const fs = require("fs");
+const {google} = require('googleapis');
+
 module.exports = async (req, res, next) => {
   const id = req.params["0"].split("/")[0];
   if (id === "default.png") return next();
   const url = `https://drive.google.com/uc?export=view&id=${id}`;
   const type = req.query.type;
 
-  const requestSettings = {
-    url,
-    method: "GET",
-    encoding: null
-  };
-  request(requestSettings, async (err, resp, buffer) => {
-    if (!resp || resp.statusCode !== 200) return next();
-    if (err) return next();
+
+  google.drive("v3").files.get({
+    fileId: id,
+    key: config.googleDrive.key,
+    alt: 'media',
+  }, {
+    responseType: 'arraybuffer'
+  }, (err, resp) => {
+    if (err) return next()
     let contentType = resp.headers["content-type"];
     res.set("Cache-Control", "public, max-age=31536000");
-    if (type && type === "webp") {
+    var buffer = new Buffer.from(resp.data, 'base64');
+    if (type && type === "webp") { 
       res.type('image/webp')
       sharp(buffer)
         .webp()
@@ -28,7 +32,7 @@ module.exports = async (req, res, next) => {
           res.end(data);
         })
         .catch(err => {
-          next();
+          return next();
         });
     } else {
       res.end(buffer);
@@ -42,5 +46,5 @@ module.exports = async (req, res, next) => {
         () => {}
       );
     }
-  });
+  })
 };
