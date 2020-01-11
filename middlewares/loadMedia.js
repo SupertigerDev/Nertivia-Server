@@ -18,10 +18,10 @@ module.exports = (req, res, next) => {
    if (resp && resp.statusCode !== 200) return res.status(404).end();
    if (err) return res.status(404).end();
    res.set('Cache-Control', 'public, max-age=31536000');
-    if (type && type === 'png') {
-      res.type('image/png')
+    if (type && type === 'webp') {
+      res.type('image/webp')
       sharp(buffer)
-        .png()
+        .webp()
         .toBuffer()
         .then( data => { 
           res.end(data);

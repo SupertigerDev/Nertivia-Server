@@ -19,9 +19,10 @@ module.exports = async (req, res, next) => {
     if (err) return next();
     let contentType = resp.headers["content-type"];
     res.set("Cache-Control", "public, max-age=31536000");
-    if (type && type === "png") {
+    if (type && type === "webp") {
+      res.type('image/webp')
       sharp(buffer)
-        .png()
+        .webp()
         .toBuffer()
         .then(data => {
           res.end(data);
