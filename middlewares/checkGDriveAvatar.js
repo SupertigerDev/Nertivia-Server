@@ -5,7 +5,7 @@ const sharp = require("sharp");
 const fs = require("fs");
 module.exports = async (req, res, next) => {
   const id = req.params["0"].split("/")[0];
-
+  if (id === "default.png") return next();
   const url = `https://drive.google.com/uc?export=view&id=${id}`;
   const type = req.query.type;
 
