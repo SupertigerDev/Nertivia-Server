@@ -1,35 +1,128 @@
 const path = require("path");
 const User = require("../../models/users");
 const GDriveApi = require("./../../API/GDrive");
-
+const cropImage = require("../../utils/cropImage");
 const CustomEmojis = require("../../models/customEmojis");
-
+const stream = require("stream");
 
 module.exports = async (req, res, next) => {
   const oauth2Client = req.oauth2Client;
-  // 1048576 = 1mb
-  const maxSize = 1048576;
-  if (req.headers["content-length"] >= maxSize)
-    return res.status(403).json({
-      status: false,
-      message: "Image is larger than 1MB."
-    });
 
-  if (!req.busboy)
+  if (!req.body.avatar) {
     return res.status(403).json({
-      status: false,
       message: "Image is not present."
     });
-
+  }
   const emojiCount = await CustomEmojis.countDocuments({
     user: req.user._id
   });
 
-  if (emojiCount > 50)
+  if (emojiCount > 50) {
     return res.status(403).json({
       status: false,
       message: "Maximum amount of emojis has reached! (50 emojis)"
     });
+  }
+
+
+  //replaceAccents = remove special characters.
+  //replace convert space to underscope
+  let emojiName = replaceAccents(req.body.name).trim();
+
+  if (emojiName.length < 1)
+    return res.status(403).json({
+      message: "Minimum: 1 characters are required."
+    });
+
+  if (emojiName.length > 30)
+    return res.status(403).json({
+      message: "Maximum: 30 characters are required."
+    });
+  emojiName = emojiName.replace(/[^A-Z0-9]+/gi, "_").trim();
+
+  const checkEmojiExists = await CustomEmojis.findOne({
+    user: req.user._id,
+    name: emojiName
+  });
+  if (checkEmojiExists)
+    return res.status(403).json({
+      status: false,
+      message: "Emoji with that name already exists!"
+    });
+
+
+    let buffer = Buffer.from(req.body.avatar.split(",")[1], "base64");
+
+  // 3048576 = 3mb
+  const maxSize = 3048576;
+  if (buffer.byteLength > maxSize) {
+    return res.status(403).json({
+      message: "Image is larger than 3MB."
+    });
+  }
+  const mimeType = base64MimeType(req.body.avatar);
+
+  if (!checkMimeType(mimeType)) {
+    return res.status(403).json({
+      message: "Invalid avatar."
+    });
+  }
+
+  buffer = await cropImage(buffer, mimeType, 100);
+
+  if (!buffer) {
+    return res.status(403).json({
+      message: "Something went wrong while cropping image."
+    });
+  }
+  const readable = new stream.Readable();
+  readable._read = () => {}; // _read is required but you can noop it
+  readable.push(buffer);
+  readable.push(null);
+
+  // get nertivia_uploads folder id
+  const requestFolderID = await GDriveApi.findFolder(oauth2Client);
+  if (!requestFolderID.result) {
+    return res.status(404).json({
+      message:
+        "If you're seeing this message, please contact Fishie@azK0 in Nertivia (Error: Google Drive folder missing.)"
+    });
+  }
+  const folderID = requestFolderID.result.id;
+
+  const requestUploadFile = await GDriveApi.uploadFile(
+    {
+      fileName: req.body.name,
+      mimeType,
+      fileStream: readable
+    },
+    folderID,
+    oauth2Client
+  );
+
+
+  const addEmoji = await CustomEmojis.create({
+    user: req.user._id,
+    emojiID: requestUploadFile.result.data.id,
+    name: emojiName
+  });
+  if (!addEmoji)
+    return res.status(403).json({
+      status: false,
+      message: "Something went wrong."
+    });
+
+  res.json({
+    status: true
+  });
+
+  const io = req.io;
+  // send owns status to every connected device
+  io.in(req.user.uniqueID).emit("customEmoji:uploaded", {
+    emoji: addEmoji
+  });
+
+  return;
 
   req.pipe(req.busboy);
   req.busboy.on(
@@ -151,4 +244,29 @@ function replaceAccents(str) {
   }
 
   return str;
+}
+
+function base64MimeType(encoded) {
+  var result = null;
+
+  if (typeof encoded !== "string") {
+    return result;
+  }
+
+  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+
+  if (mime && mime.length) {
+    result = mime[1];
+  }
+
+  return result;
+}
+
+function checkMimeType(mimeType) {
+  const filetypes = /jpeg|jpg|gif|png/;
+  const mime = filetypes.test(mimeType);
+  if (mime) {
+    return true;
+  }
+  return false;
 }

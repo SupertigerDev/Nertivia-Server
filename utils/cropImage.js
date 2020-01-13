@@ -1,14 +1,14 @@
 const gm = require("gm").subClass({imageMagick: true});
 const sharp = require('sharp');
 
-module.exports = async (buffer, mimeType) => {
+module.exports = async (buffer, mimeType, size) => {
   if (mimeType === "image/gif") {
     return new Promise(resolve => {
       gm(buffer)
         .coalesce()
-        .resize("200", "200", "^")
+        .resize(size, size, "^")
         .gravity("Center")
-        .crop("200", "200")
+        .crop(size, size)
         .repage("+")
         .dither(false)
         .matte()
@@ -21,7 +21,7 @@ module.exports = async (buffer, mimeType) => {
     });
   } else {
     return await sharp(buffer)
-      .resize(200, 200)
+      .resize(size, size)
       .webp()
       .toBuffer();
   }

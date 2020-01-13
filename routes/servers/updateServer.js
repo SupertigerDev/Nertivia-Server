@@ -7,6 +7,7 @@ const stream = require("stream");
 const { matchedData } = require("express-validator/filter");
 const FlakeId = require("flakeid");
 const flake = new FlakeId();
+const cropImage = require('../../utils/cropImage');
 
 module.exports = async (req, res, next) => {
   // check if this function is executed by the guild owner.
@@ -36,7 +37,8 @@ module.exports = async (req, res, next) => {
       data.avatar,
       oauth2Client,
       res,
-      req
+      req,
+      false
     );
     if (!ok) {
       return res.status(403).json({
@@ -53,7 +55,8 @@ module.exports = async (req, res, next) => {
       data.banner,
       oauth2Client,
       res,
-      req
+      req,
+      true
     );
     if (!ok) {
       return res.status(403).json({
@@ -103,9 +106,9 @@ function checkMimeType(mimeType) {
   return false;
 }
 
-async function uploadAvatar(base64, oauth2Client, res, req) {
+async function uploadAvatar(base64, oauth2Client, res, req, isBanner) {
   return new Promise(async resolve => {
-    const buffer = Buffer.from(base64.split(",")[1], "base64");
+    let buffer = Buffer.from(base64.split(",")[1], "base64");
 
     // 2092000 = 2mb
     const maxSize = 2092000;
@@ -119,6 +122,16 @@ async function uploadAvatar(base64, oauth2Client, res, req) {
     if (!checkMimeType(mimeType)) {
       return res.status(403).json({
         message: "Invalid avatar."
+      });
+    }
+    if (isBanner) {
+      buffer = await cropImage(buffer, mimeType, 500);
+    } else {
+      buffer = await cropImage(buffer, mimeType, 200);
+    }
+    if (!buffer) {
+      return res.status(403).json({
+        message: "Something went wrong while cropping image."
       });
     }
 

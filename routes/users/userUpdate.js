@@ -130,7 +130,7 @@ async function uploadAvatar(base64, oauth2Client, res, req) {
       });
     }
 
-    buffer = await cropImage(buffer, mimeType);
+    buffer = await cropImage(buffer, mimeType, 200);
 
     if (!buffer) {
       return res.status(403).json({
