@@ -21,6 +21,10 @@ module.exports = async (req, res, next) => {
   }, (err, resp) => {
     if (err) return next()
     let contentType = resp.headers["content-type"];
+    if (!contentType.startsWith("image/")) {
+      res.status(404).end();
+      return;
+    }
     res.set("Cache-Control", "public, max-age=31536000");
     var buffer = new Buffer.from(resp.data, 'base64');
     if (type && type === "webp") { 
@@ -38,13 +42,11 @@ module.exports = async (req, res, next) => {
       res.end(buffer);
     }
     // save image to cache
-    if (contentType.startsWith("image/")) {
       fs.writeFile(
         `public/cache/${id}.${contentType.split("/")[1]}`,
         buffer,
         "binary",
         () => {}
       );
-    }
   })
 };

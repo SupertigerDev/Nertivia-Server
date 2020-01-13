@@ -2,38 +2,41 @@ const request = require("request");
 const config = require("./../config");
 const path = require('path');
 const sharp = require('sharp')
-module.exports = (req, res, next) => {
-  const id = req.params["0"];
+const {google} = require('googleapis');
 
-  const url = `https://drive.google.com/uc?export=view&id=${id}`;
+module.exports = async (req, res, next) => {
+  const id = req.params["0"].split("/")[0];
   const type = req.query.type;
 
-  
-  const requestSettings = {
-    url,
-    method: "GET",
-    encoding: null
-  };
- request(requestSettings, (err, resp, buffer) => {
-   if (resp && resp.statusCode !== 200) return res.status(404).end();
-   if (err) return res.status(404).end();
-   res.set('Cache-Control', 'public, max-age=31536000');
-    if (type && type === 'webp') {
+
+  google.drive("v3").files.get({
+    fileId: id,
+    key: config.googleDrive.key,
+    alt: 'media',
+  }, {
+    responseType: 'arraybuffer'
+  }, (err, resp) => {
+    if (err) return res.status(404).end();
+    let contentType = resp.headers["content-type"];
+    if (!contentType.startsWith("image/")) {
+      res.status(404).end();
+      return;
+    }
+    res.set("Cache-Control", "public, max-age=31536000");
+    var buffer = new Buffer.from(resp.data, 'base64');
+    if (type && type === "webp") { 
       res.type('image/webp')
       sharp(buffer)
         .webp()
         .toBuffer()
-        .then( data => { 
+        .then(data => {
           res.end(data);
         })
-        .catch( err => { console.log(err); res.status(404).end();});
+        .catch(err => {
+          return res.status(404).end();
+        });
     } else {
-      res.type(resp.headers['content-type'])
-      const mime = resp.headers['content-type'].split("/");
-      if (mime[0] !== "image") {
-        res.set("Content-Disposition", "attachment;filename="+ id + "." + mime[1]);
-      }
-      res.end(buffer); 
+      res.end(buffer);
     }
   })
 };

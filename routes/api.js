@@ -17,7 +17,7 @@ router.use('/messages', require('./messages'));
 router.use('/settings', require('./settings'));
 
 router.use('/avatars', require('./avatars'));
-router.use('/files/*', loadMedia);
+router.use('/files/*', require('./files'));
 router.use('/media/*', loadMedia);
 
 router.use('/admin', require('./admin'));
