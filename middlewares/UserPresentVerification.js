@@ -58,7 +58,7 @@ module.exports = async (req, res, next) => {
 
   let permissions = 0;
 
-  if (member.roles || member.roles.length) {
+  if (member.roles && member.roles.length) {
     const roles = await Roles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions').lean();
 
     for (let index = 0; index < roles.length; index++) {
