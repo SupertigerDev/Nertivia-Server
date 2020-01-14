@@ -1,12 +1,15 @@
-app = require('./app');
+const app = require('./app');
+const config = require('./config.js');
 
-socketIO = require('./socketIO');
+const socketIO = require('./socketIO');
 
 const {http, io} = app;
 
-io.on('connection', socketIO);
+let mio = io;
+if(!config.domain) mio = mio.of("/nertivia");
+mio.on('connection', socketIO);
 
 
-http.listen(80, function(){
-    console.log('listening on *:80');
+http.listen(config.port||80, function(){
+    console.log("listening on *:"+config.port||80);
 });

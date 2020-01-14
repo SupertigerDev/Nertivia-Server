@@ -1,5 +1,5 @@
 const config = require('./config.js');
-process.env.REDISCLOUD_URL = config.redisURL;
+if (config.redisURL) process.env.REDISCLOUD_URL = config.redisURL;
 const redisClient = require('redis-connection')();
 redisClient.flushall();
 const express = require('express');
@@ -59,7 +59,7 @@ const allowedOrigins = config.allowedOrigins;
 app.use(cors({
   origin: function(origin, callback){
     if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
+    if(allowedOrigins.indexOf(origin) === -1 && !config.allowAllOrigins){
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       callback(new Error(msg), false);
     } else {
@@ -73,11 +73,20 @@ app.use(cors({
 
 //routes
 app.use('/api', require('./routes/api'));
-app.use(vhost('musica.' + config.domain, express.static('public/musica')))
-app.use(vhost('reddit.' + config.domain, express.static('public/reddit')))
 
-app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))
-app.use(vhost('nertiviabeta.' + config.domain, require('./routes/chatBeta')))
+if (config.domain) {
+    app.use(vhost('musica.' + config.domain, express.static('public/musica')))
+    app.use(vhost('reddit.' + config.domain, express.static('public/reddit')))
+
+    app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))
+    app.use(vhost('nertiviabeta.' + config.domain, require('./routes/chatBeta')))
+} else {
+    app.use('/musica', express.static('public/musica'))
+    app.use('/reddit', express.static('public/reddit'))
+
+    app.use('/nertivia', require('./routes/chat'))
+    app.use('/nertiviabeta', require('./routes/chatBeta'))
+}
 
 app.use('/', express.static('public/supertiger/'))
   
