@@ -10,6 +10,6 @@ if(!config.domain) mio = mio.of("/nertivia");
 mio.on('connection', socketIO);
 
 
-http.listen(config.port||80, function(){
-    console.log("listening on *:"+config.port||80);
+http.listen(config.port || 80, function(){
+    console.log("listening on *:"+ (config.port || 80));
 });
