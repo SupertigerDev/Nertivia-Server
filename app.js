@@ -13,6 +13,7 @@ const vhost = require('vhost');
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose');
 const cors = require('cors');
+const ipRangeCheck = require("ip-range-check");
 
 const io = require('socket.io')(http, {
   perMessageDeflate: false,
@@ -26,6 +27,35 @@ const io = require('socket.io')(http, {
     res.end();
   }
 });
+
+
+const cloudFlareIps = [
+  "173.245.48.0/20",
+  "103.21.244.0/22",
+  "103.22.200.0/22",
+  "103.31.4.0/22",
+  "141.101.64.0/18",
+  "108.162.192.0/18",
+  "190.93.240.0/20",
+  "188.114.96.0/20",
+  "197.234.240.0/22",
+  "198.41.128.0/17",
+  "162.158.0.0/15",
+  "104.16.0.0/12",
+  "172.64.0.0/13",
+  "131.0.72.0/22",
+]
+
+// check if ip is in cloudflare ranges.
+app.use((req, res, next) => {
+  if (config.devMode) return next();
+  if (!ipRangeCheck(req.connection.remoteAddress, cloudFlareIps)) {
+    res.redirect('https://nertivia.supertiger.tk');
+    return;
+  }
+  next();
+})
+
 
 app.set('trust proxy', 1) // trust first proxy
 
