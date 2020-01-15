@@ -50,7 +50,7 @@ const cloudFlareIps = [
 app.use((req, res, next) => {
   if (config.devMode) return next();
   if (!ipRangeCheck(req.connection.remoteAddress, cloudFlareIps)) {
-    res.redirect('https://nertivia.supertiger.tk/#WhatChaTrynaDo?');
+    res.status(404).send('<div>You have been IP Banned.</div><div>IP: ' + req.ip + '</div>')
     return;
   }
   next();
