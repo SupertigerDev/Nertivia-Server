@@ -132,40 +132,45 @@ module.exports = async (req, res, next) => {
         return;
       }
       async function directMessage() {
+
+        const isSavedNotes = req.user.uniqueID === req.channel.recipients[0].uniqueID
+
         //sender
         io.in(req.user.uniqueID).emit("receiveMessage", {
           message: messageCreatedLean
         });
 
-        // for group messaging, do a loop instead of [0]
-        io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
-          message: messageCreatedLean
-        });
+        if (!isSavedNotes) {
+          // for group messaging, do a loop instead of [0]
+          io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
+            message: messageCreatedLean
+          });
 
-        //change lastMessage timeStamp
-        const updateChannelTimeStamp = Channels.updateMany(
-          {
-            channelID
-          },
-          {
-            $set: {
-              lastMessaged: Date.now()
+          //change lastMessage timeStamp
+          const updateChannelTimeStamp = Channels.updateMany(
+            {
+              channelID
+            },
+            {
+              $set: {
+                lastMessaged: Date.now()
+              }
+            },
+            {
+              upsert: true
             }
-          },
-          {
-            upsert: true
-          }
-        );
+          );
 
-        // sends notification to a user.
-        const sendNotification = sendMessageNotification({
-          message: messageCreated,
-          recipient_uniqueID: req.channel.recipients[0].uniqueID,
-          channelID,
-          sender: req.user
-        });
+          // sends notification to a user.
+          const sendNotification = sendMessageNotification({
+            message: messageCreated,
+            recipient_uniqueID: req.channel.recipients[0].uniqueID,
+            channelID,
+            sender: req.user
+          });
 
-        await Promise.all([updateChannelTimeStamp, sendNotification]);
+          await Promise.all([updateChannelTimeStamp, sendNotification]);
+      }
       }
     }
   );

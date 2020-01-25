@@ -102,37 +102,45 @@ module.exports = async (req, res, next) => {
 
   async function directMessage() {
 
-    //change lastMessage timeStamp
-    const updateChannelTimeStamp = Channels.updateMany(
-      {
-        channelID
-      },
-      {
-        $set: {
-          lastMessaged: Date.now()
+    const isSavedNotes = req.user.uniqueID === req.channel.recipients[0].uniqueID
+
+    // checks if its sending to saved notes or not.
+    if (!isSavedNotes) {
+      //change lastMessage timeStamp
+      const updateChannelTimeStamp = Channels.updateMany(
+        {
+          channelID
+        },
+        {
+          $set: {
+            lastMessaged: Date.now()
+          }
+        },
+        {
+          upsert: true
         }
-      },
-      {
-        upsert: true
-      }
-    );
+      );
 
     // sends notification to a user.
-    const sendNotification = sendMessageNotification({
-      message: messageCreated,
-      recipient_uniqueID: req.channel.recipients[0].uniqueID,
-      channelID,
-      sender: req.user,
-    })
+
+      const sendNotification = sendMessageNotification({
+        message: messageCreated,
+        recipient_uniqueID: req.channel.recipients[0].uniqueID,
+        channelID,
+        sender: req.user,
+      })
+      await Promise.all([updateChannelTimeStamp, sendNotification]);
+    }
 
 
-    await Promise.all([updateChannelTimeStamp, sendNotification]);
 
 
-    // for group messaging, do a loop instead of [0]
-    io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
-      message: messageCreated
-    });
+    if (!isSavedNotes){
+      // for group messaging, do a loop instead of [0]
+      io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
+        message: messageCreated
+      });
+    }
 
     // Loop for other users logged in to the same account and emit (exclude the sender account.).
     //TODO: move this to client side for more performance.
@@ -148,7 +156,8 @@ module.exports = async (req, res, next) => {
       }
 
 
-    sendPushNotification(req.user, messageCreated, req.channel.recipients[0]);
+    if (!isSavedNotes)
+      sendPushNotification(req.user, messageCreated, req.channel.recipients[0]);
   }
 };
 async function sendPushNotification(user, msg, recipient) {
