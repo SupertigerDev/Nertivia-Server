@@ -170,6 +170,7 @@ async function sendPushNotification(user, msg, recipient) {
     data: {
       username: user.username,
       channel_id: msg.channelID,
+      unique_id: user.uniqueID,
       avatar: user.avatar,
       message: msgContent.length >= 500
       ? msgContent.substring(0, 500) + "..."
