@@ -30,7 +30,7 @@ async function sendNotification({message, server_id, recipient_uniqueID, channel
     notificationPromises.push(findOneAndUpdate(memberUniqueID, sender._id, channelID, message));
   }
   await Promise.all(notificationPromises);
-  return;
+  return members_uniqueID;
 }
 
 function findOneAndUpdate (recipient_uniqueID, sender_id, channelID, message) {

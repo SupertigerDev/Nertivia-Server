@@ -8,6 +8,7 @@ module.exports = async (req, res, next) => {
   try {
     await Devices.create({
       user: req.user._id,
+      user_id: req.user.uniqueID,
       platform: "android",
       token
     });
