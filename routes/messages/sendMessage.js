@@ -100,7 +100,7 @@ module.exports = async (req, res, next) => {
     })
 
 
-    sendPushNotificationServer(req.user, messageCreated, uniqueIDs, req.channel.server)
+    sendPushNotificationServer(req.user, messageCreated, uniqueIDs, req.channel)
 
 
     return;
@@ -167,7 +167,7 @@ module.exports = async (req, res, next) => {
   }
 };
 
-async function sendPushNotificationServer(user, msg, uniqueIDs, server) {
+async function sendPushNotificationServer(user, msg, uniqueIDs, channel) {
   // check if notification token exists
   const requestToken = await Devices.find({ user_id: {$in: uniqueIDs}});
 
@@ -185,9 +185,10 @@ async function sendPushNotificationServer(user, msg, uniqueIDs, server) {
       username: user.username,
       channel_id: msg.channelID,
       unique_id: user.uniqueID,
-      server_id: server.server_id,
-      server_name: server.name,
-      avatar: server.avatar,
+      server_id: channel.server.server_id,
+      server_name: channel.server.name,
+      channel_name: channel.name,
+      avatar: channel.server.avatar,
       message: msgContent.length >= 500
       ? msgContent.substring(0, 500) + "..."
       : msgContent,

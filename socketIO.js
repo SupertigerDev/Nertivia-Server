@@ -71,6 +71,7 @@ module.exports = async client => {
 
       // disconnect user if not found.
       if (!user) {
+        console.log("loggedOutReason: User not found in db")
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
         client.disconnect(true);
@@ -195,6 +196,7 @@ module.exports = async client => {
         settings
       });
     } catch (e) {
+      console.log("loggedOutReason: Unknown Error:")
       console.log(e);
       delete client.auth;
       client.emit("auth_err", "Invalid Token");
@@ -213,7 +215,7 @@ module.exports = async client => {
   client.on("disconnect", async () => {
     if (!client.auth) return;
     const { ok, result, error } = await redis.getConnectedBySocketID(client.id);
-    if (!ok) return;
+    if (!ok || !result) return;
 
     const response = await redis.disconnected(result.u_id, client.id);
 
