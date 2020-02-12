@@ -2,28 +2,22 @@ const request = require("request");
 const config = require("./../config");
 const path = require('path');
 const sharp = require('sharp')
-const {google} = require('googleapis');
-
-module.exports = async (req, res, next) => {
+module.exports = (req, res, next) => {
   const id = req.params["0"].split("/")[0];
+
+  const url = `https://avruqwirqo.cloudimg.io/v7/https://drive.google.com/uc?export=view&id=${id}`;
   const type = req.query.type;
 
-
-  google.drive("v3").files.get({
-    fileId: id,
-    key: config.googleDrive.key,
-    alt: 'media',
-  }, {
-    responseType: 'arraybuffer'
-  }, (err, resp) => {
-    if (err) return res.status(404).end();
-    let contentType = resp.headers["content-type"];
-    if (!contentType.startsWith("image/")) {
-      res.status(404).end();
-      return;
-    }
-    res.set("Cache-Control", "public, max-age=31536000");
-    var buffer = new Buffer.from(resp.data, 'base64');
+  
+  const requestSettings = {
+    url,
+    method: "GET",
+    encoding: null
+  };
+ request(requestSettings, (err, resp, buffer) => {
+   if (resp && resp.statusCode !== 200) return res.status(404).end();
+   if (err) return res.status(404).end();
+   res.set('Cache-Control', 'public, max-age=31536000');
     if (type && type === "webp") { 
       res.type('image/webp')
       sharp(buffer)

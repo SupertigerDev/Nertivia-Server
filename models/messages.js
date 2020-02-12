@@ -16,6 +16,15 @@ const embedSchema = new Schema({
   description: {type: String},
 })
 
+const mentionsSchema = new Schema({
+  username: {type: String},
+  tag: {type: String},
+  avatar: {type: String},
+  uniqueID: {type: String},
+})
+
+
+
 const messagesSchema = new Schema({
   channelID: { type: String, required: true },
   messageID: { type: String, required: true, unique: true },
@@ -24,6 +33,7 @@ const messagesSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: 'users' },
   created: { type: Number },
   embed: {type: embedSchema},
+  mentions: [mentionsSchema],
   timeEdited: { type: Number, required: false},
   color: {type: String, required: false},
   type: {type: Number, default: 0, enum: [

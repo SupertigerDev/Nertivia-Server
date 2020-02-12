@@ -130,7 +130,7 @@ module.exports = async client => {
         .lean();
 
       const notifications = Notifications.find({ recipient: user.uniqueID })
-        .select("type sender lastMessageID count recipient channelID -_id")
+        .select("mentioned type sender lastMessageID count recipient channelID -_id")
         .populate({
           path: "sender",
           select: "avatar username uniqueID tag -_id"
@@ -197,6 +197,7 @@ module.exports = async client => {
       });
     } catch (e) {
       console.log("loggedOutReason: Unknown Error:")
+      console.log("token: " + config.jwtHeader + token + "secret: " + config.jwtSecret)
       console.log(e);
       delete client.auth;
       client.emit("auth_err", "Invalid Token");

@@ -34,17 +34,24 @@ async function sendNotification({message, server_id, recipient_uniqueID, channel
 }
 
 function findOneAndUpdate (recipient_uniqueID, sender_id, channelID, message) {
+
+  const $set = {
+    recipient: recipient_uniqueID,
+    channelID,
+    type: "MESSAGE_CREATED",
+    lastMessageID: message.messageID,
+    sender: sender_id
+  }
+  const mentioned = message.mentions && !!message.mentions.find(m => m.uniqueID === recipient_uniqueID);
+  if (mentioned) {
+    $set.mentioned = true;
+  }
+
   return Notifications.findOneAndUpdate({
     recipient: recipient_uniqueID,
     channelID
   },{
-    $set: {
-      recipient: recipient_uniqueID,
-      channelID,
-      type: "MESSAGE_CREATED",
-      lastMessageID: message.messageID,
-      sender: sender_id
-    },
+    $set,
     $inc: {
       count: 1
     }

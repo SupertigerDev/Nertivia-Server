@@ -1,5 +1,6 @@
 const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
+const matchAll = require("match-all");
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
 const Notifications = require("./../../models/notifications");
@@ -29,11 +30,17 @@ module.exports = async (req, res, next) => {
     });
   }
 
+  // converted to a Set to remove duplicates.
+  let mentionIds = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
+  const mentions = await Users.find({uniqueID: {$in: mentionIds}}, {_id: 0}).select('uniqueID avatar tag username').lean();
+
+
   let query = {
     channelID,
     message,
     creator: req.user._id,
-    messageID: "placeholder"
+    messageID: "placeholder",
+    mentions
   }
   if (_color) query['color'] = _color;
 
@@ -48,12 +55,14 @@ module.exports = async (req, res, next) => {
     avatar: req.user.avatar,
     admin: req.user.admin
   };
+
   messageCreated = {
     channelID,
     message,
     color: _color,
     creator: user,
     created: messageCreated.created,
+    mentions,
     messageID: messageCreated.messageID
   };
 
