@@ -1,4 +1,6 @@
+const matchAll = require("match-all");
 const Messages = require("../../models/messages");
+const Users = require("../../models/users");
 const { matchedData } = require('express-validator/filter');
 
 module.exports = async (req, res, next) => {
@@ -27,6 +29,15 @@ module.exports = async (req, res, next) => {
 
   data.color = _color;
 
+  // converted to a Set to remove duplicates.
+  let mentionIds = Array.from(new Set(matchAll(data.message, /<@([\d]+)>/g).toArray()));
+
+  const mentions = mentionIds.length ? await Users.find({uniqueID: {$in: mentionIds}}).select('_id uniqueID avatar tag username').lean() : [];
+
+  const _idMentionsArr = mentions.map(m => m._id )
+  
+
+  
   let resObj = { ...data, timeEdited: Date.now(), messageID, channelID };
   let query = {$unset: { embed: "" }}
   if (!data.color) {
@@ -37,20 +48,22 @@ module.exports = async (req, res, next) => {
   try {
     await Messages.updateOne(
       { messageID },
-      { ...resObj, query }
+      { ...resObj, mentions: _idMentionsArr, query }
     );
     resObj.color = data.color || -2;
-    res.json({ ...resObj, embed: 0 });
+    res.json({ ...resObj,mentions, embed: 0 });
     const io = req.io;
     if (server) {
       io.in("server:" + server.server_id).emit("update_message", {
         ...resObj,
+        mentions,
         embed: 0
       });
     } else {
       io.in(user.uniqueID).emit("update_message", { ...resObj, embed: {} });
       io.in(channel.recipients[0].uniqueID).emit("update_message", {
         ...resObj,
+        mentions,
         embed: 0
       });
     }

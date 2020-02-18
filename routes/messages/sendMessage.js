@@ -32,7 +32,11 @@ module.exports = async (req, res, next) => {
 
   // converted to a Set to remove duplicates.
   let mentionIds = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
-  const mentions = await Users.find({uniqueID: {$in: mentionIds}}, {_id: 0}).select('uniqueID avatar tag username').lean();
+
+  const mentions = mentionIds.length ? await Users.find({uniqueID: {$in: mentionIds}}).select('_id uniqueID avatar tag username').lean() : [];
+
+  const _idMentionsArr = mentions.map(m => m._id )
+  
 
 
   let query = {
@@ -40,7 +44,7 @@ module.exports = async (req, res, next) => {
     message,
     creator: req.user._id,
     messageID: "placeholder",
-    mentions
+    mentions: _idMentionsArr
   }
   if (_color) query['color'] = _color;
 

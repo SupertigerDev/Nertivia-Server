@@ -16,11 +16,7 @@ module.exports = async (req, res, next) => {
   // check if its the creator and delete the server.
 
   const channels = await Channels.find({ server: req.server._id });
-  let channelIDArray = [];
-
-  for (let index = 0; index < channels.length; index++) {
-    channelIDArray.push(channels[index].channelID);
-  }
+  const channelIDArray = channels.map(c => c.channelID)
 
   if (req.server.creator === req.user._id) {
     await redis.remServerChannels(channelIDArray)

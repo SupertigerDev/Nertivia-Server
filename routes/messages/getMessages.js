@@ -51,7 +51,7 @@ module.exports = async (req, res, next) => {
       }
     })
       .populate({
-        path: "creator",
+        path: "creator mentions",
         select: "-_id -id  -__v -email -friends -status -created -lastSeen"
       })
       .limit(50)
@@ -64,7 +64,7 @@ module.exports = async (req, res, next) => {
       "-__v -_id"
     )
       .populate({
-        path: "creator",
+        path: "creator mentions",
         select: "-_id -id  -__v -email -friends -status -created -lastSeen"
       })
       .sort({

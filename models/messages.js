@@ -33,7 +33,7 @@ const messagesSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: 'users' },
   created: { type: Number },
   embed: {type: embedSchema},
-  mentions: [mentionsSchema],
+  mentions: [{ type : Schema.Types.ObjectId, ref: 'users' }],
   timeEdited: { type: Number, required: false},
   color: {type: String, required: false},
   type: {type: Number, default: 0, enum: [
