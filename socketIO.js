@@ -197,7 +197,7 @@ module.exports = async client => {
       });
     } catch (e) {
       console.log("loggedOutReason: Unknown Error:")
-      console.log("token: " + config.jwtHeader + token + "secret: " + config.jwtSecret)
+      console.log("token: " + config.jwtHeader + token + " secret: " + config.jwtSecret)
       console.log(e);
       delete client.auth;
       client.emit("auth_err", "Invalid Token");

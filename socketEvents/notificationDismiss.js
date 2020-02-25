@@ -8,7 +8,9 @@ module.exports = async (data, client, io) => {
     if (!ok || !result) return;
     
     const uniqueID = result.u_id
-    await Notifications.deleteOne({recipient: uniqueID, channelID});
-    io.to(uniqueID).emit('notification:dismiss', {channelID});
+    const del = await Notifications.deleteOne({recipient: uniqueID, channelID});
+    if (del.deletedCount >= 1) {
+        io.to(uniqueID).emit('notification:dismiss', {channelID});
+    }
 
 }
