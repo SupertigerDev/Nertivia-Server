@@ -9,7 +9,7 @@ const policies = {
     check('username')
       .not().isEmpty().withMessage("Username is required.")
       .isLength({min: 3, max: 30}).withMessage("Username must be 3 - 30 chars long.")
-      .not().contains('@').withMessage("username cannot contain @"),
+      .not().contains(':').withMessage("username cannot contain :"),
     check('password')
       .not().isEmpty().withMessage("Password is required.")
       .isLength({min: 3}).withMessage("Password must be at least 3 chars long."),
