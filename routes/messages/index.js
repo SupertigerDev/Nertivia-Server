@@ -13,6 +13,8 @@ const busboy = require('connect-busboy');
 const rateLimit = require('./../../middlewares/rateLimit');
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
+const disAllowBlockedUser = require('../../middlewares/disAllowBlockedUser');
+
 
 MainMessageRouter.route("/channels/:channelID").get(
   authenticate,
@@ -32,6 +34,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
   authenticate,
   rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
   channelVerification,
+  disAllowBlockedUser,
   require('./deleteMessage')
 );
 
@@ -40,6 +43,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").patch(
   messagePolicy.update,
   rateLimit({name: 'message_update', expire: 60, requestsLimit: 120 }),
   channelVerification,
+  disAllowBlockedUser,
   require('./updateMessage'),
   URLEmbed
 );
@@ -49,6 +53,7 @@ MainMessageRouter.route("/channels/:channelID").post(
   messagePolicy.post,
   rateLimit({name: 'message_send', expire: 60, requestsLimit: 120 }),
   channelVerification,
+  disAllowBlockedUser,
   serverChannelPermissions('send_message', true),
   checkRolePerms('Send Message', permissions.SEND_MESSAGES),
   require('./sendMessage'),
@@ -62,6 +67,7 @@ MainMessageRouter.route("/:channelID/typing").post(
   authenticate,
   rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
   channelVerification,
+  disAllowBlockedUser,
   serverChannelPermissions('send_message', true),
   checkRolePerms('Send Message', permissions.SEND_MESSAGES),
   require('./sendTypingIndicator'),

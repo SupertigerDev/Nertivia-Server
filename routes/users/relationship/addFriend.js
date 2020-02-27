@@ -1,6 +1,7 @@
 
 const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
+const BlockedUsers = require('../../../models/blockedUsers');
 
 module.exports = async (req, res, next) => {
   const {username, tag} = req.body;
@@ -31,6 +32,15 @@ module.exports = async (req, res, next) => {
       return res.status(403)
         .json({ status: false, errors: [{param: "all", msg: "Request already sent."}] });
     }
+  }
+  // check if blocked.
+  const isBlocked = await BlockedUsers.exists({$or: [
+    {requester: requester,  recipient: recipient},
+    {requester: recipient,  recipient: requester}
+  ]})
+  if (isBlocked) {
+    return res.status(403)
+    .json({ status: false, errors: [{param: "all", msg: "User is blocked by you / them"}] });
   }
 
   

@@ -16,13 +16,6 @@ const embedSchema = new Schema({
   description: {type: String},
 })
 
-const mentionsSchema = new Schema({
-  username: {type: String},
-  tag: {type: String},
-  avatar: {type: String},
-  uniqueID: {type: String},
-})
-
 
 
 const messagesSchema = new Schema({

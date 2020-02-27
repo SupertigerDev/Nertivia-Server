@@ -1,6 +1,7 @@
 const Channels = require("../models/channels");
 const Roles = require("../models/Roles");
 const ServerMembers = require("../models/ServerMembers");
+const BlockedUser = require("../models/blockedUsers");
 module.exports = async (req, res, next) => {
   const redis = require("../redis");
 
@@ -86,8 +87,20 @@ module.exports = async (req, res, next) => {
     	
     await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.uniqueID);
   } else {
-    req.channel = channel;
+
+    // check if blocked by recipient.
+    const requester = req.user;
+    const recipient = channel.recipients[0];
+
+    const isBlocked = await BlockedUser.exists({$or: [
+      {requester: requester._id, recipient: recipient._id},
+      {requester: recipient._id, recipient: requester._id}
+    ]})
+
+    const newChannel = {...channel, isBlocked}
+
+    req.channel = newChannel;
     next();
-    await redis.addChannel(channelID, channel, req.user.uniqueID);
+    await redis.addChannel(channelID, newChannel, req.user.uniqueID);
   }
 };

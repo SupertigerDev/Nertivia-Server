@@ -24,6 +24,19 @@ MainUserRouter.route("/").patch(
   require("./userUpdate")
 );
 
+
+// block user
+MainUserRouter.route("/block").post(
+  authenticate,
+  require("./blockUser")
+);
+
+// unblock user
+MainUserRouter.route("/block").delete(
+  authenticate,
+  require("./unblockUser")
+);
+
 // Details
 MainUserRouter.route("/:uniqueID?").get(authenticate, require("./userDetails"));
 

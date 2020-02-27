@@ -57,6 +57,9 @@ module.exports = {
     } 
     return wrapper('hset', `user:${uniqueID}`, `channel:${channelID}`, JSON.stringify(channelData));
   },
+  deleteDmChannel: async (uniqueID, channelID) => {
+    return wrapper('hdel', `user:${uniqueID}`, `channel:${channelID}`);
+  },
   serverChannelExists: (channelID) => {
     return wrapper('exists', `serverChannels:${channelID}`);
   },
