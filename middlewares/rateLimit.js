@@ -5,7 +5,7 @@ module.exports = function (options) {
     const key = `${uniqueID}-${name}`
     const redis = require ('../redis.js');
     const [count, ttl] = await redis.rateLimitIncr(key, expire);
-    if (count > requestsLimit) {
+    if (count >= requestsLimit) {
       res.status(429).json({
         message: 'Slow down!',
         ttl,

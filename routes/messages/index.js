@@ -51,7 +51,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").patch(
 MainMessageRouter.route("/channels/:channelID").post(
   authenticate,
   messagePolicy.post,
-  rateLimit({name: 'message_send', expire: 60, requestsLimit: 120 }),
+  rateLimit({name: 'message_send', expire: 20, requestsLimit: 30 }),
   channelVerification,
   disAllowBlockedUser,
   serverChannelPermissions('send_message', true),
