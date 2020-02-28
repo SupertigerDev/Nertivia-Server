@@ -1,4 +1,5 @@
 const User = require('../../models/users');
+const BannedIPs = require("../../models/BannedIPs");
 const JWT = require('jsonwebtoken');
 const config = require('./../../config')
 
@@ -9,6 +10,18 @@ function signToken(user) {
 module.exports = async (req, res, next) => {
   req.session.destroy()
   const { username, email, password } = req.body;
+
+
+  // check if ip is banned
+  const ipBanned = await BannedIPs.exists({ip: req.ip});
+  if (ipBanned) {
+    return res
+    .status(401)
+    .json({
+      errors: [{ msg: "IP is banned.", param: "email" }]
+    });
+  }
+
 
   // Check if there is a user with the same email
   const foundUser = await User.findOne({ email });

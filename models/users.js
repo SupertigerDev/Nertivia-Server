@@ -38,6 +38,11 @@ const usersSchema = new Schema({
         unique: 'This email is already used!',
         select: false
     },
+    banned: {type: Boolean},
+    ip: {
+      type: String, 
+      select: false,
+    },
     username: {
         type: String,
         required: [true, "Username has not been entered."],

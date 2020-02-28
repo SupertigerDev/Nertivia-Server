@@ -6,6 +6,7 @@ const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 const config = require("./config");
 const Notifications = require("./models/notifications");
+const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
 const jwt = require("jsonwebtoken");
 const { io } = require("./app");
@@ -74,6 +75,17 @@ module.exports = async client => {
         console.log("loggedOutReason: User not found in db")
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
+        client.disconnect(true);
+        return;
+      }
+
+      const ip = client.handshake.address;
+      const ipBanned = await BannedIPs.exists({ip: ip});
+
+      if (ipBanned) {
+        console.log("loggedOutReason: IP is banned.")
+        delete client.auth;
+        client.emit("auth_err", "IP Banned.");
         client.disconnect(true);
         return;
       }

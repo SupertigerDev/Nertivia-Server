@@ -14,6 +14,7 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose');
 const cors = require('cors');
 const ipRangeCheck = require("ip-range-check");
+const JWT = require("jsonwebtoken");
 
 const io = require('socket.io')(http, {
   perMessageDeflate: false,
@@ -74,6 +75,17 @@ const sessionMiddleware = session({
     client,
     ttl: 600
   }),
+  genid: (req) => {
+     const token = config.jwtHeader + req.headers.authorization;
+     // will contain uniqueID
+     try {
+        let decryptedToken = JWT.verify(token, config.jwtSecret);
+        return decryptedToken;
+     } catch(err) {
+       return "notLoggedIn"
+     }
+
+  },
   saveUninitialized: false,
   resave: false
 });

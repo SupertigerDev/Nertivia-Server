@@ -11,6 +11,18 @@ MainAdminRouter.route("/users/recent").get(
   require("./recentUsers")
 );
 
+MainAdminRouter.route("/users/search/:value").get(
+  authenticate,
+  isAdmin,
+  require("./searchUsers")
+);
+
+MainAdminRouter.route("/users/:unique_id").delete(
+  authenticate,
+  isAdmin,
+  require("./suspendUser")
+);
+
 // Online Users
 MainAdminRouter.route("/users/online").get(
   authenticate,

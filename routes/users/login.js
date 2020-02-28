@@ -1,4 +1,5 @@
 const Users = require("../../models/users");
+const BannedIPs = require("../../models/BannedIPs");
 const JWT = require("jsonwebtoken");
 const config = require("./../../config");
 
@@ -13,7 +14,7 @@ module.exports = async (req, res, next) => {
 
   // Find the user given the email
   const user = await Users.findOne({ email }).select(
-    "avatar status admin _id username uniqueID tag created GDriveRefreshToken password"
+    "avatar status admin _id username uniqueID tag created GDriveRefreshToken password banned"
   );
 
   // If not, handle it
@@ -33,6 +34,24 @@ module.exports = async (req, res, next) => {
         status: false,
         errors: [{ msg: "Password is incorrect.", param: "password" }]
       });
+  }
+  // check if user is banned
+  if (user.banned) {
+    return res
+    .status(401)
+    .json({
+      errors: [{ msg: "You are suspended.", param: "email" }]
+    });
+  }
+
+  // check if ip is banned
+  const ipBanned = await BannedIPs.exists({ip: req.ip});
+  if (ipBanned) {
+    return res
+    .status(401)
+    .json({
+      errors: [{ msg: "IP is banned.", param: "email" }]
+    });
   }
 
   user.password = undefined;
