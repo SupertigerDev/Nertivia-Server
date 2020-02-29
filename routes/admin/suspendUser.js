@@ -1,6 +1,7 @@
 const Users = require("../../models/users");
 const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require("bcryptjs");
+const sio = require("socket.io");
 
 module.exports = async (req, res, next) => {
   const uniqueID = req.params.unique_id;
@@ -19,6 +20,10 @@ module.exports = async (req, res, next) => {
 
   await Users.updateOne({ _id: userToSuspend._id }, { banned: true });
 
+
+  const redis = require("../../redis");
+  const io = req.io;
+
   // ban ip
   if (userToSuspend.ip) {
     await BannedIPs.updateOne(
@@ -26,21 +31,32 @@ module.exports = async (req, res, next) => {
       {},
       { upsert: true, setDefaultsOnInsert: true }
     );
-  }
-  const redis = require("../../redis");
-  await redis.deleteSession(uniqueID)
 
-  const io = req.io;
+    // kick everyone with that IP
+    const usersArr = await Users.find({ip: userToSuspend.ip }).select("uniqueID");
 
-  const rooms = io.sockets.adapter.rooms[uniqueID];
-  if (rooms){
-    for (let clientId in rooms.sockets || []) {
-      if (io.sockets.connected[clientId]) {
-        io.sockets.connected[clientId].emit("auth_err", "IP Banned")
-        io.sockets.connected[clientId].disconnect()
-      }
+    for (let index = 0; index < usersArr.length; index++) {
+      const uniqueID = usersArr[index].uniqueID;
+      await kickUser(io, redis, uniqueID);      
     }
-  }
+  } 
 
-  res.json("");
+  res.json("Account Suspended!");
 };
+
+/**
+ *
+ * @param {sio.Server} io
+ */
+async function kickUser(io, redis, uniqueID) {
+  await redis.deleteSession(uniqueID)
+  const rooms = io.sockets.adapter.rooms[uniqueID];
+  if (!rooms || !rooms.sockets) return;
+
+  for (const clientId in rooms.sockets) {
+      const client = io.sockets.connected[clientId];
+      if (!client) continue;
+      client.emit("auth_err", "IP IS BANNED")
+      client.disconnect(true);   
+  }
+}
