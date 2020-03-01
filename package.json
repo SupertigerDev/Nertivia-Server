@@ -4,12 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "compile": "tsc && npm run copyPublic && node dist",
+    "build": "tsc",
+    "copyPublic": "copyfiles -u 1 src/public/avatars/*  dist",
+    "runCompiled": "npm run copyPublic && node dist",
+    "watch": "tsc-watch --onSuccess \"npm run runCompiled\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/connect-redis": "0.0.13",
+    "@types/cors": "^2.8.6",
+    "@types/express": "^4.17.2",
+    "@types/express-serve-static-core": "^4.17.2",
+    "@types/express-session": "^1.17.0",
+    "@types/jsonwebtoken": "^8.3.8",
+    "@types/mongoose": "^5.7.3",
+    "@types/redis": "^2.8.16",
+    "@types/socket.io": "^2.1.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
@@ -38,5 +51,10 @@
     "sharp": "^0.22.1",
     "socket.io": "^2.3.0",
     "vhost": "^3.0.2"
+  },
+  "devDependencies": {
+    "copyfiles": "^2.2.0",
+    "tsc-watch": "^4.2.0",
+    "typescript": "^3.8.3"
   }
 }

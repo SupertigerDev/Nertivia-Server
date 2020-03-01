@@ -1,4 +1,5 @@
 node_modules/
-config.js
-public/
-fb-fcm.json
+src/config.ts
+src/public/
+src/fb-fcm.json
+dist
