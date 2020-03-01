@@ -32,8 +32,8 @@ export default function initServer() {
   app.use('/api', require('./routes/api'));
 
   if (config.domain) {
-    app.use(vhost('musica.' + config.domain, express.static('public/musica')))
-    app.use(vhost('reddit.' + config.domain, express.static('public/reddit')))
+    app.use(vhost('musica.' + config.domain, express.static(__dirname +'/public/musica')))
+    app.use(vhost('reddit.' + config.domain, express.static(__dirname +'/public/reddit')))
 
     app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))
     app.use(vhost('nertiviabeta.' + config.domain, require('./routes/chatBeta')))
