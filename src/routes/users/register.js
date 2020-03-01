@@ -62,7 +62,6 @@ module.exports = async (req, res, next) => {
   };
 
   transporter.sendMail(mailOptions, (err, info) => {
-    console.log(err)
   })
 
 
