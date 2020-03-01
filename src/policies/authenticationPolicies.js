@@ -21,6 +21,11 @@ const policies = {
     check('password').not().isEmpty().withMessage('Password is required.'),
     check('token').not().isEmpty().withMessage('Are you a bot?'),
     policyHandler
+  ],
+  confirm: [
+    check('email').not().isEmpty().withMessage('Email is required.'),
+    check('code').not().isEmpty().withMessage('code is required.'),
+    policyHandler
   ]
 }
 

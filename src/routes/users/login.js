@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
 
   // Find the user given the email
   const user = await Users.findOne({ email }).select(
-    "avatar status admin _id username uniqueID tag created GDriveRefreshToken password banned"
+    "avatar status admin _id username uniqueID tag created GDriveRefreshToken password banned email_confirm_code"
   );
 
   // If not, handle it
@@ -23,7 +23,11 @@ module.exports = async (req, res, next) => {
       .status(404)
       .json({ errors: [{ msg: "Email is incorrect.", param: "email" }] });
   }
-
+  if (user.email_confirm_code) {
+    return res.status(401).json({
+      code: "CONFIRM_EMAIL"
+    })
+  }
   // Check if the password is correct
   const isMatch = await user.isValidPassword(password);
 

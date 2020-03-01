@@ -47,6 +47,12 @@ MainUserRouter.route("/register").post(
   require("./register")
 );
 
+// confirm email
+MainUserRouter.route("/register/confirm").post(
+  authPolicy.confirm,
+  require("./confirmEmail")
+);
+
 // Login
 MainUserRouter.route("/login").post(
   authPolicy.login,

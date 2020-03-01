@@ -12,9 +12,16 @@ export default interface Config {
   googleDrive: GoogleDrive,
   IPs: IPs[],
   port: number | null
-  allowAllOrigins: boolean | null
+  allowAllOrigins: boolean | null,
+  nodemailer: Nodemailer
 }
 
+interface Nodemailer {
+  service: string,
+  user: string,
+  pass: string,
+  from: string
+}
 interface IPs {
   domain: string,
   allowedOrigins: string[]

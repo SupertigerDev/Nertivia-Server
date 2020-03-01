@@ -3,10 +3,9 @@ const Messages = require("../../models/messages");
 const matchAll = require("match-all");
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
-const Notifications = require("./../../models/notifications");
 const Devices = require("../../models/Devices");
 const FCM = require("fcm-node");
-const config = require('./../../config');
+
 
 const sendMessageNotification = require('./../../utils/SendMessageNotification');
 

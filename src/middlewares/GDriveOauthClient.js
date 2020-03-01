@@ -2,7 +2,7 @@ const {
 	google
 } = require('googleapis');
 const User = require('./../models/users');
-const config = require('./../config');
+import config from '../config';
 
 module.exports = async (req, res, next) => {
 	const oauth2Client = new google.auth.OAuth2(

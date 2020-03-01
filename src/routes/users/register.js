@@ -1,13 +1,19 @@
 const User = require('../../models/users');
 const BannedIPs = require("../../models/BannedIPs");
 const JWT = require('jsonwebtoken');
-const config = require('./../../config')
-
-function signToken(user) {
-  return JWT.sign( user.uniqueID, config.jwtSecret);
-}
+import config from '../../config'
+import nodemailer from 'nodemailer';
+import blacklistArr from '../../emailBlacklist.json'
+const transporter = nodemailer.createTransport({
+  service: config.nodemailer.service,
+  auth: {
+    user: config.nodemailer.user,
+    pass: config.nodemailer.pass
+  }
+})
 
 module.exports = async (req, res, next) => {
+
   req.session.destroy()
   const { username, email, password } = req.body;
 
@@ -32,19 +38,37 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  // Create a new user
-  const newUser = new User({ username, email, password });
-  const user = await newUser.save();
+  // check if email is blacklisted
+  const emailBlacklisted = blacklistArr.find(d => d.includes(email.split("@")[1]))
+  if (emailBlacklisted) {
+    return res.status(403).json({
+      errors: [{param: "email", msg: "Email is blacklisted."}]
+    });
+  }
 
-  // Generate the token without header information
-  const token = signToken(newUser).split('.').splice(1).join('.');
+
+
+  // Create a new user
+  const newUser = new User({ username, email, password, ip: req.ip });
+  const created = await newUser.save();
+  
+
+  // send email
+  const mailOptions = {
+    from: config.nodemailer.from,
+    to: email.trim(), 
+    subject: 'Nertivia - Confirmation Code',
+    html: `<p>Your confirmation code is: <strong>${created.email_confirm_code}</strong></p>`
+  };
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    console.log(err)
+  })
 
 
   // Respond with user
   res.send({
-    status: true,
-    message: "Account was successfully created and logged in.",
-    action: "account_created",
-    token,
+    message: "confirm email"
   })
+
 }

@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
 
   const user = await Users.findOne({ uniqueID: decryptedToken })
     .select(
-      "avatar status admin _id username uniqueID tag created GDriveRefreshToken"
+      "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code"
     )
     .lean();
   // If user doesn't exists, handle it
@@ -36,6 +36,12 @@ module.exports = async (req, res, next) => {
     req.session.destroy();
     return res.status(401).send({
       message: "Invalid Token."
+    });
+  }
+  if (user.email_confirm_code) {
+    req.session.destroy();
+    return res.status(401).send({
+      message: "Email not confimed"
     });
   }
   req.user = JSON.parse(JSON.stringify(user));

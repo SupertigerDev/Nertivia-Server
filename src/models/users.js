@@ -39,6 +39,7 @@ const usersSchema = new Schema({
         select: false
     },
     banned: {type: Boolean},
+    email_confirm_code: {type: String, select: false},
     ip: {
       type: String, 
       select: false,
@@ -135,6 +136,7 @@ usersSchema.pre('save', async function(next) {
     this.uniqueID = flake.gen();
     // generate tag
     this.tag = generateString(4);
+    this.email_confirm_code = generateString(10)
     // Date created
     this.created = Date.now();
     next();

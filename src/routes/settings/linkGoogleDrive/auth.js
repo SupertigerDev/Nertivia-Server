@@ -1,4 +1,4 @@
-const config = require('../../../config');
+import config from '../../../config'
 const Users = require('./../../../models/users');
 
 const jwt = require('jsonwebtoken')

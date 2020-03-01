@@ -65,7 +65,7 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status";
+        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status email_confirm_code";
 
       const user = await User.findOne({ uniqueID: decryptedToken })
         .select(userSelect)
@@ -78,6 +78,13 @@ module.exports = async client => {
         console.log("loggedOutReason: User not found in db")
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
+        client.disconnect(true);
+        return;
+      }
+      if (user.email_confirm_code) {
+        console.log("loggedOutReason: Email not confimed")
+        delete client.auth;
+        client.emit("auth_err", "Email not confirmed");
         client.disconnect(true);
         return;
       }
