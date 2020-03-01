@@ -1,12 +1,18 @@
 import { RedisClient, ClientOpts } from 'redis';
+import {Redis} from '../Interfaces/config'
 
 let REDIS_INSTANCE: RedisClient | undefined = undefined;
 
-export function getRedisInstance(opt?: ClientOpts) {
+export function getRedisInstance(details?: Redis) {
   if (REDIS_INSTANCE) {
     return REDIS_INSTANCE;
   } else {
-    REDIS_INSTANCE = new RedisClient(opt || {});
+    if (!details) return;
+    REDIS_INSTANCE = new RedisClient({
+      host: details.host,
+      port: details.port,
+      auth_pass: details.password
+    });
     return REDIS_INSTANCE;
   }
 }

@@ -3,7 +3,7 @@ export default interface Config {
   jwtSecret: string,
   jwtHeader: string,
   sessionSecret: string,
-  redisURL: string,
+  redis: Redis,
   reCaptchaKey: string,
   androidReCaptchaKey: string,
   devMode: boolean,
@@ -14,6 +14,13 @@ export default interface Config {
   port: number | null
   allowAllOrigins: boolean | null,
   nodemailer: Nodemailer
+}
+
+
+export interface Redis {
+  host: string,
+  port: number,
+  password: string,
 }
 
 interface Nodemailer {

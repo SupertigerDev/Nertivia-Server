@@ -22,7 +22,8 @@ mongoose.connect(config.mongoDBAddress, mongoOptions, function(err) {
 
 function connectToRedis() {
 	if (redisInstanceExists()) return;
-	const client = getRedisInstance({ url: config.redisURL, enable_offline_queue: false });
+	const client = getRedisInstance(config.redis);
+	if (!client) return;
 	client.on("ready", () => {
 		client.flushall();
 		console.log("\x1b[33mRedis>\x1b[1m Connected!\x1b[0m");
