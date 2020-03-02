@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
       {tag: value},
       {uniqueID: value},
     ]
-  }, {_id: 0}).select('avatar uniqueID username tag created').sort({_id: -1}).limit(30).lean()
+  }, {_id: 0}).select('avatar uniqueID email ip username tag created banned').sort({_id: -1}).limit(30).lean()
   res.json(users)
   
 };

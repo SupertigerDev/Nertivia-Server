@@ -14,7 +14,8 @@ const aboutMeSchema = new Schema({
   age: { type: String }, 
   continent: { type: String}, 
   country: { type: String }, 
-  about_me: { type: String }
+  about_me: { type: String },
+  "Suspend Reason": {type: String}
 })
 
 

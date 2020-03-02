@@ -7,6 +7,7 @@ const redis = require("../../redis");
 module.exports = async (req, res, next) => {
   const uniqueID = req.params.unique_id;
   const adminPassword = req.body.password;
+  const reason = req.body.reason;
 
   // check admin password
   const admin = await Users.findById(req.user._id).select("password");
@@ -14,13 +15,19 @@ module.exports = async (req, res, next) => {
   if (!verify) return res.status(403).json({ message: "Invalid password" });
 
   const userToSuspend = await Users.findOne({ uniqueID: uniqueID }).select(
-    "ip"
+    "ip banned"
   );
   if (!userToSuspend)
     return res.status(404).json({ message: "unique id not found" });
 
-  await Users.updateOne({ _id: userToSuspend._id }, { banned: true });
+  // if (userToSuspend.banned)
+  //   return res.status(401).json({ message: "User is already suspended." });
 
+  const reasonDB = reason.trim() ? reason : "Not Provided.";
+  await Users.updateOne(
+    { _id: userToSuspend._id },
+    { banned: true, $set: { about_me: { "Suspend Reason": reasonDB } } }
+  );
 
   const io = req.io;
 
@@ -33,13 +40,15 @@ module.exports = async (req, res, next) => {
     );
 
     // kick everyone with that IP
-    const usersArr = await Users.find({ip: userToSuspend.ip }).select("uniqueID");
+    const usersArr = await Users.find({ ip: userToSuspend.ip }).select(
+      "uniqueID"
+    );
 
     for (let index = 0; index < usersArr.length; index++) {
       const uniqueID = usersArr[index].uniqueID;
-      await kickUser(io, uniqueID);      
+      await kickUser(io, uniqueID);
     }
-  } 
+  }
 
   res.json("Account Suspended!");
 };
@@ -49,14 +58,14 @@ module.exports = async (req, res, next) => {
  * @param {sio.Server} io
  */
 async function kickUser(io, uniqueID) {
-  await redis.deleteSession(uniqueID)
+  await redis.deleteSession(uniqueID);
   const rooms = io.sockets.adapter.rooms[uniqueID];
   if (!rooms || !rooms.sockets) return;
 
   for (const clientId in rooms.sockets) {
-      const client = io.sockets.connected[clientId];
-      if (!client) continue;
-      client.emit("auth_err", "IP IS BANNED")
-      client.disconnect(true);   
+    const client = io.sockets.connected[clientId];
+    if (!client) continue;
+    client.emit("auth_err", "IP IS BANNED");
+    client.disconnect(true);
   }
 }
