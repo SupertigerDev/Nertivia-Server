@@ -1,6 +1,5 @@
 const gm = require("gm").subClass({imageMagick: true});
 const sharp = require('sharp');
-
 module.exports = async (buffer, mimeType, size) => {
   if (mimeType === "image/gif") {
     return new Promise(resolve => {
@@ -22,7 +21,6 @@ module.exports = async (buffer, mimeType, size) => {
   } else {
     return await sharp(buffer)
       .resize(size, size)
-      .webp()
       .toBuffer();
   }
 };

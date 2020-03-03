@@ -5,6 +5,7 @@ module.exports = async (req, res, next) => {
   const users = await Users.find({
     $or: [
       {username: { '$regex' : value, '$options' : 'i' }},
+      {email: { '$regex' : value, '$options' : 'i' }},
       {tag: value},
       {uniqueID: value},
     ]
