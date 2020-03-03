@@ -3,6 +3,8 @@ const request = require('request')
 const cheerio = require('cheerio')
 const Messages = require('./../models/messages');
 const sharp = require('sharp');
+import fetch from 'node-fetch';
+
 
 const URL = require('url').URL
 module.exports = (req, res, next) => {
@@ -27,7 +29,6 @@ module.exports = (req, res, next) => {
     }
     const $ = cheerio.load(responseHtml)
 
-
     resObj.embed.title = $('meta[property="og:title"]').attr('content')
     resObj.embed.type = $('meta[property="og:type"]').attr('content')
     resObj.embed.url = $('meta[property="og:url"]').attr('content')
@@ -46,7 +47,7 @@ module.exports = (req, res, next) => {
 
     // Get image dimensions.   
     if (resObj.embed.image){
-      const {ok, result} = await getMetadata(resObj.embed.image)
+      const {ok, result} = await getMetadata(resObj.embed.image);
       if (ok == false) {
         delete resObj.embed.image;
       } else {
@@ -82,26 +83,11 @@ module.exports = (req, res, next) => {
 
 function getMetadata(url) {
   return new Promise(resolve => {
-    const requestSettings = {
-      url,
-      method: "GET",
-      encoding: null
-    };
-    const reqImages = request(requestSettings)
-      .on('error', _ => resolve({ok: false}))
-      .on('response', resp => {
-        if (resp.statusCode !== 200) {
-          reqImages.abort();
-          return resolve({ok: false});
-        }
-      })
-      .on("data", async (chunk) => {
-        reqImages.abort();
-        try {
-          resolve({ok: true, result: await sharp(chunk).metadata()})
-        } catch {
-          resolve({ok: false})
-        }
-      })
+    fetch(url)
+    .then(res => res.buffer())
+    .then(async buf => {
+      resolve({ok: true, result: await sharp(buf).metadata()})
+    })
+    .catch(error => resolve({ok: false, error}))
   })
 }
