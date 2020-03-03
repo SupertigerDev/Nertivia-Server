@@ -56,9 +56,9 @@ module.exports = async (req, res, next) => {
 
 async function checkIPChangeAndIsBanned(req, res) {
   const storedIP = req.session["ip"];
-  if (!storedIP || storedIP != req.ip) {
+  if (!storedIP || storedIP != req.userIP) {
     // check if ip banned
-    const ipBanned = await BannedIPs.exists({ip: req.ip});
+    const ipBanned = await BannedIPs.exists({ip: req.userIP});
     if (ipBanned) {
       res.status(401).send({
         message: "IP is banned."
@@ -67,7 +67,7 @@ async function checkIPChangeAndIsBanned(req, res) {
       return true;
     }
     addIPToDB(req);
-    req.session["ip"] = req.ip;
+    req.session["ip"] = req.userIP;
     return false;
   }
   return false;
@@ -76,12 +76,12 @@ async function checkIPChangeAndIsBanned(req, res) {
 function addIPToDB(req) {
   Users.updateOne(
     { _id: req.session.user._id},
-    { ip: req.ip},
+    { ip: req.userIP},
     (err, doc) => {}
   );
 
   // UsersIPs.updateOne(
-  //   { ip: req.ip },
+  //   { ip: req.userIP },
   //   { $addToSet: { users: req.session.user._id } },
   //   { upsert: true, setDefaultsOnInsert: true },
   //   (err, doc) => {}

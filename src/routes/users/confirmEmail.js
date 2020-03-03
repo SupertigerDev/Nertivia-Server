@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
   const { code, email } = req.body;
 
   // check if ip is banned
-  const ipBanned = await BannedIPs.exists({ ip: req.ip });
+  const ipBanned = await BannedIPs.exists({ ip: req.userIP });
   if (ipBanned) {
     return res.status(401).json({
       error: "IP is banned."

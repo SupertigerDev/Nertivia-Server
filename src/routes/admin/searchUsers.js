@@ -6,6 +6,7 @@ module.exports = async (req, res, next) => {
     $or: [
       {username: { '$regex' : value, '$options' : 'i' }},
       {email: { '$regex' : value, '$options' : 'i' }},
+      {ip: { '$regex' : value, '$options' : 'i' }},
       {tag: value},
       {uniqueID: value},
     ]

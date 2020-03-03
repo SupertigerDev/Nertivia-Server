@@ -49,7 +49,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if ip is banned
-  const ipBanned = await BannedIPs.exists({ip: req.ip});
+  const ipBanned = await BannedIPs.exists({ip: req.userIP});
   if (ipBanned) {
     return res
     .status(401)

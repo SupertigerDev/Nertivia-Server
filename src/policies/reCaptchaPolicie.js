@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
   }
 
 
-  const verifyUrl = `https://google.com/recaptcha/api/siteverify?secret=${android === "true" ? config.androidReCaptchaKey: config.reCaptchaKey}&response=${token}&remoteip=${req.connection.remoteAddress}`;
+  const verifyUrl = `https://google.com/recaptcha/api/siteverify?secret=${android === "true" ? config.androidReCaptchaKey: config.reCaptchaKey}&response=${token}&remoteip=${req.userIP}`;
   
   // Make Request To VerifyURL
   request(verifyUrl, (err, response, body) => {

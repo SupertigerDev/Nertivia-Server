@@ -1,5 +1,5 @@
-import {Request, Response, NextFunction } from 'express';
-import config from '../config.js';
+import { Request, Response, NextFunction } from "express";
+import config from "../config.js";
 import ipRangeCheck from "ip-range-check";
 
 const cloudFlareIps = [
@@ -16,16 +16,20 @@ const cloudFlareIps = [
   "162.158.0.0/15",
   "104.16.0.0/12",
   "172.64.0.0/13",
-  "131.0.72.0/22",
-]
+  "131.0.72.0/22"
+];
 
 export default (req: Request, res: Response, next: NextFunction) => {
+  req.userIP =
+  req.headers["cf-connecting-ip"] ||
+  req.headers["x-forwarded-for"] ||
+  req.userIP;
   if (config.devMode) return next();
-  const address = req.connection.remoteAddress;
+  const address = req.userIP;
   if (!address || !ipRangeCheck(address, cloudFlareIps)) {
-    res.status(404).send('<div>You have been IP Banned.</div><div>IP: ' + req.ip + '</div>')
-  } else {
-    next()
+    res
+      .status(404)
+      .send("<div>You have been IP Banned.</div><div>IP: " + req.userIP + "</div>");
+  } else {    next();
   }
-
-}
+};
