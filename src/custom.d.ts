@@ -4,7 +4,7 @@ declare global {
   namespace Express {
     export interface Request {
       io?: Server,
-      userIP?: String | String[] | undefined
+      userIP?: string | string[] | undefined
     }
   }
 }
