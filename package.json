@@ -24,6 +24,7 @@
     "@types/mongoose": "^5.7.3",
     "@types/nodemailer": "^6.4.0",
     "@types/redis": "^2.8.16",
+    "@types/sharp": "^0.24.0",
     "@types/socket.io": "^2.1.4",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
