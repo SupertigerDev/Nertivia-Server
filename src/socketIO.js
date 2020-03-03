@@ -65,7 +65,7 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status email_confirm_code";
+        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status email_confirm_code banned";
 
       const user = await User.findOne({ uniqueID: decryptedToken })
         .select(userSelect)
@@ -78,6 +78,13 @@ module.exports = async client => {
         console.log("loggedOutReason: User not found in db")
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
+        client.disconnect(true);
+        return;
+      }
+      if (user.banned) {
+        console.log("loggedOutReason: User is banned")
+        delete client.auth;
+        client.emit("auth_err", "You are banned.");
         client.disconnect(true);
         return;
       }
@@ -95,7 +102,7 @@ module.exports = async client => {
       if (ipBanned) {
         console.log("loggedOutReason: IP is banned.")
         delete client.auth;
-        client.emit("auth_err", "IP Banned.");
+        client.emit("auth_err", "IP is Banned.");
         client.disconnect(true);
         return;
       }

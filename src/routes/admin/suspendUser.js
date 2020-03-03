@@ -44,9 +44,14 @@ module.exports = async (req, res, next) => {
       "uniqueID"
     );
 
+
     for (let index = 0; index < usersArr.length; index++) {
-      const uniqueID = usersArr[index].uniqueID;
-      await kickUser(io, uniqueID);
+      const _uniqueID = usersArr[index].uniqueID;
+      if (_uniqueID === uniqueID) {
+        await kickUser(io, _uniqueID, "You have been suspended for: " + reasonDB);
+      } else {
+        await kickUser(io, _uniqueID, "IP is banned.");
+      }
     }
   }
 
@@ -57,7 +62,7 @@ module.exports = async (req, res, next) => {
  *
  * @param {sio.Server} io
  */
-async function kickUser(io, uniqueID) {
+async function kickUser(io, uniqueID, message) {
   await redis.deleteSession(uniqueID);
   const rooms = io.sockets.adapter.rooms[uniqueID];
   if (!rooms || !rooms.sockets) return;
@@ -65,7 +70,7 @@ async function kickUser(io, uniqueID) {
   for (const clientId in rooms.sockets) {
     const client = io.sockets.connected[clientId];
     if (!client) continue;
-    client.emit("auth_err", "IP IS BANNED");
+    client.emit("auth_err", message);
     client.disconnect(true);
   }
 }
