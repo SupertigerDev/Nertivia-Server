@@ -20,18 +20,18 @@ const cloudFlareIps = [
 ];
 
 export default (req: Request, res: Response, next: NextFunction) => {
+  req.userIP =
+  (req.headers["cf-connecting-ip"] ||
+  req.headers["x-forwarded-for"] ||
+  req.connection.remoteAddress)?.toString();
+
   if (config.devMode) return next();
   const address = req.connection.remoteAddress;
   if (!address || !ipRangeCheck(address, cloudFlareIps)) {
     res
       .status(404)
-      .send("<div>You have been IP Banned.</div><div>IP: " + req.ip + "</div>");
+      .send("<div>You have been IP Banned.</div><div>IP: " + req.userIP + "</div>");
   } else {
-    req.userIP =
-      (req.headers["cf-connecting-ip"] ||
-      req.headers["x-forwarded-for"] ||
-      req.connection.remoteAddress)?.toString();
-
     next();
   }
 };
