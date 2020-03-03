@@ -21,9 +21,9 @@ const cloudFlareIps = [
 
 export default (req: Request, res: Response, next: NextFunction) => {
   req.userIP =
-  req.headers["cf-connecting-ip"] ||
+  (req.headers["cf-connecting-ip"] ||
   req.headers["x-forwarded-for"] ||
-  req.userIP;
+  req.userIP)?.toString();
   if (config.devMode) return next();
   const address = req.userIP;
   if (!address || !ipRangeCheck(address, cloudFlareIps)) {
