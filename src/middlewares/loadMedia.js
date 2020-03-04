@@ -19,6 +19,7 @@ module.exports = (req, res, next) => {
    if (err) return res.status(404).end();
    res.set('Cache-Control', 'public, max-age=31536000');
     if (type && type === "webp") { 
+      res.set('content-type', "image/webp")
       res.type('image/webp')
       sharp(buffer)
         .webp()
@@ -30,6 +31,7 @@ module.exports = (req, res, next) => {
           return res.status(404).end();
         });
     } else {
+      res.set('content-type', resp.headers["content-type"]);
       res.end(buffer);
     }
   })

@@ -19,7 +19,8 @@ export default async (req:Request, res:Response, next:NextFunction) => {
       if (err) return next()
       res.set('Cache-Control', 'public, max-age=31536000');
        if (type && type === "webp") { 
-         res.type('image/webp')
+        res.set('content-type', "image/webp")
+        res.type('image/webp')
          sharp(buffer)
            .webp()
            .toBuffer()
@@ -30,7 +31,8 @@ export default async (req:Request, res:Response, next:NextFunction) => {
              return res.status(404).end();
            });
        } else {
-         res.end(buffer);
+          res.set('content-type', resp.headers["content-type"]);
+          res.end(buffer);
        }
      })
 

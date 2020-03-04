@@ -7,7 +7,7 @@ const messagePolicy = require('./../../policies/messagePolicies');
 const authenticate = require("../../middlewares/authenticate");
 const channelVerification = require('./../../middlewares/ChannelVerification');
 const GDriveOauthClient = require('./../../middlewares/GDriveOauthClient');
-const URLEmbed = require('./../../middlewares/URLEmbed');
+import URLEmbed from '../../middlewares/URLEmbed';
 const serverChannelPermissions = require('./../../middlewares/serverChannelPermissions');
 const busboy = require('connect-busboy');
 const rateLimit = require('./../../middlewares/rateLimit');
