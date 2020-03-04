@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if email is blacklisted
-  const emailBlacklisted = blacklistArr.find(d => d.includes(email.split("@")[1].toLowerCase()))
+  const emailBlacklisted = blacklistArr.find(d => d === email.split("@")[1].trim().toLowerCase())
   if (emailBlacklisted) {
     return res.status(403).json({
       errors: [{param: "email", msg: "Email is blacklisted."}]
