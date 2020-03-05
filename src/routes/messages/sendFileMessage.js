@@ -41,13 +41,18 @@ module.exports = async (req, res, next) => {
       }
     }
   });
+  req.busboy.on("error", function(err) {
+    console.log("error happened");
+  })
 
   req.busboy.on(
     "file",
     async (fieldName, fileStream, fileName, encoding, mimeType) => {
       if (stop == true) return;
       if (fieldName !== "avatar") return;
-
+      if (fileName.match(/\/$/) || fileName.includes("/")) {
+        return res.status(403).json({message: "File name must not include slashes."});
+      }
       // get nertivia_uploads folder id
       const requestFolderID = await GDriveApi.findFolder(oauth2Client);
       const folderID = requestFolderID.result.id;
@@ -55,6 +60,9 @@ module.exports = async (req, res, next) => {
       let chunks = [];
       let metadata = null;
       if (checkMimeType({ fileName, mimeType })) fileStream.on("data", onData);
+      fileStream.on("error",  function(err) {
+        console.log("error happened");
+      })
 
       async function onData(chunk) {
         if (chunks.length === 0) {
