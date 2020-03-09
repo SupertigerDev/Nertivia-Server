@@ -189,7 +189,7 @@ module.exports = async (req, res, next) => {
     });
     io.to(req.user.uniqueID).emit("server:members", {
       serverMembers,
-      memberPresences: memberPresences.result
+      memberPresences: memberPresences.result.filter(s => s[0] !== null && s[1] !== "0")
     });
   }  
 };

@@ -221,7 +221,7 @@ module.exports = async client => {
         serverRoles: serverRoles,
         dms: results[0],
         notifications: results[1],
-        currentFriendStatus: result,
+        currentFriendStatus: result.filter(s => s[0] !== null && s[1] !== "0"),
         settings
       });
     } catch (e) {
