@@ -32,6 +32,15 @@ module.exports = async (req, res, next) => {
       }
     },
     { $unwind: "$server" },
+    {
+      $lookup: {
+        from: "users",
+        localField: "creator",
+        foreignField: "_id",
+        as: "creator"
+      }
+    },
+    { $unwind: "$creator" },
 
     {
       $lookup: {
@@ -49,6 +58,7 @@ module.exports = async (req, res, next) => {
         invite_code: 1,
         description: 1,
         verified: 1,
+        creator: {username: 1, uniqueID: 1, tag: 1},
         created: 1,
         server: { avatar: 1, banner: 1, name: 1, server_id: 1, public: 1 },
         total_members: { $size: "$serverMembers" },
