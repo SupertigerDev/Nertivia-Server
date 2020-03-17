@@ -24,10 +24,4 @@ module.exports = async (req, res, next) => {
 
   const io = req.io;
   io.in(req.user.uniqueID).emit("channel:mute", {channelID: channel_id});
-
-  // TODO
-  // disable desktop notification
-  // disable notification sound
-  // disable notification badge
-  // unmute
 };
