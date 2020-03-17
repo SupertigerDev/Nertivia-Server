@@ -14,7 +14,8 @@ const serverMembersSchema = new Schema({
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
   server_id: {type: String},
   type: {type: String, default: "MEMBER", enum: ['MEMBER','OWNER', 'ADMIN']},
-  roles: [{type: String, required: false, select: false}]
+  roles: [{type: String, required: false, select: false}],
+  muted_channels: [{type: String, required: false, select: false}]
 
 });
 

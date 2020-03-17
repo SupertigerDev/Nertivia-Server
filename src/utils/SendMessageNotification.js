@@ -17,7 +17,8 @@ async function sendNotification({message, server_id, recipient_uniqueID, channel
   // if a message to be send in a server
   //find all members in the server.
   const members = await ServerMembers.find({
-    server: server_id
+    server: server_id,
+    muted_channels: { $ne: channelID }
   }).populate("member");
 
   // Convert JSON Array to array of uniqueID 

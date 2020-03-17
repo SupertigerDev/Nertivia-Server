@@ -39,6 +39,20 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
   require("./deleteServerChannel")
 );
 
+// mute server channel
+MainChannelRouter.route('/:server_id/channels/:channel_id/mute').put(
+  authenticate,
+  UserPresentVerification,
+  require("./muteServerChannel")
+);
+
+// unmute server channel
+MainChannelRouter.route('/:server_id/channels/:channel_id/mute').delete(
+  authenticate,
+  UserPresentVerification,
+  require("./unmuteServerChannel")
+);
+
 // position
 MainChannelRouter.route('/:server_id/channels/position').put(
   authenticate,
