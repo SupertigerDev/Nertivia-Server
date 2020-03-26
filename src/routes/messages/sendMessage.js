@@ -4,13 +4,10 @@ const matchAll = require("match-all");
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
 const Devices = require("../../models/Devices");
-const FCM = require("fcm-node");
-
 
 const sendMessageNotification = require('./../../utils/SendMessageNotification');
 
-const serverKey = require("../../fb-fcm.json");
-const fcm = new FCM(serverKey);
+import pushNotification from '../../utils/sendPushNotification'
 
 module.exports = async (req, res, next) => {
   const { channelID } = req.params;
@@ -112,7 +109,13 @@ module.exports = async (req, res, next) => {
     })
 
 
-    sendPushNotificationServer(req.user, messageCreated, uniqueIDs, req.channel)
+    pushNotification({
+      channel: req.channel,
+      isServer: true,
+      message: messageCreated,
+      uniqueIDArr: uniqueIDs,
+      user: req.user
+    })
 
 
     return;
@@ -175,87 +178,12 @@ module.exports = async (req, res, next) => {
 
 
     if (!isSavedNotes)
-      sendPushNotification(req.user, messageCreated, req.channel.recipients[0]);
+      pushNotification({
+        user: req.user,
+        message: messageCreated,
+        recipient: req.channel.recipients[0],
+        isServer: false,
+      })  
+
   }
 };
-
-async function sendPushNotificationServer(user, msg, uniqueIDs, channel) {
-  // check if notification token exists
-  const requestToken = await Devices.find({ user_id: {$in: uniqueIDs}});
-
-  if (!requestToken || !requestToken.length) return;
-
-  const tokens = requestToken.map(t => t.token);
-
-  const msgContent = msg.message;
-
-  const message = {
-    //this may vary according to the message type (single recipient, multicast, topic, et cetera)
-    registration_ids: tokens,
- 
-    data: {
-      username: user.username,
-      channel_id: msg.channelID,
-      unique_id: user.uniqueID,
-      server_id: channel.server.server_id,
-      server_name: channel.server.name,
-      channel_name: channel.name,
-      avatar: channel.server.avatar,
-      message: msgContent.length >= 500
-      ? msgContent.substring(0, 500) + "..."
-      : msgContent,
-    }
-  };
-
-  fcm.send(message, async function(err, response) {
-    if (err) {
-      console.log("Something has gone wrong!");
-    } else {
-      // remove all expired tokens from db.
-      const failedTokens = response.results
-        .map((r, i) => r.error && tokens[i])
-        .filter(r => r);
-      await Devices.deleteMany({ token: { $in: failedTokens } });
-    }
-  });
-}
-
-async function sendPushNotification(user, msg, recipient) {
-  const _id = recipient._id;
-
-  // check if notification token exists
-  const requestToken = await Devices.find({ user: _id });
-
-  if (!requestToken || !requestToken.length) return;
-
-  const tokens = requestToken.map(t => t.token);
-
-  const msgContent = msg.message;
-
-  const message = {
-    //this may vary according to the message type (single recipient, multicast, topic, et cetera)
-    registration_ids: tokens,
- 
-    data: {
-      username: user.username,
-      channel_id: msg.channelID,
-      unique_id: user.uniqueID,
-      avatar: user.avatar,
-      message: msgContent.length >= 500
-      ? msgContent.substring(0, 500) + "..."
-      : msgContent,
-    }
-  };
-
-  fcm.send(message, async function(err, response) {
-    if (err) {
-      console.log("Something has gone wrong!");
-    } else {
-      // remove all expired tokens from db.
-      const failedTokens = response.results
-        .map((r, i) => r.error && tokens[i])
-        .filter(r => r);
-      await Devices.deleteMany({ token: { $in: failedTokens } });
-    }
-  });
-}

@@ -8,6 +8,7 @@ const path = require("path");
 const sharp = require("sharp");
 
 const sendMessageNotification = require("./../../utils/SendMessageNotification");
+import pushNotification from '../../utils/sendPushNotification'
 
 module.exports = async (req, res, next) => {
   //if formdata is not present.
@@ -130,13 +131,20 @@ module.exports = async (req, res, next) => {
           }
 
         //send notification
-        await sendMessageNotification({
+        const uniqueIDs = await sendMessageNotification({
           message: messageCreatedLean,
           channelID,
           server_id: req.channel.server._id,
           sender: req.user
         });
 
+        pushNotification({
+          channel: req.channel,
+          isServer: true,
+          message: messageCreated,
+          uniqueIDArr: uniqueIDs,
+          user: req.user
+        })
         return;
       }
       async function directMessage() {
@@ -178,7 +186,13 @@ module.exports = async (req, res, next) => {
           });
 
           await Promise.all([updateChannelTimeStamp, sendNotification]);
-      }
+          pushNotification({
+            user: req.user,
+            message: messageCreated,
+            recipient: req.channel.recipients[0],
+            isServer: false,
+          })  
+        }
       }
     }
   );

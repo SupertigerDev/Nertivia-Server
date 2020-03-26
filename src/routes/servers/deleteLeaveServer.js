@@ -11,11 +11,11 @@ const Roles = require("../../models/Roles");
 const redis = require("../../redis");
 
 const sendMessageNotification = require('./../../utils/SendMessageNotification')
-
+import pushNotification from "../../utils/sendPushNotification";
 module.exports = async (req, res, next) => {
   // check if its the creator and delete the server.
 
-  const channels = await Channels.find({ server: req.server._id });
+  const channels = await Channels.find({ server: req.server._id }).lean();
   const channelIDArray = channels.map(c => c.channelID)
 
   if (req.server.creator === req.user._id) {
@@ -107,6 +107,8 @@ module.exports = async (req, res, next) => {
   });
 
   let messageCreated = await messageCreate.save();
+
+  
   const user = {
     uniqueID: req.user.uniqueID,
     username: req.user.username,
@@ -117,14 +119,6 @@ module.exports = async (req, res, next) => {
   messageCreated = messageCreated.toObject();
   messageCreated.creator = user;
 
-  // save notification 
-  await sendMessageNotification({
-    message: messageCreated,
-    channelID: req.server.default_channel_id,
-    server_id: req.server._id,
-    sender: req.user,
-  })
-
   // emit message
   const roomsMsg = io.sockets.adapter.rooms["server:" + req.server.server_id];
   if (roomsMsg)
@@ -133,6 +127,29 @@ module.exports = async (req, res, next) => {
         message: messageCreated
       });
     }
+
+  // save notification 
+  const uniqueIDs = await sendMessageNotification({
+    message: messageCreated,
+    channelID: req.server.default_channel_id,
+    server_id: req.server._id,
+    sender: req.user,
+  })
+
+  const defaultChannel = channels.find(c => c.channelID = req.server.default_channel_id);
+  defaultChannel.server = req.server;
+
+  pushNotification({
+    channel: defaultChannel,
+    isServer: true,
+    message: {
+      message: req.user.username + " left the server",
+      channelID: req.server.default_channel_id
+    },
+    uniqueIDArr: uniqueIDs,
+    user: req.user
+  })
+
 
 
 };

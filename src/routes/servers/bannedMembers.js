@@ -1,16 +1,6 @@
 
 const Servers = require("../../models/servers");
-const Users = require("../../models/users");
-const ServerMembers = require("../../models/ServerMembers");
-const Messages = require("../../models/messages");
-const Notifications = require("../../models/notifications");
-const Channels = require("../../models/channels");
-
-const sendMessageNotification = require('./../../utils/SendMessageNotification');
-
 module.exports = async (req, res, next) => {
-  const {server_id, unique_id} = req.params;
-
   // check if this function is executed by the guild owner.
   if (req.server.creator !== req.user._id){
     return res
