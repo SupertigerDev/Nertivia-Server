@@ -22,8 +22,6 @@ module.exports = async (req, res, next) => {
   const deleteChannel = await channels.deleteOne({ channelID: channel_id, creator: req.user._id });
 
 
-  console.log(deleteChannel)
-
 
   return
 

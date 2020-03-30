@@ -74,7 +74,6 @@ export default async function send(args: Args) {
           : msgContent
     };
   } else {
-    console.log(args.message)
     message.data = {
       username: args.user.username,
       channel_id: args.message.channelID,
