@@ -11,12 +11,7 @@ const sendMessageNotification = require('../../utils/SendMessageNotification');
 
 module.exports = async (req, res, next) => {
   const {server_id, unique_id} = req.params;
-  // check if this function is executed by the guild owner.
-  if (req.server.creator !== req.user._id){
-    return res
-    .status(403)
-    .json({ message: "You do not have permission to kick members!" });
-  }
+
   if (unique_id === req.user.uniqueID) {
     return res
     .status(403)
@@ -29,6 +24,12 @@ module.exports = async (req, res, next) => {
   if (!kicker) return res
     .status(404)
     .json({ message: "User not found." });
+
+  if(kicker._id.toString() === req.server.creator.toString()) {
+    return res
+    .status(403)
+    .json({ message: "You can't kick the creator of the server." });
+  }
 
   // server channels
   const channels = await Channels.find({ server: server._id });

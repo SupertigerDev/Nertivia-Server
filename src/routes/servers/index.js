@@ -3,6 +3,8 @@ const MainServerRouter = require("express").Router();
 // Middleware
 const authenticate = require("../../middlewares/authenticate");
 const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
+const permissions = require('../../utils/rolePermConstants');
+const checkRolePerms = require('../../middlewares/checkRolePermissions');
 
 // Policies
 const UserPresentVerification = require ('./../../middlewares/UserPresentVerification')
@@ -35,11 +37,12 @@ MainServerRouter.route('/:server_id').delete(
 MainServerRouter.route('/:server_id/members/:unique_id').delete(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Kick', permissions.KICK_USER),
   require("./kickMember")
 );
 
 // banned members
-http://192.168.1.8/api/servers/6583302963345756160/bans
+//http://192.168.1.8/api/servers/6583302963345756160/bans
 MainServerRouter.route('/:server_id/bans').get(
   authenticate,
   UserPresentVerification,
@@ -51,6 +54,7 @@ MainServerRouter.route('/:server_id/bans').get(
 MainServerRouter.route('/:server_id/bans/:unique_id').put(
   authenticate,
   UserPresentVerification,
+  checkRolePerms('Ban', permissions.BAN_USER),
   require("./banMember")
 )
 
