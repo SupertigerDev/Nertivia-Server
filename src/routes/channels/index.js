@@ -10,12 +10,11 @@ MainChannelRouter.route("/:recipient_id").post(
   require("./openChannel")
 );
 
-// close channel
-// TODO: doesnt work properly. if both channels closed, the chat gets wiped.
-// MainChannelRouter.route("/:channel_id").delete(
-//   authenticate,
-//   require("./deleteChannel")
-// );
+//close channel
+MainChannelRouter.route("/:channel_id").delete(
+  authenticate,
+  require("./deleteChannel")
+);
 
 
 

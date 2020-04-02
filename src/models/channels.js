@@ -15,6 +15,7 @@ const channelsSchema = new Schema({
   visibility: {type: Boolean},
   creator: { type: Schema.Types.ObjectId, ref: 'users'},
   recipients: [{type: Schema.Types.ObjectId, ref: 'users'}],
+  hide: {type: Boolean, select: false, required: false}, // only used for recent dms.
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
   server_id: {type: String, required: false},
   lastMessaged: {type: Number},

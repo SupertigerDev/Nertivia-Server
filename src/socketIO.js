@@ -153,7 +153,7 @@ module.exports = async client => {
       }
 
       const dms = channels
-        .find({ creator: user._id }, { _id: 0 })
+        .find({ creator: user._id, hide: {$ne: true} }, { _id: 0 })
         .select("recipients channelID lastMessaged")
         .populate({
           path: "recipients",

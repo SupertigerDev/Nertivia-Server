@@ -24,6 +24,8 @@ module.exports = async (req, res, next) => {
         "-_id -id -password -__v -email -friends -status -created -lastSeen"
     });
   if (channel) {
+    await channels.updateOne({ recipients: recipient._id, creator: req.user._id }, {hide: false});
+    req.io.in(req.user.uniqueID).emit("channel:created", { channel });
     return res.json({ status: true, channel });
   }
 
