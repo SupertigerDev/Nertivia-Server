@@ -23,12 +23,16 @@ module.exports = async (req, res, next) => {
   ordered.splice(order, 0, ordered.splice(index, 1)[0]);
 
 
+  const defaultRole = roles.find(r => r.default);
+  ordered = ordered.filter(o => !o.default)
 
   let itemsToUpdate = [];
   ordered = ordered.map((v, i) => {
-    itemsToUpdate.push({_id: v._id, order: i})
-    return {...v, ...{order: i}}
+      itemsToUpdate.push({_id: v._id, order: i})
+      return {...v, ...{order: i}}
   })
+  defaultRole.order = ordered.length;
+  ordered.push(defaultRole);
 
   await Roles.bulkWrite(
     itemsToUpdate.map(item => ({

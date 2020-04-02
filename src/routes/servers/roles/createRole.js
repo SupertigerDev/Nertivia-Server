@@ -26,6 +26,7 @@ module.exports = async (req, res, next) => {
     order: rolesCount
   };
   const create = await Roles.create(doc);
+  await Roles.updateOne({server: req.server._id, default: true}, {$inc: {order: 2}})
 
   const data = {
     name: doc.name,
