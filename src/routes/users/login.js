@@ -8,12 +8,20 @@ function signToken(uniqueID) {
 }
 
 module.exports = async (req, res, next) => {
+  // email can be username:tag.
   const {email, password} = req.body;
   req.session.destroy();
   // Validate information
 
+  let obj;
+  const usernameTag = email.split(":");
+  if (usernameTag.length === 2) {
+    obj = {username: usernameTag[0], tag: usernameTag[1]}
+  } else {
+    obj = {email};
+  }
   // Find the user given the email
-  const user = await Users.findOne({ email }).select(
+  const user = await Users.findOne(obj).select(
     "avatar status admin _id username uniqueID tag created GDriveRefreshToken password banned email_confirm_code"
   );
 
