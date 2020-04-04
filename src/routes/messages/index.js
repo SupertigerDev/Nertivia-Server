@@ -16,6 +16,7 @@ const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const disAllowBlockedUser = require('../../middlewares/disAllowBlockedUser');
 
 
+// get messages
 MainMessageRouter.route("/channels/:channelID").get(
   authenticate,
   rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
@@ -23,6 +24,7 @@ MainMessageRouter.route("/channels/:channelID").get(
   require('./getMessages')
 );
 
+// get message
 MainMessageRouter.route("/:messageID/channels/:channelID").get(
   authenticate,
   rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
@@ -30,6 +32,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").get(
   require('./getMessage')
 );
 
+// delete message
 MainMessageRouter.route("/:messageID/channels/:channelID").delete(
   authenticate,
   rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
@@ -38,6 +41,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
   require('./deleteMessage')
 );
 
+// update message
 MainMessageRouter.route("/:messageID/channels/:channelID").patch(
   authenticate,
   messagePolicy.update,
@@ -48,6 +52,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").patch(
   URLEmbed
 );
 
+// send message
 MainMessageRouter.route("/channels/:channelID").post(
   authenticate,
   messagePolicy.post,
@@ -63,6 +68,7 @@ MainMessageRouter.route("/channels/:channelID").post(
   require('./sendFileMessage'),
 );
 
+// typing
 MainMessageRouter.route("/:channelID/typing").post(
   authenticate,
   rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),

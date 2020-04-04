@@ -26,6 +26,13 @@ MainServerRouter.route('/:server_id').patch(
   require("./updateServer")
 );
 
+// Get Server
+MainServerRouter.route('/:server_id').get(
+  authenticate,
+  UserPresentVerification,
+  require("./getServer")
+);
+
 // Delete
 MainServerRouter.route('/:server_id').delete(
   authenticate,

@@ -9,13 +9,13 @@ function Permission(permission, defaultAllowed) {
       if (!permissions) {
         return res.status(403).json({
           status: false,
-          message: "Failed." + permission
+          message: "Missing permission: " + permission
         });
       }
       if (!permissions[permission]) {
         return res.status(403).json({
           status: false,
-          message: "Failed." + permission
+          message: "Missing permission: " + permission
         });
       }
       return next();
@@ -29,7 +29,7 @@ function Permission(permission, defaultAllowed) {
     if (permissions[permission] === false) {
       return res.status(403).json({
         status: false,
-        message: "Failed." + permission
+        message: "Missing permission: " + permission
       });
     }
     if (permissions[permission] === true) {
