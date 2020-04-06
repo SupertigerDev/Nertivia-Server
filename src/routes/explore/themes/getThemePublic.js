@@ -5,20 +5,26 @@ const PublicThemes = require('../../../models/publicThemes');
 
 /** @type {Express.RequestHandler} */
 module.exports = async (req, res, next) => {
+  const getCSS = req.query.css;
 
   const themeID = req.params.id;
 
-  const theme = await Themes.findOne({id: themeID, creator: req.user._id});
+  const theme = await Themes.findOne({id: themeID});
   if (!theme) {
     return res.status(404).json({message: 'Invalid theme id.'});
   }
 
-  const publicTheme = await PublicThemes.findOne({theme: theme._id}, {_id: 0}).select('id description screenshot approved css updatedCss').lean();
+  let select = 'id description screenshot approved css updatedCss';
+  if (getCSS === "false") {
+    select = 'id description screenshot approved updatedCss'
+  }  
+
+  const publicTheme = await PublicThemes.findOne({theme: theme._id, approved: true}, {_id: 0}).select(select).lean();
   if (!publicTheme) {
     return res.status(404).json({message: 'Invalid theme id.'});
   }
 
   publicTheme.updatedCss = !!publicTheme.updatedCss;
 
-  res.json(publicTheme)
+  res.json({...publicTheme, name: theme.name})
 };
