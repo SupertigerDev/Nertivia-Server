@@ -9,6 +9,9 @@ module.exports = async (req, res, next) => {
   let customStatus = custom_status && custom_status.trim() !== "" ? custom_status : null;
 
   if (customStatus) {
+    if (customStatus.length >= 100) {
+      return res.status(401).json("String too long.")
+    }
     customStatus = customStatus.replace(/\n/g, " ")
   }
 
