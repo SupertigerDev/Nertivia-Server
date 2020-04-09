@@ -73,6 +73,7 @@ const usersSchema = new Schema({
         type: String,
         default: 'default.png'
     },
+    custom_status: {type: String, select: false},
     status: {
         type: Number,
         default: 1,

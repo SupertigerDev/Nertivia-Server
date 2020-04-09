@@ -2,18 +2,21 @@ import {getRedisInstance} from './redis/instance';
 
 module.exports = {
 
-  connected: (uniqueID, _id, status, socketID) => {
-    return multiWrapper(
-      getRedisInstance().multi()
+  connected: (uniqueID, _id, status, customStatus, socketID) => {
+    const multi = getRedisInstance().multi()
       .hset(`user:${uniqueID}`, 'status', status)
       .hset(`user:${uniqueID}`, 'id', _id.toString())
       .hset(`user:${uniqueID}`, 'uniqueID', uniqueID)
 
       .hset(`connected:${socketID}`, 'u_id' , uniqueID)
       .hset(`connected:${socketID}`, '_id',  _id.toString())
-      .sadd(`uniqueID:${uniqueID}`, socketID)
-      
-    )
+      .sadd(`uniqueID:${uniqueID}`, socketID) 
+
+    if (customStatus) {
+      multi.hset(`user:${uniqueID}`, 'custom_status', customStatus)
+    }
+
+    return multiWrapper(multi)
   },
   getConnectedBySocketID: (socketID) => {
     return wrapper('hgetall',`connected:${socketID}`); 
@@ -40,16 +43,35 @@ module.exports = {
   },
   getPresences: async (array) => {
     const multi = getRedisInstance().multi();
-    for (let uniqueID of array) {
+    for (let index = 0; index < array.length; index++) {
+      const uniqueID = array[index];
         multi.hmget(`user:${uniqueID}`, "uniqueID", "status")
     }
     return multiWrapper(multi) 
+  },
+  getCustomStatusArr: async (array) => {
+    const multi = getRedisInstance().multi();
+    for (let index = 0; index < array.length; index++) {
+      const uniqueID = array[index];
+        multi.hmget(`user:${uniqueID}`, "uniqueID", "custom_status")
+    }
+    return multiWrapper(multi) 
+  },
+  getCustomStatus(uniqueID) {
+    return wrapper('hmget', `user:${uniqueID}`, 'uniqueID', 'custom_status'); 
   },
   getPresence: async (uniqueID) => {
     return wrapper('hmget', `user:${uniqueID}`, 'uniqueID', 'status'); 
   },
   changeStatus: async (uniqueID, status) => {
     return wrapper('hset', `user:${uniqueID}`, 'status', status);
+  },
+  changeCustomStatus: async (uniqueID, customStatus) => {
+    if (customStatus) {
+      return wrapper('hset', `user:${uniqueID}`, 'custom_status', customStatus);
+    } else {
+      return wrapper('hdel', `user:${uniqueID}`, 'custom_status');
+    }
   },
   addChannel: async (channelID, channelData, uniqueID) => {
     if (channelData.server_id) {

@@ -1,5 +1,5 @@
 const events = require("./socketEvents/index");
-const controller = require("./socketController");
+const emitUserStatus = require("./socketController/emitUserStatus");
 const User = require("./models/users");
 const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
@@ -68,7 +68,7 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status email_confirm_code banned";
+        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned";
 
       const user = await User.findOne({ uniqueID: decryptedToken })
         .select(userSelect)
@@ -110,7 +110,7 @@ module.exports = async client => {
         return;
       }
 
-      await redis.connected(user.uniqueID, user._id, user.status, client.id);
+      await redis.connected(user.uniqueID, user._id, user.status, user.custom_status, client.id);
 
       let serverMembers = [];
 
@@ -202,10 +202,20 @@ module.exports = async client => {
 
       let serverMemberUniqueIDs = serverMembers.map(m => m.member.uniqueID);
 
-      let { ok, error, result } = await redis.getPresences([
+      const arr = [
         ...friendUniqueIDs,
         ...serverMemberUniqueIDs
-      ]);
+      ]
+
+      // filter duplicate uniqueIDs
+      let { ok, error, result } = await redis.getPresences(arr.filter((u, i) => arr.indexOf(u) === i) , true);
+
+      const memberStatusArr =  result.filter(s => s[0] !== null && s[1] !== "0");
+
+      // its ugly, but watever. Most of my code is ugly 🤡
+      const customStatusArr = (await redis.getCustomStatusArr(memberStatusArr.map(f => f[0]))).result.filter(s => s[0] !== null && s[1] !== null)
+
+
 
       const settings = {
         ...user.settings,
@@ -218,7 +228,7 @@ module.exports = async client => {
       const checkAlready = await redis.connectedUserCount(user.uniqueID);
       // if multiple users are still online
       if (checkAlready && checkAlready.result === 1) {
-        controller.emitUserStatus(
+        emitUserStatus(
           user.uniqueID,
           user._id,
           user.status,
@@ -247,14 +257,12 @@ module.exports = async client => {
           return a.concat(c.muted_channels);
         }, []),
         notifications: results[1],
-        currentFriendStatus: result.filter(s => s[0] !== null && s[1] !== "0"),
+        memberStatusArr,
+        customStatusArr,
         settings
       });
     } catch (e) {
       console.log("loggedOutReason: Unknown Error:");
-      console.log(
-        "token: " + config.jwtHeader + token + " secret: " + config.jwtSecret
-      );
       console.log(e);
       delete client.auth;
       client.emit("auth_err", "Invalid Token");
@@ -279,7 +287,7 @@ module.exports = async client => {
 
     // if all users have gone offline, emit offline status to friends.
     if (response.result === 1) {
-      controller.emitUserStatus(result.u_id, result._id, 0, getIOInstance());
+      emitUserStatus(result.u_id, result._id, 0, getIOInstance());
     }
   });
 

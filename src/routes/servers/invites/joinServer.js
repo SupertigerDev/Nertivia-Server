@@ -95,8 +95,10 @@ module.exports = async (req, res, next) => {
     };
     // get user presence
     const presence = await redis.getPresence(serverMember.member.uniqueID);
+    const customStatus = await redis.getCustomStatus(serverMember.member.uniqueID);
     io.in("server:" + server.server_id).emit("server:member_add", {
       serverMember,
+      custom_status: customStatus.result[1],
       presence: presence.result[1]
     });
 
@@ -188,9 +190,17 @@ module.exports = async (req, res, next) => {
       .populate("member")
       .lean();
 
-    const memberPresences = await redis.getPresences(
+    const memberPresences = (await redis.getPresences(
       serverMembers.map(sm => sm.member.uniqueID)
-    );
+    )).result.filter(
+      s => s[0] !== null && s[1] !== "0"
+    )
+
+    const memberCustomStatusArr = (await redis.getCustomStatusArr(memberPresences.map(cs => cs[0]))).result.filter(
+      s => s[0] !== null && s[1] !== null
+    )
+    
+
     serverMembers = serverMembers.map(sm => {
       delete sm.server;
       delete sm._id;
@@ -206,9 +216,8 @@ module.exports = async (req, res, next) => {
     });
     io.to(req.user.uniqueID).emit("server:members", {
       serverMembers,
-      memberPresences: memberPresences.result.filter(
-        s => s[0] !== null && s[1] !== "0"
-      )
+      memberPresences,
+      memberCustomStatusArr
     });
   }
 };

@@ -15,6 +15,12 @@ MainSettingsRouter.route("/status").post(
   require("./changeStatus")
 );
 
+// Change Custom Status
+MainSettingsRouter.route("/custom-status").post(
+  authenticate,
+  require("./changeCustomStatus")
+);
+
 // Change appearance
 MainSettingsRouter.route("/apperance").put(
   //TODO: fix typo in database and client and server.

@@ -7,7 +7,8 @@ export default async (req:Request, res:Response, next:NextFunction) => {
   const type = req.query.type;
 
   if (id === "default" || id === "default.png") return next()
-  const url = `https://avruqwirqo.cloudimg.io/v7/https://drive.google.com/uc?export=view&id=${id}`;
+  const encode = encodeURIComponent(`https://drive.google.com/uc?export=view&id=${id}`)
+  const url = `https://proxi.bree.workers.dev/cdn/${encode}`;
   const requestSettings = {
     url,
     method: "GET",

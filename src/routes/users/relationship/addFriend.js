@@ -2,6 +2,7 @@
 const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
 const BlockedUsers = require('../../../models/blockedUsers');
+const redis = require('../../../redis');
 
 module.exports = async (req, res, next) => {
   const {username, tag} = req.body;
@@ -71,6 +72,19 @@ module.exports = async (req, res, next) => {
   )
   
   const io = req.io
+  
+  const presence = (await redis.getPresences([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
+  const customStatus = (await redis.getCustomStatusArr([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
+  
+  docRequester.recipient.status = parseInt(presence[0][1]) || null;
+  docRecipient.recipient.status = parseInt(presence[1][1]) || null;
+
+  console.log(customStatus)
+
+  docRequester.recipient.custom_status = customStatus[0][1] || null;
+  docRecipient.recipient.custom_status = customStatus[1][1] || null;
+
+
   io.in(requester.uniqueID).emit('relationshipAdd', docRequester);
   io.in(recipient.uniqueID).emit('relationshipAdd', docRecipient);
 
