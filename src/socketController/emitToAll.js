@@ -13,7 +13,7 @@ module.exports = async (name, id, data, io) => {
   const user = await Users.findById(id).populate('servers');
 
 
-  const sockets = {};
+  let sockets = {};
 
 
   for (let index = 0; index < user.servers.length; index++) {

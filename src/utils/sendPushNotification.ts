@@ -2,6 +2,7 @@ import Devices from "../models/Devices";
 const FCM = require("fcm-node");
 const serverKey = require("../fb-fcm.json");
 const fcm = new FCM(serverKey);
+import path from 'path';
 
 interface Args {
   isServer: boolean;
@@ -24,6 +25,7 @@ interface Message {
 }
 interface Files {
   fileName: string;
+  url: string;
 }
 interface Devices {
   token: string;
@@ -48,10 +50,15 @@ export default async function send(args: Args) {
   const tokens = requestToken.map(t => t.token);
   let msgContent = "";
 
-  if (args.message.message.trim() !== "") {
+
+  if (args.message.message && args.message.message.trim() !== "") {
     msgContent = args.message.message;
   } else if (args.message.files.length) {
-    msgContent = args.message.files[0].fileName;
+    if (args.message.files[0].fileName){
+      msgContent = args.message.files[0].fileName;
+    } else {
+      msgContent = decodeURIComponent(path.basename(args.message.files[0].url));
+    }
   }
 
   const message = {

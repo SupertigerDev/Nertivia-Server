@@ -23,11 +23,10 @@ interface Embed {
   description?: string,
 }
 
-const imageFormatArr = ["png", "jpg", "jpeg", "webp", "gif"]
+//const imageFormatArr = ["png", "jpg", "jpeg", "webp", "gif"]
 
 module.exports = async (req:RequestCustom, res: Response, next: NextFunction) => {
-  if (!req.message_status) next();
-  const message = req.body.message;
+  const message = req.body.message || req.uploadFile.message;
   const message_id = req.message_id
   if (!message) return;
 

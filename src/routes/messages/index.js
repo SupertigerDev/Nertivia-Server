@@ -14,6 +14,8 @@ const rateLimit = require('./../../middlewares/rateLimit');
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const disAllowBlockedUser = require('../../middlewares/disAllowBlockedUser');
+import fileMessage from './fileMessage';
+import sendMessage from './sendMessage';
 
 
 // get messages
@@ -61,11 +63,12 @@ MainMessageRouter.route("/channels/:channelID").post(
   disAllowBlockedUser,
   serverChannelPermissions('send_message', true),
   checkRolePerms('Send Message', permissions.SEND_MESSAGES),
-  require('./sendMessage'),
+  fileMessage,
+  sendMessage,
   URLEmbed,
-  GDriveOauthClient,
-  busboy(),
-  require('./sendFileMessage'),
+  //GDriveOauthClient,
+  //busboy(),
+ // require('./sendFileMessage'),
 );
 
 // typing

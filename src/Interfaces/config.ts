@@ -13,9 +13,9 @@ export default interface Config {
   IPs: IPs[],
   port: number | null
   allowAllOrigins: boolean | null,
+  fileCDNSecret: string,
   nodemailer: Nodemailer
 }
-
 
 export interface Redis {
   host: string,

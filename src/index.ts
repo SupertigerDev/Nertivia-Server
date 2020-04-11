@@ -34,6 +34,7 @@ function connectToRedis() {
 	})
 }
 
+
 function startHTTPServer() {
 	if (httpServerInitialized) return;
 	httpServerInitialized = true;

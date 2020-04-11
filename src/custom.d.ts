@@ -1,10 +1,36 @@
-import { Server } from "socket.io";
+import socketio from "socket.io";
 
 declare global {
   namespace Express {
     export interface Request {
-      io?: Server,
-      userIP?: string | string[] | undefined
+      io: socketio.Server,
+      userIP?: string | string[] | undefined,
+      user: User,
+      uploadFile: uploadFile,
+      message_id: string,
+      channel: Channel,
+      oauth2Client: any
     }
   }
+}
+interface User {
+  uniqueID: string
+  _id: string
+  username: string
+  tag: string
+  avatar: string
+  admin: string
+}
+
+interface uploadFile {
+  file: object
+  message: string
+}
+interface Channel {
+  server: Server
+  recipients: any[]
+}
+interface Server {
+  server_id: string
+  _id: string
 }

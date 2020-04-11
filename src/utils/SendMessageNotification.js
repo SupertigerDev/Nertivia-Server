@@ -30,10 +30,15 @@ async function sendNotification({
   const members_uniqueID = members
     .map(m => m.member.uniqueID)
     .filter(m => m !== sender.uniqueID);
+  
+    if (!members_uniqueID.length) {
+      return members_uniqueID;
+    }
 
-  for await (const memberUniqueID of members_uniqueID) {
-    addToBulk(bulk, memberUniqueID, sender._id, channelID, message)
-  }
+    for (let index = 0; index < members_uniqueID.length; index++) {
+      const memberUniqueID = members_uniqueID[index];
+      addToBulk(bulk, memberUniqueID, sender._id, channelID, message)
+    }
   bulk.execute();
   return members_uniqueID;
 }
