@@ -7,6 +7,8 @@ import  uploadGoogleDrive from '../../utils/uploadCDN/googleDrive';
 import sharp from 'sharp';
 import {Request, Response, NextFunction} from 'express';
 const oauth2Client = require('./../../middlewares/GDriveOauthClient')
+const FlakeId = require('flakeid');
+const flakeId = new FlakeId(); 
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   // if formdata doesnt exist, go to the next function.
@@ -56,7 +58,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       metadata = await sharp(buffer).metadata();
       file.removeListener("data", onData);
     }
-    const dirPath = path.join(__dirname, "../", "../", "public", "temp", filename);
+
+    const fileid = flakeId.gen();
+    const dirPath = path.join(__dirname, "../", "../", "public", "temp", fileid);
 
     // temporarly store file in server.
     const writeStream = fs.createWriteStream(dirPath);
@@ -96,9 +100,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     if (upload_cdn === 1) {
       // wait untill the write is finished and then upload.
       writeStream.once("close", async () => {
-        const fileid = await nertiviaCDN.uploadFile(dirPath, req.user.uniqueID)
-          .catch(err => {res.status(403).json({message: err})})
-        if (!fileid) return deleteFile(dirPath);
+        const success = await nertiviaCDN.uploadFile(dirPath, req.user.uniqueID, fileid, filename)
+          .catch((err:any) => {res.status(403).json({message: err})})
+        if (!success) return deleteFile(dirPath);
         const fileObj: {url: string, dimensions?: object} = {
           url: `https://nertivia-media.tk/${req.user.uniqueID}/${fileid}/${encodeURIComponent(filename)}`
         };

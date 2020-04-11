@@ -2,13 +2,10 @@ import request from 'request';
 import path from 'path';
 import fs from 'fs';
 import config from '../../config';
-const FlakeId = require('flakeid');
 
-const flakeId = new FlakeId(); 
 
-export function uploadFile(filePath: string, userid: string) {
+export function uploadFile(filePath: string, userid: string, fileid: string, filename: string) {
   return new Promise((resolve, reject) => {
-    const fileid:string = flakeId.gen();
 
     const options: request.Options = {
       url: 'https://www.nertivia-media.tk/indexx.php',
@@ -16,12 +13,17 @@ export function uploadFile(filePath: string, userid: string) {
         secret: config.fileCDNSecret,
         userid,
         fileid: fileid,
-        fileToUpload: fs.createReadStream(filePath),
+        fileToUpload:{
+          value:  fs.createReadStream(filePath),
+          options: {
+            filename: filename
+          }
+        }
       }
     }
     request.post(options, (err, response, body) => {
       if (err || response.statusCode !== 200) return reject(err || body);
-      resolve(fileid);
+      resolve(true);
     })
   })
 }
