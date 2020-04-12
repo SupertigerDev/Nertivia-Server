@@ -11,6 +11,7 @@ const FlakeId = require('flakeid');
 const flakeId = new FlakeId(); 
 
 export default async (req: Request, res: Response, next: NextFunction) => {
+  let cancelRequest = false;
   // if formdata doesnt exist, go to the next function.
   if (!req.headers["content-type"]?.startsWith('multipart/form-data')) return next();
   // start getting file stream;
@@ -20,8 +21,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   let upload_cdn: number; // 0: google drive 1: nertivia cdn
 
   req.busboy.on("error", function(err:any) {
+    cancelRequest = true;
     req.unpipe(req.busboy);
-    console.error(err)
     return res.status(403).json({message: 'Something went wrong while trying to upload.'})
   })
 
@@ -47,8 +48,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     }
 
     file.on("error",  function(err) {
+      cancelRequest = true;
       req.unpipe(req.busboy);
-      console.error(err)
       return res.status(403).json({message: 'Something went wrong while trying to upload.'})
     })
 
@@ -83,6 +84,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       oauth2Client(req, res, () => {});
 
       writeStream.once("close", async () => {
+        if (cancelRequest) return;
         const data:any = await uploadGoogleDrive({
           file: {
             fileName: filename,
@@ -112,6 +114,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     if (upload_cdn === 1) {
       // wait untill the write is finished and then upload.
       writeStream.once("close", async () => {
+        if (cancelRequest) return;
         const success = await nertiviaCDN.uploadFile(dirPath, req.user.uniqueID, fileid, filename)
           .catch((err:any) => {res.status(403).json({message: err})})
         if (!success) return deleteFile(dirPath);
