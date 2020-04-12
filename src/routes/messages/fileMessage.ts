@@ -48,6 +48,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     }
 
     file.on("error",  function(err) {
+      if (cancelRequest) return;
       cancelRequest = true;
       req.unpipe(req.busboy);
       return res.status(403).json({message: 'Something went wrong while trying to upload.'})
