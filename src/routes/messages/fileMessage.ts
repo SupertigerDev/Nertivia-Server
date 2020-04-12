@@ -19,6 +19,12 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   let message: string;
   let upload_cdn: number; // 0: google drive 1: nertivia cdn
 
+  req.busboy.on("error", function(err:any) {
+    req.unpipe(req.busboy);
+    console.error(err)
+    return res.status(403).json({message: 'Something went wrong while trying to upload.'})
+  })
+
   req.busboy.on('field', (fieldname, val) => {
     if (fieldname === 'message') {
       if (val.length > 5000) {
@@ -39,6 +45,12 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       req.unpipe(req.busboy);
       return res.status(403).json({message: 'Use field name of "file" to upload files.'})
     }
+
+    file.on("error",  function(err) {
+      req.unpipe(req.busboy);
+      console.error(err)
+      return res.status(403).json({message: 'Something went wrong while trying to upload.'})
+    })
 
     if (upload_cdn === undefined) {
       req.unpipe(req.busboy);
