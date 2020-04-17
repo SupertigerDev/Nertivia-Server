@@ -116,7 +116,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       // wait untill the write is finished and then upload.
       writeStream.once("close", async () => {
         if (cancelRequest) return;
-        const success = await nertiviaCDN.uploadFile(dirPath, req.user.uniqueID, fileid, filename)
+        const success = await nertiviaCDN.uploadFile(fs.createReadStream(dirPath), req.user.uniqueID, fileid, filename)
           .catch((err:any) => {res.status(403).json({message: err})})
         if (!success) return deleteFile(dirPath);
         const fileObj: {url: string, dimensions?: object} = {

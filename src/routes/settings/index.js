@@ -30,7 +30,7 @@ MainSettingsRouter.route("/apperance").put(
 
 // Emoji
 MainSettingsRouter.route("/emoji")
-  .post(authenticate, GDriveOauthClient, require("./addCustomEmoji"))
+  .post(authenticate, require("./addCustomEmoji"))
   .put(authenticate, require("./renameCustomEmoji"))
   .delete(authenticate, require("./deleteCustomEmoji"));
 

@@ -20,7 +20,6 @@ MainUserRouter.use("/survey", require("./survey"));
 MainUserRouter.route("/").patch(
   authenticate,
   userPolicy.updateUser,
-  GDriveOauthClient,
   require("./userUpdate")
 );
 

@@ -1,12 +1,12 @@
 const Servers = require("../../models/servers");
 const Channels = require("../../models/channels");
 
-const GDriveApi = require("./../../API/GDrive");
-const stream = require("stream");
+import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+
 
 const { matchedData } = require("express-validator/filter");
 const FlakeId = require("flakeid");
-const flake = new FlakeId();
+const flakeId = new FlakeId();
 const cropImage = require('../../utils/cropImage');
 
 module.exports = async (req, res, next) => {
@@ -32,41 +32,22 @@ module.exports = async (req, res, next) => {
     }
   }
 
-  if (data.avatar && oauth2Client) {
-    const { ok, error, result } = await uploadAvatar(
-      data.avatar,
-      oauth2Client,
-      res,
-      req,
-      false
-    );
-    if (!ok) {
-      return res.status(403).json({
-        message:
-          "Something went wrong while uploading to google drive. Please try again later."
-      });
-    }
+
+  if (data.avatar) {
+    const url = await uploadAvatar(data.avatar, req.user.uniqueID, false).catch(err => {res.status(403).json({message: err})});
+    if (!url) return;
     delete data.avatar;
-    data.avatar = result.data.id;
+    data.avatar = url;
   }
 
-  if (data.banner && oauth2Client) {
-    const { ok, error, result } = await uploadAvatar(
-      data.banner,
-      oauth2Client,
-      res,
-      req,
-      true
-    );
-    if (!ok) {
-      return res.status(403).json({
-        message:
-          "Something went wrong while uploading to google drive. Please try again later."
-      });
-    }
+
+  if (data.banner) {
+    const url = await uploadAvatar(data.banner, req.user.uniqueID, true).catch(err => {res.status(403).json({message: err})});
+    if (!url) return;
     delete data.banner;
-    data.banner = result.data.id;
+    data.banner = url;
   }
+
 
   const server = req.server;
   try {
@@ -106,60 +87,100 @@ function checkMimeType(mimeType) {
   return false;
 }
 
-async function uploadAvatar(base64, oauth2Client, res, req, isBanner) {
-  return new Promise(async resolve => {
-    let buffer = Buffer.from(base64.split(",")[1], "base64");
+async function uploadAvatar(base64, uniqueID, isBanner) {
+  return new Promise(async (resolve, reject) => {
+    let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
-    // 2092000 = 2mb
-    const maxSize = 2092000;
+    // 8092000 = 8mb
+    const maxSize = 8092000; 
     if (buffer.byteLength > maxSize) {
-      return res.status(403).json({
-        message: "Image is larger than 2MB."
-      });
+      return reject("Image is larger than 8MB.")
+
     }
     const mimeType = base64MimeType(base64);
-    const type = base64.split(";")[0].split("/")[1];
+    const type = base64.split(';')[0].split('/')[1];
     if (!checkMimeType(mimeType)) {
-      return res.status(403).json({
-        message: "Invalid avatar."
-      });
+      return reject("Invalid image.")
+
     }
+
     if (isBanner) {
       buffer = await cropImage(buffer, mimeType, 500);
     } else {
       buffer = await cropImage(buffer, mimeType, 200);
     }
+
+    buffer = await cropImage(buffer, mimeType, 200);
+
     if (!buffer) {
-      return res.status(403).json({
-        message: "Something went wrong while cropping image."
-      });
+      return reject("Something went wrong while cropping image.")
     }
+    const id = flakeId.gen();
+    const name = isBanner ? 'banner' : 'avatar';
 
-    const readable = new stream.Readable();
-    readable._read = () => {}; // _read is required but you can noop it
-    readable.push(buffer);
-    readable.push(null);
 
-    // get nertivia_uploads folder id
-    const requestFolderID = await GDriveApi.findFolder(oauth2Client);
-    if (!requestFolderID.result)
-      return res
-        .status(404)
-        .json({
-          message:
-            "If you're seeing this message, please contact Fishie@azK0 in Nertivia (Error: Google Drive folder missing.)"
-        });
-    const folderID = requestFolderID.result.id;
-
-    const requestUploadFile = await GDriveApi.uploadFile(
-      {
-        fileName: "server_avatar_" + req.server.server_id,
-        mimeType,
-        fileStream: readable
-      },
-      folderID,
-      oauth2Client
-    );
-    resolve(requestUploadFile);
-  });
+    const success = await nertiviaCDN.uploadFile(buffer, uniqueID, id, `${name}.${type}`)
+      .catch(err => {reject(err)})
+    if (!success) return;
+    resolve(`${uniqueID}/${id}/${name}.${type}`);
+  })
 }
+
+
+// async function uploadAvatar(base64, oauth2Client, res, req, isBanner) {
+//   return new Promise(async resolve => {
+//     let buffer = Buffer.from(base64.split(",")[1], "base64");
+
+//     // 2092000 = 2mb
+//     const maxSize = 2092000;
+//     if (buffer.byteLength > maxSize) {
+//       return res.status(403).json({
+//         message: "Image is larger than 2MB."
+//       });
+//     }
+//     const mimeType = base64MimeType(base64);
+//     const type = base64.split(";")[0].split("/")[1];
+//     if (!checkMimeType(mimeType)) {
+//       return res.status(403).json({
+//         message: "Invalid avatar."
+//       });
+//     }
+//     if (isBanner) {
+//       buffer = await cropImage(buffer, mimeType, 500);
+//     } else {
+//       buffer = await cropImage(buffer, mimeType, 200);
+//     }
+//     if (!buffer) {
+//       return res.status(403).json({
+//         message: "Something went wrong while cropping image."
+//       });
+//     }
+
+//     const readable = new stream.Readable();
+//     readable._read = () => {}; // _read is required but you can noop it
+//     readable.push(buffer);
+//     readable.push(null);
+
+//     // get nertivia_uploads folder id
+//     const requestFolderID = await GDriveApi.findFolder(oauth2Client);
+//     if (!requestFolderID.result)
+//       return res
+//         .status(404)
+//         .json({
+//           message:
+//             "If you're seeing this message, please contact Fishie@azK0 in Nertivia (Error: Google Drive folder missing.)"
+//         });
+//     const folderID = requestFolderID.result.id;
+
+//     const requestUploadFile = await GDriveApi.uploadFile(
+//       {
+//         fileName: "server_avatar_" + req.server.server_id,
+//         mimeType,
+//         fileStream: readable
+//       },
+//       folderID,
+//       oauth2Client
+//     );
+//     resolve(requestUploadFile);
+//   });
+// }

@@ -71,7 +71,7 @@ const usersSchema = new Schema({
     },
     avatar: {
         type: String,
-        default: 'default.png'
+        default: null
     },
     custom_status: {type: String, select: false},
     status: {

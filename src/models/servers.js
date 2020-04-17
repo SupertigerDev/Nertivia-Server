@@ -16,7 +16,7 @@ const serversSchema = new Schema({
     type: String,
     required: true
   },
-  avatar: { type: String, default: "default.png" },
+  avatar: { type: String, default: null},
   banner: { type: String },
   creator: { type: Schema.Types.ObjectId, ref: "users" },
   server_id: {

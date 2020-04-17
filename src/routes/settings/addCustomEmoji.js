@@ -1,12 +1,11 @@
-const path = require("path");
-const User = require("../../models/users");
-const GDriveApi = require("./../../API/GDrive");
 const cropImage = require("../../utils/cropImage");
 const CustomEmojis = require("../../models/customEmojis");
-const stream = require("stream");
+const FlakeId = require('flakeid');
+const flakeId = new FlakeId();
+
+import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 
 module.exports = async (req, res, next) => {
-  const oauth2Client = req.oauth2Client;
 
   if (!req.body.avatar) {
     return res.status(403).json({
@@ -51,7 +50,7 @@ module.exports = async (req, res, next) => {
     });
 
 
-    let buffer = Buffer.from(req.body.avatar.split(",")[1], "base64");
+  let buffer = Buffer.from(req.body.avatar.split(",")[1], "base64");
 
   // 3048576 = 3mb
   const maxSize = 3048576;
@@ -61,10 +60,11 @@ module.exports = async (req, res, next) => {
     });
   }
   const mimeType = base64MimeType(req.body.avatar);
+  const type = mimeType.split("/")[1];
 
   if (!checkMimeType(mimeType)) {
     return res.status(403).json({
-      message: "Invalid avatar."
+      message: "Invalid image."
     });
   }
 
@@ -75,35 +75,20 @@ module.exports = async (req, res, next) => {
       message: "Something went wrong while cropping image."
     });
   }
-  const readable = new stream.Readable();
-  readable._read = () => {}; // _read is required but you can noop it
-  readable.push(buffer);
-  readable.push(null);
+  const emojiID = flakeId.gen();
 
-  // get nertivia_uploads folder id
-  const requestFolderID = await GDriveApi.findFolder(oauth2Client);
-  if (!requestFolderID.result) {
-    return res.status(404).json({
-      message:
-        "If you're seeing this message, please contact Fishie@azK0 in Nertivia (Error: Google Drive folder missing.)"
+
+  const success = await nertiviaCDN.uploadFile(buffer, null, null, `${emojiID}.${type === 'gif' ? 'gif' : 'png'}`, true).catch(err => {
+    res.status(403).json({
+      message: err
     });
-  }
-  const folderID = requestFolderID.result.id;
-
-  const requestUploadFile = await GDriveApi.uploadFile(
-    {
-      fileName: req.body.name,
-      mimeType,
-      fileStream: readable
-    },
-    folderID,
-    oauth2Client
-  );
-
+  })
+  if (!success) return;
 
   const addEmoji = await CustomEmojis.create({
+    gif: type === "gif",
     user: req.user._id,
-    emojiID: requestUploadFile.result.data.id,
+    emojiID: emojiID,
     name: emojiName
   });
   if (!addEmoji)

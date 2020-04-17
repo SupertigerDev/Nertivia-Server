@@ -21,7 +21,6 @@ MainServerRouter.route('/').post(
 MainServerRouter.route('/:server_id').patch(
   authenticate,
   serverPolicy.updateServer,
-  GDriveOauthClient,
   UserPresentVerification,
   require("./updateServer")
 );

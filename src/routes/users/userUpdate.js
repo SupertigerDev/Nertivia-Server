@@ -1,12 +1,13 @@
 const Users = require('../../models/users');
 const { matchedData } = require('express-validator/filter');
 const bcrypt = require('bcryptjs');
-const GDriveApi = require('./../../API/GDrive');
-const stream = require('stream');
 const cropImage = require('../../utils/cropImage');
+import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+const flakeId = new (require('flakeid'))();
+
+
 
 module.exports = async (req, res, next) => {
-  const oauth2Client = req.oauth2Client;
   const data = matchedData(req);
   const user = req.user;
   // if password is not supplied and user wants to change their username || tag || password || email.
@@ -74,23 +75,11 @@ module.exports = async (req, res, next) => {
     delete data.new_password;
   }
 
-  if (data.avatar && oauth2Client) {
-    const { resp, mime } = await uploadAvatar(
-      data.avatar,
-      oauth2Client,
-      res,
-      req
-    );
-    if (!resp.ok) {
-      return res
-        .status(403)
-        .json({
-          message:
-            "Something went wrong while uploading to google drive. Please try again later."
-        });
-    }
+  if (data.avatar) {
+    const url = await uploadAvatar(data.avatar, req.user.uniqueID).catch(err => {res.status(403).json({message: err})});
+    if (!url) return;
     delete data.avatar;
-    data.avatar = resp.result.data.id + `/${user.uniqueID}.${mime !== 'gif' ? 'webp' : 'gif'}`;
+    data.avatar = url;
   }
 
   try {
@@ -111,55 +100,36 @@ module.exports = async (req, res, next) => {
 };
 
 
-async function uploadAvatar(base64, oauth2Client, res, req) {
-  return new Promise(async resolve => {
+async function uploadAvatar(base64, uniqueID) {
+  return new Promise(async (resolve, reject) => {
     let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
     // 8092000 = 8mb
     const maxSize = 8092000; 
     if (buffer.byteLength > maxSize) {
-      return res.status(403).json({
-        message: "Image is larger than 8MB."
-      });
+      return reject("Image is larger than 8MB.")
+
     }
     const mimeType = base64MimeType(base64);
     const type = base64.split(';')[0].split('/')[1];
     if (!checkMimeType(mimeType)) {
-      return res.status(403).json({
-        message: "Invalid avatar."
-      });
+      return reject("Invalid avatar.")
+
     }
 
     buffer = await cropImage(buffer, mimeType, 200);
 
     if (!buffer) {
-      return res.status(403).json({
-        message: "Something went wrong while cropping image."
-      });
+      return reject("Something went wrong while cropping image.")
     }
+    const id = flakeId.gen();
 
-    const readable = new stream.Readable()
-    readable._read = () => {} // _read is required but you can noop it
-    readable.push(buffer)
-    readable.push(null)
-  
-    // get nertivia_uploads folder id
-    const requestFolderID = await GDriveApi.findFolder(oauth2Client);
-    if (!requestFolderID.result) return res.status(404).json({message: "If you're seeing this message, please contact Fishie@azK0 in Nertivia (Error: Google Drive folder missing.)"})
-    const folderID = requestFolderID.result.id;
-  
-    const requestUploadFile = await GDriveApi.uploadFile(
-      {
-        fileName: 'avatar-'+req.user.uniqueID,
-        mimeType,
-        fileStream: readable
-      },
-      folderID,
-      oauth2Client
-    );
-    resolve({resp: requestUploadFile, mime: type});
+
+    const success = await nertiviaCDN.uploadFile(buffer, uniqueID, id, `avatar.${type}`)
+      .catch(err => {reject(err)})
+    if (!success) return;
+    resolve(`${uniqueID}/${id}/avatar.${type}`);
   })
-
 }
 
 
