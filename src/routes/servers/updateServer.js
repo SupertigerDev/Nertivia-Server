@@ -116,7 +116,7 @@ async function uploadAvatar(base64, uniqueID, isBanner) {
       return reject("Something went wrong while cropping image.")
     }
     const id = flakeId.gen();
-    const name = isBanner ? 'banner' : 'avatar';
+    const name = isBanner ? 'bnr' : 'avatar';
 
 
     const success = await nertiviaCDN.uploadFile(buffer, uniqueID, id, `${name}.${type}`)
