@@ -9,6 +9,7 @@ const ServerRoles = require("../../../models/Roles");
 const redis = require("./../../../redis");
 const sendMessageNotification = require("./../../../utils/SendMessageNotification");
 import pushNotification from "../../../utils/sendPushNotification";
+import getUserDetails from "../../../utils/getUserDetails";
 
 module.exports = async (req, res, next) => {
   const { invite_code, server_id } = req.params;
@@ -190,16 +191,7 @@ module.exports = async (req, res, next) => {
       .populate("member")
       .lean();
 
-    const memberPresences = (await redis.getPresences(
-      serverMembers.map(sm => sm.member.uniqueID)
-    )).result.filter(
-      s => s[0] !== null && s[1] !== "0"
-    )
-
-    const memberCustomStatusArr = (await redis.getCustomStatusArr(memberPresences.map(cs => cs[0]))).result.filter(
-      s => s[0] !== null && s[1] !== null
-    )
-    
+    const  {programActivityArr, memberStatusArr, customStatusArr} = await getUserDetails(serverMembers.map(sm => sm.member.uniqueID))   
 
     serverMembers = serverMembers.map(sm => {
       delete sm.server;
@@ -216,8 +208,9 @@ module.exports = async (req, res, next) => {
     });
     io.to(req.user.uniqueID).emit("server:members", {
       serverMembers,
-      memberPresences,
-      memberCustomStatusArr
+      memberPresences: memberStatusArr,
+      memberCustomStatusArr: customStatusArr,
+      programActivityArr
     });
   }
 };

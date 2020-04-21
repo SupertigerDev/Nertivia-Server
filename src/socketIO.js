@@ -1,5 +1,6 @@
 const events = require("./socketEvents/index");
 const emitUserStatus = require("./socketController/emitUserStatus");
+const emitToAll = require("./socketController/emitToAll");
 const User = require("./models/users");
 const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
@@ -14,6 +15,7 @@ const redis = require("./redis");
 // const sio = require("socket.getIOInstance()");
 
 import { getIOInstance } from "./socket/instance";
+import getUsrDetails from './utils/getUserDetails';
 
 // nsps = namespaces.
 // disable socket events when not authorized .
@@ -207,14 +209,7 @@ module.exports = async client => {
         ...serverMemberUniqueIDs
       ]
 
-      // filter duplicate uniqueIDs
-      let { ok, error, result } = await redis.getPresences(arr.filter((u, i) => arr.indexOf(u) === i) , true);
-
-      const memberStatusArr =  result.filter(s => s[0] !== null && s[1] !== "0");
-
-      // its ugly, but watever. Most of my code is ugly 🤡
-      const customStatusArr = (await redis.getCustomStatusArr(memberStatusArr.map(f => f[0]))).result.filter(s => s[0] !== null && s[1] !== null)
-
+      const {customStatusArr, memberStatusArr, programActivityArr} = await getUsrDetails(arr.filter((u, i) => arr.indexOf(u) === i))
 
 
       const settings = {
@@ -259,6 +254,7 @@ module.exports = async client => {
         notifications: results[1],
         memberStatusArr,
         customStatusArr,
+        programActivityArr,
         settings
       });
     } catch (e) {
@@ -288,10 +284,40 @@ module.exports = async client => {
     // if all users have gone offline, emit offline status to friends.
     if (response.result === 1) {
       emitUserStatus(result.u_id, result._id, 0, getIOInstance());
+    } else {
+      // remove program activity status if the socket id matches
+      const programActivity = await redis.getProgramActivity(result.u_id);
+      if (!programActivity.ok || !programActivity.result) return;
+      const {socketID} = JSON.parse(programActivity.result);
+      if (socketID === client.id) {
+        await redis.setProgramActivity(result.u_id, null);
+        emitToAll("programActivity:changed", result._id, {uniqueID: result.u_id}, getIOInstance())
+      }
+
     }
   });
 
   client.on("notification:dismiss", data =>
     events.notificationDismiss(data, client, getIOInstance())
   );
+
+  client.on("programActivity:set", async data => {
+    const { ok, result } = await redis.getConnectedBySocketID(client.id);
+    if (!ok || !result) return;
+    const uniqueID = result.u_id
+    const _id = result._id;
+    if (data) {
+      const res = await redis.setProgramActivity(uniqueID, {name: data.name, status: data.status, socketID: client.id})
+      const json = JSON.parse(res.result[0])
+      // only emit if: 
+      // json is empty
+      // json is not the same.
+      if ( (json && (json.name !== data.name || json.status !== data.status)) || (!json) ) {
+        emitToAll("programActivity:changed", _id, {name: data.name, status: data.status, uniqueID}, getIOInstance())
+      }
+    } else {
+      await redis.setProgramActivity(uniqueID, null);
+      emitToAll("programActivity:changed", _id, {uniqueID}, getIOInstance())
+    }
+  })
 };

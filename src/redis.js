@@ -36,10 +36,34 @@ module.exports = {
       .del(`connected:${socketID}`)
     );
     if(response.result[1] == 0) {
+      await wrapper("del", `programActivity:${uniqueID}`);
       return wrapper("del", `user:${uniqueID}`)
     } else {
       return response
     }
+  },
+  getProgramActivity: (uniqueID) => {
+    return wrapper("get", `programActivity:${uniqueID}`);
+  },
+  getProgramActivityArr: async (array) => {
+    const multi = getRedisInstance().multi();
+    for (let index = 0; index < array.length; index++) {
+      const uniqueID = array[index];
+        multi.get(`programActivity:${uniqueID}`)
+    }
+    return multiWrapper(multi) 
+  },
+  setProgramActivity: (uniqueID, data) => {
+    const multi = getRedisInstance().multi();
+    if (!data) {
+      multi.del(`programActivity:${uniqueID}`)
+    } else {
+      const {name, status, socketID} = data;
+      multi.get(`programActivity:${uniqueID}`);
+      multi.set(`programActivity:${uniqueID}`, JSON.stringify({name, status, socketID}))
+      multi.expire(`programActivity:${uniqueID}`, 240) // 4 minutes
+    }
+    return multiWrapper(multi) 
   },
   getPresences: async (array) => {
     const multi = getRedisInstance().multi();

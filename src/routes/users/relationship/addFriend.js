@@ -75,18 +75,18 @@ module.exports = async (req, res, next) => {
   
   const presence = (await redis.getPresences([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
   const customStatus = (await redis.getCustomStatusArr([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
+  const programActivity = (await redis.getProgramActivityArr([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
   
   docRequester.recipient.status = parseInt(presence[0][1]) || null;
-  docRecipient.recipient.status = parseInt(presence[1][1]) || null;
-
-  console.log(customStatus)
-
   docRequester.recipient.custom_status = customStatus[0][1] || null;
+  
+  
+  docRecipient.recipient.status = parseInt(presence[1][1]) || null;
   docRecipient.recipient.custom_status = customStatus[1][1] || null;
 
 
-  io.in(requester.uniqueID).emit('relationshipAdd', docRequester);
-  io.in(recipient.uniqueID).emit('relationshipAdd', docRecipient);
+  io.in(requester.uniqueID).emit('relationshipAdd', {...docRequester, program_activity: JSON.parse(programActivity[0]) || null});
+  io.in(recipient.uniqueID).emit('relationshipAdd', {...docRecipient, program_activity: JSON.parse(programActivity[1]) || null});
 
   return res.json({ status: true, message: `Request sent to ${recipient.username}` })
 }
