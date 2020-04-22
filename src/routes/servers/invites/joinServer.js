@@ -161,7 +161,7 @@ module.exports = async (req, res, next) => {
     });
 
     
-    const defaultChannel = serverChannels.find(c => c.channelID = server.default_channel_id);
+    const defaultChannel = serverChannels.find(c => c.channelID === server.default_channel_id);
     defaultChannel.server = server;
     pushNotification({
       channel: defaultChannel,
