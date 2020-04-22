@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const cropImage = require('../../utils/cropImage');
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 const flakeId = new (require('flakeid'))();
+const emitToAll = require('../../socketController/emitToAll');
 
 
 
@@ -92,7 +93,17 @@ module.exports = async (req, res, next) => {
     const io = req.io;
     res.json(resObj);
 
+
     io.in(req.user.uniqueID).emit("update_member", resObj);
+
+    // emit public data
+    if (!data.avatar && !data.username) return;
+    const publicObj = {uniqueID: req.user.uniqueID}
+    if (data.avatar) publicObj.avatar = data.avatar;
+    if (data.username) publicObj.username = data.username;
+    if (data.tag) publicObj.tag = data.tag;
+    emitToAll('update_member', req.user._id, publicObj, io, false)
+    
   } catch (e) {
     console.log(e);
     res.status(403).json({ message: "Something went wrong. Try again later." });

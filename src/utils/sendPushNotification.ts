@@ -61,7 +61,7 @@ export default async function send(args: Args) {
     }
   }
 
-  const message = {
+  const message: any = {
     registration_ids: tokens,
     data: {}
   };
@@ -74,23 +74,27 @@ export default async function send(args: Args) {
       server_id: args.channel.server.server_id,
       server_name: args.channel.server.name,
       channel_name: args.channel.name,
-      avatar: args.channel.server.avatar,
       message:
         msgContent.length >= 500
           ? msgContent.substring(0, 500) + "..."
           : msgContent
     };
+    if (args.channel.server.avatar) {
+      message.data.avatar = args.channel.server.avatar;
+    }
   } else {
     message.data = {
       username: args.user.username,
       channel_id: args.message.channelID,
       unique_id: args.user.uniqueID,
-      avatar: args.user.avatar,
       message:
         msgContent.length >= 500
           ? msgContent.substring(0, 500) + "..."
           : msgContent
     };
+    if (args.user.avatar) {
+      message.data.avatar = args.user.avatar;
+    }
   }
 
   fcm.send(message, async function(err: Error, response: any) {

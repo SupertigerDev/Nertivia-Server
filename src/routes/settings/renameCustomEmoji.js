@@ -16,13 +16,26 @@ module.exports = async (req, res, next) => {
       message: "Maximum: 30 characters are required."
     });
 
+  const emojiName = replaceAccents(name)
+    .replace(/[^A-Z0-9]+/gi, "_")
+    .trim()
+
+  const checkEmojiExists = await CustomEmojis.findOne({
+    user: req.user._id,
+    name: emojiName
+  });
+  if (checkEmojiExists)
+    return res.status(403).json({
+      status: false,
+      message: "Emoji with that name already exists!"
+  });
+
+
   CustomEmojis.findOneAndUpdate(
     { user: userID, emojiID },
     {
       $set: {
-        name: replaceAccents(name)
-          .replace(/[^A-Z0-9]+/gi, "_")
-          .trim()
+        name: emojiName
       }
     },
     { new: true }
