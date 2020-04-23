@@ -30,9 +30,9 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
   if (!message) return;
 
 
-  const url = /(^|\s)((https?:\/\/)?[\w-]+(\.[a-z-]+)+\.?(:\d+)?(\/\S*)?)/.exec(message);
+  const url = /^(^|\s)(https?:\/\/)?(([^.\s/<>]+\.)+[a-z]+(:(\d+))?(\/[^\s<>]*)?)/.exec(message);
   if (!url) return;
-  const firstURL = url[3] ? url[2] : 'https://' + url[2]
+  const firstURL = url[2] ? url[0] : 'https://' + url[0]
 
 
   let resObj = {}
