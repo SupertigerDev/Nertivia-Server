@@ -307,6 +307,12 @@ module.exports = async client => {
     const uniqueID = result.u_id
     const _id = result._id;
     if (data) {
+      if (data.name) {
+        data.name = data.name.substring(0, 100)
+      }
+      if (data.status) {
+        data.status = data.status.substring(0, 100)
+      }
       const res = await redis.setProgramActivity(uniqueID, {name: data.name, status: data.status, socketID: client.id})
       const json = JSON.parse(res.result[0])
       // only emit if: 
