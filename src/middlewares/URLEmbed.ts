@@ -2,7 +2,6 @@ import {Response, Request, NextFunction} from 'express'
 import AbortController from "abort-controller"
 import cheerio from 'cheerio';
 
-const linkifyIt = require('linkify-it')();
 const Messages = require('./../models/messages');
 import sharp from 'sharp';
 import fetch from 'node-fetch';
@@ -30,9 +29,10 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
   const message_id = req.message_id
   if (!message) return;
 
-  const urls = linkifyIt.match(message)
-  if (!urls) return;
-  let firstURL:string = urls[0].url
+
+  const url = /(^|\s)((https?:\/\/)?[\w-]+(\.[a-z-]+)+\.?(:\d+)?(\/\S*)?)/.exec(message);
+  if (!url) return;
+  const firstURL = url[3] ? url[2] : 'https://' + url[2]
 
 
   let resObj = {}
