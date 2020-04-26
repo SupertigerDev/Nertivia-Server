@@ -15,8 +15,6 @@ module.exports = (req, res, next) => {
   const verifyUrl = "https://hcaptcha.com/siteverify"
   const secret = config.captchaKey;
 
-  const data = { secret: secret, response: token };
-
 
   fetch(`${verifyUrl}?secret=${secret}&response=${token}&remoteip=${req.userIP}`, {
     method: "post",
