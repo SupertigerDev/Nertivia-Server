@@ -8,7 +8,7 @@ export function uploadFile(BufferOrStream: any, userid: string, fileid: string, 
   return new Promise((resolve, reject) => {
 
     const options: request.Options = {
-      url: 'https://www.nertivia-media.tk/indexx.php',
+      url: 'https://media.nertivia.tk/indexx.php',
       formData: {
         secret: config.fileCDNSecret,
         userid: userid || "",

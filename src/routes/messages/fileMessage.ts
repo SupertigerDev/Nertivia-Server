@@ -120,7 +120,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
           .catch((err:any) => {res.status(403).json({message: err})})
         if (!success) return deleteFile(dirPath);
         const fileObj: {url: string, dimensions?: object} = {
-          url: `https://nertivia-media.tk/${req.user.uniqueID}/${fileid}/${encodeURIComponent(filename)}`
+          url: `https://media.nertivia.tk/${req.user.uniqueID}/${fileid}/${encodeURIComponent(filename)}`
         };
         if (metadata){
           fileObj.dimensions = { width: metadata.width, height: metadata.height };
