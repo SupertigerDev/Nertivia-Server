@@ -77,7 +77,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
 
     const fileid = flakeId.gen();
-    const dirPath = path.join(__dirname, "../", "../", "public", "temp", filename);
+    let dirPath = path.join(__dirname, "../", "../", "public", "temp", `${fileid}${path.extname(filename)}`);
 
     // temporarly store file in server.
     const writeStream = fs.createWriteStream(dirPath);
@@ -87,17 +87,24 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
       if (isImage(filename, mimetype)) {
         if (compress) {
-          const compressed = await new Promise((res, rej) => {
-            gmInstance(dirPath)
-              .resize(1920, 1080, ">")
-              .quality(50)
-              .autoOrient()
-              .interlace("Plane")
-              // png files seem to be large :/ dont know how to fix.
-              .write(dirPath, err => {
-                if (err) return rej(err);
-                res(true);
-              })
+          const compressed = await new Promise(async (res, rej) => {
+          const currentExt = path.extname(dirPath);
+          if (currentExt !== ".jpg" && currentExt !== ".jpeg" && currentExt !== ".gif") { 
+            const newDir = path.join(path.dirname(dirPath), path.basename(dirPath, currentExt) + ".jpg")
+            const success = await renameAsync(dirPath, newDir).catch(err => {rej(err)})
+            if (!success) return;
+            dirPath = newDir;
+            filename = path.basename(filename, currentExt) + ".jpg"
+          }
+          gmInstance(dirPath)
+            .resize(1920, 1080, ">")
+            .quality(50)
+            .autoOrient()
+            .interlace("Plane")
+            .write(dirPath, err => {
+              if (err) return rej(err);
+              res(true);
+            })
           }).catch(() => { res.status(403).json({ message: "Failed to compress image." }) })
           if (!compressed) return deleteFile(dirPath);
         }
@@ -166,4 +173,13 @@ function isImage(fileName: string, mimeType: string) {
     return true;
   }
   return false;
+}
+
+function renameAsync(oldDir: string, newDir: string) {
+  return new Promise((res, rej) => {
+    fs.rename(oldDir, newDir, err => {
+      if (err) return rej(err);
+      res(true);
+    })
+  })
 }
