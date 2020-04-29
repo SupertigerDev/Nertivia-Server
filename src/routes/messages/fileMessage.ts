@@ -18,7 +18,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (!req.headers["content-type"]?.startsWith('multipart/form-data')) return next();
   // file size limit
   const filesize = parseInt(req.headers['content-length'] || "0");
-  const file_limit = 50340000; // 50MB
+  const file_limit = 57670000; // 55MB
   if (filesize > file_limit) {
     return res.status(403).json({message: '50MB file or below.'})
   }
