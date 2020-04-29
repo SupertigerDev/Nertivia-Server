@@ -97,8 +97,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
             filename = path.basename(filename, currentExt) + ".jpg"
           }
           gmInstance(dirPath)
-            .resize(1920, 1080, ">")
-            .quality(50)
+            .background("White")
+            .flatten()
+            .quality(90)
             .autoOrient()
             .interlace("Plane")
             .write(dirPath, err => {
