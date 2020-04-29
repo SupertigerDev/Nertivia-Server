@@ -89,19 +89,17 @@ export default async (req: Request, res: Response, next: NextFunction) => {
         if (compress) {
           const compressed = await new Promise(async (res, rej) => {
           const currentExt = path.extname(dirPath);
-          if (currentExt !== ".jpg" && currentExt !== ".jpeg" && currentExt !== ".gif") { 
-            const newDir = path.join(path.dirname(dirPath), path.basename(dirPath, currentExt) + ".jpg")
+          if (currentExt !== ".webp" && currentExt !== ".gif") { 
+            const newDir = path.join(path.dirname(dirPath), path.basename(dirPath, currentExt) + ".webp")
             const success = await renameAsync(dirPath, newDir).catch(err => {rej(err)})
             if (!success) return;
             dirPath = newDir;
-            filename = path.basename(filename, currentExt) + ".jpg"
+            filename = path.basename(filename, currentExt) + ".webp"
           }
           gmInstance(dirPath)
-            .background("White")
-            .flatten()
+            .resize(1920, 1080, ">")
             .quality(90)
             .autoOrient()
-            .interlace("Plane")
             .write(dirPath, err => {
               if (err) return rej(err);
               res(true);
@@ -167,7 +165,7 @@ function deleteFile(path: string) {
 }
 
 function isImage(fileName: string, mimeType: string) {
-  const filetypes = /jpeg|jpg|gif|png/;
+  const filetypes = /jpeg|jpg|gif|png|webp/;
   const mimeTypeTest = filetypes.test(mimeType);
   const extname = filetypes.test(path.extname(fileName).toLowerCase());
   if (mimeTypeTest && extname) {
