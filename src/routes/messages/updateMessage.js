@@ -51,6 +51,13 @@ module.exports = async (req, res, next) => {
       { ...resObj, mentions: _idMentionsArr, query }
     );
     resObj.color = data.color || -2;
+    resObj.creator = {
+      uniqueID: req.user.uniqueID,
+      username: req.user.username,
+      tag: req.user.tag,
+      avatar: req.user.avatar,
+      admin: req.user.admin
+    };
     res.json({ ...resObj,mentions, embed: 0 });
     const io = req.io;
     if (server) {
