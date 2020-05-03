@@ -6,7 +6,7 @@ module.exports = async (req, res, next) => {
 
   // Find invite
   const invite = await ServerInvites.findOne({ invite_code: inviteCode })
-    .populate("server")
+    .populate("server", "+verified")
     .lean();
 
   if (!invite) {

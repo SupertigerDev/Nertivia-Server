@@ -12,6 +12,7 @@ const userBansSchema = new Schema({
 });
 
 const serversSchema = new Schema({
+  verified: {type: Boolean, select: false},
   name: {
     type: String,
     required: true

@@ -14,7 +14,6 @@ const serversListSchema = new Schema({
   description: {type: String},
   created: {type: Number, default: 0},
   creator: {type: Schema.Types.ObjectId, ref: 'users'},
-  verified: {type: Boolean}
 });
 
 

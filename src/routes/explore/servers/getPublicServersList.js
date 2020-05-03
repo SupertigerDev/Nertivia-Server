@@ -1,6 +1,7 @@
 // const FlakeId = require('flakeid');
 // const flake = new FlakeId();
 const publicServersList = require("./../../../models/publicServersList");
+const Servers = require("./../../../models/servers");
 
 module.exports = async (req, res, next) => {
   const { verified, most_users, date_added } = req.query;
@@ -11,7 +12,7 @@ module.exports = async (req, res, next) => {
   if (verified && verified == "false") {
     match.$or = [{ verified: false }, { verified: { $exists: false } }];
   } else if (verified && verified == "true") {
-    match.verified = true;
+    match["server.verified"] = true
   }
 
   if (most_users && most_users == "true") {
@@ -32,6 +33,7 @@ module.exports = async (req, res, next) => {
       }
     },
     { $unwind: "$server" },
+    
     {
       $lookup: {
         from: "users",
@@ -60,7 +62,7 @@ module.exports = async (req, res, next) => {
         verified: 1,
         creator: {username: 1, uniqueID: 1, tag: 1},
         created: 1,
-        server: { avatar: 1, banner: 1, name: 1, server_id: 1, public: 1 },
+        server: { avatar: 1, banner: 1, name: 1, server_id: 1, public: 1, verified: 1 },
         total_members: { $size: "$serverMembers" },
         _id: 0
       }

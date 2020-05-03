@@ -49,7 +49,7 @@ const populateServers = {
     }
   ],
   select:
-    "name creator default_channel_id server_id avatar banner channel_position"
+    "name creator default_channel_id server_id avatar banner channel_position verified"
 };
 
 /**
