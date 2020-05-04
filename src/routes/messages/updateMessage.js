@@ -26,6 +26,13 @@ module.exports = async (req, res, next) => {
   if (data.color && data.color === -1) {
     _color = undefined
   }
+  
+  if (data.message && data.message.length > 5000) {
+    return res.status(403).json({
+      status: false,
+      message: "Message must contain characters less than 5,000"
+    });
+  }
 
   data.color = _color;
 
