@@ -14,7 +14,7 @@ async function sendNotification({
   const bulk = Notifications.collection.initializeUnorderedBulkOp();
   // If messages are to be sent to dm.
   if (recipient_uniqueID) {
-    await addToBulk(bulk, recipient_uniqueID, sender._id, channelID, message);
+    await addToBulk(bulk, recipient_uniqueID, sender._id, channelID, message, false);
     bulk.execute();
     return;
   }
@@ -30,20 +30,20 @@ async function sendNotification({
   const members_uniqueID = members
     .map(m => m.member.uniqueID)
     .filter(m => m !== sender.uniqueID);
-  
-    if (!members_uniqueID.length) {
-      return members_uniqueID;
-    }
 
-    for (let index = 0; index < members_uniqueID.length; index++) {
-      const memberUniqueID = members_uniqueID[index];
-      addToBulk(bulk, memberUniqueID, sender._id, channelID, message)
-    }
+  if (!members_uniqueID.length) {
+    return members_uniqueID;
+  }
+
+  for (let index = 0; index < members_uniqueID.length; index++) {
+    const memberUniqueID = members_uniqueID[index];
+    addToBulk(bulk, memberUniqueID, sender._id, channelID, message, true)
+  }
   bulk.execute();
   return members_uniqueID;
 }
 
-function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message) {
+function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message, isServer) {
   const $set = {
     recipient: recipient_uniqueID,
     channelID,
@@ -57,19 +57,23 @@ function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message) {
   if (mentioned) {
     $set.mentioned = true;
   }
+  const find = {
+    recipient: recipient_uniqueID,
+    channelID
+  }
+  if (isServer) {
+    find.count = { $lt: 100}
+  }
 
   bulk
-    .find({
-      recipient: recipient_uniqueID,
-      channelID
-    }).upsert()
+    .find(find).upsert()
     .update(
       {
         $set,
         $inc: { count: 1 }
       },
     );
-    return;
+  return;
 }
 
 module.exports = sendNotification;
