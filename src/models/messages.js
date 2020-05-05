@@ -27,6 +27,7 @@ const messagesSchema = new Schema({
   created: { type: Number },
   embed: {type: embedSchema},
   mentions: [{ type : Schema.Types.ObjectId, ref: 'users' }],
+  quotes: [{ type : Schema.Types.ObjectId, ref: 'message_quotes' }],
   timeEdited: { type: Number, required: false},
   color: {type: String, required: false},
   type: {type: Number, default: 0, enum: [

@@ -1,6 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
 const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
+const MessageQuotes = require("../../models/messageQuotes");
 const matchAll = require("match-all");
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
@@ -37,7 +38,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   }
 
   // converted to a Set to remove duplicates.
-  let mentionIds = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
+  const mentionIds = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
 
   let mentions = [];
   if (mentionIds.length) {
@@ -45,6 +46,20 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   } 
   const _idMentionsArr = mentions.map((m:any)=> m._id )
   
+  // converted to a Set to remove duplicates.
+  const messageIds = Array.from(new Set(matchAll(message, /<m([\d]+)>/g).toArray()));
+
+  let quotedMessages = [];
+  let quotes_idArr = []
+  if (messageIds.length) {
+    quotedMessages = await Messages.find({channelID, messageID: {$in: messageIds}}, {_id: 0}).select('creator message messageID').populate("creator", "username uniqueID avatar").lean();
+    quotes_idArr = (await MessageQuotes.insertMany(quotedMessages.map((q: any) => {
+      return {...q, creator: q.creator._id, quotedChannel: req.channel._id}
+    }))).map((qm: any)=> qm._id)
+  }
+  
+
+
 
 
   let query: any = {
@@ -52,7 +67,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     message,
     creator: req.user._id,
     messageID: "placeholder",
-    mentions: _idMentionsArr
+    mentions: _idMentionsArr,
+    quotes: quotes_idArr
   }
   if (req.uploadFile && req.uploadFile.file) {
     query.files = [req.uploadFile.file]
@@ -78,6 +94,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     creator: user,
     created: messageCreated.created,
     mentions,
+    quotes: quotedMessages,
     messageID: messageCreated.messageID
   };
   if (req.uploadFile && req.uploadFile.file) {

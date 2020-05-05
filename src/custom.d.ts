@@ -27,6 +27,7 @@ interface uploadFile {
   message: string
 }
 interface Channel {
+  _id: string,
   server: Server
   recipients: any[]
 }

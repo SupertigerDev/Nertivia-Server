@@ -1,4 +1,5 @@
 const Messages = require("../../models/messages");
+const MessageQuotes = require("../../models/messageQuotes");
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
@@ -33,6 +34,13 @@ module.exports = async (req, res, next) => {
 
   try {
     await message.remove();
+    if (message.quotes && message.quotes.length){
+      await MessageQuotes.deleteMany({
+        _id: {
+          $in: message.quotes
+        }
+      })
+    }
     const resObj = { channelID, messageID };
     res.json(resObj);
     const io = req.io;

@@ -1,5 +1,6 @@
 const Channels = require("../../../models/channels");
 const Messages = require("../../../models/messages");
+const MessageQuotes = require("../../../models/messageQuotes");
 const Notifications = require("../../../models/notifications");
 const redis = require("./../../../redis");
 
@@ -12,6 +13,7 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({ message: "Cannot delete default channel." });
   }
   try {
+    await MessageQuotes.deleteMany({quotedChannel: req.channel._id})
     await Notifications.deleteMany({ channelID });
     await Channels.deleteOne({ channelID });
     await Messages.deleteMany({ channelID });

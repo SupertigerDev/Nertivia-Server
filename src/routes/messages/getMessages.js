@@ -27,10 +27,22 @@ module.exports = async (req, res, next) => {
       .sort({
         _id: -1
       })
-      .populate({
+      .populate([{
         path: "creator",
-        select: "-_id -id  -__v -email -friends -status -created -lastSeen"
-      })
+        select: "avatar username uniqueID tag admin -_id"
+      }, {
+        path: "mentions",
+        select: "avatar username uniqueID tag admin -_id"
+      }, {
+        path: "quotes",
+        select: "creator message messageID -_id",
+        populate: {
+          path: "creator",
+          select: "avatar username uniqueID tag admin -_id",
+          model: "users"
+        }
+      }
+      ])
       .limit(50)
       .lean();
   } else if (beforeMessageID) {
@@ -50,10 +62,22 @@ module.exports = async (req, res, next) => {
         $gt: beforeFromMessage.id
       }
     })
-      .populate({
-        path: "creator mentions",
-        select: "-_id -id  -__v -email -friends -status -created -lastSeen"
-      })
+      .populate([{
+        path: "creator",
+        select: "avatar username uniqueID tag admin -_id"
+      }, {
+        path: "mentions",
+        select: "avatar username uniqueID tag admin -_id"
+      }, {
+        path: "quotes",
+        select: "creator message messageID -_id",
+        populate: {
+          path: "creator",
+          select: "avatar username uniqueID tag admin -_id",
+          model: "users"
+        }
+      }
+      ])
       .limit(50)
       .lean();
   } else {
@@ -63,17 +87,28 @@ module.exports = async (req, res, next) => {
       },
       "-__v -_id"
     )
-      .populate({
-        path: "creator mentions",
-        select: "-_id -id  -__v -email -friends -status -created -lastSeen"
-      })
+      .populate([{
+        path: "creator",
+        select: "avatar username uniqueID tag admin -_id"
+      }, {
+        path: "mentions",
+        select: "avatar username uniqueID tag admin -_id"
+      }, {
+        path: "quotes",
+        select: "creator message messageID -_id",
+        populate: {
+          path: "creator",
+          select: "avatar username uniqueID tag admin -_id",
+          model: "users"
+        }
+      }
+      ])
       .sort({
         _id: -1
       })
       .limit(50)
       .lean();
   }
-
   return res.json({
     status: true,
     channelID,

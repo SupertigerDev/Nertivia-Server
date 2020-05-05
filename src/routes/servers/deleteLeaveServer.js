@@ -5,6 +5,7 @@ const Servers = require("../../models/servers");
 const User = require("../../models/users");
 const ServerInvites = require("../../models/ServerInvites");
 const Messages = require("../../models/messages");
+const MessageQuotes = require("../../models/messageQuotes");
 const Notifications = require('../../models/notifications');
 const PublicServersList = require("../../models/publicServersList");
 const Roles = require("../../models/Roles");
@@ -17,6 +18,7 @@ module.exports = async (req, res, next) => {
 
   const channels = await Channels.find({ server: req.server._id }).lean();
   const channelIDArray = channels.map(c => c.channelID)
+  const channel_idArray = channels.map(c => c._id)
 
   if (req.server.creator === req.user._id) {
     await redis.remServerChannels(channelIDArray)
@@ -26,6 +28,11 @@ module.exports = async (req, res, next) => {
     await PublicServersList.deleteOne({ server: req.server._id });
 
     if (channelIDArray) {
+      await MessageQuotes.deleteMany({
+        quotedChannel: {
+          $in: channel_idArray
+        }
+      })
       await Messages.deleteMany({ channelID: { $in: channelIDArray } });
       await Notifications.deleteMany({ channelID: { $in: channelIDArray } });
     }
