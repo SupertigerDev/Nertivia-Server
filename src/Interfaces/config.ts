@@ -9,7 +9,7 @@ export default interface Config {
   domain: string | null,
   allowedOrigins: string[],
   googleDrive: GoogleDrive,
-  IPs: IPs[],
+  IPs?: IPs[],
   port: number | null
   allowAllOrigins: boolean | null,
   fileCDNSecret: string,
