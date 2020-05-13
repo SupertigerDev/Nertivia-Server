@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import Users from '../../models/users';
 import Servers from '../../models/servers';
-import ServerMembers from '../../models/ServerMembers';
 import Roles from '../../models/Roles';
-import { ADMIN } from '../../utils/rolePermConstants';
 import joinServer from "../../utils/joinServer";
 
 
@@ -35,6 +33,17 @@ export default async function createBot(req: Request, res: Response) {
     res.status(403).json({ message: "Bot is banned from the server." })
     return;
   }
+
+  const joined = await Users.exists({
+    _id: bot._id,
+    servers: req.server._id
+  });
+  if (joined) {
+    res.status(403).json({ message: "Bot is already in that server." })
+    return;
+  }
+
+
 
   // create role for bot
   const roleId = flake.gen();
