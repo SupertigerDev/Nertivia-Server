@@ -12,6 +12,7 @@ router.use('/devices', require('./devices'));
 router.use('/servers', require('./servers'));
 router.use('/channels', require('./channels'));
 router.use('/themes', require('./themes'))
+router.use('/bots', require('./bots'))
 
 router.use('/explore', require('./explore'))
 

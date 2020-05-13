@@ -6,31 +6,31 @@ const authenticate = require("../../../middlewares/authenticate");
 
 // get public servers list
 MainServersRouter.route('/').get(
-  authenticate,
+  authenticate(),
   require("./getPublicServersList")
 );
 
 // get a server
 MainServersRouter.route('/:server_id').get(
-  authenticate,
+  authenticate(),
   require("./getServer")
 );
 
 // update  public server
 MainServersRouter.route('/:server_id').patch(
-  authenticate,
+  authenticate(),
   require("./updatePublicServersList")
 );
 
 // delete  public server
 MainServersRouter.route('/:server_id').delete(
-  authenticate,
+  authenticate(),
   require("./deletePublicServersList")
 );
 
 // add to public servers list
 MainServersRouter.route('/').post(
-  authenticate,
+  authenticate(),
   require("./addPublicServersList")
 );
 

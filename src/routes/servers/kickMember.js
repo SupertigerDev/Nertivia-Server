@@ -5,6 +5,7 @@ const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
 const Notifications = require("../../models/notifications");
 const Channels = require("../../models/channels");
+const Roles = require("../../models/Roles");
 const redis = require("../../redis");
 
 const sendMessageNotification = require('../../utils/SendMessageNotification');
@@ -45,12 +46,20 @@ module.exports = async (req, res, next) => {
 
   await redis.remServerMember(unique_id, server_id);
   await redis.remServerChannels(unique_id, channelIDs)
-
+  const io = req.io;
   // remove server from users server list.
   await Users.updateOne(
     { _id: kicker._id },
     { $pullAll: { servers: [server._id] } }
   );
+
+
+  //if bot, delete bot role
+  const role = await Roles.findOneAndDelete({bot: kicker._id, server: server._id});
+
+  if (role) {
+    io.in("server:" + role.server_id).emit("server:delete_role", {role_id: role.id, server_id: role.server_id});
+  }
 
   // delete member from server members
   await ServerMembers.deleteMany({
@@ -61,7 +70,7 @@ module.exports = async (req, res, next) => {
   res.json({ status: "Done!" });
 
 
-  const io = req.io;
+
 
   // leave room
   const rooms = io.sockets.adapter.rooms[unique_id];

@@ -151,7 +151,7 @@ module.exports = async client => {
         serverRoles = await ServerRoles.find(
           { server: { $in: serverIDs } },
           { _id: 0 }
-        ).select("name id color permissions server_id deletable order default");
+        ).select("name id color permissions server_id deletable order default bot");
       }
 
       const dms = channels
@@ -266,7 +266,7 @@ module.exports = async client => {
     }
   });
 
-  //If the socket didn't authenticate, disconnect it
+  //If the socket didn't authenticate(), disconnect it
   setTimeout(function() {
     if (!client.auth) {
       client.emit("auth_err", "Invalid Token");

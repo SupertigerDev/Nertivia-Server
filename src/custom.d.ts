@@ -9,6 +9,7 @@ declare global {
       uploadFile: uploadFile,
       message_id: string,
       channel: Channel,
+      server: Server
       oauth2Client: any
     }
   }

@@ -9,16 +9,16 @@ const relationshipPolicy = require("./../../../policies/relationshipPolicies");
 
 // Add
 MainRelationshipRouter.route('/')
-  .post(authenticate, relationshipPolicy.post, require('./addFriend'));
+  .post(authenticate(), relationshipPolicy.post, require('./addFriend'));
 
 // Accept
 MainRelationshipRouter.route('/')
-  .put(authenticate, relationshipPolicy.put, require('./acceptFriend'));
+  .put(authenticate(), relationshipPolicy.put, require('./acceptFriend'));
 
 
 // Remove
 MainRelationshipRouter.route('/')
-  .delete(authenticate, relationshipPolicy.delete, require('./removeFriend'));
+  .delete(authenticate(), relationshipPolicy.delete, require('./removeFriend'));
 
 
 module.exports = MainRelationshipRouter;

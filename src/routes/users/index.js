@@ -18,7 +18,7 @@ MainUserRouter.use("/survey", require("./survey"));
 
 // Update
 MainUserRouter.route("/").patch(
-  authenticate,
+  authenticate(true),
   userPolicy.updateUser,
   require("./userUpdate")
 );
@@ -26,18 +26,18 @@ MainUserRouter.route("/").patch(
 
 // block user
 MainUserRouter.route("/block").post(
-  authenticate,
+  authenticate(),
   require("./blockUser")
 );
 
 // unblock user
 MainUserRouter.route("/block").delete(
-  authenticate,
+  authenticate(),
   require("./unblockUser")
 );
 
 // Details
-MainUserRouter.route("/:uniqueID?").get(authenticate, require("./userDetails"));
+MainUserRouter.route("/:uniqueID?").get(  authenticate(true), require("./userDetails"));
 
 // Register
 MainUserRouter.route("/register").post(
@@ -61,7 +61,7 @@ MainUserRouter.route("/login").post(
 
 // Logout
 MainUserRouter.route("/logout").delete(
-  authenticate,
+  authenticate(true),
   require("./logout")
 );
 

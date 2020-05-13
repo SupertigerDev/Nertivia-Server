@@ -9,16 +9,16 @@ const surveyPolicy = require("./../../../policies/surveyPolicies");
 
 // Details
 MainSurveyRouter.route('/')
-  .get(authenticate, require('./surveyDetails'));
+  .get(authenticate(true), require('./surveyDetails'));
 
 // Update
 MainSurveyRouter.route('/')
-  .put(authenticate, surveyPolicy.put, require('./surveyUpdate'));
+  .put(authenticate(true), surveyPolicy.put, require('./surveyUpdate'));
 
 
 // Skip
 MainSurveyRouter.route('/skip')
-  .delete(authenticate, require('./surveySkip'));
+  .delete(authenticate(), require('./surveySkip'));
 
 
 module.exports = MainSurveyRouter;

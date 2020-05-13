@@ -10,33 +10,33 @@ const settingsPolicy = require("../../policies/settingsPolicies");
 
 // Change Status
 MainSettingsRouter.route("/status").post(
-  authenticate,
+  authenticate(true),
   settingsPolicy.status,
   require("./changeStatus")
 );
 
 // Change Custom Status
 MainSettingsRouter.route("/custom-status").post(
-  authenticate,
+  authenticate(true),
   require("./changeCustomStatus")
 );
 
 // Change appearance
 MainSettingsRouter.route("/apperance").put(
   //TODO: fix typo in database and client and server.
-  authenticate,
+  authenticate(),
   require("./changeAppearance")
 );
 
 // Emoji
 MainSettingsRouter.route("/emoji")
-  .post(authenticate, require("./addCustomEmoji"))
-  .put(authenticate, require("./renameCustomEmoji"))
-  .delete(authenticate, require("./deleteCustomEmoji"));
+  .post(authenticate(), require("./addCustomEmoji"))
+  .put(authenticate(), require("./renameCustomEmoji"))
+  .delete(authenticate(), require("./deleteCustomEmoji"));
 
 // Server Position
 MainSettingsRouter.route("/server_position")
-  .put(authenticate, require("./serverPosition"))
+  .put(authenticate(), require("./serverPosition"))
 
 // Link Google Drive
 MainSettingsRouter.use(

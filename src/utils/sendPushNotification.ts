@@ -21,7 +21,7 @@ interface User {
 interface Message {
   message: string;
   channelID: string;
-  files: Files[];
+  files?: Files[];
 }
 interface Files {
   fileName: string;
@@ -53,11 +53,11 @@ export default async function send(args: Args) {
 
   if (args.message.message && args.message.message.trim() !== "") {
     msgContent = args.message.message;
-  } else if (args.message.files.length) {
-    if (args.message.files[0].fileName){
-      msgContent = args.message.files[0].fileName;
+  } else if (args.message.files!!.length) {
+    if (args.message.files!![0].fileName){
+      msgContent = args.message.files!![0].fileName;
     } else {
-      msgContent = decodeURIComponent(path.basename(args.message.files[0].url));
+      msgContent = decodeURIComponent(path.basename(args.message.files!![0].url));
     }
   }
 

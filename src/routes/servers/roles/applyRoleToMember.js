@@ -17,15 +17,22 @@ module.exports = async (req, res, next) => {
   }
 
   // check if role exists in that server
-  const roleExists = await Roles.findOne({id: role_id, server_id: server_id});
+  const role = await Roles.findOne({id: role_id, server_id: server_id});
 
-  if (roleExists.default === true) {
+  if (role.default === true) {
     return res
     .status(404)
     .json({ message: "Role does not exist." });
   }
 
-  if (!roleExists) {
+  if (role.bot) {
+    return res
+    .status(403)
+    .json({ message: "This is a bot role." });
+  }
+
+
+  if (!role) {
     return res
     .status(404)
     .json({ message: "Role does not exist." });

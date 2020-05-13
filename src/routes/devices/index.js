@@ -6,7 +6,7 @@ const authenticate = require("../../middlewares/authenticate");
 
 // register device
 MainDevicesRouter.route("/").post(
-  authenticate,
+  authenticate(),
   require("./registerDevice")
 );
 

@@ -3,68 +3,88 @@ const BannedIPs = require("../models/BannedIPs");
 import config from '../config';
 const JWT = require("jsonwebtoken");
 
-module.exports = async (req, res, next) => {
-  // check if details exist in redis session
-  if (req.session["user"]) {
-    req.user = req.session["user"];
+module.exports = function (allowBot = false, allowInvalid = false) {
+  return async function (req, res, next) {
+
+    const token = config.jwtHeader + req.headers.authorization;
+    // will contain uniqueID
+    let decryptedToken;
+
+    try {
+      decryptedToken = JWT.verify(token, config.jwtSecret);
+    } catch (e) {
+      if (allowInvalid) return next();
+      req.session.destroy();
+      return res.status(401).send({
+        message: "Invalid Token."
+      });
+    }
+
+    // check if details exist in redis session
+    if (req.session["user"]) {
+      req.user = req.session["user"];
+      const iPBanned = await checkIPChangeAndIsBanned(req, res);
+      if (iPBanned) {
+        return;
+      }
+      if (req.user.uniqueID === decryptedToken) {
+        if (req.user.bot && !allowBot) {
+          res.status(403).json({message: "Bots are not allowed to access this."})
+          return;
+        }
+        return next();
+      }
+    }
+
+
+
+
+    const user = await Users.findOne({ uniqueID: decryptedToken })
+      .select(
+        "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned bot"
+      )
+      .lean();
+    // If user doesn't exists, handle it
+    if (!user) {
+      if (allowInvalid) return next();
+      req.session.destroy();
+      return res.status(401).send({
+        message: "Invalid Token."
+      });
+    }
+    if (user.banned) {
+      req.session.destroy();
+      return res.status(401).send({
+        message: "You are banned."
+      });
+    }
+    if (user.email_confirm_code) {
+      if (allowInvalid) return next();
+      req.session.destroy();
+      return res.status(401).send({
+        message: "Email not confimed"
+      });
+    }
+    req.user = JSON.parse(JSON.stringify(user));
+    req.session["user"] = user;
     const iPBanned = await checkIPChangeAndIsBanned(req, res);
     if (iPBanned) {
       return;
     }
-    return next();
-  }
-  const token = config.jwtHeader + req.headers.authorization;
-  // will contain uniqueID
-  let decryptedToken;
+    if (user.bot && !allowBot) {
+      res.status(403).json({message: "Bots are not allowed to access this."})
+      return;
+    }
 
-  try {
-    decryptedToken = JWT.verify(token, config.jwtSecret);
-  } catch (e) {
-    req.session.destroy();
-    return res.status(401).send({
-      message: "Invalid Token."
-    });
-  }
-
-  const user = await Users.findOne({ uniqueID: decryptedToken })
-    .select(
-      "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned"
-    )
-    .lean();
-  // If user doesn't exists, handle it
-  if (!user) {
-    req.session.destroy();
-    return res.status(401).send({
-      message: "Invalid Token."
-    });
-  }
-  if (user.banned) {
-    req.session.destroy();
-    return res.status(401).send({
-      message: "You are banned."
-    });
-  }
-  if (user.email_confirm_code) {
-    req.session.destroy();
-    return res.status(401).send({
-      message: "Email not confimed"
-    });
-  }
-  req.user = JSON.parse(JSON.stringify(user));
-  req.session["user"] = user;
-  const iPBanned = await checkIPChangeAndIsBanned(req, res);
-  if (iPBanned) {
-    return;
-  }
-
-  next();
-};
+    next();
+  };
+}
 
 async function checkIPChangeAndIsBanned(req, res) {
   const storedIP = req.session["ip"];
   if (!storedIP || storedIP != req.userIP) {
     // check if ip banned
-    const ipBanned = await BannedIPs.exists({ip: req.userIP});
+    const ipBanned = await BannedIPs.exists({ ip: req.userIP });
     if (ipBanned) {
       res.status(401).send({
         message: "IP is banned."
@@ -81,9 +101,9 @@ async function checkIPChangeAndIsBanned(req, res) {
 
 function addIPToDB(req) {
   Users.updateOne(
-    { _id: req.session.user._id},
-    { ip: req.userIP},
-    (err, doc) => {}
+    { _id: req.session.user._id },
+    { ip: req.userIP },
+    (err, doc) => { }
   );
 
   // UsersIPs.updateOne(

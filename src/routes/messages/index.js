@@ -20,7 +20,7 @@ import sendMessage from './sendMessage';
 
 // get messages
 MainMessageRouter.route("/channels/:channelID").get(
-  authenticate,
+  authenticate(true),
   rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
   require('./getMessages')
@@ -28,7 +28,7 @@ MainMessageRouter.route("/channels/:channelID").get(
 
 // get message
 MainMessageRouter.route("/:messageID/channels/:channelID").get(
-  authenticate,
+  authenticate(true),
   rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
   require('./getMessage')
@@ -36,7 +36,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").get(
 
 // delete message
 MainMessageRouter.route("/:messageID/channels/:channelID").delete(
-  authenticate,
+  authenticate(true),
   rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
   channelVerification,
   disAllowBlockedUser,
@@ -45,7 +45,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
 
 // update message
 MainMessageRouter.route("/:messageID/channels/:channelID").patch(
-  authenticate,
+  authenticate(true),
   messagePolicy.update,
   rateLimit({name: 'message_update', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -56,7 +56,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").patch(
 
 // send message
 MainMessageRouter.route("/channels/:channelID").post(
-  authenticate,
+  authenticate(true),
   messagePolicy.post,
   rateLimit({name: 'message_send', expire: 20, requestsLimit: 15 }),
   channelVerification,
@@ -73,7 +73,7 @@ MainMessageRouter.route("/channels/:channelID").post(
 
 // typing
 MainMessageRouter.route("/:channelID/typing").post(
-  authenticate,
+  authenticate(true),
   rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
   channelVerification,
   disAllowBlockedUser,

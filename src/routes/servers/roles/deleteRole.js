@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
   }
 
 
-  const del = await Roles.deleteOne({_id: role._id});
+  await Roles.deleteOne({_id: role._id});
 
   const io = req.io;
   io.in("server:" + req.server.server_id).emit("server:delete_role", {role_id: role.id, server_id: req.server.server_id});

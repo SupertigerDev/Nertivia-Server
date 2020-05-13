@@ -6,7 +6,7 @@ const UserPresentVerification = require("./../../../middlewares/UserPresentVerif
 
 // Invites
 MainInviteRouter.route("/:server_id/invites").get(
-  authenticate,
+  authenticate(),
   UserPresentVerification,
   require("./getInvites")
 );
@@ -16,19 +16,19 @@ MainInviteRouter.route("/invite/:invite_code").get(require("./inviteDetails"));
 
 // Create Invite
 MainInviteRouter.route("/:server_id/invite").post(
-  authenticate,
+  authenticate(),
   UserPresentVerification,
   require("./createInvite")
 );
 
 // Join by invite
 MainInviteRouter.route("/invite/:invite_code").post(
-  authenticate,
+  authenticate(),
   require("./joinServer")
 );
 // Join by server_id
 MainInviteRouter.route("/invite/servers/:server_id").post(
-  authenticate,
+  authenticate(),
   require("./joinServer")
 );
 

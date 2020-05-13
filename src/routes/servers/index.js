@@ -12,14 +12,14 @@ const serverPolicy = require("../../policies/ServerPolicies");
 
 // Create
 MainServerRouter.route('/').post(
-  authenticate,
+  authenticate(),
   serverPolicy.createServer,
   require("./createServer")
 );
 
 // Update
 MainServerRouter.route('/:server_id').patch(
-  authenticate,
+  authenticate(true),
   serverPolicy.updateServer,
   UserPresentVerification,
   require("./updateServer")
@@ -27,21 +27,21 @@ MainServerRouter.route('/:server_id').patch(
 
 // Get Server
 MainServerRouter.route('/:server_id').get(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   require("./getServer")
 );
 
 // Delete
 MainServerRouter.route('/:server_id').delete(
-  authenticate,
+  authenticate(),
   UserPresentVerification,
   require("./deleteLeaveServer")
 );
 
 // kick member
 MainServerRouter.route('/:server_id/members/:unique_id').delete(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   checkRolePerms('Kick', permissions.KICK_USER),
   require("./kickMember")
@@ -50,7 +50,7 @@ MainServerRouter.route('/:server_id/members/:unique_id').delete(
 // banned members
 //http://192.168.1.8/api/servers/6583302963345756160/bans
 MainServerRouter.route('/:server_id/bans').get(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   require("./bannedMembers")
 )
@@ -58,7 +58,7 @@ MainServerRouter.route('/:server_id/bans').get(
 // ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:unique_id').put(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   checkRolePerms('Ban', permissions.BAN_USER),
   require("./banMember")
@@ -67,7 +67,7 @@ MainServerRouter.route('/:server_id/bans/:unique_id').put(
 // un ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:unique_id').delete(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   require("./unBanMember")
 )

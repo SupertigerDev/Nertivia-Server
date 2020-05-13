@@ -8,14 +8,14 @@ const checkRolePerms = require('./../../../middlewares/checkRolePermissions');
 const {MANAGE_CHANNELS} = require("./../../../utils/rolePermConstants");
 // Channels
 MainChannelRouter.route('/:server_id/channels').get(
-  authenticate,
+  authenticate(),
   UserPresentVerification,
   require("./getServerChannels")
 );
 
 // Create
 MainChannelRouter.route('/:server_id/channels').put(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.createChannel,
@@ -24,7 +24,7 @@ MainChannelRouter.route('/:server_id/channels').put(
 
 // Update
 MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.updateChannel,
@@ -33,7 +33,7 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
 
 // Delete
 MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
-  authenticate,
+  authenticate(true),
   UserPresentVerification,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   require("./deleteServerChannel")
@@ -41,21 +41,21 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
 
 // mute server channel
 MainChannelRouter.route('/:server_id/channels/:channel_id/mute').put(
-  authenticate,
+  authenticate(),
   UserPresentVerification,
   require("./muteServerChannel")
 );
 
 // unmute server channel
 MainChannelRouter.route('/:server_id/channels/:channel_id/mute').delete(
-  authenticate,
+  authenticate(),
   UserPresentVerification,
   require("./unmuteServerChannel")
 );
 
 // position
 MainChannelRouter.route('/:server_id/channels/position').put(
-  authenticate,
+  authenticate(),
   UserPresentVerification,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   require("./channelPositions")

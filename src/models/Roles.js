@@ -15,6 +15,7 @@ const serverRolesSchema = new Schema({
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
   server_id: {type: String},
   default: {type: Boolean, default: false}, // prevents them from changing certain things eg: change name of the role.
+  bot: {type: Schema.Types.ObjectId, ref: 'user'},
   deletable: {type: Boolean, default: true},
   order: {type: Number},
 });
