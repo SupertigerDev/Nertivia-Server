@@ -13,7 +13,8 @@ module.exports = async (req, res, next) => {
   const user = await Users.findOne({
     uniqueID
   })
-    .select("-status -__v -friends +about_me +badges +servers")
+    .select("-status -__v -friends +about_me +badges +servers +createdBy")
+    .populate('createdBy', 'username tag uniqueID -_id')
     .lean();
 
   if (!user) {
