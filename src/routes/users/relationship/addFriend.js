@@ -11,6 +11,11 @@ module.exports = async (req, res, next) => {
   const recipient = await User.findOne({ username, tag })
   if (!recipient) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "User not found."}] });
+
+  if (recipient.bot) {
+    return res.status(403)
+    .json({ status: false, errors: [{param: "all", msg: "Cannot add bot user."}] });
+  }
   
   // Find requester
   const requester = await User.findOne({ uniqueID: req.user.uniqueID });

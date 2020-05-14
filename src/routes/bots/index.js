@@ -6,12 +6,14 @@ const UserPresentVerification = require("./../../middlewares/UserPresentVerifica
 const checkRolePerms = require('./../../middlewares/checkRolePermissions');
 const { ADMIN } = require("./../../utils/rolePermConstants");
 const rateLimit = require('../../middlewares/rateLimit');
+const UserPolicies = require('../../policies/UserPolicies');
 
 // routes
 import createBot from './createBot';
 import myBots from './myBots';
 import getBot from './getBot';
 import botJoin from './botJoin';
+import updateBot from './updateBot';
 
 // create a bot
 botsRouter.route("/").post(
@@ -25,6 +27,14 @@ botsRouter.route("/").get(
   authenticate(),
   myBots
 );
+
+// update my bot.
+botsRouter.route("/:bot_id").post(
+  authenticate(),
+  UserPolicies.updateBot,
+  updateBot
+);
+
 
 // get bot. token only visable for creator. (SAFE TO USE FOR OTHER USERS.)
 botsRouter.route("/:bot_id").get(

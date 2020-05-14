@@ -37,7 +37,7 @@ MainUserRouter.route("/block").delete(
 );
 
 // Details
-MainUserRouter.route("/:uniqueID?").get(  authenticate(true), require("./userDetails"));
+MainUserRouter.route("/:uniqueID?").get(authenticate(true), require("./userDetails"));
 
 // Register
 MainUserRouter.route("/register").post(
