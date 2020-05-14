@@ -21,6 +21,7 @@ interface User {
   tag: string
   avatar: string
   admin: string
+  bot?: boolean,
 }
 
 interface uploadFile {

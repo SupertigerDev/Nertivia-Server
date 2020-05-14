@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
   )
     .populate({
       path: "creator",
-      select: "-_id -id  -__v -email -friends -status -created -lastSeen"
+      select: "-_id -id  -__v -email -friends -status -created -lastSeen bot"
     })
     .lean();
 
