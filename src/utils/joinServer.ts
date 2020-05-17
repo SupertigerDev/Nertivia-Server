@@ -148,7 +148,7 @@ export default async function join(server: any, user: any, socketID: string | un
 
   // send members list
   let serverMembers = await ServerMembers.find({ server: server._id })
-    .populate("member")
+    .populate("member", "username tag avatar uniqueID bot")
     .lean();
 
   const  {programActivityArr, memberStatusArr, customStatusArr} = await getUserDetails(serverMembers.map((sm: any) => sm.member.uniqueID))   
@@ -157,12 +157,6 @@ export default async function join(server: any, user: any, socketID: string | un
     delete sm.server;
     delete sm._id;
     delete sm.__v;
-    sm.member = {
-      username: sm.member.username,
-      tag: sm.member.tag,
-      avatar: sm.member.avatar,
-      uniqueID: sm.member.uniqueID
-    };
     sm.server_id = server.server_id;
     return sm;
   });

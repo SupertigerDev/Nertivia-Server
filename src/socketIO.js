@@ -143,7 +143,7 @@ module.exports = async client => {
           .select("type member server_id roles")
           .populate({
             path: "member",
-            select: "username tag avatar uniqueID member -_id"
+            select: "username tag avatar uniqueID member -_id bot"
           })
           .lean();
 
@@ -159,7 +159,7 @@ module.exports = async client => {
         .select("recipients channelID lastMessaged")
         .populate({
           path: "recipients",
-          select: "avatar username uniqueID tag -_id"
+          select: "avatar username uniqueID tag bot -_id"
         })
         .lean();
 
