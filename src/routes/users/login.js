@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
   if (usernameTag.length === 2) {
     obj = {username: usernameTag[0], tag: usernameTag[1]}
   } else {
-    obj = {email};
+    obj = {email: email.toLowerCase()};
   }
   // Find the user given the email
   const user = await Users.findOne(obj).select(

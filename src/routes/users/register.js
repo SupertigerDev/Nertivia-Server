@@ -49,14 +49,14 @@ module.exports = async (req, res, next) => {
 
 
   // Create a new user
-  const newUser = new User({ username, email, password, ip: req.userIP });
+  const newUser = new User({ username, email: email.toLowerCase(), password, ip: req.userIP });
   const created = await newUser.save();
   
 
   // send email
   const mailOptions = {
     from: config.nodemailer.from,
-    to: email.trim(), 
+    to: email.toLowerCase().trim(), 
     subject: 'Nertivia - Confirmation Code',
     html: `<p>Your confirmation code is: <strong>${created.email_confirm_code}</strong></p>`
   };
