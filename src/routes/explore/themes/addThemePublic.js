@@ -2,11 +2,8 @@ const Express = require("express");
 const uploadImage = require('../../../utils/uploadBase64Image');
 const Themes = require('../../../models/themes');
 const PublicThemes = require('../../../models/publicThemes');
-const FlakeId = require('flakeid');
 
-const flake = new FlakeId({
-  timeOffset : (2013-1970)*32536000*1000,
-});
+const flake = require('../../../utils/genFlakeId').default;
 
 
 /** @type {Express.RequestHandler} */

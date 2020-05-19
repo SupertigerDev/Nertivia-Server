@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
-const FlakeId = require('flakeid');
-const flake = new FlakeId();
+const flake = require('../utils/genFlakeId').default;
 
 const {
   Schema

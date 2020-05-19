@@ -1,14 +1,10 @@
 import { Request, Response } from "express";
-import Users from '../../models/users';
+const Users = require('../../models/users')
 import Servers from '../../models/servers';
 import Roles from '../../models/Roles';
 import joinServer from "../../utils/joinServer";
 
-
-const FlakeId = require("flakeid");
-const flake = new FlakeId({
-  timeOffset: (2013 - 1970) * 11636000 * 1000
-});
+import flake from '../../utils/genFlakeId'
 
 
 export default async function createBot(req: Request, res: Response) {

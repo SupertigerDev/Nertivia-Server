@@ -1,12 +1,9 @@
-const FlakeId = require('flakeid');
+
 const Roles = require('./../../../models/Roles');
 const ServerMembers = require('./../../../models/ServerMembers');
 const Users = require('./../../../models/users');
 const redis = require("../../../redis");
 
-const flake = new FlakeId({
-  timeOffset : (2013-1970)*11636000*1000,
-});
 
 // /:server_id/members/:member_id/roles/:role_id
 module.exports = async (req, res, next) => {

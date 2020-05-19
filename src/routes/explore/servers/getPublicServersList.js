@@ -1,7 +1,4 @@
-// const FlakeId = require('flakeid');
-// const flake = new FlakeId();
 const publicServersList = require("./../../../models/publicServersList");
-const Servers = require("./../../../models/servers");
 
 module.exports = async (req, res, next) => {
   const { verified, most_users, date_added } = req.query;

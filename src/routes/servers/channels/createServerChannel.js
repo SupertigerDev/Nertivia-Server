@@ -1,6 +1,4 @@
-const FlakeId = require('flakeid');
-const flake = new FlakeId();
-
+const flake = require('../../../utils/genFlakeId').default;
 const Channels = require("../../../models/channels");
 
 module.exports = async (req, res, next) => {

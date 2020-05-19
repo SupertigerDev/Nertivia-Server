@@ -1,10 +1,6 @@
 const mongoose = require("mongoose");
 const beautifyUnique = require("mongoose-beautiful-unique-validation");
-const bcrypt = require("bcryptjs");
 const { Schema } = mongoose;
-
-const FlakeId = require("flakeid");
-const flake = new FlakeId();
 
 const userBansSchema = new Schema({
   user: { type: Schema.Types.ObjectId, ref: "users" },

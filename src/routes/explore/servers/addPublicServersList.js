@@ -1,5 +1,4 @@
-const FlakeId = require('flakeid');
-const flake = new FlakeId();
+const flake = require('../../../utils/genFlakeId').default;
 const servers = require('./../../../models/servers');
 const publicServersList = require("./../../../models/publicServersList");
 

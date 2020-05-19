@@ -5,8 +5,7 @@ import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 
 
 const { matchedData } = require("express-validator/filter");
-const FlakeId = require("flakeid");
-const flakeId = new FlakeId();
+const flake = require('../../utils/genFlakeId').default;
 const cropImage = require('../../utils/cropImage');
 
 module.exports = async (req, res, next) => {
@@ -115,7 +114,7 @@ async function uploadAvatar(base64, uniqueID, isBanner) {
     if (!buffer) {
       return reject("Something went wrong while cropping image.")
     }
-    const id = flakeId.gen();
+    const id = flake.gen();
     const name = isBanner ? 'bnr' : 'avatar';
 
 

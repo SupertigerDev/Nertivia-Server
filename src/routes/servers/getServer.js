@@ -1,14 +1,3 @@
-const Servers = require("../../models/servers");
-const Channels = require("../../models/channels");
-
-const GDriveApi = require("./../../API/GDrive");
-const stream = require("stream");
-
-const { matchedData } = require("express-validator/filter");
-const FlakeId = require("flakeid");
-const flake = new FlakeId();
-const cropImage = require('../../utils/cropImage');
-
 module.exports = async (req, res, next) => {
  res.json({
    name: req.server.name,

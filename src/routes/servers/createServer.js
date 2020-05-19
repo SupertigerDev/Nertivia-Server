@@ -7,13 +7,9 @@ const User = require("../../models/users");
 const Roles = require("../../models/Roles");
 const rolePerms = require("../../utils/rolePermConstants");
 
-// Imports
-const FlakeId = require('flakeid');
-const flake = new FlakeId();
 
-const flakeRole = new FlakeId({
-  timeOffset: (2013 - 1970) * 11636000 * 1000
-});
+// Imports
+const flake = require('../../utils/genFlakeId').default;
 
 
 module.exports = async (req, res, next) => {
@@ -62,7 +58,7 @@ module.exports = async (req, res, next) => {
   const io = req.io;
 
   // create default role
-  const roleID = flakeRole.gen();
+  const roleID = flake.gen();
 
   const roleDoc = {
     name: "Online",

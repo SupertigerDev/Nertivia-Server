@@ -1,8 +1,6 @@
 const cropImage = require("../../utils/cropImage");
 const CustomEmojis = require("../../models/customEmojis");
-const FlakeId = require('flakeid');
-const flakeId = new FlakeId();
-
+const flake = require('../../utils/genFlakeId').default;
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 
 module.exports = async (req, res, next) => {
@@ -75,7 +73,7 @@ module.exports = async (req, res, next) => {
       message: "Something went wrong while cropping image."
     });
   }
-  const emojiID = flakeId.gen();
+  const emojiID = flake.gen();
 
 
   const success = await nertiviaCDN.uploadFile(buffer, null, null, `${emojiID}.${type === 'gif' ? 'gif' : 'png'}`, true).catch(err => {

@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require('bcryptjs');
-const FlakeId = require('flakeid');
-const flake = new FlakeId();
+const flake = require('../utils/genFlakeId').default;
 const {
   Schema
 } = mongoose;

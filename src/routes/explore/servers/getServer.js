@@ -1,5 +1,3 @@
-// const FlakeId = require('flakeid');
-// const flake = new FlakeId();
 const publicServersList = require("./../../../models/publicServersList");
 const servers = require('./../../../models/servers');
 

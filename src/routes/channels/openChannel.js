@@ -1,8 +1,7 @@
 const users = require("../../models/users");
 const channels = require("../../models/channels");
 
-const FlakeId = require('flakeid');
-const flake = new FlakeId();
+const flake = require('../../utils/genFlakeId').default;
 
 module.exports = async (req, res, next) => {
   const { recipient_id } = req.params;

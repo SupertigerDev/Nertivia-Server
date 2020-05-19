@@ -1,11 +1,7 @@
 const Users = require("../../models/users");
 const Themes = require("../../models/themes");
 
-const FlakeId = require('flakeid');
-const flake = new FlakeId({
-  timeOffset : (2013-1970)*31536000*1000,
-});
-
+const flake = require('../../utils/genFlakeId').default;
 module.exports = async (req, res, next) => {
   const { name, css } = req.body;
   const id = flake.gen();

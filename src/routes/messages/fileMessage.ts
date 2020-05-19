@@ -9,8 +9,7 @@ import gm from 'gm';
 const gmInstance = gm.subClass({ imageMagick: true });
 import { Request, Response, NextFunction } from 'express';
 const oauth2Client = require('./../../middlewares/GDriveOauthClient')
-const FlakeId = require('flakeid');
-const flakeId = new FlakeId();
+import flake from '../../utils/genFlakeId'
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   let cancelRequest = false;
@@ -76,7 +75,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     let metadata: sharp.Metadata;
 
 
-    const fileid = flakeId.gen();
+    const fileid = flake.gen();
     let dirPath = path.join(__dirname, "../", "../", "public", "temp", `${fileid}${path.extname(filename)}`);
 
     // temporarly store file in server.

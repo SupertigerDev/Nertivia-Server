@@ -1,11 +1,7 @@
-const FlakeId = require("flakeid");
+const flake = require('../../../utils/genFlakeId').default;
 const Roles = require("./../../../models/Roles");
 
 const rolePerms = require("../../../utils/rolePermConstants");
-
-const flake = new FlakeId({
-  timeOffset: (2013 - 1970) * 11636000 * 1000
-});
 
 module.exports = async (req, res, next) => {
 
