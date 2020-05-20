@@ -20,14 +20,14 @@ module.exports = async (req, res, next) => {
 
   // check if tag + username already exists || email already exists
   if (data.email || data.username || data.tag) {
-    const userTagExists = await Users.findOne({
+    const userTagExists = await Users.exists({
       username: data.username || user.username,
       tag: data.tag || user.tag,
       uniqueID: { $ne: user.uniqueID }
     });
 
-    const userEmailExists = await Users.findOne({
-      email: data.email,
+    const userEmailExists = await Users.exists({
+      email: data.email.toLowerCase(),
       uniqueID: { $ne: user.uniqueID }
     });
 
