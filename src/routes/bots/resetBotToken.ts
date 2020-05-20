@@ -16,7 +16,7 @@ export default async function resetBotToken(req: Request, res: Response) {
 
   await Users.updateOne({_id: bot._id}, {$inc: { passwordVersion: 1 }});
 
-  res.json({token: JWT.sign(`${bot_id}-${bot.passwordVersion ? bot.passwordVersion : 1 }`, config.jwtSecret).split(".").splice(1).join(".")})
+  res.json({token: JWT.sign(`${bot_id}-${bot.passwordVersion ? bot.passwordVersion + 1 : 1 }`, config.jwtSecret).split(".").splice(1).join(".")})
 
   kickBot(req.io, bot_id);
 }
