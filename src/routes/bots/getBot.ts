@@ -23,7 +23,7 @@ export default async function createBot(req: Request, res: Response) {
   }
 
   if (token && req.user && bot.createdBy._id.toString() === req.user._id) {
-    bot.token = sign(bot.uniqueID + bot.passwordVersion !== null ? `-${bot.passwordVersion}` : '', config.jwtSecret)
+    bot.token = sign(bot.uniqueID + (bot.passwordVersion !== undefined ? `-${bot.passwordVersion}` : ''), config.jwtSecret)
       .split(".")
       .splice(1)
       .join(".");
