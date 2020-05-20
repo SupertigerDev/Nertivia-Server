@@ -29,8 +29,8 @@ function getSessionInstance() {
       const token = config.jwtHeader + req.headers.authorization;
       try {
         // will contain uniqueID
-        let decryptedToken = JWT.verify(token, config.jwtSecret);
-        return decryptedToken.toString();
+        const decryptedToken = JWT.verify(token, config.jwtSecret);
+        return decryptedToken.toString().split("-")[0];
       } catch (err) {
         return "notLoggedIn";
       }

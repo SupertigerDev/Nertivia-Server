@@ -3,8 +3,12 @@ const BannedIPs = require("../../models/BannedIPs");
 const JWT = require("jsonwebtoken");
 import config from '../../config';
 
-function signToken(uniqueID) {
-  return JWT.sign(uniqueID, config.jwtSecret);
+function signToken(uniqueID, pwdVer) {
+  if (pwdVer !== undefined) {
+    return JWT.sign(`${uniqueID}-${pwdVer}`, config.jwtSecret);
+  } else {
+    return JWT.sign(uniqueID, config.jwtSecret);
+  }
 }
 
 module.exports = async (req, res, next) => {
@@ -22,7 +26,7 @@ module.exports = async (req, res, next) => {
   }
   // Find the user given the email
   const user = await Users.findOne(obj).select(
-    "avatar status admin _id username uniqueID tag created GDriveRefreshToken password banned email_confirm_code"
+    "avatar status admin _id username uniqueID tag created GDriveRefreshToken password banned email_confirm_code passwordVersion"
   );
 
   // If not, handle it
@@ -69,7 +73,7 @@ module.exports = async (req, res, next) => {
   user.password = undefined;
 
   // Generate token without header information
-  const token = signToken(user.uniqueID)
+  const token = signToken(user.uniqueID, user.passwordVersion)
     .split(".")
     .splice(1)
     .join(".");

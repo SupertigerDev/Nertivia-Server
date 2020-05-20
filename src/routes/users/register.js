@@ -1,6 +1,5 @@
 const User = require('../../models/users');
 const BannedIPs = require("../../models/BannedIPs");
-const JWT = require('jsonwebtoken');
 import config from '../../config'
 import nodemailer from 'nodemailer';
 import blacklistArr from '../../emailBlacklist.json'

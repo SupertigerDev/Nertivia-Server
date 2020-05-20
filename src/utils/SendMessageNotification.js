@@ -69,7 +69,6 @@ function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message, isSe
     .find(find).upsert()
     .update(
       {
-        $set,
         $inc: { count: 1 }
       },
     );

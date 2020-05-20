@@ -9,9 +9,13 @@ module.exports = function (allowBot = false, allowInvalid = false) {
     const token = config.jwtHeader + req.headers.authorization;
     // will contain uniqueID
     let decryptedToken;
+    let passwordVersion = 0;
 
     try {
-      decryptedToken = JWT.verify(token, config.jwtSecret);
+      const decrypted = JWT.verify(token, config.jwtSecret);
+      const split = decrypted.split("-");
+      decryptedToken = split[0];
+      passwordVersion = split[1] ? parseInt(split[1]) : 0;
     } catch (e) {
       if (allowInvalid) return next();
       req.session.destroy();
@@ -27,6 +31,15 @@ module.exports = function (allowBot = false, allowInvalid = false) {
       if (iPBanned) {
         return;
       }
+      const pswdVerNotEmpty = req.user.passwordVersion === undefined && passwordVersion !== 0;
+      if (pswdVerNotEmpty || req.user.passwordVersion !== undefined && req.user.passwordVersion !== passwordVersion) {
+        req.session.destroy();
+        return res.status(401).send({
+          message: "Token invalidated."
+        });
+      }
+
+
       if (req.user.uniqueID === decryptedToken) {
         if (req.user.bot && !allowBot) {
           res.status(403).json({message: "Bots are not allowed to access this."})
@@ -41,7 +54,7 @@ module.exports = function (allowBot = false, allowInvalid = false) {
 
     const user = await Users.findOne({ uniqueID: decryptedToken })
       .select(
-        "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned bot"
+        "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned bot passwordVersion"
       )
       .lean();
     // If user doesn't exists, handle it
@@ -65,6 +78,14 @@ module.exports = function (allowBot = false, allowInvalid = false) {
         message: "Email not confimed"
       });
     }
+    const pswdVerNotEmpty = user.passwordVersion === undefined && passwordVersion !== 0;
+    if (pswdVerNotEmpty || user.passwordVersion !== undefined && user.passwordVersion !== passwordVersion) {
+      req.session.destroy();
+      return res.status(401).send({
+        message: "Token invalidated."
+      });
+    }
+
     req.user = JSON.parse(JSON.stringify(user));
     req.session["user"] = user;
     const iPBanned = await checkIPChangeAndIsBanned(req, res);

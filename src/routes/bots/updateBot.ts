@@ -6,7 +6,7 @@ import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 import emitToAll from "../../socketController/emitToAll";
 const flakeId = new (require('flakeid'))();
 
-export default async function createBot(req: Request, res: Response) {
+export default async function updateBot(req: Request, res: Response) {
   const { bot_id } = req.params;
 
   const bot = await Users.findOne({createdBy: req.user._id, uniqueID: bot_id}).select("avatar bot created tag uniqueID username").lean();

@@ -14,6 +14,7 @@ import myBots from './myBots';
 import getBot from './getBot';
 import botJoin from './botJoin';
 import updateBot from './updateBot';
+import resetBotToken from './resetBotToken';
 
 // create a bot
 botsRouter.route("/").post(
@@ -49,6 +50,13 @@ botsRouter.route("/:bot_id/servers/:server_id").put(
   UserPresentVerification,
   checkRolePerms('Admin', ADMIN),
   botJoin
+);
+
+// reset token /bots/6665254446718521344/reset-token
+botsRouter.route("/:bot_id/reset-token").post(
+  authenticate(),
+  rateLimit({name: 'reset_bot_token', expire: 60, requestsLimit: 5 }),
+  resetBotToken
 );
 
 

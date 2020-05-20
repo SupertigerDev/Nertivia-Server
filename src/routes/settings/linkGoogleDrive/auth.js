@@ -10,8 +10,8 @@ module.exports = async (req, res, next) => {
 	const {code, token} = req.body;
 	try {
 		// jwt token
-		const decryptedToken = await jwt.verify(config.jwtHeader + token, config.jwtSecret);
-
+		let decryptedToken = await jwt.verify(config.jwtHeader + token, config.jwtSecret);
+		decryptedToken = decryptedToken.split("-")[0];
 
 		const {tokens} = await oauth2Client.getToken (code);
 		const refresh_token = tokens.refresh_token;

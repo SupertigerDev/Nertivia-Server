@@ -61,16 +61,19 @@ module.exports = async client => {
     const { token } = data;
 
     try {
-      const decryptedToken = await jwt.verify(
+      let decryptedToken = await jwt.verify(
         config.jwtHeader + token,
         config.jwtSecret
       );
+      const split = decryptedToken.split("-");
+      decryptedToken = split[0];
+      const passwordVersion = split[1] ? parseInt(split[1]) : 0;
       client.auth = true;
 
       // get the user
 
       const userSelect =
-        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned";
+        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion";
 
       const user = await User.findOne({ uniqueID: decryptedToken })
         .select(userSelect)
@@ -100,6 +103,17 @@ module.exports = async client => {
         client.disconnect(true);
         return;
       }
+
+
+      const pswdVerNotEmpty = user.passwordVersion === undefined && passwordVersion !== 0;
+      if (pswdVerNotEmpty || user.passwordVersion !== undefined && user.passwordVersion !== passwordVersion) {
+        console.log("loggedOutReason: Invalid Password Version");
+        delete client.auth;
+        client.emit("auth_err", "Token invalidated.");
+        client.disconnect(true);
+        return;
+      }
+
 
       const ip = client.handshake.address;
       const ipBanned = await BannedIPs.exists({ ip: ip });

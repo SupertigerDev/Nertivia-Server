@@ -55,6 +55,10 @@ const usersSchema = new Schema({
     minlength: 3,
     select: false
   },
+  passwordVersion: {
+    type: Number,
+    select: false,
+  },
   uniqueID: {
     type: String,
     unique: true

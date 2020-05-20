@@ -1,16 +1,20 @@
 const Users = require('../../models/users');
 const { matchedData } = require('express-validator/filter');
 const bcrypt = require('bcryptjs');
+const JWT = require('jsonwebtoken');
 const cropImage = require('../../utils/cropImage');
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import config from '../../config';
 const flakeId = new (require('flakeid'))();
 const emitToAll = require('../../socketController/emitToAll');
-
+const sio = require("socket.io");
 
 
 module.exports = async (req, res, next) => {
   const data = matchedData(req);
   const user = req.user;
+  const socketID = req.body.socketID
+  let updatePassword = false
   // if password is not supplied and user wants to change their username || tag || password || email.
   if ( !data.password && (data.username || data.tag || data.new_password || data.email) ) {
     return res
@@ -72,7 +76,10 @@ module.exports = async (req, res, next) => {
           message: "Something went wrong, try again later. (hash password fail)"
         });
     }
+    updatePassword = true;
     data.password = passwordHash;
+    data.$inc = { passwordVersion: 1 }
+    req.user.passwordVersion = !req.user.passwordVersion ? 1 : req.user.passwordVersion + 1
     delete data.new_password;
   }
 
@@ -85,13 +92,23 @@ module.exports = async (req, res, next) => {
 
   try {
     await Users.updateOne({ _id: user._id }, data);
+
+    delete data.$inc;
     const resObj = Object.assign({}, data);
     delete resObj.password;
-    const updateSession = Object.assign({}, req.session["user"], resObj);
+    const updateSession = Object.assign({}, req.session["user"], resObj, {passwordVersion: req.user.passwordVersion});
     req.session["user"] = updateSession;
     resObj.uniqueID = user.uniqueID;
     const io = req.io;
-    res.json(resObj);
+    if (updatePassword) {
+      res.json({...resObj, token: JWT.sign(`${user.uniqueID}-${req.user.passwordVersion}`, config.jwtSecret).split(".").splice(1).join(".")});
+
+      // logout other accounts
+      kickUser(io, user.uniqueID, socketID)
+
+    } else {
+      res.json(resObj);
+    }
 
 
     io.in(req.user.uniqueID).emit("update_member", resObj);
@@ -168,4 +185,21 @@ function checkMimeType(mimeType) {
     return true;
   }
   return false;
+}
+
+/**
+ *
+ * @param {sio.Server} io
+ */
+async function kickUser(io, uniqueID, socketID) {
+  const rooms = io.sockets.adapter.rooms[uniqueID];
+  if (!rooms || !rooms.sockets) return;
+
+  for (const clientId in rooms.sockets) {
+    const client = io.sockets.connected[clientId];
+    if (!client) continue;
+    if (client.id === socketID) continue;
+    client.emit("auth_err", "Password Changed.");
+    client.disconnect(true);
+  }
 }
