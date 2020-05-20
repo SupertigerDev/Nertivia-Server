@@ -13,7 +13,7 @@ export default async function createBot(req: Request, res: Response) {
 
   let servers: any[] | undefined;
   const bot: any = await Users.findOne({ uniqueID: bot_id, bot: true }, { _id: 0 })
-    .select("avatar tag uniqueID username createdBy")
+    .select("avatar tag uniqueID username createdBy passwordVersion")
     .populate("createdBy", "username tag avatar uniqueID")
     .lean();
 
@@ -23,7 +23,7 @@ export default async function createBot(req: Request, res: Response) {
   }
 
   if (token && req.user && bot.createdBy._id.toString() === req.user._id) {
-    bot.token = sign(bot.uniqueID, config.jwtSecret)
+    bot.token = sign(bot.uniqueID + bot.passwordVersion !== null ? `-${bot.passwordVersion}` : '', config.jwtSecret)
       .split(".")
       .splice(1)
       .join(".");
