@@ -30,10 +30,18 @@ module.exports = async (req, res, next) => {
       uniqueID: { $ne: user.uniqueID }
     });
 
-    const userEmailExists = await Users.exists({
-      email: data.email.toLowerCase(),
-      uniqueID: { $ne: user.uniqueID }
-    });
+    if (data.email) {
+      const userEmailExists = await Users.exists({
+        email: data.email.toLowerCase(),
+        uniqueID: { $ne: user.uniqueID }
+      });
+      if (userEmailExists) {
+        return res
+          .status(403)
+          .json({ errors: [{ param: "email", msg: "Email already used." }] });
+      }
+    }
+
 
     if (userTagExists) {
       return res.status(403).json({
@@ -41,11 +49,6 @@ module.exports = async (req, res, next) => {
           { param: "tag", msg: "Username with that tag is already used." }
         ]
       });
-    }
-    if (userEmailExists) {
-      return res
-        .status(403)
-        .json({ errors: [{ param: "email", msg: "Email already used." }] });
     }
   }
 
