@@ -143,7 +143,7 @@ module.exports = async (req, res, next) => {
     sender: req.user,
   })
 
-  const defaultChannel = channels.find(c => c.channelID = req.server.default_channel_id);
+  const defaultChannel = channels.find(c => c.channelID === req.server.default_channel_id);
   defaultChannel.server = req.server;
 
   pushNotification({
