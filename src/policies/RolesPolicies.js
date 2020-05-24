@@ -21,6 +21,10 @@ const policies = {
       .isLength({ min: 0, max: 15 })
       .withMessage("color must be shorter than 15 characters")
       .optional({ checkFalsy: true }),
+    check("hideRole")
+      .isBoolean()
+      .withMessage("Invalid Format.")
+      .optional({ checkNull: true }),
     policyHandler
   ]
 };

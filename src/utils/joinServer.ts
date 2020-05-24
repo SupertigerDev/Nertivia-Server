@@ -139,7 +139,7 @@ export default async function join(server: any, user: any, socketID: string | un
   let serverRoles = await ServerRoles.find(
     { server: server._id },
     { _id: 0 }
-  ).select("name id color permissions server_id deletable order default");
+  ).select("name id color permissions server_id deletable order default hideRole");
 
   io.to(user.uniqueID).emit("server:roles", {
     server_id: server.server_id,

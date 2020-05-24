@@ -10,7 +10,8 @@ const {
 const serverRolesSchema = new Schema({
   name: {type: String, default: 'New Role'},
   id: {type: String},
-  color: {typ: String},
+  color: {type: String},
+  hideRole: {type: Boolean},
   permissions:{type: Number, default: 0},
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
   server_id: {type: String},

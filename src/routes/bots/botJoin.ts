@@ -61,6 +61,7 @@ export default async function createBot(req: Request, res: Response) {
     permissions: doc.permissions,
     deletable: false,
     botRole: true,
+    hideRole: true,
     id: roleId,
     server_id: server_id,
     order: 0
