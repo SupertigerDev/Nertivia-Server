@@ -37,9 +37,10 @@ module.exports = async (req, res, next) => {
       });
       if (userEmailExists) {
         return res
-          .status(403)
-          .json({ errors: [{ param: "email", msg: "Email already used." }] });
+        .status(403)
+        .json({ errors: [{ param: "email", msg: "Email already used." }] });
       }
+      data.email = email.toLowerCase()
     }
 
 
