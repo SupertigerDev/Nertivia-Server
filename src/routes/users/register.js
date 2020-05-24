@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
 
 
   // Check if there is a user with the same email
-  const foundUser = await User.findOne({ email });
+  const foundUser = await User.findOne({ email: email.toLowerCase() });
   if (foundUser) { 
     return res.status(403).json({ 
         status: false,
