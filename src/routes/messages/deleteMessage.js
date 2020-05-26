@@ -12,20 +12,11 @@ module.exports = async (req, res, next) => {
     return res.status(404).json({ message: "Message was not found." });
   }
 
-  if (
-    server &&
-    message.creator.toString() !== user._id &&
-    server.creator !== user._id
-  ) {
-    return res.status(403).json({ message: "No permission." });
-  }
 
-  if (
-    server &&
-    server.creator !== user._id &&
-    message.creator.toString() != user._id
-  ) {
-    return res.status(403).json({ message: "No permission." });
+  if (server && req.permErrorMessage) {
+    if (message.creator.toString() !== user._id) {
+      return res.status(403).json(req.permErrorMessage)
+    }
   }
 
   if (!server && message.creator.toString() !== req.user._id) {

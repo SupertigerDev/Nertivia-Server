@@ -40,6 +40,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
   rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
   channelVerification,
   disAllowBlockedUser,
+  checkRolePerms('Admin', permissions.ADMIN, false),
   require('./deleteMessage')
 );
 
