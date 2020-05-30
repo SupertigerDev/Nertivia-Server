@@ -48,7 +48,6 @@ function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message, isSe
     recipient: recipient_uniqueID,
     channelID,
     type: "MESSAGE_CREATED",
-    lastMessageID: message.messageID,
     sender: sender_id
   };
   const mentioned =
@@ -62,7 +61,7 @@ function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message, isSe
     channelID
   }
   if (isServer) {
-    find.count = { $lt: 100}
+    find.count = { $lt: 100 }
   }
 
   bulk
@@ -70,6 +69,7 @@ function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message, isSe
     .update(
       {
         $set,
+        $setOnInsert: { lastMessageID: message.messageID },
         $inc: { count: 1 }
       },
     );
