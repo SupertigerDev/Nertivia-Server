@@ -15,11 +15,11 @@ setInterval(() => {
     const requestSentCount = Object.values(requests)[index].count
     const param = Object.values(requests)[index].param
     if (requestSentCount >= 100) {
-      console.log(`...${ip.slice(13, ip.length)} is sending a lot of requests (${requestSentCount}) at ${param}`)
+      console.log(`...${ip.slice(13, ip.length)} is sending a lot of requests (${requestSentCount} in 60 seconds) at ${param}`)
     }
   }
   requests = {};
-}, 1000);
+}, 60000);
 
 
 router.use('/*', (req, res, next) => {
