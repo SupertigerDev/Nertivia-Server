@@ -7,6 +7,30 @@ const loadMedia = require('./../middlewares/loadMedia');
 
 import avatars from './avatars';
 
+let requests = {}
+
+setInterval(() => {
+  for (let index = 0; index < Object.keys(requests).length; index++) {
+    const ip = Object.keys(requests)[index]
+    const requestSentCount = Object.values(requests)[index].count
+    const param = Object.values(requests)[index].param
+    if (requestSentCount >= 100) {
+      console.log(`...${ip.slice(13, ip.length)} is sending a lot of requests (${requestSentCount}) at ${param}`)
+    }
+  }
+  requests = {};
+}, 1000);
+
+
+router.use('/*', (req, res, next) => {
+  if (requests[req.userIP]) {
+    requests[req.userIP] = { param: req.originalUrl, count: requests[req.userIP].count + 1 }
+  } else {
+    requests[req.userIP] = { param: req.originalUrl, count: 1 }
+  }
+  next();
+})
+
 router.use('/user', require('./users'));
 router.use('/devices', require('./devices'));
 router.use('/servers', require('./servers'));
@@ -25,5 +49,5 @@ router.use('/files/*', require('./files'));
 router.use('/media/*', loadMedia);
 
 router.use('/admin', require('./admin'));
- 
+
 module.exports = router;
