@@ -5,6 +5,7 @@ const authenticate = require("../../middlewares/authenticate");
 const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
+const rateLimit = require('../../middlewares/rateLimit');
 
 // Policies
 const UserPresentVerification = require ('./../../middlewares/UserPresentVerification')
@@ -13,6 +14,7 @@ const serverPolicy = require("../../policies/ServerPolicies");
 // Create
 MainServerRouter.route('/').post(
   authenticate(),
+  rateLimit({name: 'create_server', expire: 60, requestsLimit: 10 }),
   serverPolicy.createServer,
   require("./createServer")
 );
@@ -36,6 +38,7 @@ MainServerRouter.route('/:server_id').get(
 MainServerRouter.route('/:server_id').delete(
   authenticate(),
   UserPresentVerification,
+  rateLimit({name: 'delete_leave_server', expire: 60, requestsLimit: 10 }),
   require("./deleteLeaveServer")
 );
 
