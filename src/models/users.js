@@ -88,7 +88,7 @@ const usersSchema = new Schema({
     type: Number,
     default: 0,
     enum: [
-      0, // Peasant 
+      0, // Member 
       1, // Admin
       2, // Mod
       3, // Creator,
