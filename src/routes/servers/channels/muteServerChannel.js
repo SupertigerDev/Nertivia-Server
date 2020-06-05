@@ -8,7 +8,14 @@ module.exports = async (req, res, next) => {
 
   // check if channel exists in server.
   if (req.channel.server_id !== server_id) {
-    return res.status(403).json({ message: "Channel not found." });
+    return res.status(404).json({ message: "Channel not found." });
+  }
+
+  // check if already muted
+  const isMuted = await ServerMembers.exists({ member: req.user._id, server_id: req.channel.server_id, muted_channels: channel_id });
+
+  if (isMuted) {
+    return res.status(403).json({ message: "Channel already muted!" });
   }
 
   await ServerMembers.updateOne(
