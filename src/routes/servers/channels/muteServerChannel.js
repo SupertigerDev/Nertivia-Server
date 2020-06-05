@@ -15,7 +15,7 @@ module.exports = async (req, res, next) => {
   const isMuted = await ServerMembers.exists({ member: req.user._id, server_id: req.channel.server_id, muted_channels: channel_id });
 
   if (isMuted) {
-    return res.status(403).json({ message: "Channel already muted!" });
+    return res.status(403).json({ message: "Channel is already muted!" });
   }
 
   await ServerMembers.updateOne(
