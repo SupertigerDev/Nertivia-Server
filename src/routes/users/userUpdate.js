@@ -31,8 +31,9 @@ module.exports = async (req, res, next) => {
     });
 
     if (data.email) {
+      data.email = data.email.toLowerCase()
       const userEmailExists = await Users.exists({
-        email: data.email.toLowerCase(),
+        email: data.email,
         uniqueID: { $ne: user.uniqueID }
       });
       if (userEmailExists) {
@@ -40,7 +41,6 @@ module.exports = async (req, res, next) => {
         .status(403)
         .json({ errors: [{ param: "email", msg: "Email already used." }] });
       }
-      data.email = email.toLowerCase()
     }
 
 

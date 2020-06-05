@@ -44,9 +44,6 @@ export default async function createBot(req: Request, res: Response) {
     servers = servers.filter((val, i) =>
       servers?.findIndex(v => v.server_id === val.server_id) === i
     )
-
-    console.log(servers)
-
   }
 
 
