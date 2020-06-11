@@ -42,7 +42,7 @@ module.exports = async (req, res, next) => {
   const channel = await Channels.findOne({
     channelID,
     creator: {$in: [null,req.user._id]}
-  }).populate("recipients server").lean();
+  }).populate("recipients server", "server.verified").lean();
 
   if (!channel) {
     return res.status(404).json({
