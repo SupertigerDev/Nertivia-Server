@@ -37,7 +37,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  const server = await Servers.findOne({ server_id: serverID }).lean();
+  const server = await Servers.findOne({ server_id: serverID }).select("+verified").lean();
   if (!server) {
     return res.status(404).json({
       message: "Server doesn't exist!"

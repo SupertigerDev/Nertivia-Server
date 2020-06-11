@@ -46,6 +46,5 @@ module.exports = async (req, res, next) => {
 
   if (!invite && !server)
     return res.status(404).json({ message: "Invalid server." });
-  joinServer(server || invite.server, req.user, socketID, req, res)
-
+  joinServer(server || invite, req.user, socketID, req, res)
 };

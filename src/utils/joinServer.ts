@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 
 const Channels = require("../models/channels");
 const User = require("../models/users");
+const ServerInvites = require("../models/ServerInvites");
 const Messages = require("../models/messages");
 const ServerMembers = require("../models/ServerMembers");
 const ServerRoles = require("../models/Roles");
@@ -16,6 +17,13 @@ export default async function join(server: any, user: any, socketID: string | un
     _id: user._id,
     servers: server._id
   });
+
+  const invite_code:string = server.invite_code;
+
+  if (server.invite_code) {
+    server = server.server;
+  }
+
 
   if (joined) return res.status(409).json({ message: "Already joined!" });
 
@@ -166,4 +174,10 @@ export default async function join(server: any, user: any, socketID: string | un
     memberCustomStatusArr: customStatusArr,
     programActivityArr
   });
+
+
+  // increment invite code usese
+  if (invite_code) {
+    await ServerInvites.updateOne({invite_code}, {$inc: {uses: 1}})
+  }
 }

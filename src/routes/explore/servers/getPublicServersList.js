@@ -1,7 +1,7 @@
 const publicServersList = require("./../../../models/publicServersList");
 
 module.exports = async (req, res, next) => {
-  const { verified, most_users, date_added } = req.query;
+  const { verified, alphabetical, most_users, date_added } = req.query;
 
   const match = {};
   let sort = null;
@@ -12,8 +12,8 @@ module.exports = async (req, res, next) => {
     match["server.verified"] = true
   }
 
-  if (most_users && most_users == "true") {
-    sort = { total_members: -1 };
+  if (alphabetical && alphabetical == "true") {
+    sort = { "server.name": 1 };
   } else if (most_users && most_users == "false") {
     sort = { total_members: 1 };
   } else if (date_added && date_added == "true") {
@@ -65,8 +65,8 @@ module.exports = async (req, res, next) => {
       }
     },
     { $match: match },
-    { $sort: sort || { "server.name": 1 } }
-    // { $limit: 10 } //TODO: add lazy loading
+    { $sort: sort || { "total_members": -1 } }
+    // { $limit: 10 } //TODO: add lazy loading (im lazy to add it yet -_-)
   ]);
 
   res.json(serversList);

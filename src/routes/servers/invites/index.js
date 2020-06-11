@@ -15,6 +15,21 @@ MainInviteRouter.route("/:server_id/invites").get(
 // Invite details
 MainInviteRouter.route("/invite/:invite_code").get(require("./inviteDetails"));
 
+
+// Delete invite
+MainInviteRouter.route("/invite/:invite_code").delete(
+  authenticate(),
+  require("./deleteInvite")
+);
+
+  
+// Create Custom Invite
+MainInviteRouter.route("/:server_id/invites/custom").post(
+  authenticate(),
+  UserPresentVerification,
+  require("./createCustomInvite")
+);
+
 // Create Invite
 MainInviteRouter.route("/:server_id/invite").post(
   authenticate(),
