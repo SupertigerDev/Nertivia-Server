@@ -103,7 +103,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (req.uploadFile && req.uploadFile.file) {
     query.files = [req.uploadFile.file]
   }
-  if (buttons && buttons.length) {
+  if (buttons && buttons.length && req.user.bot) {
     query.buttons = buttons;
   }
   if (_color) query['color'] = _color;
