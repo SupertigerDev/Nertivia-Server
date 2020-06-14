@@ -8,6 +8,7 @@ const policies = {
     check('message').isString().withMessage('message must be a string!').optional(),
     check('socketID').optional(),
     check('tempID').optional(),
+    check('buttons').isArray().withMessage('buttons must be an array!').optional(),
     policyHandler
   ],
   update: [

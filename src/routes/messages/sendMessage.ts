@@ -10,23 +10,53 @@ const Devices = require("../../models/Devices");
 const sendMessageNotification = require('./../../utils/SendMessageNotification');
 
 import pushNotification from '../../utils/sendPushNotification'
+import config from '../../config';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID } = req.params;
-  let { tempID, message, socketID, color } = req.body;
+  let { tempID, message, socketID, color, buttons } = req.body;
 
   if (req.uploadFile) {
     message = req.uploadFile.message;
   }
  // console.log(req.uploadFile)
   if ((!message || !message.trim()) && !req.uploadFile) {
-    res.status(403).send("Cant send empty message.")
+    res.status(403).send({message: "Cant send empty message."})
     return;
   }
 
   let _color;
   if (typeof color === 'string' && color.startsWith('#')) {
     _color = color.substring(0, 7);
+  }
+
+  if (buttons && buttons.length && req.user.bot) {
+
+    if (buttons.length > 15) {
+      res.status(403).send({message: "You can only add up to 15 buttons."})
+      return;
+    }
+
+    // filter out user data
+    const newButtons = [];
+
+    for (let index = 0; index < buttons.length; index++) {
+      const button: {name: string, id: string} = buttons[index];
+      if (button.id.match(/[^A-Za-z0-9-]+/)){
+        res.status(403).send({message: "Button id can only contain alphanumeric characters and dashes."})
+        return;
+      }
+      if (!button.id) {
+        res.status(403).send({message: "Button must contain an id"})  
+        return;
+      }
+      if (!button.name || !button.name.trim()) {
+        res.status(403).send({message: "Button must contain a name"})  
+        return;
+      }
+      newButtons.push({name: button.name.trim(), id: button.id});
+    }
+    buttons = newButtons;
   }
 
 
@@ -73,6 +103,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (req.uploadFile && req.uploadFile.file) {
     query.files = [req.uploadFile.file]
   }
+  if (buttons && buttons.length) {
+    query.buttons = buttons;
+  }
   if (_color) query['color'] = _color;
 
   const messageCreate = new Messages(query)
@@ -101,7 +134,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (req.uploadFile && req.uploadFile.file) {
     messageCreated.files = [req.uploadFile.file]
   }
-
+  if (buttons && buttons.length && req.user.bot) {
+    messageCreated.buttons = buttons;
+  }
   res.json({
     status: true,
     tempID,

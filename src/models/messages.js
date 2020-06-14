@@ -16,7 +16,6 @@ const embedSchema = new Schema({
 })
 
 
-
 const messagesSchema = new Schema({
   channelID: { type: String, required: true },
   messageID: { type: String, required: true, unique: true },
@@ -25,6 +24,7 @@ const messagesSchema = new Schema({
   creator: { type: Schema.Types.ObjectId, ref: 'users' },
   created: { type: Number },
   embed: {type: embedSchema},
+  buttons: {type: Array},
   mentions: [{ type : Schema.Types.ObjectId, ref: 'users' }],
   quotes: [{ type : Schema.Types.ObjectId, ref: 'message_quotes' }],
   timeEdited: { type: Number, required: false},

@@ -3,6 +3,7 @@ const MainChannelRouter = require("express").Router();
 // Middleware
 const authenticate = require("../../middlewares/authenticate");
 const channelVerification = require("../../middlewares/ChannelVerification");
+const rateLimit = require("../../middlewares/rateLimit");
 
 // open channel
 MainChannelRouter.route("/:recipient_id").post(
@@ -22,6 +23,24 @@ MainChannelRouter.route("/:channel_id").delete(
   authenticate(true),
   require("./deleteChannel")
 );
+
+// click message button 
+//channels/${channelID}/messages/${messageID}/button/${buttonID}
+MainChannelRouter.route("/:channelID/messages/:messageID/button/:buttonID").post(
+  authenticate(true),
+  channelVerification,
+  rateLimit({name: 'click_message_button', expire: 60, requestsLimit: 300 }),
+  require("../messages/messageButtonClick")
+)
+
+// click message button callback (only used by message creator)
+//channels/${channelID}/messages/${messageID}/button/${buttonID}
+MainChannelRouter.route("/:channelID/messages/:messageID/button/:buttonID").patch(
+  authenticate(true),
+  channelVerification,
+  rateLimit({name: 'click_message_button_callback', expire: 60, requestsLimit: 300 }),
+  require("../messages/messageButtonCallback")
+)
 
 
 

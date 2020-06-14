@@ -97,7 +97,7 @@ module.exports = async (req, res, next) => {
       }
     }).limit(25).populate(populate);
 
-    
+
     if (above.length === 25 && bottom.length < 25) {
       above = await Messages.find({
         channelID,

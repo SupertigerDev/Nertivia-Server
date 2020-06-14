@@ -47,10 +47,6 @@ module.exports = async (req, res, next) => {
     {path: 'server', select: "+verified"}
   ])
   .lean()
-  
-  
-  
-  // .populate("recipients server", "+server.verified").lean();
 
   if (!channel) {
     return res.status(404).json({
