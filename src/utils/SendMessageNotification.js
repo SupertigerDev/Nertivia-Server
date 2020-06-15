@@ -60,9 +60,6 @@ function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message, isSe
     recipient: recipient_uniqueID,
     channelID
   }
-  if (isServer) {
-    find.count = { $lt: 100 }
-  }
 
   bulk
     .find(find).upsert()
