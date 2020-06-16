@@ -13,10 +13,19 @@ import getUserDetails from "./getUserDetails";
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
   // check if user is already joined
-  const joined = await User.findOne({
+  const joined = await User.exists({
     _id: user._id,
     servers: server._id
   });
+
+  const joined2 = await ServerMembers.exists({
+    member: user._id,
+    server_id: server.server_id
+  })
+  
+  // https://stackoverflow.com/questions/14692726/unique-constraint-with-two-fields-in-mongodb
+  
+  if (joined || joined2) return res.status(409).json({ message: "Already joined!" });
 
   const invite_code:string = server.invite_code;
 
@@ -25,19 +34,28 @@ export default async function join(server: any, user: any, socketID: string | un
   }
 
 
-  if (joined) return res.status(409).json({ message: "Already joined!" });
-
-  await User.updateOne(
+  const updatedUser = await User.updateOne(
     { _id: user._id },
     { $push: { servers: server._id } }
-  );
-  await ServerMembers.create({
+  ).catch(() => {res.status(403).json({ message: "Something went wrong while upading user." })})
+  if (!updatedUser) return;
+
+  const createdServerMember = await ServerMembers.create({
     server: server._id,
     member: user._id,
     roles: [roleId],
     server_id: server.server_id,
     type: type,
-  });
+  }).catch(async () => {
+    res.status(403).json({ message: "Something went wrong while creating server member." });
+    await User.updateOne(
+      { _id: user._id },
+      { $pullAll: { servers: [server.server_id] } }
+    );
+  })
+  if (!createdServerMember) return;
+
+
   let serverChannels = await Channels.find({
     server: server._id
   }).lean();

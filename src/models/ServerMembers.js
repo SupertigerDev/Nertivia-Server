@@ -20,9 +20,13 @@ const serverMembersSchema = new Schema({
 });
 
 
+serverMembersSchema.index({member: 1, server: 1}, {unique: true});
+
+
 
 serverMembersSchema.plugin(beautifyUnique);
 const serverMembers = mongoose.model('server_members', serverMembersSchema);
+
 
 
 module.exports = serverMembers;
