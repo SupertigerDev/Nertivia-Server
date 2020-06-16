@@ -6,7 +6,7 @@ export default async function createBot(req: Request, res: Response) {
 
   //await User.deleteMany({createdBy: req.user._id});
 
-  const botCount = await User.count({createdBy: req.user._id});
+  const botCount = await User.countDocuments({createdBy: req.user._id});
   if (botCount >= 5) {
     res.status(403).json({message: "You can only create 5 bots."})
     return;
