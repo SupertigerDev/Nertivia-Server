@@ -1,6 +1,6 @@
 
 const User = require("../../../models/users");
-const { matchedData } = require('express-validator/filter');
+const { matchedData } = require('express-validator');
 
 module.exports = async (req, res, next) => {
   const data = matchedData(req);

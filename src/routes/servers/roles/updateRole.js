@@ -1,5 +1,5 @@
 const Roles = require('./../../../models/Roles');
-const { matchedData } = require("express-validator/filter");
+const { matchedData } = require("express-validator");
 const redis = require("../../../redis");
 module.exports = async (req, res, next) => {
   const roleID = req.params.role_id;

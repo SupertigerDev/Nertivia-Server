@@ -1,7 +1,7 @@
 const matchAll = require("match-all");
 const Messages = require("../../models/messages");
 const Users = require("../../models/users");
-const { matchedData } = require('express-validator/filter');
+const { matchedData } = require('express-validator');
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;

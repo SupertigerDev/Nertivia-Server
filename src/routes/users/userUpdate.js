@@ -1,5 +1,5 @@
 const Users = require('../../models/users');
-const { matchedData } = require('express-validator/filter');
+const { matchedData } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 const cropImage = require('../../utils/cropImage');

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Users from '../../models/users';
-import { matchedData } from "express-validator/filter";
+import { matchedData } from "express-validator";
 import cropImage from "../../utils/cropImage";
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 import emitToAll from "../../socketController/emitToAll";

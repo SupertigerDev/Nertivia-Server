@@ -1,5 +1,5 @@
-const { check } = require('express-validator/check');
-const { sanitizeBody } = require('express-validator/filter');
+const { check } = require('express-validator');
+const { sanitizeBody } = require('express-validator');
 
 const policyHandler = require('./policyHandler');
 

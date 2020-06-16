@@ -2,7 +2,7 @@ const Express = require("express");
 const uploadImage = require('../../../utils/uploadBase64Image');
 const Themes = require('../../../models/themes');
 const PublicThemes = require('../../../models/publicThemes');
-const { matchedData } = require("express-validator/filter");
+const { matchedData } = require("express-validator");
 
 /** @type {Express.RequestHandler} */
 module.exports = async (req, res, next) => {

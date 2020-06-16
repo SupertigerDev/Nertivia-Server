@@ -4,7 +4,7 @@ const Channels = require("../../models/channels");
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 
 
-const { matchedData } = require("express-validator/filter");
+const { matchedData } = require("express-validator");
 const flake = require('../../utils/genFlakeId').default;
 const cropImage = require('../../utils/cropImage');
 
