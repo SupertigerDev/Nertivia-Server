@@ -23,7 +23,6 @@ export default async function join(server: any, user: any, socketID: string | un
     server_id: server.server_id
   })
   
-  // https://stackoverflow.com/questions/14692726/unique-constraint-with-two-fields-in-mongodb
   
   if (joined || joined2) return res.status(409).json({ message: "Already joined!" });
 
