@@ -9,6 +9,7 @@ const policies = {
     check('socketID').optional(),
     check('tempID').optional(),
     check('buttons').isArray().withMessage('buttons must be an array!').optional(),
+    check('htmlEmbed').optional(),
     policyHandler
   ],
   update: [

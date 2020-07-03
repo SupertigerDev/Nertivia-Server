@@ -1,4 +1,6 @@
 import {Request, Response, NextFunction} from 'express';
+import { zip, unzip } from '../../utils/zip'
+import {jsonToHtml} from 'jsonhtmlfyer';
 const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
 const MessageQuotes = require("../../models/messageQuotes");
@@ -11,10 +13,11 @@ const sendMessageNotification = require('./../../utils/SendMessageNotification')
 
 import pushNotification from '../../utils/sendPushNotification'
 import config from '../../config';
+import { json } from 'body-parser';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID } = req.params;
-  let { tempID, message, socketID, color, buttons } = req.body;
+  let { tempID, message, socketID, color, buttons, htmlEmbed } = req.body;
 
   if (req.uploadFile) {
     message = req.uploadFile.message;
@@ -67,6 +70,22 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     buttons = newButtons;
   }
 
+  let jsonToBase64HtmlEmbed: string | undefined = undefined;
+  if (htmlEmbed && req.user.bot) {
+    if (typeof htmlEmbed !== "object") {
+      return res.status(403).send({message: "invalid htmlEmbed type."}) 
+    }
+    if (JSON.stringify(htmlEmbed).length > 5000) {
+      return res.status(403).send({message: "Json length must be less than 5000"});
+    }
+    try {
+      jsonToBase64HtmlEmbed = zip(jsonToHtml(htmlEmbed, "https://proxi.bree.workers.dev/cdn/"));
+    } catch(err) {
+      return res.status(403).send({message: err.message});
+    }
+  }
+
+
 
   if (message && message.length > 5000) {
     return res.status(403).json({
@@ -114,6 +133,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (buttons && buttons.length && req.user.bot) {
     query.buttons = buttons;
   }
+  if (jsonToBase64HtmlEmbed && req.user.bot) {
+    query.htmlEmbed = jsonToBase64HtmlEmbed;
+  }
   if (_color) query['color'] = _color;
 
   const messageCreate = new Messages(query)
@@ -145,6 +167,10 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (buttons && buttons.length && req.user.bot) {
     messageCreated.buttons = buttons;
   }
+  if (jsonToBase64HtmlEmbed && req.user.bot) {
+    messageCreated.htmlEmbed = jsonToBase64HtmlEmbed;
+  }
+
   res.json({
     status: true,
     tempID,

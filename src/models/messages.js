@@ -25,6 +25,7 @@ const messagesSchema = new Schema({
   created: { type: Number },
   embed: {type: embedSchema},
   buttons: {type: Array},
+  htmlEmbed: {type: String},
   mentions: [{ type : Schema.Types.ObjectId, ref: 'users' }],
   quotes: [{ type : Schema.Types.ObjectId, ref: 'message_quotes' }],
   timeEdited: { type: Number, required: false},
