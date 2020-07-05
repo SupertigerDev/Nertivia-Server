@@ -208,7 +208,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   const io: SocketIO.Server = req.io;
 
   if (messageID) {
-    updateMessage(req, req.server, messageCreated, io);
+    updateMessage(req, req.channel.server, messageCreated, io);
   } else if (req.channel.server) {
     serverMessage(req, io, channelID, messageCreated, socketID);
   } else {
