@@ -80,10 +80,10 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
     messageID: message_id
   }
   if (req.channel.server) {
-    io.in('server:' + req.channel.server.server_id).emit('update_message', emitData)
+    io.in('server:' + req.channel.server.server_id).emit('update_message', {...emitData, replace: false})
   } else {
-    io.in(req.channel.recipients[0].uniqueID).emit('update_message', emitData)
-    io.in(req.user.uniqueID).emit('update_message', emitData)
+    io.in(req.channel.recipients[0].uniqueID).emit('update_message', {...emitData, replace: false})
+    io.in(req.user.uniqueID).emit('update_message', {...emitData, replace: false})
   }
 }
 
