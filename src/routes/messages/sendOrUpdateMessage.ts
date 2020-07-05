@@ -16,13 +16,23 @@ import config from '../../config';
 import { json } from 'body-parser';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
-  const { channelID } = req.params;
+  const { channelID, messageID } = req.params;
   let { tempID, message, socketID, color, buttons, htmlEmbed } = req.body;
+
+  // If messageID exists, message wants to update.
+  let messageDoc;
+  if (messageID) {
+    messageDoc = await Messages.findOne({ channelID, messageID });
+    if (!messageDoc)
+      return res.status(404).json({ message: "Message was not found." });
+    if (messageDoc.creator.toString() !== req.user._id)
+      return res.status(403).json({ message: "Message is not created by you." });
+  }
 
   if (req.uploadFile) {
     message = req.uploadFile.message;
   }
- // console.log(req.uploadFile)
+
   if ((!message || !message.trim()) && !req.uploadFile) {
     res.status(403).send({message: "Cant send empty message."})
     return;
@@ -138,9 +148,16 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   }
   if (_color) query['color'] = _color;
 
-  const messageCreate = new Messages(query)
-
-  let messageCreated = await messageCreate.save();
+  let messageCreated: any = undefined;
+  if (messageID) {
+    query.messageID = messageID
+    query.created = messageDoc.created
+    query.timeEdited = Date.now()
+    await Messages.replaceOne({messageID}, query);
+  } else {
+    const messageCreate = new Messages(query)
+    messageCreated = await messageCreate.save();
+  }
 
   const user = {
     uniqueID: req.user.uniqueID,
@@ -156,11 +173,14 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     message,
     color: _color,
     creator: user,
-    created: messageCreated.created,
+    created: messageCreated ? messageCreated.created : messageDoc.created,
     mentions,
     quotes: quotedMessages,
-    messageID: messageCreated.messageID
+    messageID: messageCreated ? messageCreated.messageID : messageID
   };
+  if (query.timeEdited) {
+    messageCreated.timeEdited = query.timeEdited
+  }
   if (req.uploadFile && req.uploadFile.file) {
     messageCreated.files = [req.uploadFile.file]
   }
@@ -171,124 +191,147 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     messageCreated.htmlEmbed = jsonToBase64HtmlEmbed;
   }
 
-  res.json({
-    status: true,
-    tempID,
-    messageCreated
-  });
+  if (messageID) {
+    res.json(messageCreated);
+  } else {
+    res.json({
+      status: true,
+      tempID,
+      messageCreated
+    });
+  }
 
   //req.message_status = true;
   req.message_id = messageCreated.messageID;
-  next();
 
   // emit
   const io: SocketIO.Server = req.io;
 
-  if (req.channel.server) {
-    return serverMessage();
+  if (messageID) {
+    updateMessage(req, req.server, messageCreated, io);
+  } else if (req.channel.server) {
+    serverMessage(req, io, channelID, messageCreated, socketID);
   } else {
-    return directMessage();
+    directMessage(req, io, channelID, messageCreated, socketID, tempID);
+  }
+  next();
+  
+
+};
+
+async function serverMessage(req: any, io: any, channelID: any, messageCreated: any, socketID: any) {
+
+
+  const clients =
+    io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
+      .sockets;
+  for (let clientId in clients) {
+    if (clientId !== socketID) {
+      io.to(clientId).emit("receiveMessage", {
+        message: messageCreated
+      });
+    }
   }
 
-  async function serverMessage() {
+
+  //send notification
+  const uniqueIDs = await sendMessageNotification({
+    message: messageCreated,
+    channelID,
+    server_id: req.channel.server._id,
+    sender: req.user,
+  })
 
 
-    const clients =
-      io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
-        .sockets;
-    for (let clientId in clients) {
+  pushNotification({
+    channel: req.channel,
+    isServer: true,
+    message: messageCreated,
+    uniqueIDArr: uniqueIDs,
+    user: req.user
+  })
+
+
+  return;
+}
+
+async function directMessage(req: any, io: any, channelID: any, messageCreated: any, socketID: any, tempID: any) {
+
+  const isSavedNotes = req.user.uniqueID === req.channel.recipients[0].uniqueID
+
+  // checks if its sending to saved notes or not.
+  if (!isSavedNotes) {
+    //change lastMessage timeStamp
+    const updateChannelTimeStamp = Channels.updateMany(
+      {
+        channelID
+      },
+      {
+        $set: {
+          lastMessaged: Date.now()
+        }
+      },
+      {
+        upsert: true
+      }
+    );
+
+  // sends notification to a user.
+
+    const sendNotification = sendMessageNotification({
+      message: messageCreated,
+      recipient_uniqueID: req.channel.recipients[0].uniqueID,
+      channelID,
+      sender: req.user,
+    })
+    await Promise.all([updateChannelTimeStamp, sendNotification]);
+  }
+
+
+
+
+  if (!isSavedNotes){
+    // for group messaging, do a loop instead of [0]
+    io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
+      message: messageCreated
+    });
+  }
+
+  // Loop for other users logged in to the same account and emit (exclude the sender account.).
+  //TODO: move this to client side for more performance.
+  const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
+  if (rooms)
+    for (let clientId in rooms.sockets || []) {
       if (clientId !== socketID) {
         io.to(clientId).emit("receiveMessage", {
-          message: messageCreated
+          message: messageCreated,
+          tempID
         });
       }
     }
 
 
-    //send notification
-    const uniqueIDs = await sendMessageNotification({
-      message: messageCreated,
-      channelID,
-      server_id: req.channel.server._id,
-      sender: req.user,
-    })
-
-
+  if (!isSavedNotes)
     pushNotification({
-      channel: req.channel,
-      isServer: true,
+      user: req.user,
       message: messageCreated,
-      uniqueIDArr: uniqueIDs,
-      user: req.user
-    })
+      recipient: req.channel.recipients[0],
+      isServer: false,
+    })  
 
+}
 
-    return;
+function updateMessage(req: any,server: any, resObj: any, io: any) {
+  if (server) {
+    io.in("server:" + server.server_id).emit("update_message", {
+      ...resObj,
+      embed: 0
+    });
+  } else {
+    io.in(req.user.uniqueID).emit("update_message", { ...resObj, embed: {} });
+    io.in(req.channel.recipients[0].uniqueID).emit("update_message", {
+      ...resObj,
+      embed: 0
+    });
   }
-
-  async function directMessage() {
-
-    const isSavedNotes = req.user.uniqueID === req.channel.recipients[0].uniqueID
-
-    // checks if its sending to saved notes or not.
-    if (!isSavedNotes) {
-      //change lastMessage timeStamp
-      const updateChannelTimeStamp = Channels.updateMany(
-        {
-          channelID
-        },
-        {
-          $set: {
-            lastMessaged: Date.now()
-          }
-        },
-        {
-          upsert: true
-        }
-      );
-
-    // sends notification to a user.
-
-      const sendNotification = sendMessageNotification({
-        message: messageCreated,
-        recipient_uniqueID: req.channel.recipients[0].uniqueID,
-        channelID,
-        sender: req.user,
-      })
-      await Promise.all([updateChannelTimeStamp, sendNotification]);
-    }
-
-
-
-
-    if (!isSavedNotes){
-      // for group messaging, do a loop instead of [0]
-      io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
-        message: messageCreated
-      });
-    }
-
-    // Loop for other users logged in to the same account and emit (exclude the sender account.).
-    //TODO: move this to client side for more performance.
-    const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
-    if (rooms)
-      for (let clientId in rooms.sockets || []) {
-        if (clientId !== socketID) {
-          io.to(clientId).emit("receiveMessage", {
-            message: messageCreated,
-            tempID
-          });
-        }
-      }
-
-
-    if (!isSavedNotes)
-      pushNotification({
-        user: req.user,
-        message: messageCreated,
-        recipient: req.channel.recipients[0],
-        isServer: false,
-      })  
-
-  }
-};
+}

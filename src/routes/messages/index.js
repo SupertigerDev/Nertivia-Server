@@ -15,7 +15,7 @@ const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const disAllowBlockedUser = require('../../middlewares/disAllowBlockedUser');
 import fileMessage from './fileMessage';
-import sendMessage from './sendMessage';
+import sendMessage from './sendOrUpdateMessage';
 
 
 // get messages
@@ -51,7 +51,8 @@ MainMessageRouter.route("/:messageID/channels/:channelID").patch(
   rateLimit({name: 'message_update', expire: 60, requestsLimit: 120 }),
   channelVerification,
   disAllowBlockedUser,
-  require('./updateMessage'),
+  fileMessage,
+  sendMessage,
   URLEmbed
 );
 
