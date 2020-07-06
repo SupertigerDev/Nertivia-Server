@@ -153,6 +153,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     query.messageID = messageID
     query.created = messageDoc.created
     query.timeEdited = Date.now()
+    if (!req.uploadFile && messageDoc.files) {
+      query.files = messageDoc.files;
+    }
     await Messages.replaceOne({messageID}, query);
   } else {
     const messageCreate = new Messages(query)
@@ -183,6 +186,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   }
   if (req.uploadFile && req.uploadFile.file) {
     messageCreated.files = [req.uploadFile.file]
+  } else if (messageID && messageDoc.files) {
+    messageCreated.files = messageDoc.files
   }
   if (buttons && buttons.length && req.user.bot) {
     messageCreated.buttons = buttons;
