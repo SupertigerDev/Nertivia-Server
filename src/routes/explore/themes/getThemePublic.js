@@ -19,9 +19,12 @@ module.exports = async (req, res, next) => {
     select = 'id description screenshot approved updatedCss'
   }  
 
-  const publicTheme = await PublicThemes.findOne({theme: theme._id, approved: true}, {_id: 0}).select(select).lean();
+  const publicTheme = await PublicThemes.findOne({theme: theme._id}, {_id: 0}).select(select).lean();
   if (!publicTheme) {
     return res.status(404).json({message: 'Invalid theme id.'});
+  }
+  if (!publicTheme.approved && theme.creator.toString() !== req.user._id) {
+    return res.status(404).json({message: 'Theme is not approved.'});
   }
 
   publicTheme.updatedCss = !!publicTheme.updatedCss;
