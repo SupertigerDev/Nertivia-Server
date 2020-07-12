@@ -119,14 +119,43 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   let quotedMessages = [];
   let quotes_idArr = []
   if (messageIds.length) {
-    quotedMessages = await Messages.find({channelID, messageID: {$in: messageIds}}, {_id: 0}).select('creator message messageID').populate("creator", "username uniqueID avatar").lean();
+    if (messageDoc && messageIds.includes(messageDoc.messageID)) {
+      res.status(403).json({message: "Cannot quote this message."})
+      return;
+    }
+    quotedMessages = await Messages.find({channelID, messageID: {$in: messageIds}}, {_id: 0})
+      .select('creator message messageID quotes')
+      .populate([
+        {
+          path: "quotes",
+          select: "creator message messageID",
+          populate: {
+            path: "creator",
+            select: "avatar username uniqueID tag admin -_id",
+            model: "users"
+          }
+        },
+        {
+          path: "creator",
+          select: "username uniqueID avatar"
+        }
+      ]).lean()
     quotes_idArr = (await MessageQuotes.insertMany(quotedMessages.map((q: any) => {
       return {...q, creator: q.creator._id, quotedChannel: req.channel._id}
     }))).map((qm: any)=> qm._id)
+
+    for (let index = 0; index < quotedMessages.length; index++) {
+      const quotedMessage = quotedMessages[index];
+      if (!quotedMessage.quotes) continue
+      
+      const nestedArr= filterNestedQuotes (quotedMessage.message, quotedMessage.quotes);
+      quotes_idArr = [...quotes_idArr, ...nestedArr.map((q: any) => q._id)]
+      quotedMessages = [...quotedMessages, ...nestedArr];
+      delete quotedMessages[index].quotes;
+
+    }
+
   }
-  
-
-
 
 
   let query: any = {
@@ -258,6 +287,12 @@ async function serverMessage(req: any, io: any, channelID: any, messageCreated: 
 
 
   return;
+}
+
+const reg = /<m([\d]+)>/g;
+function filterNestedQuotes(baseQuote: string, quotes: any[]) {
+  const quotesIDArr: string[] = matchAll(baseQuote, reg).toArray();
+  return quotes.filter(q => quotesIDArr.includes(q.messageID))
 }
 
 async function directMessage(req: any, io: any, channelID: any, messageCreated: any, socketID: any, tempID: any) {

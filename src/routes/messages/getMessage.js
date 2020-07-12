@@ -3,6 +3,23 @@ const Messages = require("../../models/messages");
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
 
+  const populate = [{
+    path: "creator",
+    select: "avatar username uniqueID tag admin -_id bot"
+  }, {
+    path: "mentions",
+    select: "avatar username uniqueID tag admin -_id"
+  }, {
+    path: "quotes",
+    select: "creator message messageID -_id",
+    populate: {
+      path: "creator",
+      select: "avatar username uniqueID tag admin -_id",
+      model: "users"
+    }
+  }
+  ]
+
   // Get message
   let message = await Messages.findOne(
     {
@@ -11,10 +28,7 @@ module.exports = async (req, res, next) => {
     },
     "-__v -_id"
   )
-    .populate({
-      path: "creator",
-      select: "-_id -id  -__v -email -friends -status -created -lastSeen bot"
-    })
+    .populate(populate)
     .lean();
 
   if (!message) {
