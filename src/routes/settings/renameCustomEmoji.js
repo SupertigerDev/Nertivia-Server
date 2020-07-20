@@ -22,7 +22,8 @@ module.exports = async (req, res, next) => {
 
   const checkEmojiExists = await CustomEmojis.findOne({
     user: req.user._id,
-    name: emojiName
+    name: emojiName,
+    emojiID: {$ne: emojiID}
   });
   if (checkEmojiExists)
     return res.status(403).json({
