@@ -10,6 +10,7 @@ const gmInstance = gm.subClass({ imageMagick: true });
 import { Request, Response, NextFunction } from 'express';
 const oauth2Client = require('./../../middlewares/GDriveOauthClient')
 import flake from '../../utils/genFlakeId'
+import compressImage from '../../utils/compressImage';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   let cancelRequest = false;
@@ -76,7 +77,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
 
     const fileid = flake.gen();
-    let dirPath = path.join(__dirname, "../", "../", "public", "temp", `${fileid}${path.extname(filename)}`);
+    let dirPath: any = path.join(__dirname, "../", "../", "public", "temp", `${fileid}${path.extname(filename)}`);
 
     // temporarly store file in server.
     const writeStream = fs.createWriteStream(dirPath);
@@ -86,25 +87,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
       if (isImage(filename, mimetype)) {
         if (compress) {
-          const compressed = await new Promise(async (res, rej) => {
-          const currentExt = path.extname(dirPath);
-          if (currentExt !== ".webp" && currentExt !== ".gif") { 
-            const newDir = path.join(path.dirname(dirPath), path.basename(dirPath, currentExt) + ".webp")
-            const success = await renameAsync(dirPath, newDir).catch(err => {rej(err)})
-            if (!success) return;
-            dirPath = newDir;
-            filename = path.basename(filename, currentExt) + ".webp"
-          }
-          gmInstance(dirPath)
-            .resize(1920, 1080, ">")
-            .quality(90)
-            .autoOrient()
-            .write(dirPath, err => {
-              if (err) return rej(err);
-              res(true);
-            })
-          }).catch(() => { res.status(403).json({ message: "Failed to compress image." }) })
-          if (!compressed) return deleteFile(dirPath);
+
+          dirPath = await compressImage(filename, dirPath)
+            .catch(() => {res.status(403).json({ message: "Failed to compress image." }) })
+          if (!dirPath) return;
+
         }
         metadata = await sharp(dirPath).metadata();
       }

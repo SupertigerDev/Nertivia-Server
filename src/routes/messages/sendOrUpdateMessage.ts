@@ -90,6 +90,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     }
     try {
       jsonToBase64HtmlEmbed = zip(jsonToHtml(htmlEmbed, "https://proxi.bree.workers.dev/cdn/"));
+      // TODO: use bottom line when new markdown system is implimented
+      // jsonToBase64HtmlEmbed = zip(JSON.stringify(htmlEmbed));
     } catch(err) {
       return res.status(403).send({message: err.message});
     }

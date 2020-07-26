@@ -12,6 +12,7 @@ const {MANAGE_ROLES} = require("./../../../utils/rolePermConstants");
 MainRolesRouter.route("/:server_id/roles").post(
   authenticate(true),
   UserPresentVerification,
+  rolePolicies.updateRole,
   // redis and UserPresentVerification needs work in order for this to work.
   checkRolePerms('Roles', MANAGE_ROLES),
   require("./createRole")
