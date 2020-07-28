@@ -89,10 +89,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       return res.status(403).send({message: "Json length must be less than 5000"});
     }
     try {
-      jsonToBase64HtmlEmbed = zip(jsonToHtml(htmlEmbed, "https://proxi.bree.workers.dev/cdn/"));
-      // TODO: use bottom line when new markdown system is implimented
-      // IMPORTANT: use jsonToHtml to validate the json first before implimenting the new markdown!!!!!!
-      // jsonToBase64HtmlEmbed = zip(JSON.stringify(htmlEmbed));
+      //use jsonToHtml to validate the json first before implimenting the new markdown!!!!!!
+      jsonToHtml(htmlEmbed)
+      jsonToBase64HtmlEmbed = zip(JSON.stringify(htmlEmbed));
     } catch(err) {
       return res.status(403).send({message: err.message});
     }
