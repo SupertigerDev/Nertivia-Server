@@ -13,6 +13,8 @@ import bodyParser from 'body-parser';
 
 export default function initServer() {
   const app = express();
+  app.disable('x-powered-by');
+  
   const server = new http.Server(app);
 
   const io = getIOInstance(server);
