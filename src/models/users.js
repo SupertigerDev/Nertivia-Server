@@ -44,7 +44,7 @@ const usersSchema = new Schema({
   username: {
     type: String,
     required: [true, "Username has not been entered."],
-    minlength: [3, "Username must be more than 5 characters long."],
+    minlength: [3, "Username must be more than 3 characters long."],
   },
   tag: {
     type: String,
