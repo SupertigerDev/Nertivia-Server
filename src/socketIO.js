@@ -90,7 +90,7 @@ module.exports = async client => {
         return;
       }
       if (user.banned) {
-        console.log("loggedOutReason: User is banned");
+        console.log("loggedOutReason: User is banned", user.username, user.uniqueID);
         delete client.auth;
         client.emit("auth_err", "You are banned.");
         client.disconnect(true);
@@ -119,7 +119,7 @@ module.exports = async client => {
       const ipBanned = await BannedIPs.exists({ ip: ip });
 
       if (ipBanned) {
-        console.log("loggedOutReason: IP is banned.");
+        console.log("loggedOutReason: IP is banned.", user.username, user.uniqueID);
         delete client.auth;
         client.emit("auth_err", "IP is Banned.");
         client.disconnect(true);
@@ -272,8 +272,6 @@ module.exports = async client => {
         settings
       });
     } catch (e) {
-      console.log("loggedOutReason: Unknown Error:");
-      console.log(e);
       delete client.auth;
       client.emit("auth_err", "Invalid Token");
       client.disconnect(true);

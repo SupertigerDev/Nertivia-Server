@@ -8,12 +8,10 @@ export default cors({
       config.allowedOrigins.indexOf(origin) === -1 &&
       !config.allowAllOrigins
     ) {
-      const msg =
-        "The CORS policy for this site does not allow access from the specified Origin.";
-      callback(new Error(msg), false);
+      callback(null, false);
     } else {
       callback(null, true);
     }
   },
-  credentials: true
+  credentials: true,
 });
