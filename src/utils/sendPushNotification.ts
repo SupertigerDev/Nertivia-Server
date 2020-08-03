@@ -1,8 +1,11 @@
 import Devices from "../models/Devices";
-const FCM = require("fcm-node");
 const serverKey = require("../fb-fcm.json");
-const fcm = new FCM(serverKey);
 import path from 'path';
+import admin from 'firebase-admin'
+
+admin.initializeApp({
+  credential: admin.credential.cert(serverKey)
+});
 
 interface Args {
   isServer: boolean;
@@ -61,9 +64,9 @@ export default async function send(args: Args) {
     }
   }
 
+  const registration_ids = tokens;
   const message: any = {
-    registration_ids: tokens,
-    data: {}
+    data: {},
   };
 
   if (args.isServer) {
@@ -97,16 +100,15 @@ export default async function send(args: Args) {
     }
   }
 
-  fcm.send(message, async function(err: Error, response: any) {
-    if (err) {
-      console.log(err)
-      console.log("Something has gone wrong!");
-    } else {
-      // remove all expired tokens from db.
-      const failedTokens = response.results
-        .map((r: any, i:any) => r.error && tokens[i])
-        .filter((r:any) => r);
-      await Devices.deleteMany({ token: { $in: failedTokens } });
-    }
-  });
+  admin.messaging().sendToDevice(registration_ids, message, {priority: "high"})
+    .then(async res => {
+      const failedTokens = res.results.map((token, index) => token.error && tokens[index]).filter(r => r);
+      if (failedTokens.length) {
+        await Devices.deleteMany({ token: { $in: failedTokens } });
+      }
+    })
+    .catch(err => {
+      console.log("FCM> Something went wrong");
+      console.log(err);
+    })
 }
