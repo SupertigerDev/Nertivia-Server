@@ -25,14 +25,18 @@ interface Embed {
 //const imageFormatArr = ["png", "jpg", "jpeg", "webp", "gif"]
 
 module.exports = async (req:RequestCustom, res: Response, next: NextFunction) => {
-  const message = req.body.message || req.uploadFile.message;
+  const message: string = req.body.message || req.uploadFile.message;
   const message_id = req.message_id
   if (!message) return;
 
+  const urlRegex = new RegExp(
+    "(^|[ \t\r\n])((http|https):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))"
+   ,"g"
+  );
 
-  const url = /^(^|\s)(https?:\/\/)?(([^.\s/<>]+\.)+[a-z]+(:(\d+))?(\/[^\s<>]*)?)/.exec(message);
-  if (!url) return;
-  const firstURL = url[2] ? url[0] : 'https://' + url[0]
+  const url = message.match(urlRegex);
+  if (!url || !url[0]) return;
+  const firstURL = url[0]
 
 
   let resObj = {}
