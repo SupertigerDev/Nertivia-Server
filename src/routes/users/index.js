@@ -59,6 +59,19 @@ MainUserRouter.route("/login").post(
   require("./login")
 );
 
+// Reset password request
+MainUserRouter.route("/reset/request").post(
+  authPolicy.resetRequest,
+  reCaptchaPolicy,
+  require("./resetRequest")
+);
+
+// Reset password
+MainUserRouter.route("/reset/code/:code").post(
+  authPolicy.reset,
+  require("./reset")
+);
+
 // Logout
 MainUserRouter.route("/logout").delete(
   authenticate(true),

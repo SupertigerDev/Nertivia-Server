@@ -37,6 +37,11 @@ const usersSchema = new Schema({
   },
   banned: { type: Boolean },
   email_confirm_code: { type: String, select: false },
+  reset_password_code: {
+    type: String,
+    select: false,
+    index: {expires: 43200 } // 12 hours
+  },
   ip: {
     type: String,
     select: false,

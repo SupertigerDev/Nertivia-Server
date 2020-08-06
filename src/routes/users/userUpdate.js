@@ -195,6 +195,7 @@ function checkMimeType(mimeType) {
  *
  * @param {sio.Server} io
  */
+// also used in reset password.
 async function kickUser(io, uniqueID, socketID) {
   const rooms = io.sockets.adapter.rooms[uniqueID];
   if (!rooms || !rooms.sockets) return;
