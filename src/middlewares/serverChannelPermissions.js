@@ -1,9 +1,13 @@
+const { containsPerm, ADMIN } = require("../utils/rolePermConstants");
+
 function Permission(permission, defaultAllowed) {
   return Permission[permission, defaultAllowed] || (Permission[permission, defaultAllowed] = function(req, res, next) {
     if (!req.channel.server) return next();
     const permissions = req.channel.permissions;
 
     if (req.channel.server.creator === req.user._id) return next()
+    // if user has admin role.
+    if (containsPerm(req.permissions, ADMIN)) return next()
 
     if (defaultAllowed === false) {
       if (!permissions) {
