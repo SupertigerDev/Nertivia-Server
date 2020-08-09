@@ -2,6 +2,9 @@ const Servers = require("../../models/servers");
 const Channels = require("../../models/channels");
 
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import tempSaveImage from '../../utils/tempSaveImage';
+import compressImage from '../../utils/compressImage';
+import fs from 'fs';
 
 
 const { matchedData } = require("express-validator");
@@ -33,7 +36,7 @@ module.exports = async (req, res, next) => {
 
 
   if (data.avatar) {
-    const url = await uploadAvatar(data.avatar, req.user.uniqueID, false).catch(err => {res.status(403).json({message: err})});
+    const url = await uploadAvatar(data.avatar, req.user.uniqueID, false).catch(err => { res.status(403).json({ message: err }) });
     if (!url) return;
     delete data.avatar;
     data.avatar = url;
@@ -41,7 +44,7 @@ module.exports = async (req, res, next) => {
 
 
   if (data.banner) {
-    const url = await uploadAvatar(data.banner, req.user.uniqueID, true).catch(err => {res.status(403).json({message: err})});
+    const url = await uploadAvatar(data.banner, req.user.uniqueID, true).catch(err => { res.status(403).json({ message: err }) });
     if (!url) return;
     delete data.banner;
     data.banner = url;
@@ -91,95 +94,53 @@ async function uploadAvatar(base64, uniqueID, isBanner) {
     let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
     // 8092000 = 8mb
-    const maxSize = 8092000; 
+    const maxSize = 8092000;
     if (buffer.byteLength > maxSize) {
       return reject("Image is larger than 8MB.")
 
     }
     const mimeType = base64MimeType(base64);
-    const type = base64.split(';')[0].split('/')[1];
+    let type = base64.split(';')[0].split('/')[1];
     if (!checkMimeType(mimeType)) {
       return reject("Invalid image.")
 
     }
 
+    let dirPath = "";
     if (isBanner) {
-      buffer = await cropImage(buffer, mimeType, 500);
+      // buffer = await cropImage(buffer, mimeType, 500);
+      // TODO: ADD ERROR HANDLING
+      // DELETE TEMP FILE
+      dirPath = (await tempSaveImage(`bnr.${type}`, buffer)).dirPath;
+      dirPath = await compressImage(`bnr.${type}`, dirPath).catch(err => { reject("Something went wrong while compressing image.") })
+      if (!dirPath) return;
+      buffer = fs.createReadStream(dirPath);
     } else {
       buffer = await cropImage(buffer, mimeType, 200);
     }
 
-    buffer = await cropImage(buffer, mimeType, 200);
-
     if (!buffer) {
-      return reject("Something went wrong while cropping image.")
+      if (isBanner) deleteFile(dirPath);
+      return reject("Something went wrong while compressing image.")
     }
     const id = flake.gen();
     const name = isBanner ? 'bnr' : 'avatar';
 
+    if (isBanner && type !== "gif") {
+      type = "webp"
+    }
+
 
     const success = await nertiviaCDN.uploadFile(buffer, uniqueID, id, `${name}.${type}`)
-      .catch(err => {reject(err)})
+      .catch(err => { reject(err) })
+    if (isBanner) deleteFile(dirPath);
     if (!success) return;
     resolve(`${uniqueID}/${id}/${name}.${type}`);
   })
 }
 
-
-// async function uploadAvatar(base64, oauth2Client, res, req, isBanner) {
-//   return new Promise(async resolve => {
-//     let buffer = Buffer.from(base64.split(",")[1], "base64");
-
-//     // 2092000 = 2mb
-//     const maxSize = 2092000;
-//     if (buffer.byteLength > maxSize) {
-//       return res.status(403).json({
-//         message: "Image is larger than 2MB."
-//       });
-//     }
-//     const mimeType = base64MimeType(base64);
-//     const type = base64.split(";")[0].split("/")[1];
-//     if (!checkMimeType(mimeType)) {
-//       return res.status(403).json({
-//         message: "Invalid avatar."
-//       });
-//     }
-//     if (isBanner) {
-//       buffer = await cropImage(buffer, mimeType, 500);
-//     } else {
-//       buffer = await cropImage(buffer, mimeType, 200);
-//     }
-//     if (!buffer) {
-//       return res.status(403).json({
-//         message: "Something went wrong while cropping image."
-//       });
-//     }
-
-//     const readable = new stream.Readable();
-//     readable._read = () => {}; // _read is required but you can noop it
-//     readable.push(buffer);
-//     readable.push(null);
-
-//     // get nertivia_uploads folder id
-//     const requestFolderID = await GDriveApi.findFolder(oauth2Client);
-//     if (!requestFolderID.result)
-//       return res
-//         .status(404)
-//         .json({
-//           message:
-//             "If you're seeing this message, please contact Fishie@azK0 in Nertivia (Error: Google Drive folder missing.)"
-//         });
-//     const folderID = requestFolderID.result.id;
-
-//     const requestUploadFile = await GDriveApi.uploadFile(
-//       {
-//         fileName: "server_avatar_" + req.server.server_id,
-//         mimeType,
-//         fileStream: readable
-//       },
-//       folderID,
-//       oauth2Client
-//     );
-//     resolve(requestUploadFile);
-//   });
-// }
+function deleteFile(path) {
+  fs.unlink(path, err => {
+    if (err) console.error(err)
+  });
+}
