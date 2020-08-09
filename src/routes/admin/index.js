@@ -30,6 +30,21 @@ MainAdminRouter.route("/users/online").get(
   require("./onlineUsers")
 );
 
+
+// recently Created Servers
+MainAdminRouter.route("/servers/recent").get(
+  authenticate(),
+  isAdmin,
+  require("./recentServers")
+);
+
+MainAdminRouter.route("/servers/search/:value").get(
+  authenticate(),
+  isAdmin,
+  require("./searchServers")
+);
+
+
 // waiting for appeal themes
 MainAdminRouter.route("/themes/waiting").get(
   authenticate(),
