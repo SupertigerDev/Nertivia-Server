@@ -13,7 +13,7 @@ export default async function createBot(req: Request, res: Response) {
 
   let servers: any[] | undefined;
   const bot: any = await Users.findOne({ uniqueID: bot_id, bot: true }, { _id: 0 })
-    .select("avatar tag uniqueID username createdBy passwordVersion")
+    .select("avatar tag uniqueID username createdBy passwordVersion botPrefix botCommands")
     .populate("createdBy", "username tag avatar uniqueID")
     .lean();
 

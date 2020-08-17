@@ -18,6 +18,35 @@ const policies = {
       .not().contains(':').withMessage("username cannot contain :").optional({ checkFalsy: true }),
     check('tag').isString().withMessage('Invalid Format.').isAlphanumeric().withMessage('Tag must contain alphanumeric characters and no spaces.').isLength({ min: 4, max: 4 }).withMessage('Tag must be 4 characters long.').optional({ checkFalsy: true }),
     check('avatar').isString().withMessage('Invalid Format.').optional({ checkFalsy: true }),
+    check("botPrefix").isString().withMessage("Invalid Format").isLength({max: 5}).withMessage("Prefix must be at least 5 characters long.").optional({checkFalsy: true}),
+    check("botCommands").custom((val) => {
+      if (!Array.isArray(val)){
+        throw new Error('Invalid Format');
+      }
+      if (val.length > 200) {
+        throw new Error('Max amount of commands you can have is 200.');
+      }
+      for (let i = 0; i < val.length; i++) {
+        const cmd = val[i];
+        if (Object.keys(cmd).length > 2) {
+          throw new Error('Object contains unusual things.');
+        }
+        if (!cmd.c) {
+          throw new Error('Object is missing arg or command');
+        }
+        if (typeof cmd.c !== "string" ||( typeof cmd.a !== "string" && typeof cmd.a !== "undefined") ) {
+          throw new Error('Invalid command type');
+        }
+        if (cmd.c.length > 20) {
+          throw new Error('Command name must be less than 20 characters');
+        }
+        if (cmd.a && cmd.a.length > 30) {
+          throw new Error('args name must be less than 30 characters');
+        }
+      }
+      return true;
+      
+    }).optional({checkFalsy: true}),
     policyHandler
   ],
 

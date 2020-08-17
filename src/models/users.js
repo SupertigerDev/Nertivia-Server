@@ -40,7 +40,7 @@ const usersSchema = new Schema({
   reset_password_code: {
     type: String,
     select: false,
-    index: {expires: 43200 } // 12 hours
+    index: { expires: 43200 } // 12 hours
   },
   ip: {
     type: String,
@@ -131,7 +131,17 @@ const usersSchema = new Schema({
 
   // used for bots only
   bot: { type: Boolean, require: false },
-  createdBy: { type: Schema.Types.ObjectId, ref: 'users', required: false, select: false }
+  createdBy: { type: Schema.Types.ObjectId, ref: 'users', required: false, select: false },
+  botPrefix: {
+    type: String,
+    select: false,
+    required: false,
+  },
+  botCommands: {
+    type: [{ type: Object }],
+    select: false,
+    required: false,
+  }
 });
 
 usersSchema.pre('save', async function (next) {

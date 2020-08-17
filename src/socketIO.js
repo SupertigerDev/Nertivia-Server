@@ -157,7 +157,7 @@ module.exports = async client => {
           .select("type member server_id roles")
           .populate({
             path: "member",
-            select: "username tag avatar uniqueID member -_id bot"
+            select: "username tag avatar uniqueID member -_id bot botPrefix"
           })
           .lean();
 

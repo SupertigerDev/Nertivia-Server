@@ -14,6 +14,7 @@ import myBots from './myBots';
 import getBot from './getBot';
 import botJoin from './botJoin';
 import updateBot from './updateBot';
+import getCommands from './getCommands';
 import resetBotToken from './resetBotToken';
 
 // create a bot
@@ -28,6 +29,13 @@ botsRouter.route("/").get(
   authenticate(),
   myBots
 );
+
+// get commands
+botsRouter.route("/commands").get(
+  authenticate(),
+  getCommands
+);
+
 
 // update my bot.
 botsRouter.route("/:bot_id").post(
