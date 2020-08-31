@@ -193,7 +193,7 @@ export default async function join(server: any, user: any, socketID: string | un
   });
 
 
-  // increment invite code usese
+  // increment invite code uses
   if (invite_code) {
     await ServerInvites.updateOne({invite_code}, {$inc: {uses: 1}})
   }
