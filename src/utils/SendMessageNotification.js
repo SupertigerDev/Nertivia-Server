@@ -23,7 +23,8 @@ async function sendNotification({
   //find all members in the server.
   const members = await ServerMembers.find({
     server: server_id,
-    muted_channels: { $ne: channelID }
+    muted_channels: { $ne: channelID },
+    muted: { $ne: 2 },
   }).populate("member");
 
   // Convert JSON Array to array of uniqueID

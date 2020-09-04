@@ -187,20 +187,23 @@ module.exports = async client => {
         })
         .lean();
 
-      const mutedChannels = ServerMembers.find(
+      const mutedChannelsAndServers = ServerMembers.find(
         {
           member: user._id,
-          muted_channels: { $exists: true, $not: { $size: 0 } }
+          $or: [
+            {muted_channels: { $exists: true, $not: { $size: 0 }}},
+            {muted: { $exists: true, $ne: 0 }}
+          ]
         },
         { _id: 0 }
-      ).select("muted_channels");
+      ).select("muted_channels muted server_id");
 
       const customEmojisList = customEmojis.find({ user: user._id });
       const results = await Promise.all([
         dms,
         notifications,
         customEmojisList,
-        mutedChannels
+        mutedChannelsAndServers
       ]);
 
       client.join(user.uniqueID);
@@ -256,15 +259,30 @@ module.exports = async client => {
         }
       }
 
+      let concatedMutedChannels = [];
+      for (let i = 0; i < results[3].length; i++) {
+        const res = results[3][i].muted_channels;
+        if (res && res.length){
+          concatedMutedChannels = [...concatedMutedChannels, ...res]
+        }
+      }
+      let mutedServers = [];
+      for (let i = 0; i < results[3].length; i++) {
+        const res = results[3][i];
+        if (res.muted) {
+          mutedServers.push({muted: res.muted, server_id: res.server_id});
+        }
+      }
+
+
       client.emit("success", {
         message: "Logged in!",
         user,
         serverMembers,
         serverRoles: serverRoles,
         dms: results[0],
-        mutedChannels: results[3].reduce((a, c) => {
-          return a.concat(c.muted_channels);
-        }, []),
+        mutedChannels: concatedMutedChannels,
+        mutedServers:  mutedServers,
         notifications: results[1],
         memberStatusArr,
         customStatusArr,

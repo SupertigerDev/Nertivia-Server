@@ -1,0 +1,40 @@
+const ServerMembers = require("../../models/ServerMembers");
+const Notifications = require("../../models/notifications");
+
+
+
+module.exports = async (req, res, next) => {
+  let {type} = req.body;
+
+  if (!type) type = 0;
+
+
+  if (typeof type !== "number") {
+    res.status(401).json({message: "type must be number."})
+    return
+  }
+
+  if (type > 2 || type < 0) {
+    res.status(401).json({message: "type must be between 0 and 2"})
+    return
+  }
+
+  await ServerMembers.updateOne(
+    { member: req.user._id, server_id: req.server.server_id },
+    { $set: { muted: type } }
+  );
+
+  await Notifications.deleteMany({
+    guildID: req.server.server_id,
+    recipient: req.user.uniqueID
+  });
+  
+  res.json({ message: "Done" });
+
+  const io = req.io;
+  io.in(req.user.uniqueID).emit("server:mute", {server_id: req.server.server_id, muted: type});
+
+  
+};
+
+

@@ -27,6 +27,14 @@ MainServerRouter.route('/:server_id').patch(
   require("./updateServer")
 );
 
+
+// mute server
+MainServerRouter.route('/:server_id/mute').put(
+  authenticate(),
+  UserPresentVerification,
+  require("./muteServer")
+);
+
 // Get Server
 MainServerRouter.route('/:server_id').get(
   authenticate(true),
