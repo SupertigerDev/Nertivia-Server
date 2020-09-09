@@ -12,6 +12,15 @@ import pushNotification from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
+  
+
+  const invite_code:string = server.invite_code;
+
+  if (server.invite_code) {
+    server = server.server;
+  }
+
+
   // check if user is already joined
   const joined = await User.exists({
     _id: user._id,
@@ -26,11 +35,7 @@ export default async function join(server: any, user: any, socketID: string | un
   
   if (joined || joined2) return res.status(409).json({ message: "Already joined!" });
 
-  const invite_code:string = server.invite_code;
 
-  if (server.invite_code) {
-    server = server.server;
-  }
 
 
   const updatedUser = await User.updateOne(
