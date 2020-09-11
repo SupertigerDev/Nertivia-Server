@@ -56,7 +56,7 @@
     "match-all": "^1.2.5",
     "mongoose": "^5.9.19",
     "mongoose-beautiful-unique-validation": "^7.1.1",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.8",
     "npm": "^6.14.7",
     "pako": "^1.0.11",
