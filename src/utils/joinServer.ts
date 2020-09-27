@@ -7,7 +7,6 @@ const Messages = require("../models/messages");
 const ServerMembers = require("../models/ServerMembers");
 const ServerRoles = require("../models/Roles");
 const redis = require("../redis");
-const sendMessageNotification = require("./SendMessageNotification");
 import pushNotification from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
 
@@ -142,27 +141,25 @@ export default async function join(server: any, user: any, socketID: string | un
     }
   }
 
-  // save notification
-  const uniqueIDs = await sendMessageNotification({
-    message: messageCreated,
-    channelID: server.default_channel_id,
-    server_id: server._id,
-    sender: user
-  });
 
+  await Channels.updateOne({ channelID: server.default_channel_id }, { $set: {
+    lastMessaged: Date.now()
+  }})
   
   const defaultChannel = serverChannels.find((c:any) => c.channelID === server.default_channel_id);
   defaultChannel.server = server;
-  pushNotification({
-    channel: defaultChannel,
-    isServer: true,
-    message: {
-      message: user.username + " joined the server",
-      channelID: server.default_channel_id
-    },
-    uniqueIDArr: uniqueIDs,
-    user: user
-  })
+
+  
+  // pushNotification({
+  //   channel: defaultChannel,
+  //   isServer: true,
+  //   message: {
+  //     message: user.username + " joined the server",
+  //     channelID: server.default_channel_id
+  //   },
+  //   uniqueIDArr: uniqueIDs,
+  //   user: user
+  // })
 
 
   // send roles

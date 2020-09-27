@@ -14,6 +14,7 @@ const sendMessageNotification = require('./../../utils/SendMessageNotification')
 import pushNotification from '../../utils/sendPushNotification'
 import config from '../../config';
 import { json } from 'body-parser';
+import channels from '../../models/channels';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID, messageID } = req.params;
@@ -269,23 +270,32 @@ async function serverMessage(req: any, io: any, channelID: any, messageCreated: 
     }
   }
 
+  const date = Date.now();
+  await channels.updateOne({ channelID }, { $set: {
+    lastMessaged: date
+  }})
 
   //send notification
-  const uniqueIDs = await sendMessageNotification({
+  await sendMessageNotification({
     message: messageCreated,
     channelID,
     server_id: req.channel.server._id,
     sender: req.user,
   })
 
-
-  pushNotification({
-    channel: req.channel,
-    isServer: true,
-    message: messageCreated,
-    uniqueIDArr: uniqueIDs,
-    user: req.user
+  await ServerMembers.updateOne({server: req.channel.server._id, member: req.user._id}, {
+    $set: {
+        [`last_seen_channels.${channelID}`] : date + 1
+    }
   })
+
+  // pushNotification({
+  //   channel: req.channel,
+  //   isServer: true,
+  //   message: messageCreated,
+  //   uniqueIDArr: uniqueIDs,
+  //   user: req.user
+  // })
 
 
   return;

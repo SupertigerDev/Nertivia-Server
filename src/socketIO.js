@@ -138,7 +138,7 @@ module.exports = async client => {
 
         const serverChannels = await channels
           .find({ server: { $in: serverIDs } })
-          .select("name channelID server server_id")
+          .select("name channelID server server_id lastMessaged")
           .lean();
 
         user.servers = user.servers.map(server => {
@@ -197,6 +197,14 @@ module.exports = async client => {
         },
         { _id: 0 }
       ).select("muted_channels muted server_id");
+
+      const lastSeenServerChannels = (await ServerMembers.find({
+        member: user._id,
+        last_seen_channels: {$exists: true, $not: {$size: 0}}
+      }, {_id: 0}).select("last_seen_channels").lean()).map(res => res.last_seen_channels).reduce((accumulator, currentValue) => {
+        return {...accumulator, ...currentValue}
+      }, {})
+
 
       const customEmojisList = customEmojis.find({ user: user._id });
       const results = await Promise.all([
@@ -287,7 +295,8 @@ module.exports = async client => {
         memberStatusArr,
         customStatusArr,
         programActivityArr,
-        settings
+        settings,
+        lastSeenServerChannels
       });
     } catch (e) {
       delete client.auth;

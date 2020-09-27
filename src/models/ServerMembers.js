@@ -17,6 +17,7 @@ const serverMembersSchema = new Schema({
   roles: [{type: String, required: false, select: false}],
   muted: {type: Number, select: false, enum: [0, 1, 2]}, // enable, sound, mute all
   muted_channels: [{type: String, required: false, select: false}],
+  last_seen_channels: {type: Object, select: false}
 
 });
 

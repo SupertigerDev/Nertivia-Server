@@ -6,7 +6,6 @@ const Messages = require("../../models/messages");
 const Notifications = require("../../models/notifications");
 const Channels = require("../../models/channels");
 
-const sendMessageNotification = require('./../../utils/SendMessageNotification');
 
 module.exports = async (req, res, next) => {
   const {server_id, unique_id} = req.params;

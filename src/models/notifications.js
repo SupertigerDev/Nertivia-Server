@@ -8,7 +8,7 @@ const {
 const notificationsSchema = new Schema({
   recipient: { type: String, required: true },
   type: { type: String, required: true },
-  guildID: { type: String, required: false },
+  // guildID: { type: String, required: false },
   mentioned: {type: Boolean},
   channelID: { type: String, required: false },
   lastMessageID: {type: String, required: false },

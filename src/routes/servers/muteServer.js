@@ -1,5 +1,6 @@
 const ServerMembers = require("../../models/ServerMembers");
 const Notifications = require("../../models/notifications");
+const Channels = require("../../models/channels");
 
 
 
@@ -24,10 +25,14 @@ module.exports = async (req, res, next) => {
     { $set: { muted: type } }
   );
 
-  await Notifications.deleteMany({
-    guildID: req.server.server_id,
-    recipient: req.user.uniqueID
-  });
+  if (type === 2) {
+    const serverChannels = (await Channels.find({server_id: req.server.server_id}).select("channelID").lean()).map(c => c.channelID);
+
+    await Notifications.deleteOne({
+      channelID: {$in: serverChannels},
+      recipient: req.user.uniqueID
+    });
+  }
   
   res.json({ message: "Done" });
 

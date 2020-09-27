@@ -8,8 +8,6 @@ const Channels = require("../../models/channels");
 const Roles = require("../../models/Roles");
 const redis = require("../../redis");
 
-const sendMessageNotification = require('../../utils/SendMessageNotification');
-
 module.exports = async (req, res, next) => {
   const {server_id, unique_id} = req.params;
 
@@ -103,13 +101,10 @@ module.exports = async (req, res, next) => {
   messageCreated = messageCreated.toObject();
   messageCreated.creator = kicker;
 
-  // save notification 
-  await sendMessageNotification({
-    message: messageCreated,
-    channelID: req.server.default_channel_id,
-    server_id: req.server._id,
-    sender: kicker,
-  })
+
+  await Channels.updateOne({ channelID: req.server.default_channel_id }, { $set: {
+    lastMessaged: Date.now()
+  }})
 
 
   // emit message

@@ -11,7 +11,6 @@ const PublicServersList = require("../../models/publicServersList");
 const Roles = require("../../models/Roles");
 const redis = require("../../redis");
 
-const sendMessageNotification = require('./../../utils/SendMessageNotification')
 import pushNotification from "../../utils/sendPushNotification";
 module.exports = async (req, res, next) => {
   // check if its the creator and delete the server.
@@ -135,13 +134,11 @@ module.exports = async (req, res, next) => {
       });
     }
 
-  // save notification 
-  const uniqueIDs = await sendMessageNotification({
-    message: messageCreated,
-    channelID: req.server.default_channel_id,
-    server_id: req.server._id,
-    sender: req.user,
-  })
+
+  await Channels.updateOne({ channelID: req.server.default_channel_id }, { $set: {
+    lastMessaged: Date.now()
+  }})
+
 
   const defaultChannel = channels.find(c => c.channelID === req.server.default_channel_id);
   defaultChannel.server = req.server;
