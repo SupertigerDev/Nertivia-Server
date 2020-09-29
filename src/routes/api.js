@@ -30,9 +30,10 @@ router.use('/*', (req, res, next) => {
     requests[req.userIP] = { param: req.originalUrl, count: 1 }
   }
 
-  if (rateLimited[req.userIP] ||  requests[req.userIP].count >=500) {
+  if (rateLimited[req.userIP] ||  requests[req.userIP].count >=5) {
     if (!rateLimited[req.userIP]) {
       rateLimited[req.userIP] = Date.now();
+      console.log(`Rate limited ...${req.userIP.slice(6, req.userIP.length)}`)
     }
     if (diff_minutes(rateLimited[req.userIP], Date.now()) > 5) {
       delete rateLimited[req.userIP];
