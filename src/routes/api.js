@@ -8,6 +8,7 @@ const loadMedia = require('./../middlewares/loadMedia');
 import avatars from './avatars';
 
 let requests = {}
+let rateLimited = {}
 
 setInterval(() => {
   for (let index = 0; index < Object.keys(requests).length; index++) {
@@ -28,8 +29,25 @@ router.use('/*', (req, res, next) => {
   } else {
     requests[req.userIP] = { param: req.originalUrl, count: 1 }
   }
+
+  if (rateLimited[req.userIP] ||  requests[req.userIP].count >=500) {
+    if (!rateLimited[req.userIP]) {
+      rateLimited[req.userIP] = Date.now();
+    }
+    if (diff_minutes(rateLimited[req.userIP], Date.now()) > 5) {
+      delete rateLimited[req.userIP];
+      return next();
+    }
+    res.status(403).json({message: "You have been rate limited!"})
+    return;
+  }
   next();
 })
+function diff_minutes(dt2, dt1) {
+  let diff =(dt2 - dt1) / 1000;
+  diff /= 60;
+  return Math.abs(Math.round(diff));
+}
 
 router.use('/user', require('./users'));
 router.use('/devices', require('./devices'));

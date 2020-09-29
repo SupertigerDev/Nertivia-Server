@@ -143,17 +143,4 @@ module.exports = async (req, res, next) => {
   const defaultChannel = channels.find(c => c.channelID === req.server.default_channel_id);
   defaultChannel.server = req.server;
 
-  pushNotification({
-    channel: defaultChannel,
-    isServer: true,
-    message: {
-      message: req.user.username + " left the server",
-      channelID: req.server.default_channel_id
-    },
-    uniqueIDArr: uniqueIDs,
-    user: req.user
-  })
-
-
-
 };
