@@ -16,7 +16,7 @@ setInterval(() => {
     const requestSentCount = Object.values(requests)[index].count
     const param = Object.values(requests)[index].param
     if (requestSentCount >= 100) {
-      console.log(`...${ip.slice(6, ip.length)} is sending a lot of requests (${requestSentCount} in 60 seconds) at ${param}`)
+      console.log(`HashedIP: ${ip} is sending a lot of requests (${requestSentCount} in 60 seconds) at ${param}`)
     }
   }
   requests = {};
@@ -33,7 +33,7 @@ router.use('/*', (req, res, next) => {
   if (rateLimited[req.userIP] ||  requests[req.userIP].count >=500) {
     if (!rateLimited[req.userIP]) {
       rateLimited[req.userIP] = Date.now();
-      console.log(`Rate limited ...${req.userIP.slice(6, req.userIP.length)}`)
+      console.log(`Rate limited HashedIP: ${req.userIP}`)
     }
     if (diff_minutes(rateLimited[req.userIP], Date.now()) > 5) {
       delete rateLimited[req.userIP];
