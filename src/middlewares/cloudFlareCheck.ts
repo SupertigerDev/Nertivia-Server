@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import config from "../config.js";
 import ipRangeCheck from "ip-range-check";
+import crypto from "crypto";
 
 const cloudFlareIps = [
   "173.245.48.0/20",
@@ -20,17 +21,21 @@ const cloudFlareIps = [
 ];
 
 export default (req: Request, res: Response, next: NextFunction) => {
-  req.userIP =
-  (req.headers["cf-connecting-ip"] ||
+  const userIP = (req.headers["cf-connecting-ip"] ||
   req.headers["x-forwarded-for"] ||
   req.connection.remoteAddress)?.toString();
+  if (userIP) {
+    // hash the user ip. This hashed ip will be used in every routes as this is a middleware.
+    req.userIP = crypto.createHash('sha256').update(userIP).digest('hex');
+  }
 
   if (config.devMode) return next();
   const address = req.connection.remoteAddress;
+  // just a fake message when someone finds out the vps IP
   if (!address || !ipRangeCheck(address, cloudFlareIps)) {
     res
       .status(404)
-      .send("<div>You have been IP Banned.</div><div>IP: " + req.userIP + "</div>");
+      .send("<div>You have been IP Banned.</div><div>IP: 127.0.0.1</div>");
   } else {
     next();
   }
