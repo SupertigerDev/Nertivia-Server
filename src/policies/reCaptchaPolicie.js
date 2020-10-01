@@ -16,7 +16,7 @@ module.exports = (req, res, next) => {
   const secret = config.captchaKey;
 
 
-  fetch(`${verifyUrl}?secret=${secret}&response=${token}&remoteip=${req.userIP}`, {
+  fetch(`${verifyUrl}?secret=${secret}&response=${token}`, {
     method: "post",
   })
   .then(res => res.json())
