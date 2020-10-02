@@ -11,7 +11,13 @@ const sio = require("socket.io");
 
 
 module.exports = async (req, res, next) => {
-  const data = matchedData(req);
+  let data = matchedData(req);
+  if (data.username) {
+    data.username = data.username.replace(
+      /[\xA0\x00-\x09\x0B\x0C\x0E-\x1F\x7F\u2000-\u200F\u202F]/gu,
+      ""
+    );
+  }
   const user = req.user;
   const socketID = req.body.socketID
   let updatePassword = false
