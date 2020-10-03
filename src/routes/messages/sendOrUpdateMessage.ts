@@ -22,7 +22,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   let message = undefined;
   if (req.body.message) {
     message = req.body.message.replace(
-      /[\xA0\x00-\x09\x0B\x0C\x0E-\x1F\x7F\u2000-\u200F\u202F]/gu,
+      /[\xA0\x00-\x09\x0B\x0C\x0E-\x1F\x7F\u2000-\u200F\u202F/u2800]/gu,
       ""
     );
   } 
