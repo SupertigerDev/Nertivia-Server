@@ -3,7 +3,7 @@ const BannedIPs = require("../models/BannedIPs");
 import config from '../config';
 const JWT = require("jsonwebtoken");
 
-module.exports = function (allowBot = false, allowInvalid = false) {
+module.exports = function (allowBot = false, allowInvalid = false, allowNonTerms = false) {
   return async function (req, res, next) {
 
     const token = config.jwtHeader + req.headers.authorization;
@@ -54,7 +54,7 @@ module.exports = function (allowBot = false, allowInvalid = false) {
 
     const user = await Users.findOne({ uniqueID: decryptedToken })
       .select(
-        "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned bot passwordVersion"
+        "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned bot passwordVersion readTerms"
       )
       .lean();
     // If user doesn't exists, handle it
@@ -63,6 +63,12 @@ module.exports = function (allowBot = false, allowInvalid = false) {
       req.session.destroy();
       return res.status(401).send({
         message: "Invalid Token."
+      });
+    }
+    if ((!user.bot && !user.readTerms) && !allowNonTerms) {
+      req.session.destroy();
+      return res.status(401).send({
+        message: "You must accept the updated privacy policy and the TOS before continuing inside the app."
       });
     }
     if (user.banned) {

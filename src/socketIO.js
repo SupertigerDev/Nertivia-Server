@@ -73,7 +73,7 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion";
+        "avatar username admin email uniqueID tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
 
       const user = await User.findOne({ uniqueID: decryptedToken })
         .select(userSelect)
@@ -83,21 +83,29 @@ module.exports = async client => {
 
       // disconnect user if not found.
       if (!user) {
-        console.log("loggedOutReason: User not found in db");
+        console.log("Disconnect Reason: User not found in db");
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
         client.disconnect(true);
         return;
       }
+      if (!user.bot && !user.readTerms) {
+        console.log("Disconnect Reason: Terms not accepted", user.username, user.uniqueID);
+        delete client.auth;
+        client.emit("auth_err", "terms_not_agreed");
+        client.disconnect(true);
+        return;
+      }
+      delete user.readTerms;
       if (user.banned) {
-        console.log("loggedOutReason: User is banned", user.username, user.uniqueID);
+        console.log("Disconnect Reason: User is banned", user.username, user.uniqueID);
         delete client.auth;
         client.emit("auth_err", "You are banned.");
         client.disconnect(true);
         return;
       }
       if (user.email_confirm_code) {
-        console.log("loggedOutReason: Email not confimed");
+        console.log("Disconnect Reason Email not confirmed");
         delete client.auth;
         client.emit("auth_err", "Email not confirmed");
         client.disconnect(true);

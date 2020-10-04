@@ -127,7 +127,7 @@ const usersSchema = new Schema({
   },
   settings: { type: settingsSchema, select: false },
   GDriveRefreshToken: { type: String, required: false, select: false }, // TODO move this to settings
-
+  readTerms: {type: Boolean, select: false, default: true},
 
   // used for bots only
   bot: { type: Boolean, require: false },

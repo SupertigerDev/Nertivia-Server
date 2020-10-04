@@ -36,6 +36,12 @@ MainUserRouter.route("/block").delete(
   require("./unblockUser")
 );
 
+// User agreeing to the TOS and the privacy policy
+MainUserRouter.route("/agreeingPolicies").post(
+  authenticate(false, false, true),
+  require("./agreeingPolicies")
+);
+
 // Details
 MainUserRouter.route("/:uniqueID?").get(authenticate(true), require("./userDetails"));
 
