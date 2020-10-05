@@ -3,9 +3,14 @@ const BannedIPs = require("../../models/BannedIPs");
 const JWT = require("jsonwebtoken");
 import config from '../../config';
 
-function signToken(uniqueID) {
-  return JWT.sign(uniqueID, config.jwtSecret);
+function signToken(uniqueID, pwdVer) {
+  if (pwdVer !== undefined) {
+    return JWT.sign(`${uniqueID}-${pwdVer}`, config.jwtSecret);
+  } else {
+    return JWT.sign(uniqueID, config.jwtSecret);
+  }
 }
+
 
 module.exports = async (req, res, next) => {
   const { code, email } = req.body;
@@ -20,7 +25,7 @@ module.exports = async (req, res, next) => {
 
   // Check if there is a user with the same email
   const foundUser = await User.findOne({ email: email.toLowerCase() }).select(
-    "uniqueID email_confirm_code"
+    "uniqueID email_confirm_code passwordVersion"
   );
   if (!foundUser) {
     return res.status(404).json({
@@ -42,7 +47,7 @@ module.exports = async (req, res, next) => {
   await User.updateOne({_id: foundUser._id}, {$unset: {email_confirm_code: 1}})
 
   // Generate the token without header information
-  const token = signToken(foundUser.uniqueID)
+  const token = signToken(foundUser.uniqueID, foundUser.passwordVersion)
     .split(".")
     .splice(1)
     .join(".");
