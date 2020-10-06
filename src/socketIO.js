@@ -90,7 +90,7 @@ module.exports = async client => {
         return;
       }
       if (!user.bot && !user.readTerms) {
-        console.log("Disconnect Reason: Terms not accepted", user.username, user.uniqueID);
+        //console.log("Disconnect Reason: Terms not accepted", user.username, user.uniqueID);
         delete client.auth;
         client.emit("auth_err", "terms_not_agreed");
         client.disconnect(true);
