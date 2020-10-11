@@ -14,6 +14,7 @@ import myBots from './myBots';
 import getBot from './getBot';
 import botJoin from './botJoin';
 import updateBot from './updateBot';
+import deleteBot from './deleteBot';
 import getCommands from './getCommands';
 import resetBotToken from './resetBotToken';
 
@@ -42,6 +43,13 @@ botsRouter.route("/:bot_id").post(
   authenticate(),
   UserPolicies.updateBot,
   updateBot
+);
+
+
+// delete my bot
+botsRouter.route("/:bot_id").delete(
+  authenticate(),
+  deleteBot
 );
 
 
