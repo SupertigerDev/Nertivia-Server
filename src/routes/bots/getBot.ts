@@ -17,7 +17,7 @@ export default async function createBot(req: Request, res: Response) {
     .populate("createdBy", "username tag avatar uniqueID")
     .lean();
 
-  if (!bot) {
+  if (!bot || !bot.createdBy) {
     res.status(404).json({ message: "Bot not found." })
     return;
   }
