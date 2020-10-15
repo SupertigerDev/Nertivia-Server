@@ -64,6 +64,11 @@ MainUserRouter.route("/login").post(
   reCaptchaPolicy,
   require("./login")
 );
+// delete my account
+MainUserRouter.route("/delete-account").delete(
+  authenticate(),
+  require("./deleteAccount")
+);
 
 // Reset password request
 MainUserRouter.route("/reset/request").post(

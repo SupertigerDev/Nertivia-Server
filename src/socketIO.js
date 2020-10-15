@@ -89,14 +89,7 @@ module.exports = async client => {
         client.disconnect(true);
         return;
       }
-      if (!user.bot && !user.readTerms) {
-        //console.log("Disconnect Reason: Terms not accepted", user.username, user.uniqueID);
-        delete client.auth;
-        client.emit("auth_err", "terms_not_agreed");
-        client.disconnect(true);
-        return;
-      }
-      delete user.readTerms;
+
       if (user.banned) {
         console.log("Disconnect Reason: User is banned", user.username, user.uniqueID);
         delete client.auth;
@@ -133,6 +126,14 @@ module.exports = async client => {
         client.disconnect(true);
         return;
       }
+      if (!user.bot && !user.readTerms) {
+        //console.log("Disconnect Reason: Terms not accepted", user.username, user.uniqueID);
+        delete client.auth;
+        client.emit("auth_err", "terms_not_agreed");
+        client.disconnect(true);
+        return;
+      }
+      delete user.readTerms;
 
       await redis.connected(user.uniqueID, user._id, user.status, user.custom_status, client.id);
 
