@@ -48,7 +48,7 @@ module.exports = async (req, res, next) => {
 
   await Users.updateOne({_id: req.user._id}, {
     $set: {
-      username: "Deleted User" + (Math.floor(Math.random() * 100000) + 1),
+      username: "Deleted User " + (Math.floor(Math.random() * 100000) + 1),
       created: 0
     },
     $inc: {passwordVersion: 1},
@@ -67,6 +67,7 @@ module.exports = async (req, res, next) => {
       servers: 1,
       lastSeen: 1,
       status: 1,
+      badges: 1,
     }
   })
 

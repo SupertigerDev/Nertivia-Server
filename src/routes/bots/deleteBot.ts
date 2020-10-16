@@ -18,7 +18,7 @@ export default async function deleteBot(req: Request, res: Response) {
       { uniqueID: bot_id },
       {
         $set: {
-          username: "DeletedBot" + (Math.floor(Math.random() * 100000) + 1),
+          username: "Deleted Bot " + (Math.floor(Math.random() * 100000) + 1),
           created: 0
         },
         $unset: {
