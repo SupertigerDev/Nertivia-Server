@@ -1,5 +1,6 @@
 const Messages = require("../../models/messages");
 const MessageQuotes = require("../../models/messageQuotes");
+const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
@@ -40,6 +41,15 @@ module.exports = async (req, res, next) => {
     } else {
       io.in(user.uniqueID).emit("delete_message", resObj);
       io.in(channel.recipients[0].uniqueID).emit("delete_message", resObj);
+    }
+
+    // delete image if exists
+    const filesExist = message.files && message.files.length;
+    const isImage = message.files[0].dimensions;
+    const isNertiviaCDN = message.files[0].url.startsWith("https://")
+    if (filesExist && isImage && isNertiviaCDN) {
+      const path = (new URL(message.files[0].url)).pathname;
+      nertiviaCDN.deletePath(path).catch(err => {console.log("Error deleting from CDN", err)})
     }
   } catch (error) {
     console.error(error);

@@ -1,5 +1,5 @@
 const Users = require("../../models/users");
-const Servers = require("../../models/servers");
+const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 const redis = require("../../redis");
 
@@ -70,12 +70,17 @@ module.exports = async (req, res, next) => {
     }
   })
 
+  
+  // delete files from cdn
+  nertiviaCDN.deletePath("/" + req.user.uniqueID).catch(err => {console.log("Error deleting from CDN", err)});
+
   kickUser(req.io, req.user.uniqueID);
   req.session.destroy();
 
   req
   .status(200)
   .json({status: "Account Deleted!"})
+
 
 
 };
