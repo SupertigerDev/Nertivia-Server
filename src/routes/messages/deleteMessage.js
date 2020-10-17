@@ -45,8 +45,8 @@ module.exports = async (req, res, next) => {
 
     // delete image if exists
     const filesExist = message.files && message.files.length;
-    const isImage = message.files[0].dimensions;
-    const isNertiviaCDN = message.files[0].url.startsWith("https://")
+    const isImage = filesExist && message.files[0].dimensions;
+    const isNertiviaCDN = filesExist && message.files[0].url.startsWith("https://")
     if (filesExist && isImage && isNertiviaCDN) {
       const path = (new URL(message.files[0].url)).pathname;
       nertiviaCDN.deletePath(path).catch(err => {console.log("Error deleting from CDN", err)})
