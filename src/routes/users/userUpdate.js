@@ -17,6 +17,12 @@ module.exports = async (req, res, next) => {
       /[\xA0\x00-\x09\x0B\x0C\x0E-\x1F\x7F\u{2000}-\u{200F}\u{202F}\u{2800}]/gu,
       ""
     );
+    // check if result is empty
+    if (!data.username.trim()) {
+      return res
+      .status(403)
+      .json({ errors: [{ param: "username", msg: "Username is required." }] });
+    }
   }
   const user = req.user;
   const socketID = req.body.socketID
