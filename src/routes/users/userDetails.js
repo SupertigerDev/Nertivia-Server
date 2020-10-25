@@ -2,7 +2,6 @@ const Users = require("./../../models/users");
 const BlockedUsers = require("./../../models/blockedUsers");
 const Servers = require("./../../models/servers");
 const Friends = require("./../../models/friends");
-import spaceTime from 'spacetime';
 
 module.exports = async (req, res, next) => {
   let uniqueID = req.params.uniqueID;
@@ -22,13 +21,6 @@ module.exports = async (req, res, next) => {
     return res.status(404).json({
       message: "User was not found."
     });
-  }
-  
-  if (user.about_me && user.about_me.country) {
-    try {
-      const time = spaceTime.now(user.about_me.country).format("nice");
-      user.about_me.time = time;
-    } catch {};
   }
 
   // get common servers
