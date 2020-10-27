@@ -11,7 +11,7 @@ const PublicServersList = require("../../models/publicServersList");
 const Roles = require("../../models/Roles");
 const redis = require("../../redis");
 
-import pushNotification from "../../utils/sendPushNotification";
+import { deleteFCMFromServer, sendServerPush } from "../../utils/sendPushNotification";
 module.exports = async (req, res, next) => {
   // check if its the creator and delete the server.
 
@@ -57,7 +57,9 @@ module.exports = async (req, res, next) => {
   }
 
 
+  
   // Leave server
+  await deleteFCMFromServer(req.server.server_id, req.user.uniqueID);
 
   // delete all leavers notification from the server 
   if (channelIDArray) {
@@ -135,12 +137,19 @@ module.exports = async (req, res, next) => {
     }
 
 
-  await Channels.updateOne({ channelID: req.server.default_channel_id }, { $set: {
+  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, { $set: {
     lastMessaged: Date.now()
-  }})
+  }}).lean();
 
-
-  const defaultChannel = channels.find(c => c.channelID === req.server.default_channel_id);
   defaultChannel.server = req.server;
+  sendServerPush({
+    channel: defaultChannel,
+    message: {
+      channelID: defaultChannel.channelID,
+      message: "joined the server",
+    },
+    sender: user,
+    server_id: req.server.server_id
+  })
 
 };

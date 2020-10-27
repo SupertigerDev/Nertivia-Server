@@ -7,6 +7,7 @@ const Notifications = require("../../models/notifications");
 const Channels = require("../../models/channels");
 const Roles = require("../../models/Roles");
 const redis = require("../../redis");
+const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
   const {server_id, unique_id} = req.params;
@@ -33,6 +34,7 @@ module.exports = async (req, res, next) => {
   }
 
 
+  await deleteFCMFromServer(server_id, unique_id);
   await Servers.updateOne(
     {_id: server._id},
     {$push: {user_bans: {user: kicker._id}}}
@@ -113,12 +115,6 @@ module.exports = async (req, res, next) => {
 
 
 
-  
-  await Channels.updateOne({ channelID: req.server.default_channel_id }, { $set: {
-    lastMessaged: Date.now()
-  }})
-
-
   // emit message
   const roomsMsg = io.sockets.adapter.rooms["server:" + req.server.server_id];
   if (roomsMsg){
@@ -128,6 +124,23 @@ module.exports = async (req, res, next) => {
       });
     }
   }
+  
+  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, { $set: {
+    lastMessaged: Date.now()
+  }}).lean()
+
+
+  defaultChannel.server = req.server;
+  sendServerPush({
+    channel: defaultChannel,
+    message: {
+      channelID: defaultChannel.channelID,
+      message: "has been banned",
+    },
+    sender: kicker,
+    server_id: req.server.server_id
+  })
+
 
 
 

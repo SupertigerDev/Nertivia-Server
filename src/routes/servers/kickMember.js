@@ -7,6 +7,7 @@ const Notifications = require("../../models/notifications");
 const Channels = require("../../models/channels");
 const Roles = require("../../models/Roles");
 const redis = require("../../redis");
+const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
   const {server_id, unique_id} = req.params;
@@ -29,6 +30,8 @@ module.exports = async (req, res, next) => {
     .status(403)
     .json({ message: "You can't kick the creator of the server." });
   }
+
+  await deleteFCMFromServer(server_id,unique_id);
 
   // server channels
   const channels = await Channels.find({ server: server._id });
@@ -101,12 +104,6 @@ module.exports = async (req, res, next) => {
   messageCreated = messageCreated.toObject();
   messageCreated.creator = kicker;
 
-
-  await Channels.updateOne({ channelID: req.server.default_channel_id }, { $set: {
-    lastMessaged: Date.now()
-  }})
-
-
   // emit message
   const roomsMsg = io.sockets.adapter.rooms["server:" + req.server.server_id];
   if (roomsMsg){
@@ -116,7 +113,20 @@ module.exports = async (req, res, next) => {
       });
     }
   }
+  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, { $set: {
+    lastMessaged: Date.now()
+  }}).lean()
 
+  defaultChannel.server = req.server;
+  sendServerPush({
+    channel: defaultChannel,
+    message: {
+      channelID: defaultChannel.channelID,
+      message: "has been kicked",
+    },
+    sender: kicker,
+    server_id: req.server.server_id
+  })
 
 
   

@@ -2,6 +2,7 @@ const Users = require("../../models/users");
 const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 const redis = require("../../redis");
+const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 
 
 
@@ -43,6 +44,8 @@ module.exports = async (req, res, next) => {
     .status(403)
     .json({error: "You must leave / Delete all of your servers before deleting your account."})
   }
+
+  await deleteAllUserFCM(req.user.uniqueID);
 
 
 

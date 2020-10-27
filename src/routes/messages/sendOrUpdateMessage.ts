@@ -11,7 +11,7 @@ const Devices = require("../../models/Devices");
 
 const sendMessageNotification = require('./../../utils/SendMessageNotification');
 
-import pushNotification from '../../utils/sendPushNotification'
+import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
 import config from '../../config';
 import { json } from 'body-parser';
 import channels from '../../models/channels';
@@ -296,20 +296,18 @@ async function serverMessage(req: any, io: any, channelID: any, messageCreated: 
     }
   })
 
-  // pushNotification({
-  //   channel: req.channel,
-  //   isServer: true,
-  //   message: messageCreated,
-  //   uniqueIDArr: uniqueIDs,
-  //   user: req.user
-  // })
 
+  sendServerPush({
+    sender: req.user,
+    message: messageCreated,
+    channel: req.channel,
+    server_id: req.channel.server.server_id
+  })  
 
-  return;
 }
 
-const reg = /<m([\d]+)>/g;
 function filterNestedQuotes(baseQuote: string, quotes: any[]) {
+  const reg = /<m([\d]+)>/g;
   const quotesIDArr: string[] = matchAll(baseQuote, reg).toArray();
   return quotes.filter(q => quotesIDArr.includes(q.messageID))
 }
@@ -370,12 +368,12 @@ async function directMessage(req: any, io: any, channelID: any, messageCreated: 
     }
 
 
-  if (!isSavedNotes)
-    pushNotification({
-      user: req.user,
+  if (isSavedNotes) return;
+
+    sendDMPush({
+      sender: req.user,
       message: messageCreated,
       recipient: req.channel.recipients[0],
-      isServer: false,
     })  
 
 }

@@ -3,6 +3,7 @@ const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require("bcryptjs");
 const sio = require("socket.io");
 const redis = require("../../redis");
+const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
   const uniqueID = req.params.unique_id;
@@ -17,11 +18,11 @@ module.exports = async (req, res, next) => {
   const userToSuspend = await Users.findOne({ uniqueID: uniqueID }).select(
     "ip banned"
   );
-  if (!userToSuspend)
+  if (!userToSuspend){
     return res.status(404).json({ message: "unique id not found" });
+  }
 
-  // if (userToSuspend.banned)
-  //   return res.status(401).json({ message: "User is already suspended." });
+  await deleteAllUserFCM(uniqueID);  
 
   const reasonDB = reason.trim() ? reason : "Not Provided.";
   await Users.updateOne(

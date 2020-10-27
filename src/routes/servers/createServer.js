@@ -6,6 +6,7 @@ const Servers = require("../../models/servers");
 const User = require("../../models/users");
 const Roles = require("../../models/Roles");
 const rolePerms = require("../../utils/rolePermConstants");
+const { AddFCMUserToServer } = require("../../utils/sendPushNotification");
 
 
 // Imports
@@ -89,7 +90,7 @@ module.exports = async (req, res, next) => {
   createServerObj.__v = undefined;
   createServerObj._id = undefined;
   res.json(createServerObj);
-
+  AddFCMUserToServer(createServer.server_id, req.user.uniqueID);
   // send owns status to every connected device
   createServerObj.channels = [createChannel];
   const serverMember = addServerMember.toObject();

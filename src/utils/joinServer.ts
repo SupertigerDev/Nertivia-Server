@@ -7,7 +7,7 @@ const Messages = require("../models/messages");
 const ServerMembers = require("../models/ServerMembers");
 const ServerRoles = require("../models/Roles");
 const redis = require("../redis");
-import pushNotification from "./sendPushNotification";
+import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
@@ -149,17 +149,19 @@ export default async function join(server: any, user: any, socketID: string | un
   const defaultChannel = serverChannels.find((c:any) => c.channelID === server.default_channel_id);
   defaultChannel.server = server;
 
+
+  await AddFCMUserToServer(server.server_id, user.uniqueID)
+
+  sendServerPush({
+    channel: defaultChannel,
+    message: {
+      channelID: server.default_channel_id,
+      message: user.username + " joined the server",
+    },
+    sender: user,
+    server_id: server.server_id
+  })
   
-  // pushNotification({
-  //   channel: defaultChannel,
-  //   isServer: true,
-  //   message: {
-  //     message: user.username + " joined the server",
-  //     channelID: server.default_channel_id
-  //   },
-  //   uniqueIDArr: uniqueIDs,
-  //   user: user
-  // })
 
 
   // send roles
