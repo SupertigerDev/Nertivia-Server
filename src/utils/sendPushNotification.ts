@@ -69,6 +69,7 @@ export async function sendServerPush(args: ServerArgs) {
   const devices = await Servers.findOne({server_id: args.server_id}).select("FCM_devices").populate("FCM_devices") as any;
   if (!devices.FCM_devices || !devices.FCM_devices.length) return;
   const tokensArr = devices.FCM_devices.filter((d: any) => d.user_id !== args.sender.uniqueID).map((t: any) => t.token);
+  if (!tokensArr.length) return; 
   const data: any = {
     username: args.sender.username,
     channel_id: args.message.channelID,
