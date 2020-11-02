@@ -51,7 +51,7 @@
     "i": "^0.3.6",
     "ip-range-check": "^0.2.0",
     "jsdom": "^16.2.2",
-    "jsonhtmlfyer": "^0.2.0",
+    "jsonhtmlfyer": "^0.2.1",
     "jsonwebtoken": "^8.5.1",
     "match-all": "^1.2.5",
     "mongoose": "^5.9.19",
