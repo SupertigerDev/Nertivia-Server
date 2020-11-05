@@ -10,6 +10,7 @@ export function getIOInstance(server?: Server) {
   } else {
     IO_INSTANCE = socketIO(server, {
       perMessageDeflate: false,
+      pingTimeout: 60000,
       handlePreflightRequest: function(req, res) {
         var headers = {
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
