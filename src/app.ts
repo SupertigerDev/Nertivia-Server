@@ -48,7 +48,6 @@ export default function initServer() {
   }
 
   app.use('/', express.static('public/supertiger/'))
-  app.use('/twemojis', express.static('public/twemojis/'))
 
 
   return server;
