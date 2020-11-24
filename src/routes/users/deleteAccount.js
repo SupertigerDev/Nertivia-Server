@@ -82,7 +82,7 @@ module.exports = async (req, res, next) => {
   kickUser(req.io, req.user.uniqueID);
   req.session.destroy();
 
-  req
+  res
   .status(200)
   .json({status: "Account Deleted!"})
 
