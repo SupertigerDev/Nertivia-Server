@@ -146,7 +146,7 @@ module.exports = async (req, res, next) => {
     channel: defaultChannel,
     message: {
       channelID: defaultChannel.channelID,
-      message: "joined the server",
+      message: "left the server",
     },
     sender: user,
     server_id: req.server.server_id
