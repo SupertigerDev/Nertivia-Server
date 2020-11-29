@@ -19,13 +19,23 @@ module.exports = async (req, res, next) => {
   }
   const server = req.server;
 
-  const kicker = await Users.findOne({uniqueID: unique_id}).select('_id uniqueID username tag avatar admin');
+  const userToBeKicked = await Users.findOne({uniqueID: unique_id}).select('_id uniqueID username tag avatar admin');
 
-  if (!kicker) return res
+
+  if (!userToBeKicked) return res
     .status(404)
     .json({ message: "User not found." });
+    
+  const memberExistsInServer = await ServerMembers.exists({member: userToBeKicked._id, server_id});
 
-  if(kicker._id.toString() === req.server.creator.toString()) {
+  if (!memberExistsInServer) {
+    res.json({ status: "Member is already not in the server." });
+    return;
+  }
+
+
+
+  if(userToBeKicked._id.toString() === req.server.creator.toString()) {
     return res
     .status(403)
     .json({ message: "You can't kick the creator of the server." });
@@ -50,13 +60,13 @@ module.exports = async (req, res, next) => {
   const io = req.io;
   // remove server from users server list.
   await Users.updateOne(
-    { _id: kicker._id },
+    { _id: userToBeKicked._id },
     { $pullAll: { servers: [server._id] } }
   );
 
 
   //if bot, delete bot role
-  const role = await Roles.findOneAndDelete({bot: kicker._id, server: server._id});
+  const role = await Roles.findOneAndDelete({bot: userToBeKicked._id, server: server._id});
 
   if (role) {
     io.in("server:" + role.server_id).emit("server:delete_role", {role_id: role.id, server_id: role.server_id});
@@ -64,7 +74,7 @@ module.exports = async (req, res, next) => {
 
   // delete member from server members
   await ServerMembers.deleteMany({
-    member: kicker._id,
+    member: userToBeKicked._id,
     server: server._id
   });
 
@@ -95,14 +105,14 @@ module.exports = async (req, res, next) => {
   // send kick message
   const messageCreate = new Messages({
     channelID: server.default_channel_id,
-    creator: kicker._id,
+    creator: userToBeKicked._id,
     messageID: "placeholder",
     type: 3 // kick message
   });
   let messageCreated = await messageCreate.save();
 
   messageCreated = messageCreated.toObject();
-  messageCreated.creator = kicker;
+  messageCreated.creator = userToBeKicked;
 
   // emit message
   const roomsMsg = io.sockets.adapter.rooms["server:" + req.server.server_id];
@@ -124,7 +134,7 @@ module.exports = async (req, res, next) => {
       channelID: defaultChannel.channelID,
       message: "has been kicked",
     },
-    sender: kicker,
+    sender: userToBeKicked,
     server_id: req.server.server_id
   })
 

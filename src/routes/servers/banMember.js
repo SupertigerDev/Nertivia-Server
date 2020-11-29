@@ -20,14 +20,23 @@ module.exports = async (req, res, next) => {
   }
   const server = req.server;
 
-  const kicker = await Users.findOne({uniqueID: unique_id}).select('_id uniqueID username tag avatar admin');
+  const userToBeBanned = await Users.findOne({uniqueID: unique_id}).select('_id uniqueID username tag avatar admin');
 
-  if (!kicker) return res
+  if (!userToBeBanned) return res
     .status(404)
     .json({ message: "User not found." });
 
+  const userAlreadyBanned = await Servers.exists({"user_bans.user": userToBeBanned._id});
 
-  if(kicker._id.toString() === req.server.creator.toString()) {
+  if (userAlreadyBanned) {
+    res.json({ status: "Member is already banned." });
+    return;
+  }
+
+  console.log(userAlreadyBanned)
+
+
+  if(userToBeBanned._id.toString() === req.server.creator.toString()) {
     return res
     .status(403)
     .json({ message: "You can't ban the creator of the server." });
@@ -37,7 +46,7 @@ module.exports = async (req, res, next) => {
   await deleteFCMFromServer(server_id, unique_id);
   await Servers.updateOne(
     {_id: server._id},
-    {$push: {user_bans: {user: kicker._id}}}
+    {$push: {user_bans: {user: userToBeBanned._id}}}
   );
 
 
@@ -59,13 +68,13 @@ module.exports = async (req, res, next) => {
   const io = req.io;
   // remove server from users server list.
   await Users.updateOne(
-    { _id: kicker._id },
+    { _id: userToBeBanned._id },
     { $pullAll: { servers: [server._id] } }
   );
 
 
   //if bot, delete bot role
-  const role = await Roles.findOneAndDelete({bot: kicker._id, server: server._id});
+  const role = await Roles.findOneAndDelete({bot: userToBeBanned._id, server: server._id});
 
   if (role) {
     io.in("server:" + role.server_id).emit("server:delete_role", {role_id: role.id, server_id: role.server_id});
@@ -75,7 +84,7 @@ module.exports = async (req, res, next) => {
   // delete member from server members
 
   await ServerMembers.deleteMany({
-    member: kicker._id,
+    member: userToBeBanned._id,
     server: server._id
   });
 
@@ -104,14 +113,14 @@ module.exports = async (req, res, next) => {
   // send kick message
   const messageCreate = new Messages({
     channelID: server.default_channel_id,
-    creator: kicker._id,
+    creator: userToBeBanned._id,
     messageID: "placeholder",
     type: 4 // ban message
   });
   let messageCreated = await messageCreate.save();
 
   messageCreated = messageCreated.toObject();
-  messageCreated.creator = kicker;
+  messageCreated.creator = userToBeBanned;
 
 
 
@@ -137,7 +146,7 @@ module.exports = async (req, res, next) => {
       channelID: defaultChannel.channelID,
       message: "has been banned",
     },
-    sender: kicker,
+    sender: userToBeBanned,
     server_id: req.server.server_id
   })
 
