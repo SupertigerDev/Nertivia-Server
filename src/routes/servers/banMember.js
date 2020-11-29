@@ -33,9 +33,6 @@ module.exports = async (req, res, next) => {
     return;
   }
 
-  console.log(userAlreadyBanned)
-
-
   if(userToBeBanned._id.toString() === req.server.creator.toString()) {
     return res
     .status(403)
