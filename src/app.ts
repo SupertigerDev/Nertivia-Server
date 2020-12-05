@@ -34,20 +34,14 @@ export default function initServer() {
   app.use('/api', require('./routes/api'));
 
   if (config.domain) {
-    app.use(vhost('musica.' + config.domain, express.static(__dirname +'/public/musica')))
-    app.use(vhost('reddit.' + config.domain, express.static(__dirname +'/public/reddit')))
-
-    app.use(vhost('nertivia.' + config.domain, require('./routes/chat')))
-    app.use(vhost('nertiviabeta.' + config.domain, require('./routes/chatBeta')))
+    app.use(vhost(config.domain, require('./routes/chat')))
+    app.use(vhost('beta.' + config.domain, require('./routes/chatBeta')))
+    app.use(vhost('supertiger.' + config.domain, express.static('public/supertiger/')))
   } else {
-    app.use('/musica', express.static('public/musica'))
-    app.use('/reddit', express.static('public/reddit'))
-
     app.use('/nertivia', require('./routes/chat'))
     app.use('/nertiviabeta', require('./routes/chatBeta'))
   }
 
-  app.use('/', express.static('public/supertiger/'))
 
 
   return server;

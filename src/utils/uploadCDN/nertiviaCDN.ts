@@ -5,7 +5,7 @@ export function uploadFile(BufferOrStream: any, userid: string, fileid: string, 
   return new Promise((resolve, reject) => {
 
     const options: request.Options = {
-      url: 'https://media.nertivia.tk/indexx.php',
+      url: 'https://media.nertivia.net/indexx.php',
       formData: {
         secret: config.fileCDNSecret,
         userid: userid || "",
@@ -29,7 +29,7 @@ export function uploadFile(BufferOrStream: any, userid: string, fileid: string, 
 export function deletePath(path: string) {
   return new Promise((resolve, reject) => {
     const options: request.Options = {
-      url: 'https://media.nertivia.tk/indexx-remove.php',
+      url: 'https://media.nertivia.net/indexx-remove.php',
       json: {
         secret: config.fileCDNSecret,
         removePath: path
