@@ -60,7 +60,14 @@ module.exports = async (req, res, next) => {
         creator: {username: 1, uniqueID: 1, tag: 1},
         created: 1,
         server: { avatar: 1, banner: 1, name: 1, server_id: 1, public: 1, verified: 1 },
-        total_members: { $size: "$serverMembers" },
+        total_members: {
+          $size: {
+            $filter: {
+              input: "$serverMembers",
+              "cond": { "$ne": [ "$$this.type", "BOT" ] }
+            }
+          }
+        },
         _id: 0
       }
     },
