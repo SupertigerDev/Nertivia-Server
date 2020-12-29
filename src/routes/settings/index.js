@@ -7,6 +7,7 @@ const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
 
 // Policies
 const settingsPolicy = require("../../policies/settingsPolicies");
+const rateLimit = require("../../middlewares/rateLimit");
 
 // Change Status
 MainSettingsRouter.route("/status").post(
@@ -18,6 +19,7 @@ MainSettingsRouter.route("/status").post(
 // Change Custom Status
 MainSettingsRouter.route("/custom-status").post(
   authenticate(true),
+  rateLimit({name: 'messages_load', expire: 60, requestsLimit: 50 }),
   require("./changeCustomStatus")
 );
 
