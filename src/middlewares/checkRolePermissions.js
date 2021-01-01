@@ -6,23 +6,26 @@ module.exports = function (name, flag, sendError = true) {
     if (!req.channel) {
       if (!req.server) {
         sendErrorMessage(req, res, `No server!`, sendError, next)
+        return;
       }
-    } else if (!req.channel.server) {
+    } else if (!req.server) {
       return next();
     }
     // owner always has the permission
-    const creator = req.server ? req.server.creator : req.channel.server ? req.channel.server.creator : undefined;
+    const creator = req.server ? req.server.creator : req.server ? req.server.creator : undefined;
     if (creator === req.user._id) {
       return next();
     }
 
     if (req.permissions === undefined) {
       sendErrorMessage(req, res, `Missing permission! (${name})`, sendError, next)
+      return;
     }
     if (containsPerm(req.permissions, flag | ADMIN)) {
       return next();
     } else {
       sendErrorMessage(req, res, `Missing permission! (${name})`, sendError, next)
+      return;
     }
   }
 }

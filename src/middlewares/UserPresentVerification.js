@@ -79,7 +79,7 @@ module.exports = async (req, res, next) => {
 
   if (channelID) {
     // check if channel exists in the server
-    const channel = await Channels.findOne({server_id: serverID, channelID: channelID});
+    const channel = await Channels.findOne({server_id: serverID, channelID: channelID}).lean()
     if (!channel) {
       return res.status(404).json({
         message: "ChannelID is invalid or does not exist in the server."
