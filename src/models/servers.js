@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const beautifyUnique = require("mongoose-beautiful-unique-validation");
 const { Schema } = mongoose;
 
 const userBansSchema = new Schema({
@@ -27,7 +26,7 @@ const serversSchema = new Schema({
   public: { type: Boolean },
   user_bans: { type: [userBansSchema], select: false },
   channel_position: [{type: String, required: false, select: false}],
-  FCM_devices: { type: [{ type: Schema.Types.ObjectId, ref: 'devices', unique: true }], select: false },
+  FCM_devices: { type: [{ type: Schema.Types.ObjectId, ref: 'devices' }], select: false },
 });
 
 serversSchema.pre("save", async function(next) {
@@ -40,7 +39,6 @@ serversSchema.pre("save", async function(next) {
   }
 });
 
-serversSchema.plugin(beautifyUnique);
 const Servers = mongoose.model("servers", serversSchema);
 
 module.exports = Servers;

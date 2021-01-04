@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const beautifyUnique = require('mongoose-beautiful-unique-validation');
 const bcrypt = require('bcryptjs');
 const {
     Schema
@@ -16,7 +15,6 @@ const serverInvitesSchema = new Schema({
 
 
 
-serverInvitesSchema.plugin(beautifyUnique);
 const serverInvites = mongoose.model('server_invite', serverInvitesSchema);
 
 

@@ -106,7 +106,7 @@ const usersSchema = new Schema({
     select: false
   },
   servers: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'servers', unique: true }],
+    type: [{ type: Schema.Types.ObjectId, ref: 'servers'}],
     select: false
   },
   created: {

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const beautifyUnique = require('mongoose-beautiful-unique-validation');
 const bcrypt = require('bcryptjs');
 const {
     Schema
@@ -26,7 +25,6 @@ serversListSchema.pre('save', async function(next) {
 
 
 
-serversListSchema.plugin(beautifyUnique);
 const serversList = mongoose.model('public_servers', serversListSchema);
 
 

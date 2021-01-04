@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const beautifyUnique = require('mongoose-beautiful-unique-validation');
+
 const {
     Schema
 } = mongoose;
@@ -15,8 +15,6 @@ const bannedIPsSchema = new Schema({
     index: {expires: 398999 } // 4.6 days
   },
 });
-
-bannedIPsSchema.plugin(beautifyUnique);
 
 
 
