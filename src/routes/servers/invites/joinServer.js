@@ -17,6 +17,9 @@ module.exports = async (req, res, next) => {
       .populate({ path: "server", populate: [{ path: "creator" }] })
       .lean();
     // check if banned
+    if (!invite) {
+      return res.status(404).json({ message: "Invalid server." });
+    }
     const checkBanned = await Servers.findOne({
       _id: invite.server._id,
       "user_bans.user": {
