@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
       .lean();
     // check if banned
     if (!invite) {
-      return res.status(404).json({ message: "Invalid server." });
+      return res.status(404).json({ message: "Invalid invite code." });
     }
     const checkBanned = await Servers.findOne({
       _id: invite.server._id,
