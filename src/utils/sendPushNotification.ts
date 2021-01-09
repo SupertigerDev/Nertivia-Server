@@ -1,12 +1,17 @@
 import Devices from "../models/Devices";
-const serverKey = require("../fb-fcm.json");
+let serverKey: any;
+try {
+  serverKey = require("../fb-fcm.json");
+  admin.initializeApp({
+    credential: admin.credential.cert(serverKey)
+  });
+} catch {
+  console.log("Warning> fb-fcm.json was not provided. Mobile push notifications will not work.")
+}
 import path from 'path';
 import admin, { messaging } from 'firebase-admin'
 import Servers from "../models/servers";
 
-admin.initializeApp({
-  credential: admin.credential.cert(serverKey)
-});
 
 interface Args {
   isServer: boolean;
@@ -48,6 +53,7 @@ interface ServerArgs {
 }
 
 export async function sendDMPush(args: DMArgs) {
+  if (!serverKey) return;
   const devices = (await Devices.find({user: args.recipient._id}) as any) as Devices[];
   if (!devices.length) return;
   const tokensArr = devices.map(t => t.token);
@@ -66,6 +72,7 @@ export async function sendDMPush(args: DMArgs) {
 
 }
 export async function sendServerPush(args: ServerArgs) {
+  if (!serverKey) return;
   const devices = await Servers.findOne({server_id: args.server_id}).select("FCM_devices").populate("FCM_devices") as any;
   if (!devices.FCM_devices || !devices.FCM_devices.length) return;
   const tokensArr = devices.FCM_devices.filter((d: any) => d.user_id !== args.sender.uniqueID).map((t: any) => t.token);
@@ -87,6 +94,7 @@ export async function sendServerPush(args: ServerArgs) {
 
 
 function sendToDevice(tokenArr: string[], data: any) {
+  if (!serverKey) return;
   admin.messaging().sendToDevice(tokenArr, {data}, {priority: "high"})
   .then(async res => {
     const failedTokens = res.results.map((token, index) => token.error && tokenArr[index]).filter(r => r);
@@ -107,6 +115,7 @@ function sendToDevice(tokenArr: string[], data: any) {
 
 // join /create server 
 export async function AddFCMUserToServer(server_id: string, uniqueID: string) {
+  if (!serverKey) return;
   const devices = await Devices.find({user_id: uniqueID});
   if (!devices.length) return;
   const deviceIDArr = devices.map(d => d._id)
@@ -115,6 +124,7 @@ export async function AddFCMUserToServer(server_id: string, uniqueID: string) {
 
 // leave, kick, banned from server
 export async function deleteFCMFromServer(server_id: string, uniqueID: string) {
+  if (!serverKey) return;
   const devices = await Devices.find({user_id: uniqueID});
   if (!devices.length) return;
   const deviceIDArr = devices.map(d => d._id)
@@ -123,6 +133,7 @@ export async function deleteFCMFromServer(server_id: string, uniqueID: string) {
 
 // suspended / account deleted from nertivia
 export async function deleteAllUserFCM(uniqueID: string) {
+  if (!serverKey) return;
   const devices = await Devices.find({user_id: uniqueID});
   if (!devices.length) return;
   const deviceIDArr = devices.map(d => d._id)
