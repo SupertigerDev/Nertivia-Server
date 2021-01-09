@@ -44,7 +44,7 @@ module.exports = async (req, res, next) => {
   )
 
   const io = req.io;
-  io.in("server:" + req.server.server_id).emit("server:update_roles", {server_id: req.server._id, roles: ordered});
+  io.in("server:" + req.server.server_id).emit("server:update_roles", {server_id: req.server.server_id, roles: ordered});
 
   res.json(ordered);
 };
