@@ -42,12 +42,21 @@ MainServerRouter.route('/:server_id').get(
   require("./getServer")
 );
 
-// Delete
+
+// Leave Server
 MainServerRouter.route('/:server_id').delete(
   authenticate(),
   UserPresentVerification,
-  rateLimit({name: 'delete_leave_server', expire: 60, requestsLimit: 10 }),
-  require("./deleteLeaveServer")
+  rateLimit({name: 'leave_server', expire: 60, requestsLimit: 10 }),
+  require("./leaveServer")
+);
+
+// Delete server
+MainServerRouter.route('/:server_id/delete').post(
+  authenticate(),
+  UserPresentVerification,
+  rateLimit({name: 'delete_server', expire: 60, requestsLimit: 10 }),
+  require("./deleteServer")
 );
 
 // kick member

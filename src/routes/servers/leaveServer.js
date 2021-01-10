@@ -9,22 +9,14 @@ const redis = require("../../redis");
 import deleteServer from "../../utils/deleteServer";
 import { deleteFCMFromServer, sendServerPush } from "../../utils/sendPushNotification";
 module.exports = async (req, res, next) => {
-  // check if its the creator and delete the server.
+  // check if its the creator and send an error if it is.
+  if (req.server.creator === req.user._id) {
+    return res.status(403).json({message: "You may delete your server through the server settings page."});
+  }
 
   const channels = await Channels.find({ server: req.server._id }).lean();
   const channelIDArray = channels.map(c => c.channelID)
 
-  if (req.server.creator === req.user._id) {
-    deleteServer(req.io, req.server.server_id, req.server, (err, status) => {
-      if (err) return res.status(403).json({message: err.message});
-      if (!status) return res.status(403).json({message: "Something went wrong. Try again later."});
-      res.json({ status: "Done!" });
-    })
-    return;
-  }
-
-
-  
   // Leave server
   await deleteFCMFromServer(req.server.server_id, req.user.uniqueID);
 
