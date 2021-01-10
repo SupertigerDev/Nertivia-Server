@@ -11,48 +11,20 @@ const PublicServersList = require("../../models/publicServersList");
 const Roles = require("../../models/Roles");
 const redis = require("../../redis");
 
+import deleteServer from "../../utils/deleteServer";
 import { deleteFCMFromServer, sendServerPush } from "../../utils/sendPushNotification";
 module.exports = async (req, res, next) => {
   // check if its the creator and delete the server.
 
   const channels = await Channels.find({ server: req.server._id }).lean();
   const channelIDArray = channels.map(c => c.channelID)
-  const channel_idArray = channels.map(c => c._id)
 
   if (req.server.creator === req.user._id) {
-    await redis.remServerChannels(channelIDArray)
-    await redis.delAllServerMembers(req.server.server_id);
-    await redis.deleteServer(req.server.server_id);
-    await Servers.deleteOne({ _id: req.server._id });
-    await PublicServersList.deleteOne({ server: req.server._id });
-
-    if (channelIDArray) {
-      await MessageQuotes.deleteMany({
-        quotedChannel: {
-          $in: channel_idArray
-        }
-      })
-      await Messages.deleteMany({ channelID: { $in: channelIDArray } });
-      await Notifications.deleteMany({ channelID: { $in: channelIDArray } });
-    }
-    await Channels.deleteMany({ server: req.server._id });
-    await ServerMembers.deleteMany({ server: req.server._id });
-    await ServerInvites.deleteMany({ server: req.server._id });
-    await Roles.deleteMany({ server: req.server._id });
-
-    await User.updateMany({ $pullAll: { servers: [req.server._id] } });
-    res.json({ status: "Done!" });
-
-    //EMIT
-    const io = req.io;
-    const rooms = io.sockets.adapter.rooms["server:" + req.server.server_id];
-    if (rooms)
-      for (let clientId in rooms.sockets || []) {
-        io.sockets.connected[clientId].emit("server:leave", {
-          server_id: req.server.server_id
-        });
-        io.sockets.connected[clientId].leave("server:" + req.server.server_id);
-      }
+    deleteServer(req.io, req.server.server_id, req.server, (err, status) => {
+      if (err) return res.status(403).json({message: err.message});
+      if (!status) return res.status(403).json({message: "Something went wrong. Try again later."});
+      res.json({ status: "Done!" });
+    })
     return;
   }
 
