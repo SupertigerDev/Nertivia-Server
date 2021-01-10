@@ -1,14 +1,9 @@
 // Models
 const ServerMembers = require("../../models/ServerMembers");
 const Channels = require("../../models/channels");
-const Servers = require("../../models/servers");
 const User = require("../../models/users");
-const ServerInvites = require("../../models/ServerInvites");
 const Messages = require("../../models/messages");
-const MessageQuotes = require("../../models/messageQuotes");
 const Notifications = require('../../models/notifications');
-const PublicServersList = require("../../models/publicServersList");
-const Roles = require("../../models/Roles");
 const redis = require("../../redis");
 
 import deleteServer from "../../utils/deleteServer";
