@@ -1,17 +1,19 @@
+import admin, { messaging } from 'firebase-admin'
 import Devices from "../models/Devices";
 let serverKey: any;
 try {
   serverKey = require("../fb-fcm.json");
-  admin.initializeApp({
-    credential: admin.credential.cert(serverKey)
-  });
 } catch {
   console.log("Warning> fb-fcm.json was not provided. Mobile push notifications will not work.")
 }
 import path from 'path';
-import admin, { messaging } from 'firebase-admin'
 import Servers from "../models/servers";
 
+if (serverKey) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serverKey)
+  });
+}
 
 interface Args {
   isServer: boolean;
