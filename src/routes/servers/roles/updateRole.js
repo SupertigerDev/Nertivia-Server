@@ -4,8 +4,11 @@ const redis = require("../../../redis");
 module.exports = async (req, res, next) => {
   const roleID = req.params.role_id;
 
-  const dataMatched = matchedData(req);
+  let dataMatched = matchedData(req);
 
+  if (!dataMatched.name || !dataMatched.name.trim()) {
+    delete dataMatched.name;
+  }
 
   // check if role exists.
   const role = await Roles.findOne({id: roleID, server: req.server._id});

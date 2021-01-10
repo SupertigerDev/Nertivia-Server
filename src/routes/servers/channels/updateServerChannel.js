@@ -16,6 +16,11 @@ module.exports = async (req, res, next) => {
     if (data.permissions) {
       dataFiltered.permissions = data.permissions
     }
+
+    if (!dataFiltered.name || !dataFiltered.name.trim()) {
+      delete dataFiltered.name;
+    }
+
     await Channels.updateOne({ channelID }, dataFiltered);
     const io = req.io;
     io.in("server:" + req.server.server_id).emit("server:update_channel", Object.assign({}, dataFiltered, {channelID}) );
