@@ -15,8 +15,10 @@ export default async function deleteServer(io: any, server_id: string, server: a
 
   if (!server) {
     server = await Servers.findOne({server_id}).select("_id server_id");
-    callback(new Error("Server not found."), false);
-    return;
+    if (!server) {
+      callback(new Error("Server not found."), false);
+      return;
+    }
   }
 
   const channels = await Channels.find({ server: server._id }).lean();

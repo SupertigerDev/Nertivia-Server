@@ -10,6 +10,8 @@ module.exports = async (req, res, next) => {
   const adminPassword = req.body.password;
   const reason = req.body.reason;
 
+  if (!adminPassword) return res.status(403).json({ message: "Invalid password" });
+
   // check admin password
   const admin = await Users.findById(req.user._id).select("password");
   const verify = await bcrypt.compare(adminPassword, admin.password);

@@ -22,6 +22,11 @@ MainAdminRouter.route("/users/:unique_id").delete(
   isAdmin,
   require("./suspendUser")
 );
+MainAdminRouter.route("/servers/:server_id").delete(
+  authenticate(),
+  isAdmin,
+  require("./deleteServer")
+);
 
 // Online Users
 MainAdminRouter.route("/users/online").get(
