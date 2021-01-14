@@ -2,6 +2,7 @@ const User = require('../../models/users');
 const BannedIPs = require("../../models/BannedIPs");
 import config from '../../config'
 import nodemailer from 'nodemailer';
+import validate from 'deep-email-validator'
 import blacklistArr from '../../emailBlacklist.json'
 const transporter = nodemailer.createTransport({
   service: config.nodemailer.service,
@@ -48,6 +49,13 @@ module.exports = async (req, res, next) => {
     });
   }
 
+  // check if the email really exists
+  const emailExists = await validate(email);
+
+  if (!emailExists.valid) {
+    return res.status(403).json({
+      errors: [{param: "email", msg: `Email is Invalid (${emailExists.reason}).`}]})
+  }
   // check if email is blacklisted
   const emailBlacklisted = blacklistArr.find(d => d === email.split("@")[1].trim().toLowerCase())
   if (emailBlacklisted) {
