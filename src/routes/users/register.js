@@ -65,11 +65,8 @@ module.exports = async (req, res, next) => {
   }
 
 
-
-  // Create a new user
   const newUser = new User({ username, email: email.toLowerCase(), password, ip: req.userIP });
   const created = await newUser.save();
-  
 
   // send email
   const mailOptions = {
@@ -79,13 +76,16 @@ module.exports = async (req, res, next) => {
     html: `<p>Your confirmation code is: <strong>${created.email_confirm_code}</strong></p>`
   };
 
-  transporter.sendMail(mailOptions, (err, info) => {
+  transporter.sendMail(mailOptions, async (err, info) => {
+    if (err) {
+      await User.deleteOne({_id: created._id})
+      return res.status(403).json({
+        errors: [{param: "other", msg: "Something went wrong while sending email. Try again later."}]
+      });
+    }
+    // Respond with user
+    res.send({
+      message: "confirm email"
+    })
   })
-
-
-  // Respond with user
-  res.send({
-    message: "confirm email"
-  })
-
 }
