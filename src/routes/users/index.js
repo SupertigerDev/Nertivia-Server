@@ -2,6 +2,7 @@ const MainUserRouter = require("express").Router();
 
 // Middleware
 const authenticate = require("../../middlewares/authenticate");
+const rateLimit = require("../../middlewares/rateLimit");
 const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
 
 // Policies
@@ -48,6 +49,7 @@ MainUserRouter.route("/:uniqueID?").get(authenticate(true), require("./userDetai
 // Register
 MainUserRouter.route("/register").post(
   authPolicy.register,
+  rateLimit({name: 'register', expire: 600, requestsLimit: 5, useIP: true, nextIfInvalid: true }),
   reCaptchaPolicy,
   require("./register")
 );
@@ -61,6 +63,7 @@ MainUserRouter.route("/register/confirm").post(
 // Login
 MainUserRouter.route("/login").post(
   authPolicy.login,
+  rateLimit({name: 'login', expire: 600, requestsLimit: 5, useIP: true, nextIfInvalid: true }),
   reCaptchaPolicy,
   require("./login")
 );
@@ -73,6 +76,7 @@ MainUserRouter.route("/delete-account").delete(
 // Reset password request
 MainUserRouter.route("/reset/request").post(
   authPolicy.resetRequest,
+  rateLimit({name: 'reset_password', expire: 600, requestsLimit: 5, useIP: true, nextIfInvalid: true }),
   reCaptchaPolicy,
   require("./resetRequest")
 );

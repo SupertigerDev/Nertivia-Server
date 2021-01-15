@@ -1,7 +1,19 @@
-const request = require('request')
 const fetch = require('node-fetch')
 import config from '../config';
 module.exports = (req, res, next) => {
+
+
+  // decide if the captcha is required
+  if (config.devMode) {
+    next();
+    return;
+  }
+  
+  if (!req.rateLimited) {
+    next();
+    return;
+  } 
+
 
   const { token } = req.body;
   if (
@@ -9,7 +21,7 @@ module.exports = (req, res, next) => {
     token === null ||
     token === ''
   ) {
-    return res.status(403).json({ status: false, errors: [{ msg: "ReCaptcha is not provided", param: "reCaptcha" }] });
+    return res.status(403).json({ status: false, errors: [{ msg: "Captcha is required", param: "reCaptcha", code: 1 }] });
   }
 
   const verifyUrl = "https://hcaptcha.com/siteverify"
@@ -27,7 +39,7 @@ module.exports = (req, res, next) => {
     next();
   })
   .catch(() => {
-    res.status(403).json({ status: false, errors: [{ msg: "Invalid ReCaptcha ", param: "reCaptcha" }] });
+    res.status(403).json({ status: false, errors: [{ msg: "Invalid Captcha ", param: "reCaptcha" }] });
   })
 
 
