@@ -50,7 +50,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if the email really exists
-  const emailExists = await validate(email);
+  const emailExists = await validate({email, validateTypo: false});
 
   if (!emailExists.valid) {
     return res.status(403).json({
