@@ -25,8 +25,8 @@ export default (req: Request, res: Response, next: NextFunction) => {
   req.headers["x-forwarded-for"] ||
   req.connection.remoteAddress)?.toString();
   if (userIP) {
-    // hash the user ip. This hashed ip will be used in every routes as this is a middleware.
-    req.userIP = crypto.createHash('sha256').update(userIP).digest('hex');
+    // hash the user ip. 
+    req.userIP = userIP
   }
 
   if (config.devMode) return next();
@@ -35,7 +35,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
   if (!address || !ipRangeCheck(address, cloudFlareIps)) {
     res
       .status(404)
-      .send("<div>You have been IP Banned.</div><div>IP: 127.0.0.1</div>");
+      .send(`<div>You have been IP Banned.</div><div>IP: ${address}</div>`);
   } else {
     next();
   }
