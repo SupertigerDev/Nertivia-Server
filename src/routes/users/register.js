@@ -40,15 +40,6 @@ module.exports = async (req, res, next) => {
   }
 
 
-  // Check if there is a user with the same email
-  const foundUser = await User.findOne({ email: email.toLowerCase() });
-  if (foundUser) { 
-    return res.status(403).json({ 
-        status: false,
-        errors: [{param: "email", msg: "Email is already used."}]
-    });
-  }
-
   // check if the email really exists
   const emailExists = await validate({email, validateTypo: false, validateSMTP: false});
 
@@ -62,8 +53,15 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({
       errors: [{param: "email", msg: "Email is blacklisted."}]
     });
+  }  
+  // Check if there is a user with the same email in the db
+  const foundUser = await User.findOne({ email: email.toLowerCase() });
+  if (foundUser) { 
+    return res.status(403).json({ 
+        status: false,
+        errors: [{param: "email", msg: "Email is already used."}]
+    });
   }
-
 
   const newUser = new User({ username, email: email.toLowerCase(), password, ip: req.userIP });
   const created = await newUser.save();
