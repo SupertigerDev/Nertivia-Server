@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
     .status(404)
     .json({ message: "User not found." });
 
-  const userAlreadyBanned = await Servers.exists({"user_bans.user": userToBeBanned._id});
+  const userAlreadyBanned = await Servers.exists({"user_bans.user": userToBeBanned._id, server_id});
 
   if (userAlreadyBanned) {
     res.json({ status: "Member is already banned." });
