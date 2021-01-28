@@ -55,6 +55,7 @@ export default async function deleteServer(io: any, server_id: string, server: a
     const rooms = io.sockets.adapter.rooms["server:" + server.server_id];
     if (rooms)
       for (let clientId in rooms.sockets || []) {
+        if (!io.sockets.connected[clientId]) continue;
         io.sockets.connected[clientId].emit("server:leave", {
           server_id: server.server_id
         });
