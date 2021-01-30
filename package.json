@@ -23,7 +23,6 @@
     "@types/express-session": "^1.17.0",
     "@types/gm": "^1.18.8",
     "@types/jsonwebtoken": "^8.5.0",
-    "@types/mongoose": "^5.7.24",
     "@types/node-fetch": "^2.5.7",
     "@types/nodemailer": "^6.4.0",
     "@types/pako": "^1.0.1",

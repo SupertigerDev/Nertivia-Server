@@ -215,7 +215,7 @@ module.exports = async client => {
       }, {})
 
 
-      const customEmojisList = customEmojis.find({ user: user._id });
+      const customEmojisList = customEmojis.find({ user: user._id }, {_id: 0}).select("emojiID gif name");
       const results = await Promise.all([
         dms,
         notifications,
