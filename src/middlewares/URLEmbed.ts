@@ -23,32 +23,29 @@ interface Embed {
 }
 
 //const imageFormatArr = ["png", "jpg", "jpeg", "webp", "gif"]
+const urlRegex = new RegExp(
+  "(^|[ \t\r\n])((http|https):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))");
 
 module.exports = async (req:RequestCustom, res: Response, next: NextFunction) => {
   const message: string = req.body.message || req.uploadFile.message;
   const message_id = req.message_id
   if (!message) return;
 
-  const urlRegex = new RegExp(
-    "(^|[ \t\r\n])((http|https):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))"
-   ,"g"
-  );
 
-  const url = message.match(urlRegex);
-  if (!url || !url[0]) return;
-  const firstURL = url[0]
+  const url = message.match(urlRegex)?.[0].trim();
+  if (!url?.[0]) return;
 
 
-  let resObj = {}
-  const OGTagResult = await getOGTags(firstURL)
+  let resObj: any = {}
+  const OGTagResult = await getOGTags(url)
   if (!OGTagResult.ok) return;
   // if url is an image 
   if (OGTagResult.type === "img") {
     try {
-      const meta = await getImageMetadata(firstURL);
+      const meta = await getImageMetadata(url);
       resObj = {
         image: {
-          url: firstURL,
+          url: url,
           dimensions: {
             height:meta.height,
             width: meta.width
@@ -59,10 +56,11 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
       return;
     }
   } else if (!OGTagResult.result) return
+  resObj = OGTagResult.result;
   if (OGTagResult.result?.image) {
     try {
       const meta = await getImageMetadata(OGTagResult.result.image);
-      resObj = {...OGTagResult.result, image: {
+      resObj = {...resObj, image: {
         url: OGTagResult.result.image,
         dimensions: {
           height:meta.height,
@@ -125,6 +123,7 @@ function getOGTags(url: string) {
 
 function addIfExists(embed: Embed, key:keyof Embed , value?:string) {
   if (!value) return;
+  if (value.length >= 2000) return;
   embed[key] = value;
 }
 
