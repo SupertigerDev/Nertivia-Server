@@ -38,7 +38,6 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
 
   let resObj: any = {}
   const OGTagResult = await getOGTags(url)
-  console.log(OGTagResult)
   if (!OGTagResult.ok) return;
   // if url is an image 
   if (OGTagResult.type === "img") {
@@ -104,13 +103,14 @@ function getOGTags(url: string) {
       const embed:Embed = {};
       const html = await res.text();
       const parseHTML = cheerio.load(html);
-      addIfExists(embed, "title", parseHTML('head meta[property="og:title"]').attr('content'))
-      addIfExists(embed, "type", parseHTML('head meta[property="og:type"]').attr('content'))
-      addIfExists(embed, "url", parseHTML('head meta[property="og:url"]').attr('content'))
-      addIfExists(embed, "image", parseHTML('head meta[property="og:image"]').attr('content'))
-      addIfExists(embed, "site_name", parseHTML('head meta[property="og:site_name"]').attr('content'))
-      addIfExists(embed, "description", parseHTML('head meta[property="og:description"]').attr('content'))
+      addIfExists(embed, "title", parseHTML('meta[property="og:title"]').attr('content'))
+      addIfExists(embed, "type", parseHTML('meta[property="og:type"]').attr('content'))
+      addIfExists(embed, "url", parseHTML('meta[property="og:url"]').attr('content'))
+      addIfExists(embed, "image", parseHTML('meta[property="og:image"]').attr('content'))
+      addIfExists(embed, "site_name", parseHTML('meta[property="og:site_name"]').attr('content'))
+      addIfExists(embed, "description", parseHTML('meta[property="og:description"]').attr('content'))
       const keys = Object.keys(embed);
+      console.log(embed)
       if (!keys.length || keys.length === 1) return resolve({ok: false})
       if (!embed.url){
         embed.url = url;
