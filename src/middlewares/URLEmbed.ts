@@ -56,7 +56,7 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
       return;
     }
   } else if (!OGTagResult.result) return
-  resObj = OGTagResult.result;
+  resObj = {...resObj, ...OGTagResult.result};
   if (OGTagResult.result?.image) {
     try {
       const meta = await getImageMetadata(OGTagResult.result.image);

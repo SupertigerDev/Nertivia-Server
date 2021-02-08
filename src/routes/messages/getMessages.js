@@ -22,6 +22,7 @@ module.exports = async (req, res, next) => {
     }
   }
   ]
+  const select = "-embed._id"
 
   // Get messages
   let messages;
@@ -46,6 +47,7 @@ module.exports = async (req, res, next) => {
         _id: -1
       })
       .populate(populate)
+      .select(select)
       .limit(50)
       .lean();
   } else if (beforeMessageID) {
@@ -66,6 +68,7 @@ module.exports = async (req, res, next) => {
       }
     })
       .populate(populate)
+      .select(select)
       .limit(50)
       .lean();
   } else if (aroundMessageID) {
@@ -88,14 +91,14 @@ module.exports = async (req, res, next) => {
       }
     }).sort({
       _id: -1
-    }).limit(25).populate(populate);
+    }).limit(25).populate(populate).select(select);
 
     let bottom = await Messages.find({
       channelID,
       _id: {
         $gt: message.id
       }
-    }).limit(25).populate(populate);
+    }).limit(25).populate(populate).select(select);
 
 
     if (above.length === 25 && bottom.length < 25) {
@@ -106,7 +109,7 @@ module.exports = async (req, res, next) => {
         }
       }).sort({
         _id: -1
-      }).limit(50 - bottom.length).populate(populate);
+      }).limit(50 - bottom.length).populate(populate).select(select);
 
     } else if (bottom.length === 25 && above.length < 25) {
       bottom = await Messages.find({
@@ -114,7 +117,7 @@ module.exports = async (req, res, next) => {
         _id: {
           $gt: message.id
         }
-      }).limit(50 - above.length).populate(populate);
+      }).limit(50 - above.length).populate(populate).select(select);
     }
 
 
@@ -127,7 +130,7 @@ module.exports = async (req, res, next) => {
       },
       "-__v -_id"
     )
-      .populate(populate)
+      .populate(populate).select(select)
       .sort({
         _id: -1
       })
