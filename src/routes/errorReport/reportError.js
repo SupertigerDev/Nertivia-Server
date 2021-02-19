@@ -29,6 +29,7 @@ module.exports = async (req, res, next) => {
     lastMessaged: Date.now()
   }})
 
+res.json({message: "Done!"});
 
   const io = req.io;
   const clients =
@@ -41,8 +42,6 @@ module.exports = async (req, res, next) => {
     });
 
   }
-
-  
   //send notification
   await sendMessageNotification({
     message: messageCreated,
