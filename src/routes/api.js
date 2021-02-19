@@ -50,6 +50,7 @@ function diff_minutes(dt2, dt1) {
   return Math.abs(Math.round(diff));
 }
 
+router.use('/error_report', require('./errorReport'));
 router.use('/user', require('./users'));
 router.use('/devices', require('./devices'));
 router.use('/servers', require('./servers'));
