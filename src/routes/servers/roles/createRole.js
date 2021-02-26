@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
   const doc = {
     name: dataMatched.name || "New Role",
     id: id,
-    permissions: rolePerms.SEND_MESSAGES,
+    permissions: dataMatched.permissions || rolePerms.SEND_MESSAGES,
     server: req.server._id,
     server_id: req.server.server_id,
     order: rolesCount
