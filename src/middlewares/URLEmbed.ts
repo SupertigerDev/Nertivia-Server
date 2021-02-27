@@ -105,7 +105,7 @@ function getOGTags(url: string) {
       const parseHTML = cheerio.load(html);
       addIfExists(embed, "title", parseHTML('meta[property="og:title"]').attr('content'))
       addIfExists(embed, "type", parseHTML('meta[property="og:type"]').attr('content'))
-      addIfExists(embed, "url", parseHTML('meta[property="og:url"]').attr('content'))
+      // addIfExists(embed, "url", parseHTML('meta[property="og:url"]').attr('content'))
       addIfExists(embed, "image", parseHTML('meta[property="og:image"]').attr('content'))
       addIfExists(embed, "site_name", parseHTML('meta[property="og:site_name"]').attr('content'))
       addIfExists(embed, "description", parseHTML('meta[property="og:description"]').attr('content'))
