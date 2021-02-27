@@ -111,9 +111,7 @@ function getOGTags(url: string) {
       addIfExists(embed, "description", parseHTML('meta[property="og:description"]').attr('content'))
       const keys = Object.keys(embed);
       if (!keys.length || keys.length === 1) return resolve({ok: false})
-      if (!embed.url){
-        embed.url = url;
-      }
+      embed.url = url;
       return resolve({ok: true, result: embed});
     } catch {
       return resolve({ok: false})
