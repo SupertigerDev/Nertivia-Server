@@ -51,7 +51,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     _color = color.substring(0, 7);
   }
 
-  if (buttons && buttons.length && req.user.bot) {
+  if (buttons && buttons.length) {
 
     if (buttons.length > 15) {
       res.status(403).send({message: "You can only add up to 15 buttons."})
@@ -89,7 +89,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   }
 
   let jsonToBase64HtmlEmbed: string | undefined = undefined;
-  if (htmlEmbed && req.user.bot) {
+  if (htmlEmbed) {
     if (typeof htmlEmbed !== "object") {
       return res.status(403).send({message: "invalid htmlEmbed type."}) 
     }
@@ -179,10 +179,10 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   if (req.uploadFile && req.uploadFile.file) {
     query.files = [req.uploadFile.file]
   }
-  if (buttons && buttons.length && req.user.bot) {
+  if (buttons && buttons.length) {
     query.buttons = buttons;
   }
-  if (jsonToBase64HtmlEmbed && req.user.bot) {
+  if (jsonToBase64HtmlEmbed) {
     query.htmlEmbed = jsonToBase64HtmlEmbed;
   }
   if (_color) query['color'] = _color;
@@ -228,10 +228,10 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   } else if (messageID && messageDoc.files) {
     messageCreated.files = messageDoc.files
   }
-  if (buttons && buttons.length && req.user.bot) {
+  if (buttons && buttons.length) {
     messageCreated.buttons = buttons;
   }
-  if (jsonToBase64HtmlEmbed && req.user.bot) {
+  if (jsonToBase64HtmlEmbed) {
     messageCreated.htmlEmbed = jsonToBase64HtmlEmbed;
   }
 
