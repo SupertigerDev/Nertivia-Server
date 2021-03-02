@@ -40,8 +40,8 @@ const policies = {
         if (cmd.c.length > 20) {
           throw new Error('Command name must be less than 20 characters');
         }
-        if (cmd.a && cmd.a.length > 30) {
-          throw new Error('args name must be less than 30 characters');
+        if (cmd.a && cmd.a.length > 80) {
+          throw new Error('args name must be less than 80 characters');
         }
       }
       return true;
