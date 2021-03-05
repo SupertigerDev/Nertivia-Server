@@ -75,12 +75,12 @@ export default async (req: Request, res: Response, next: NextFunction) => {
         res.status(403).send({message: "Button must contain a name"})  
         return;
       }
-     if (button.name.trim().length > 32) {
-      res.status(403).send({message: "Button name must be less than 32 characters."})  
+     if (button.name.trim().length > 40) {
+      res.status(403).send({message: "Button name must be less than 40 characters."})  
       return;
      } 
-     if (button.id.length >= 20) {
-      res.status(403).send({message: "button id must be less than 20 characters."})  
+     if (button.id.length >= 40) {
+      res.status(403).send({message: "button id must be less than 40 characters."})  
       return;
      } 
       newButtons.push({name: button.name.trim(), id: button.id});
