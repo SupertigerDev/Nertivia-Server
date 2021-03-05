@@ -83,7 +83,7 @@ module.exports = async (req, res, next) => {
     order: 0
   };
 
-  io.in(req.user.uniqueID).emit("server:create_role", roleData);
+
 
 
   createServerObj.creator = { uniqueID: req.user.uniqueID };
@@ -103,6 +103,7 @@ module.exports = async (req, res, next) => {
   serverMember.server_id = createServer.server_id;
 
   io.in(req.user.uniqueID).emit("server:joined", createServerObj);
+  io.in(req.user.uniqueID).emit("server:create_role", roleData);
   io.in(req.user.uniqueID).emit("server:member_add", {
     serverMember: serverMember
   });
