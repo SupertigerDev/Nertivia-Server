@@ -31,7 +31,7 @@ export default async function createBot(req: Request, res: Response) {
   delete bot.createdBy._id;
 
   if (myservers && req.user) {
-    const myServers = await Servers.find({ creator: req.user._id }).select("name server_id").lean();
+    const myServers = await Servers.find({ creator: req.user._id }).select("name server_id avatar").lean();
     const myServer_ids = myServers.map(ms => ms._id);
 
     const sm = await ServerMembers.find({ member: req.user._id, roles: { $exists: 1, $not: { $size: 0 } } }, { _id: 0 }).select("roles").lean();
