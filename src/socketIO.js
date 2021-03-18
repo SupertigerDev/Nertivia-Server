@@ -6,6 +6,7 @@ const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import config from "./config";
+import blockedUsers from "./models/blockedUsers";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
@@ -57,6 +58,15 @@ const populateServers = {
  * @param {sio.Socket} client
  */
 module.exports = async client => {
+  //If the socket didn't authenticate(), disconnect it
+  let timeout = setTimeout(function() {
+    if (!client.auth) {
+      client.emit("auth_err", "Invalid Token");
+      client.disconnect(true);
+    }
+  }, 10000);
+
+
   client.on("authentication", async data => {
     const { token } = data;
 
@@ -87,6 +97,7 @@ module.exports = async client => {
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
         client.disconnect(true);
+        clearTimeout(timeout);
         return;
       }
 
@@ -95,6 +106,7 @@ module.exports = async client => {
         delete client.auth;
         client.emit("auth_err", "You are banned.");
         client.disconnect(true);
+        clearTimeout(timeout);
         return;
       }
       if (user.email_confirm_code) {
@@ -102,6 +114,7 @@ module.exports = async client => {
         delete client.auth;
         client.emit("auth_err", "Email not confirmed");
         client.disconnect(true);
+        clearTimeout(timeout);
         return;
       }
 
@@ -112,6 +125,7 @@ module.exports = async client => {
         delete client.auth;
         client.emit("auth_err", "Token invalidated.");
         client.disconnect(true);
+        clearTimeout(timeout);
         return;
       }
 
@@ -124,6 +138,7 @@ module.exports = async client => {
         delete client.auth;
         client.emit("auth_err", "IP is Banned.");
         client.disconnect(true);
+        clearTimeout(timeout);
         return;
       }
       if (!user.bot && !user.readTerms) {
@@ -131,6 +146,7 @@ module.exports = async client => {
         delete client.auth;
         client.emit("auth_err", "terms_not_agreed");
         client.disconnect(true);
+        clearTimeout(timeout);
         return;
       }
       delete user.readTerms;
@@ -216,6 +232,9 @@ module.exports = async client => {
 
 
       const customEmojisList = customEmojis.find({ user: user._id }, {_id: 0}).select("emojiID gif name");
+
+      const bannedUserIDs = (await blockedUsers.find({requester: user._id}).populate("recipient", "uniqueID")).map(d => d.recipient.uniqueID)
+
       const results = await Promise.all([
         dms,
         notifications,
@@ -291,7 +310,7 @@ module.exports = async client => {
         }
       }
 
-
+      clearTimeout(timeout);
       client.emit("success", {
         message: "Logged in!",
         user,
@@ -305,22 +324,19 @@ module.exports = async client => {
         customStatusArr,
         programActivityArr,
         settings,
-        lastSeenServerChannels
+        lastSeenServerChannels,
+        bannedUserIDs
+        
       });
     } catch (e) {
       delete client.auth;
       client.emit("auth_err", "Invalid Token");
       client.disconnect(true);
+      clearTimeout(timeout);
     }
   });
 
-  //If the socket didn't authenticate(), disconnect it
-  setTimeout(function() {
-    if (!client.auth) {
-      client.emit("auth_err", "Invalid Token");
-      client.disconnect(true);
-    }
-  }, 10000);
+
 
   client.on("disconnect", async () => {
     if (!client.auth) return;
