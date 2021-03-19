@@ -5,7 +5,7 @@ import { sign } from "jsonwebtoken";
 import config from "../../config";
 import ServerMembers from '../../models/ServerMembers';
 import Roles from '../../models/Roles';
-import { ADMIN } from '../../utils/rolePermConstants'
+import { roles } from '../../utils/rolePermConstants'
 
 export default async function createBot(req: Request, res: Response) {
   const { bot_id } = req.params;
@@ -36,7 +36,7 @@ export default async function createBot(req: Request, res: Response) {
 
     const sm = await ServerMembers.find({ member: req.user._id, roles: { $exists: 1, $not: { $size: 0 } } }, { _id: 0 }).select("roles").lean();
     servers = [...myServers, ...(await Roles
-      .find({ servers: { $nin: myServer_ids }, permissions: { $bitsAllSet: ADMIN }, id: { $in: (sm.map((s: any) => s.roles) as any).flat() } }, { _id: 0 })
+      .find({ servers: { $nin: myServer_ids }, permissions: { $bitsAllSet: roles.ADMIN }, id: { $in: (sm.map((s: any) => s.roles) as any).flat() } }, { _id: 0 })
       .select("server").populate("server", "name server_id")
       .lean()).map((s: any) => s.server)]
 

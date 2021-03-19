@@ -1,4 +1,4 @@
-const { containsPerm, ADMIN } = require("../utils/rolePermConstants");
+const { containsPerm, roles: {ADMIN} } = require("../utils/rolePermConstants");
 
 function Permission(permission, defaultAllowed) {
   return Permission[permission, defaultAllowed] || (Permission[permission, defaultAllowed] = function(req, res, next) {

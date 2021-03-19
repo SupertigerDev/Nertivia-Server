@@ -19,6 +19,7 @@ module.exports = async (req, res, next) => {
     const cacheMember = JSON.parse((await redis.getServerMember(req.user.uniqueID, serverID)).result || null);
     if (cacheMember) {
       req.permissions = cacheMember.permissions;
+      req.highestRolePosition = cacheMember.highestRolePosition;
       req.server = cacheServer;
       if (channelID) {
         // check if channel is in cache
@@ -57,9 +58,11 @@ module.exports = async (req, res, next) => {
   }
 
   let permissions = 0;
+  let highestRolePosition = undefined;
 
   if (member.roles && member.roles.length) {
-    const roles = await Roles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions').lean();
+    const roles = await Roles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions order').lean();
+    highestRolePosition = Math.min(...roles.map(r => r.order));
 
     for (let index = 0; index < roles.length; index++) {
       const perm = roles[index].permissions;
@@ -74,7 +77,8 @@ module.exports = async (req, res, next) => {
   permissions = permissions| defaultRole.permissions;
 
   req.permissions = permissions;
-  await redis.addServerMember(req.user.uniqueID, server.server_id, JSON.stringify({permissions}));
+  req.highestRolePosition = highestRolePosition;
+  await redis.addServerMember(req.user.uniqueID, server.server_id, JSON.stringify({permissions, highestRolePosition}));
   
 
   if (channelID) {

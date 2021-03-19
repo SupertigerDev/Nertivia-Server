@@ -40,7 +40,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
   rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
   channelVerification,
   disAllowBlockedUser,
-  checkRolePerms('Admin', permissions.ADMIN, false),
+  checkRolePerms('Admin', permissions.roles.ADMIN, false),
   require('./deleteMessage')
 );
 
@@ -64,7 +64,7 @@ MainMessageRouter.route("/channels/:channelID").post(
   channelVerification,
   disAllowBlockedUser,
   serverChannelPermissions('send_message', true),
-  checkRolePerms('Send Message', permissions.SEND_MESSAGES),
+  checkRolePerms('Send Message', permissions.roles.SEND_MESSAGES),
   fileMessage,
   sendMessage,
   URLEmbed,
@@ -80,7 +80,7 @@ MainMessageRouter.route("/:channelID/typing").post(
   channelVerification,
   disAllowBlockedUser,
   serverChannelPermissions('send_message', true),
-  checkRolePerms('Send Message', permissions.SEND_MESSAGES),
+  checkRolePerms('Send Message', permissions.roles.SEND_MESSAGES),
   require('./sendTypingIndicator'),
 );
 

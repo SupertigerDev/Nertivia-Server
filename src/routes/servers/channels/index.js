@@ -5,7 +5,7 @@ const authenticate = require("../../../middlewares/authenticate");
 const UserPresentVerification = require ('./../../../middlewares/UserPresentVerification')
 const serverPolicy = require("../../../policies/ServerPolicies");
 const checkRolePerms = require('./../../../middlewares/checkRolePermissions');
-const {MANAGE_CHANNELS} = require("./../../../utils/rolePermConstants");
+const { roles: {MANAGE_CHANNELS}} = require("./../../../utils/rolePermConstants");
 // Channels
 MainChannelRouter.route('/:server_id/channels').get(
   authenticate(),

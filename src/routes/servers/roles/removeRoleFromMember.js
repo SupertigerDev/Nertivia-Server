@@ -18,7 +18,14 @@ module.exports = async (req, res, next) => {
   }
 
   // check if role exists in that server
-  const role = await Roles.findOne({id: role_id, server_id: server_id});
+  const role = await Roles.findOne({id: role_id, server_id: server_id}).select("bot order default");
+
+  if (role.default === true) {
+    return res
+    .status(404)
+    .json({ message: "Role does not exist." });
+  }
+
 
   if (!role) {
     return res
@@ -41,6 +48,19 @@ module.exports = async (req, res, next) => {
     .status(404)
     .json({ message: "Member does not exist." });
   }
+
+
+  // higher role should have higher priority
+  const isCreator = req.server.creator === req.user._id
+  if (!isCreator) {
+    if (req.highestRolePosition >= role.order) {
+      return res
+      .status(403)
+      .json({ message: "Your Role priority is too low to perfom this action." });
+    }
+  }
+
+
 
   await ServerMembers.updateOne({_id: serverMember._id}, {$pull: { roles: role_id } });
   redis.remServerMember(member_id, req.server.server_id);

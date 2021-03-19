@@ -63,7 +63,7 @@ MainServerRouter.route('/:server_id/delete').post(
 MainServerRouter.route('/:server_id/members/:unique_id').delete(
   authenticate(true),
   UserPresentVerification,
-  checkRolePerms('Kick', permissions.KICK_USER),
+  checkRolePerms('Kick', permissions.roles.KICK_USER),
   require("./kickMember")
 );
 
@@ -80,7 +80,7 @@ MainServerRouter.route('/:server_id/bans').get(
 MainServerRouter.route('/:server_id/bans/:unique_id').put(
   authenticate(true),
   UserPresentVerification,
-  checkRolePerms('Ban', permissions.BAN_USER),
+  checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./banMember")
 )
 

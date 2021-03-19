@@ -25,8 +25,11 @@ module.exports = async (req, res, next) => {
     //check if member in server
     let isInServer = await redis.getServerMember(req.user.uniqueID, channel.server_id);
     if (isInServer.result) {
+      const data = JSON.parse(isInServer.result);
       req.channel = channel;
-      req.permissions = JSON.parse(isInServer.result).permissions
+      req.permissions = data.permissions
+      req.highestRolePosition = data.highestRolePosition;
+
       // get server
       const server = await redis.getServer(channel.server_id);
       if (server.result) {
@@ -66,10 +69,12 @@ module.exports = async (req, res, next) => {
 
     
     let permissions = 0;
+    let highestRolePosition = undefined;
 
-    if (member.roles || member.roles.length) {
-      const roles = await Roles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions').lean();
-      for (let index = 0; index < roles.length; index++) {
+    if (member.roles && member.roles.length) {
+      const roles = await Roles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions order').lean();
+      highestRolePosition = Math.min(...roles.map(r => r.order));
+      for (let index = 0; index < roles.length; index++) { 
         const perm = roles[index].permissions;
         if (perm) {
           permissions = permissions | perm;
@@ -83,8 +88,9 @@ module.exports = async (req, res, next) => {
 
     req.channel = channel;
     req.permissions = permissions;
+    req.highestRolePosition = highestRolePosition;
     next();
-    await redis.addServerMember(req.user.uniqueID, channel.server.server_id, JSON.stringify({permissions}));
+    await redis.addServerMember(req.user.uniqueID, channel.server.server_id, JSON.stringify({permissions, highestRolePosition}));
 
     await redis.addServer(channel.server.server_id, channel.server);
 

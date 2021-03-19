@@ -1,6 +1,8 @@
 const Roles = require('./../../../models/Roles');
 const { matchedData } = require("express-validator");
 const redis = require("../../../redis");
+const rolePermConstants = require('../../../utils/rolePermConstants');
+const { connection } = require('mongoose');
 module.exports = async (req, res, next) => {
   const roleID = req.params.role_id;
 
@@ -11,12 +13,40 @@ module.exports = async (req, res, next) => {
   }
 
   // check if role exists.
-  const role = await Roles.findOne({id: roleID, server: req.server._id});
+  const role = await Roles.findOne({id: roleID, server: req.server._id}).select("order permissions");
 
   if (!role) {
     return res
     .status(403)
     .json({ message: "Role does not exist in that server." });
+  }
+
+  // higher role should have higher priority
+  const isCreator = req.server.creator === req.user._id
+  if (!isCreator) {
+    if (req.highestRolePosition >= role.order) {
+      return res
+      .status(403)
+      .json({ message: "Your Role priority is too low to perfom this action." });
+    }
+    // only allowed to edit permissions you have.
+    const requesterPermissions = req.permissions;
+    const isAdmin = rolePermConstants.containsPerm(requesterPermissions, rolePermConstants.roles.ADMIN);
+    if (!isAdmin) {
+      const oldPermissions = role.permissions;
+      const permissionToModify = dataMatched.permissions;
+      const permChanged = rolePermConstants.changedPermissions(oldPermissions, permissionToModify);
+      for (let name in permChanged) {
+        const perm = permChanged[name];
+        const hasPerm = rolePermConstants.containsPerm(requesterPermissions, perm);
+        if (!hasPerm) {
+           res
+          .status(403)
+          .json({ message: "Cannot modify this permission as you dont have it." });
+          return;
+        }
+      }
+    }
   }
 
   await Roles.updateOne({_id: role._id}, dataMatched);

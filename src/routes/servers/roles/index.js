@@ -6,7 +6,7 @@ const UserPresentVerification = require("./../../../middlewares/UserPresentVerif
 const checkRolePerms = require('./../../../middlewares/checkRolePermissions');
 
 const rolePolicies = require('./../../../policies/RolesPolicies');
-const {MANAGE_ROLES} = require("./../../../utils/rolePermConstants");
+const {roles: {MANAGE_ROLES}} = require("./../../../utils/rolePermConstants");
 
 // create role
 MainRolesRouter.route("/:server_id/roles").post(

@@ -64,7 +64,7 @@ module.exports = async (req, res, next) => {
   const roleDoc = {
     name: "Online",
     id: roleID,
-    permissions: rolePerms.SEND_MESSAGES,
+    permissions: rolePerms.roles.SEND_MESSAGES,
     server: createServer._id,
     server_id: createServer.server_id,
     default: true,
