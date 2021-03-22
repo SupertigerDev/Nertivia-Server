@@ -2,13 +2,12 @@ const {
 	google
 } = require('googleapis');
 const User = require('./../models/users');
-import config from '../config';
 
 module.exports = async (req, res, next) => {
 	const oauth2Client = new google.auth.OAuth2(
-		config.googleDrive.client_id,
-		config.googleDrive.client_secret,
-		config.googleDrive.url
+		process.env.DRIVE_CLIENT_ID,
+		process.env.DRIVE_CLIENT_SECRET,
+		process.env.DRIVE_URL
 	);
 	req.oauth2Client = oauth2Client;
 

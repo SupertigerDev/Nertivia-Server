@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from "express";
-import config from "../config.js";
 import ipRangeCheck from "ip-range-check";
 
 const cloudFlareIps = [
@@ -28,7 +27,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
     req.userIP = userIP
   }
 
-  if (config.devMode) return next();
+  if (process.env.DEV_MODE) return next();
   const address = req.connection.remoteAddress;
   // just a fake message when someone finds out the vps IP
   if (!address || !ipRangeCheck(address, cloudFlareIps)) {

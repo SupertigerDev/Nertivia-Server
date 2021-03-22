@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 const cropImage = require('../../utils/cropImage');
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
-import config from '../../config';
 const flakeId = new (require('flakeid'))();
 const emitToAll = require('../../socketController/emitToAll');
 const sio = require("socket.io");
@@ -117,7 +116,7 @@ module.exports = async (req, res, next) => {
     resObj.uniqueID = user.uniqueID;
     const io = req.io;
     if (updatePassword) {
-      res.json({...resObj, token: JWT.sign(`${user.uniqueID}-${req.user.passwordVersion}`, config.jwtSecret).split(".").splice(1).join(".")});
+      res.json({...resObj, token: JWT.sign(`${user.uniqueID}-${req.user.passwordVersion}`, process.env.JWT_SECRET).split(".").splice(1).join(".")});
 
       // logout other accounts
       kickUser(io, user.uniqueID, socketID)

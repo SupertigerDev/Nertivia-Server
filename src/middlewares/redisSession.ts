@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import connectRedis from "connect-redis";
 import session from "express-session";
-import config from "../config";
 import JWT from 'jsonwebtoken';
 import {getRedisInstance, redisInstanceExists} from '../redis/instance'
 import { RequestHandler } from "express-serve-static-core";
@@ -20,16 +19,16 @@ let sessionInstance:RequestHandler | null = null;
 function getSessionInstance() {
   if (sessionInstance !== null) return sessionInstance;
   sessionInstance = session({
-    secret: config.sessionSecret,
+    secret: process.env.SESSION_SECRET,
     store: new RedisStore({
       client: getRedisInstance(),
       ttl: 600
     }),
     genid: req => {
-      const token = config.jwtHeader + req.headers.authorization;
+      const token = process.env.JWT_HEADER + req.headers.authorization;
       try {
         // will contain uniqueID
-        const decryptedToken = JWT.verify(token, config.jwtSecret);
+        const decryptedToken = JWT.verify(token, process.env.JWT_SECRET);
         return decryptedToken.toString().split("-")[0];
       } catch (err) {
         return "notLoggedIn";

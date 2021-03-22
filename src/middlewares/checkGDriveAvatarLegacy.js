@@ -1,6 +1,3 @@
-const request = require("request");
-import config from '../config';
-const path = require("path");
 const sharp = require("sharp");
 const fs = require("fs");
 const {google} = require('googleapis');
@@ -14,7 +11,7 @@ module.exports = async (req, res, next) => {
 
   google.drive("v3").files.get({
     fileId: id,
-    key: config.googleDrive.key,
+    key: process.env.DRIVE_KEY,
     alt: 'media',
   }, {
     responseType: 'arraybuffer'

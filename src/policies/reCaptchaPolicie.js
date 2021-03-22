@@ -1,10 +1,9 @@
 const fetch = require('node-fetch')
-import config from '../config';
 module.exports = (req, res, next) => {
 
 
   // decide if the captcha is required
-  if (config.devMode) {
+  if (process.env.DEV_MODE) {
     next();
     return;
   }
@@ -25,7 +24,7 @@ module.exports = (req, res, next) => {
   }
 
   const verifyUrl = "https://hcaptcha.com/siteverify"
-  const secret = config.captchaKey;
+  const secret = process.env.CAPTCHA_KEY;
 
 
   fetch(`${verifyUrl}?secret=${secret}&response=${token}`, {

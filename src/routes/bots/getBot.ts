@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 const Users = require('../../models/users')
 import Servers from '../../models/servers';
 import { sign } from "jsonwebtoken";
-import config from "../../config";
 import ServerMembers from '../../models/ServerMembers';
 import Roles from '../../models/Roles';
 import { roles } from '../../utils/rolePermConstants'
@@ -23,7 +22,7 @@ export default async function createBot(req: Request, res: Response) {
   }
 
   if (token && req.user && bot.createdBy._id.toString() === req.user._id) {
-    bot.token = sign(bot.uniqueID + (bot.passwordVersion !== undefined ? `-${bot.passwordVersion}` : ''), config.jwtSecret)
+    bot.token = sign(bot.uniqueID + (bot.passwordVersion !== undefined ? `-${bot.passwordVersion}` : ''), process.env.JWT_SECRET)
       .split(".")
       .splice(1)
       .join(".");

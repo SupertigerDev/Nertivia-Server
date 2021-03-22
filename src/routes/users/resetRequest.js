@@ -1,14 +1,12 @@
 const Users = require("../../models/users");
 const BannedIPs = require("../../models/BannedIPs");
-const JWT = require("jsonwebtoken");
-import config from '../../config';
 const crypto = require("crypto")
 import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
-  service: config.nodemailer.service,
+  service: process.env.SMTP_SERVICE,
   auth: {
-    user: config.nodemailer.user,
-    pass: config.nodemailer.pass
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   }
 })
 
@@ -65,7 +63,7 @@ module.exports = async (req, res, next) => {
 
   // send email
   const mailOptions = {
-    from: config.nodemailer.from,
+    from: process.env.SMTP_FROM,
     to: email.toLowerCase().trim(), 
     subject: 'Nertivia - Reset Password',
     html: `<p>Hello, ${user.username}!<br> Click on this link to reset your password: <strong>https://nertivia.net/reset?unique-id=${user.uniqueID}&code=${resetCode}</strong></p>`

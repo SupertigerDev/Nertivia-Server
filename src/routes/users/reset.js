@@ -1,14 +1,13 @@
 const Users = require("../../models/users");
 const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require('bcryptjs');
-import config from '../../config';
 const sio = require("socket.io");
 import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
-  service: config.nodemailer.service,
+  service: process.env.SMTP_SERVICE,
   auth: {
-    user: config.nodemailer.user,
-    pass: config.nodemailer.pass
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
   }
 })
 
@@ -78,7 +77,7 @@ module.exports = async (req, res, next) => {
   kickUser(req.io, user.uniqueID)
   // send email
   const mailOptions = {
-    from: config.nodemailer.from,
+    from: process.env.SMTP_FROM,
     to: user.email.toLowerCase().trim(), 
     subject: 'Nertivia - Password Changed',
     html: `<p>Hello, ${user.username}!<br> Your password was changed. If this was not done by you, reset your password as soon as possible.`

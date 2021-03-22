@@ -1,6 +1,5 @@
 import {Server} from "http";
 import socketIO from "socket.io";
-import config from "../config.js";
 
 let IO_INSTANCE: socketIO.Server | undefined = undefined;
 
@@ -14,7 +13,7 @@ export function getIOInstance(server?: Server) {
       handlePreflightRequest: function(req, res) {
         var headers = {
           "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Origin": config.allowedOrigins,
+          "Access-Control-Allow-Origin": JSON.parse(process.env.ALLOWED_ORIGINS),
           "Access-Control-Allow-Credentials": true
         };
         res.writeHead(200, headers);

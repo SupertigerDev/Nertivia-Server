@@ -1,5 +1,4 @@
 import request from 'request';
-import config from '../../config';
 
 export function uploadFile(BufferOrStream: any, userid: string, fileid: string, filename: string, isEmoji?: Boolean) {
   return new Promise((resolve, reject) => {
@@ -7,7 +6,7 @@ export function uploadFile(BufferOrStream: any, userid: string, fileid: string, 
     const options: request.Options = {
       url: 'https://media.nertivia.net/indexx.php',
       formData: {
-        secret: config.fileCDNSecret,
+        secret: process.env.FILE_CDN_SECRET,
         userid: userid || "",
         fileid: fileid || "",
         isemoji: isEmoji ? "1" : "0",
@@ -31,7 +30,7 @@ export function deletePath(path: string) {
     const options: request.Options = {
       url: 'https://media.nertivia.net/indexx-remove.php',
       json: {
-        secret: config.fileCDNSecret,
+        secret: process.env.FILE_CDN_SECRET,
         removePath: path
       }
     }

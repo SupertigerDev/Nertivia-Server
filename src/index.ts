@@ -2,7 +2,14 @@ import { getRedisInstance, redisInstanceExists } from "./redis/instance";
 import { getIOInstance } from "./socket/instance";
 import app from './app';
 import mongoose from "mongoose";
-import config from './config'
+import dotenv from 'dotenv';
+dotenv.config();
+// header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
+process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
+
+interface ProcessEnv {
+    [key: string]: string;
+}
 
 
 const mongoOptions: mongoose.ConnectionOptions = {
@@ -14,7 +21,7 @@ const mongoOptions: mongoose.ConnectionOptions = {
 
 let httpServerInitialized = false;
 
-mongoose.connect(config.mongoDBAddress, mongoOptions, function(err) {
+mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, function(err) {
   if (err) throw err;
 	console.log("\x1b[32m" + "MongoDB> " + "\x1b[1m" + "Connected!\x1b[0m");
 	connectToRedis();
@@ -22,7 +29,11 @@ mongoose.connect(config.mongoDBAddress, mongoOptions, function(err) {
 
 function connectToRedis() {
 	if (redisInstanceExists()) return;
-	const client = getRedisInstance(config.redis);
+	const client = getRedisInstance({
+		host: process.env.REDIS_HOST,
+		password: process.env.REDIS_PASS,
+		port: parseInt(process.env.REDIS_PORT)
+	});
 	if (!client) return;
 	client.on("ready", () => {
 		client.flushall();
@@ -47,9 +58,9 @@ function startHTTPServer() {
 
 
 
-
-	server.listen(config.port || 80, function(){
-			console.log("\x1b[36mHTTP & Socket>\x1b[1m listening on *:"+ (config.port || 80) + "\x1b[0m");
+	const port = process.env.PORT || 80;
+	server.listen(port, function(){
+			console.log("\x1b[36mHTTP & Socket>\x1b[1m listening on *:"+ (port) + "\x1b[0m");
 	});
 
 }

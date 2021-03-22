@@ -1,18 +1,17 @@
 const Users = require("../models/users");
 const BannedIPs = require("../models/BannedIPs");
-import config from '../config';
 const JWT = require("jsonwebtoken");
 
 module.exports = function (allowBot = false, allowInvalid = false, allowNonTerms = false) {
   return async function (req, res, next) {
 
-    const token = config.jwtHeader + req.headers.authorization;
+    const token = process.env.JWT_HEADER + req.headers.authorization;
     // will contain uniqueID
     let decryptedToken;
     let passwordVersion = 0;
 
     try {
-      const decrypted = JWT.verify(token, config.jwtSecret);
+      const decrypted = JWT.verify(token, process.env.JWT_SECRET);
       const split = decrypted.split("-");
       decryptedToken = split[0];
       passwordVersion = split[1] ? parseInt(split[1]) : 0;

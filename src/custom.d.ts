@@ -13,6 +13,37 @@ declare global {
       oauth2Client: any
     }
   }
+  namespace NodeJS {
+    interface ProcessEnv {
+      MONGODB_ADDRESS: string
+      JWT_SECRET: string
+      JWT_HEADER: string
+      SESSION_SECRET: string
+      
+      REDIS_HOST: string
+      REDIS_PORT: string
+      REDIS_PASS: string
+      
+      CAPTCHA_KEY: string
+      
+      DOMAIN: string
+      ALLOWED_ORIGINS: string
+      
+      SMTP_SERVICE: string
+      SMTP_USER: string
+      SMTP_PASS: string
+      SMTP_FROM: string
+      
+      FILE_CDN_SECRET: string
+      
+      DRIVE_CLIENT_ID: string
+      DRIVE_CLIENT_SECRET: string
+      DRIVE_URL:string
+      DRIVE_KEY: string
+      
+      DEV_MODE: string
+    }
+  }
 }
 interface User {
   uniqueID: string

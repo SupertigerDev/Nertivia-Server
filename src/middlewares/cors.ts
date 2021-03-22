@@ -1,12 +1,11 @@
-import config from "../config";
 import cors from "cors";
 
 export default cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
     if (
-      config.allowedOrigins.indexOf(origin) === -1 &&
-      !config.allowAllOrigins
+      JSON.parse(process.env.ALLOWED_ORIGINS).indexOf(origin) === -1 &&
+      !JSON.parse(process.env.ALLOWED_ORIGINS)
     ) {
       callback(null, false);
     } else {

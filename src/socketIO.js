@@ -5,7 +5,6 @@ const User = require("./models/users");
 const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
-import config from "./config";
 import blockedUsers from "./models/blockedUsers";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
@@ -72,8 +71,8 @@ module.exports = async client => {
 
     try {
       let decryptedToken = await jwt.verify(
-        config.jwtHeader + token,
-        config.jwtSecret
+        process.env.JWT_HEADER + token,
+        process.env.JWT_SECRET
       );
       const split = decryptedToken.split("-");
       decryptedToken = split[0];

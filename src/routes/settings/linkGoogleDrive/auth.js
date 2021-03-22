@@ -1,4 +1,3 @@
-import config from '../../../config'
 const Users = require('./../../../models/users');
 
 const jwt = require('jsonwebtoken')
@@ -10,7 +9,7 @@ module.exports = async (req, res, next) => {
 	const {code, token} = req.body;
 	try {
 		// jwt token
-		let decryptedToken = await jwt.verify(config.jwtHeader + token, config.jwtSecret);
+		let decryptedToken = await jwt.verify(process.env.JWT_HEADER + token, process.env.JWT_SECRET);
 		decryptedToken = decryptedToken.split("-")[0];
 
 		const {tokens} = await oauth2Client.getToken (code);

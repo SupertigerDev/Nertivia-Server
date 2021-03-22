@@ -1,13 +1,12 @@
 const User = require("../../models/users");
 const BannedIPs = require("../../models/BannedIPs");
 const JWT = require("jsonwebtoken");
-import config from '../../config';
 
 function signToken(uniqueID, pwdVer) {
   if (pwdVer !== undefined) {
-    return JWT.sign(`${uniqueID}-${pwdVer}`, config.jwtSecret);
+    return JWT.sign(`${uniqueID}-${pwdVer}`, process.env.JWT_SECRET);
   } else {
-    return JWT.sign(uniqueID, config.jwtSecret);
+    return JWT.sign(uniqueID, process.env.JWT_SECRET);
   }
 }
 

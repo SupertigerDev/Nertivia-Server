@@ -12,7 +12,6 @@ const Devices = require("../../models/Devices");
 const sendMessageNotification = require('./../../utils/SendMessageNotification');
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
-import config from '../../config';
 import { json } from 'body-parser';
 import channels from '../../models/channels';
 

@@ -1,5 +1,3 @@
-const request = require("request");
-import config from '../config';
 const path = require('path');
 const sharp = require('sharp')
 const fs = require('fs');

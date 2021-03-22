@@ -1,5 +1,4 @@
 const request = require("request");
-import config from '../config';
 const path = require('path');
 const sharp = require('sharp')
 module.exports = (req, res, next) => {
