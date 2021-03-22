@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-node@master
       - name: Install Dependencies
         run: npm install
-      - name: Build App
+      - name: Compile Typescript
         run: npm run build
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v2.1.5
@@ -37,3 +37,17 @@ jobs:
           REMOTE_HOST: ${{ secrets.HOST }}
           REMOTE_USER: ${{ secrets.USER }}
           TARGET: /root/test
+      - name: Copy package.json
+        uses: easingthemes/ssh-deploy@v2.1.5
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.KEY }}
+          SOURCE: "package.json"
+          REMOTE_HOST: ${{ secrets.HOST }}
+          REMOTE_USER: ${{ secrets.USER }}
+          TARGET: /root/test/
+          
+          
+          
+          
+          
+          
