@@ -45,7 +45,13 @@ jobs:
           REMOTE_HOST: ${{ secrets.HOST }}
           REMOTE_USER: ${{ secrets.USER }}
           TARGET: /root/test/
-          
+      - name: run npm i and restart server
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          command: npm i --prefix /root/test/ 
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          privateKey: ${{ secrets.KEY }}  
           
           
           
