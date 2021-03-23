@@ -5,7 +5,7 @@ import express from "express";
 import http from "http";
 
 // middlewares
-import cloudflareCheck from "./middlewares/cloudFlareCheck";
+import realIP from "./middlewares/realIP";
 import redisSession from './middlewares/redisSession'
 import cors from "./middlewares/cors";
 import bodyParser from 'body-parser';
@@ -20,7 +20,7 @@ export default function initServer() {
 
   // middlewares
   app.use(bodyParser.json({limit: '10mb'}));
-  app.use(cloudflareCheck);
+  app.use(realIP);
   app.use(cors);
   app.use(function(req, res, next){
     req.io = io;
@@ -31,17 +31,6 @@ export default function initServer() {
 
   // routes
   app.use('/api', require('./routes/api'));
-
-  if (process.env.DOMAIN) {
-    app.use(vhost(process.env.DOMAIN, require('./routes/chat')))
-    app.use(vhost('beta.' + process.env.DOMAIN, require('./routes/chatBeta')))
-    app.use(vhost('supertiger.' + process.env.DOMAIN, express.static('public/supertiger/')))
-  } else {
-    app.use('/nertivia', require('./routes/chat'))
-    app.use('/nertiviabeta', require('./routes/chatBeta'))
-  }
-
-
 
   return server;
 }
