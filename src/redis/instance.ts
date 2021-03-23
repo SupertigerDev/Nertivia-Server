@@ -1,5 +1,10 @@
 import { RedisClient, ClientOpts } from 'redis';
-import {Redis} from '../Interfaces/config'
+
+export interface Redis {
+  host: string,
+  port: number,
+  password: string,
+}
 
 let REDIS_INSTANCE: RedisClient | undefined = undefined;
 
