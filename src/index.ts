@@ -58,7 +58,7 @@ function startHTTPServer() {
 
 
 
-	const port = process.env.PORT || 80;
+	const port = process.env.PORT || 8000;
 	server.listen(port, function(){
 			console.log("\x1b[36mHTTP & Socket>\x1b[1m listening on *:"+ (port) + "\x1b[0m");
 	});
