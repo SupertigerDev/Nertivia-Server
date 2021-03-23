@@ -3,7 +3,7 @@ import {getIOInstance} from './socket/instance'
 const vhost = require('vhost');
 import express from "express";
 import http from "http";
-
+const redisAdapter = require("socket.io-redis");
 // middlewares
 import realIP from "./middlewares/realIP";
 import redisSession from './middlewares/redisSession'
@@ -17,6 +17,13 @@ export default function initServer() {
   const server = new http.Server(app);
 
   const io = getIOInstance(server);
+  
+  //redis://[USER]:[PASSWORD]@[SERVICE-IP]:[PORT]
+  io.adapter(redisAdapter({
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    auth_pass: process.env.REDIS_PASS
+  }));
 
   // middlewares
   app.use(bodyParser.json({limit: '10mb'}));
