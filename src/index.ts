@@ -14,8 +14,8 @@ if (cluster.isMaster) {
 	console.log("Master PID: ", process.pid);
 
 	// run workers
-	// for (let i = 0; i < numCPUs; i++) {
-	for (let i = 0; i < 4; i++) {
+	for (let i = 0; i < numCPUs; i++) {
+	// for (let i = 0; i < 4; i++) {
 		cluster.fork();
 	}
   cluster.on('exit', (worker, code, signal) => {
