@@ -265,16 +265,18 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 async function serverMessage(req: any, io: any, channelID: any, messageCreated: any, socketID: any) {
 
 
-  const clients =
-    io.sockets.adapter.rooms["server:" + req.channel.server.server_id]
-      .sockets;
-  for (let clientId in clients) {
-    if (clientId !== socketID) {
-      io.to(clientId).emit("receiveMessage", {
-        message: messageCreated
-      });
+  io.in("server:" + req.channel.server.server_id).clients((err: any, clients: any[]) => {
+    for (let i = 0; i < clients.length; i++) {
+      const id = clients[i];
+
+      if (id !== socketID) {
+        io.to(id).emit("receiveMessage", {
+          message: messageCreated
+        });
+      }
     }
-  }
+  });
+  
 
   const date = Date.now();
   await channels.updateOne({ channelID }, { $set: {
@@ -354,17 +356,19 @@ async function directMessage(req: any, io: any, channelID: any, messageCreated: 
   }
 
   // Loop for other users logged in to the same account and emit (exclude the sender account.).
-  //TODO: move this to client side for more performance.
-  const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
-  if (rooms)
-    for (let clientId in rooms.sockets || []) {
-      if (clientId !== socketID) {
-        io.to(clientId).emit("receiveMessage", {
+  io.in(req.user.uniqueID).clients((err: any, clients: any[]) => {
+    for (let i = 0; i < clients.length; i++) {
+      const id = clients[i];
+      if (id !== socketID) {
+        io.to(id).emit("receiveMessage", {
           message: messageCreated,
           tempID
         });
       }
     }
+  });
+
+
 
 
   if (isSavedNotes) return;

@@ -95,20 +95,17 @@ export default async function join(server: any, user: any, socketID: string | un
   // send owns status to every connected device
   createServerObj.channels = serverChannels;
 
-  io.in(user.uniqueID).emit(
-    "server:joined",
-    socketID ? {...createServerObj, socketID } : createServerObj
-  );
   // join room
-  const room = io.sockets.adapter.rooms[user.uniqueID];
-  if (room)
-    for (let clientId in room.sockets || []) {
-      if (io.sockets.connected[clientId]) {
-        io.sockets.connected[clientId].join(
-          "server:" + createServerObj.server_id
-        );
-      }
+  io.in(user.uniqueID).clients((err: any, clients: string[]) => {
+    for (let i = 0; i < clients.length; i++) {
+      const id = clients[i];
+      io.to(id).emit(
+        "server:joined",
+        socketID ? {...createServerObj, socketID } : createServerObj
+      );
+      (io.of('/').adapter as any).remoteJoin(id, "server:" + createServerObj.server_id)
     }
+  });
 
   // send join message
 
@@ -131,16 +128,9 @@ export default async function join(server: any, user: any, socketID: string | un
   messageCreated.creator = user;
 
   // emit message
-  const serverRooms =
-    io.sockets.adapter.rooms["server:" + createServerObj.server_id];
-  if (serverRooms) {
-    for (let clientId in serverRooms.sockets || []) {
-      io.to(clientId).emit("receiveMessage", {
-        message: messageCreated
-      });
-    }
-  }
-
+  io.in("server:" + createServerObj.server_id).emit("receiveMessage", {
+    message: messageCreated
+  });
 
   await Channels.updateOne({ channelID: server.default_channel_id }, { $set: {
     lastMessaged: Date.now()

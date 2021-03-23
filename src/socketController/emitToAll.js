@@ -1,6 +1,7 @@
 const Friends = require ('./../models/friends');
 const Users = require ('./../models/users');
-const SocketIO = require('socket.io')
+const SocketIO = require('socket.io');
+const { emit } = require('./../models/users');
 
 
 /**
@@ -13,42 +14,41 @@ module.exports = async (name, id, data, io, emitToSelf = true) => {
   const user = await Users.findById(id).populate('servers');
 
 
-  let sockets = {};
+  let roomIDArr = [];
+
+
+
 
 
   for (let index = 0; index < user.servers.length; index++) {
     const server = user.servers[index];
-    const room = io.sockets.adapter.rooms["server:" + server.server_id];
-    if (!room || !room.sockets) continue;
-    sockets = {...sockets, ...room.sockets}
+    roomIDArr.push("server:" + server.server_id);
   }
 
   for (let index = 0; index < friends.length; index++) {
     const friend = friends[index];
-    if (!friend.recipient) continue;
-    const room = io.sockets.adapter.rooms[friend.recipient.uniqueID];
-    if (!room || !room.sockets) continue;
-    sockets = {...sockets, ...room.sockets}
-  }
-
-  const room = io.sockets.adapter.rooms[user.uniqueID]
-  if (room && room.sockets) {
-    if (emitToSelf) {
-      sockets = {...sockets, ...room.sockets}
-   } else {
-     const socketIDArr = Object.keys(room.sockets);
-     for (let index = 0; index < socketIDArr.length; index++) {
-       const socketID = socketIDArr[index];
-       delete sockets[socketID]
-     }
-   }
+    if (!friend.recipient?.length) continue;
+    roomIDArr.push(friend.recipient.uniqueID);
   }
 
 
-  const idArr = Object.keys(sockets);
-  for (let index = 0; index < idArr.length; index++) {
-    const id = idArr[index];
-    io.to(id).emit(name, data)
+  
+  if (emitToSelf) {
+    roomIDArr.push(user.uniqueID);
+  } else {
+    // remove existing 
+    io.in(user.uniqueID).clients((err, clients) => {
+      roomIDArr = roomIDArr.filter(id => !clients.includes(id))
+      emitTo(name, data, roomIDArr, io)
+    })
   }
-
+}
+function emitTo(name, data, roomIDArr, io) {
+  io.of('/').adapter.clients(roomIDArr, (err, clients) => {
+    console.log(clients);
+    for (let i = 0; i < clients.length; i++) {
+      const id = clients[i];
+      io.to(id).emit(name, data)
+    }
+  })
 }

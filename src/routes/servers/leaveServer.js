@@ -48,16 +48,19 @@ module.exports = async (req, res, next) => {
 
 
   // leave room
-  const rooms = io.sockets.adapter.rooms[req.user.uniqueID];
-  if (rooms)
-    for (let clientId in rooms.sockets || []) {
-      if (io.sockets.connected[clientId]) {
-        io.sockets.connected[clientId].emit("server:leave", {
-          server_id: req.server.server_id
-        });
-        io.sockets.connected[clientId].leave("server:" + req.server.server_id);
-      }
+
+
+  io.in(req.user.uniqueID).clients((err, clients) => {
+    for (let i = 0; i < clients.length; i++) {
+      const id = clients[i];
+      io.to(id).emit("server:leave", {
+        server_id: req.server.server_id
+      });
+      io.of('/').adapter.remoteLeave(id, "server:" + req.server.server_id)
     }
+  });
+
+
 
   // emit leave event 
   io.in("server:" + req.server.server_id).emit("server:member_remove", {
@@ -87,14 +90,10 @@ module.exports = async (req, res, next) => {
   messageCreated.creator = user;
 
   // emit message
-  const roomsMsg = io.sockets.adapter.rooms["server:" + req.server.server_id];
-  if (roomsMsg)
-    for (let clientId in roomsMsg.sockets || []) {
-      io.to(clientId).emit("receiveMessage", {
-        message: messageCreated
-      });
-    }
 
+  io.in("server:" + req.server.server_id).emit("receiveMessage", {
+    message: messageCreated
+  });
 
   const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, { $set: {
     lastMessaged: Date.now()

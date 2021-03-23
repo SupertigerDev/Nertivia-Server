@@ -32,16 +32,11 @@ module.exports = async (req, res, next) => {
 res.json({message: "Done!"});
 
   const io = req.io;
-  const clients =
-    io.sockets.adapter.rooms["server:" + server_id]
-      ?.sockets;
-  if (!clients) return;
-  for (let clientId in clients) {
-    io.to(clientId).emit("receiveMessage", {
-      message: messageCreated
-    });
 
-  }
+  io.to("server:" + server_id).emit("receiveMessage", {
+    message: messageCreated
+  })
+
   //send notification
   await sendMessageNotification({
     message: messageCreated,

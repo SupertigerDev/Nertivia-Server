@@ -52,14 +52,17 @@ export default async function deleteServer(io: any, server_id: string, server: a
     callback(null, true);
 
     //EMIT leave event
-    const rooms = io.sockets.adapter.rooms["server:" + server.server_id];
-    if (rooms)
-      for (let clientId in rooms.sockets || []) {
-        if (!io.sockets.connected[clientId]) continue;
-        io.sockets.connected[clientId].emit("server:leave", {
+
+
+    io.in("server:" + server.server_id).clients((err: any, clients: string[]) => {
+      for (let i = 0; i < clients.length; i++) {
+        const id = clients[i];
+        io.to(id).emit("server:leave", {
           server_id: server.server_id
         });
-        io.sockets.connected[clientId].leave("server:" + server.server_id);
+        io.of('/').adapter.remoteLeave(id, "server:" + server.server_id)
       }
+    });
+
 
 }

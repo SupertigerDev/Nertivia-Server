@@ -91,14 +91,13 @@ module.exports = async (req, res, next) => {
 };
 async function kickUser(io, uniqueID) {
   await redis.deleteSession(uniqueID);
-  const rooms = io.sockets.adapter.rooms[uniqueID];
-  if (!rooms || !rooms.sockets) return;
 
-  for (const clientId in rooms.sockets) {
-    const client = io.sockets.connected[clientId];
-    if (!client) continue;
-    client.emit("auth_err", "Token outdated.");
-    client.disconnect(true);
-  }
+  io.in(uniqueID).clients((err, clients) => {
+    for (let i = 0; i < clients.length; i++) {
+      const id = clients[i];
+      io.to(id).emit("auth_err",  "Token outdated.");
+      io.of('/').adapter.remoteDisconnect(id, true) 
+    }
+  });
 }
 

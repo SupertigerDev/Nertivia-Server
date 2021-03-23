@@ -57,6 +57,7 @@ const populateServers = {
  * @param {sio.Socket} client
  */
 module.exports = async client => {
+
   //If the socket didn't authenticate(), disconnect it
   let timeout = setTimeout(function() {
     if (!client.auth) {
@@ -324,7 +325,8 @@ module.exports = async client => {
         programActivityArr,
         settings,
         lastSeenServerChannels,
-        bannedUserIDs
+        bannedUserIDs,
+        pid: process.pid
         
       });
     } catch (e) {

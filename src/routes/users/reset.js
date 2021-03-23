@@ -95,14 +95,14 @@ module.exports = async (req, res, next) => {
  */
 // also used in user update password.
 async function kickUser(io, uniqueID, socketID) {
-  const rooms = io.sockets.adapter.rooms[uniqueID];
-  if (!rooms || !rooms.sockets) return;
 
-  for (const clientId in rooms.sockets) {
-    const client = io.sockets.connected[clientId];
-    if (!client) continue;
-    if (client.id === socketID) continue;
-    client.emit("auth_err", "Password Changed.");
-    client.disconnect(true);
-  }
+
+  io.in(uniqueID).clients((err, clients) => {
+    for (let i = 0; i < clients.length; i++) {
+      const id = clients[i];
+      if (id === socketID) continue;
+      io.to(id).emit("auth_err", "Password Changed.");
+      io.of('/').adapter.remoteDisconnect(id, true) 
+    }
+  });
 }

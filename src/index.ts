@@ -14,7 +14,8 @@ if (cluster.isMaster) {
 	console.log("Master PID: ", process.pid);
 
 	// run workers
-	for (let i = 0; i < numCPUs; i++) {
+	// for (let i = 0; i < numCPUs; i++) {
+	for (let i = 0; i < 4; i++) {
 		cluster.fork();
 	}
   cluster.on('exit', (worker, code, signal) => {
@@ -49,7 +50,7 @@ function start() {
 		});
 		if (!client) return;
 		client.on("ready", () => {
-			client.flushall();
+			// client.flushall();
 			console.log("\x1b[33mRedis>\x1b[1m Connected!\x1b[0m");
 			startHTTPServer();
 		});
