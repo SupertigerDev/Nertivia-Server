@@ -43,14 +43,14 @@ module.exports = async (req, res, next) => {
   const isCreator = req.server.creator === req.user._id
   if (!isCreator) {
     // check if requesters role is above the recipients
-    const member = await ServerMembers.findOne({ server: req.server._id, member: req.user._id }).select("roles");
+    const member = await ServerMembers.findOne({ server: req.server._id, member: userToBeBanned._id }).select("roles");
     if (member) {
       const roles = await Roles.find({ id: { $in: member.roles } }, { _id: 0 }).select('order').lean();
       let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
       if (recipientHighestRolePosition <= req.highestRolePosition) {
         return res
           .status(403)
-          .json({ message: "Your Role priority is too low to perfom this action." });
+          .json({ message: "Your Role priority is the same or lower than the recipient." });
       }
     }
   }
