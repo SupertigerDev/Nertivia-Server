@@ -45,7 +45,6 @@ module.exports = async (name, id, data, io, emitToSelf = true) => {
 }
 function emitTo(name, data, roomIDArr, io) {
   io.of('/').adapter.clients(roomIDArr, (err, clients) => {
-    console.log(clients);
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit(name, data)
