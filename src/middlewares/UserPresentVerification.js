@@ -58,7 +58,7 @@ module.exports = async (req, res, next) => {
   }
 
   let permissions = 0;
-  let highestRolePosition = undefined;
+  let highestRolePosition = 0;
 
   if (member.roles && member.roles.length) {
     const roles = await Roles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions order').lean();

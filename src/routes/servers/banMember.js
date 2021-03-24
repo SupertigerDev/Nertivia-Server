@@ -20,6 +20,7 @@ module.exports = async (req, res, next) => {
   }
   const server = req.server;
 
+  // allow members that are not in this server to be banned.
   const userToBeBanned = await Users.findOne({uniqueID: unique_id}).select('_id uniqueID username tag avatar admin');
 
   if (!userToBeBanned) return res
@@ -38,6 +39,22 @@ module.exports = async (req, res, next) => {
     .status(403)
     .json({ message: "You can't ban the creator of the server." });
   }
+
+  const isCreator = req.server.creator === req.user._id
+  if (!isCreator) {
+    // check if requesters role is above the recipients
+    const member = await ServerMembers.findOne({ server: req.server._id, member: req.user._id }).select("roles");
+    if (member) {
+      const roles = await Roles.find({ id: { $in: member.roles } }, { _id: 0 }).select('order').lean();
+      let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
+      if (recipientHighestRolePosition <= req.highestRolePosition) {
+        return res
+          .status(403)
+          .json({ message: "Your Role priority is too low to perfom this action." });
+      }
+    }
+  }
+
 
 
   await deleteFCMFromServer(server_id, unique_id);

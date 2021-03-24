@@ -10,23 +10,23 @@ const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
-  const {server_id, unique_id} = req.params;
+  const { server_id, unique_id } = req.params;
 
   if (unique_id === req.user.uniqueID) {
     return res
-    .status(403)
-    .json({ message: "Why would you kick yourself?" });
+      .status(403)
+      .json({ message: "Why would you kick yourself?" });
   }
   const server = req.server;
 
-  const userToBeKicked = await Users.findOne({uniqueID: unique_id}).select('_id uniqueID username tag avatar admin');
+  const userToBeKicked = await Users.findOne({ uniqueID: unique_id }).select('_id uniqueID username tag avatar admin');
 
 
   if (!userToBeKicked) return res
     .status(404)
     .json({ message: "User not found." });
-    
-  const memberExistsInServer = await ServerMembers.exists({member: userToBeKicked._id, server_id});
+
+  const memberExistsInServer = await ServerMembers.exists({ member: userToBeKicked._id, server_id });
 
   if (!memberExistsInServer) {
     res.json({ status: "Member is already not in the server." });
@@ -35,13 +35,31 @@ module.exports = async (req, res, next) => {
 
 
 
-  if(userToBeKicked._id.toString() === req.server.creator.toString()) {
+  if (userToBeKicked._id.toString() === req.server.creator.toString()) {
     return res
-    .status(403)
-    .json({ message: "You can't kick the creator of the server." });
+      .status(403)
+      .json({ message: "You can't kick the creator of the server." });
   }
 
-  await deleteFCMFromServer(server_id,unique_id);
+
+  const isCreator = req.server.creator === req.user._id
+  if (!isCreator) {
+    // check if requesters role is above the recipients
+    const member = await ServerMembers.findOne({ server: req.server._id, member: req.user._id }).select("roles");
+    if (member) {
+      const roles = await Roles.find({ id: { $in: member.roles } }, { _id: 0 }).select('order').lean();
+      let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
+      if (recipientHighestRolePosition <= req.highestRolePosition) {
+        return res
+          .status(403)
+          .json({ message: "Your Role priority is too low to perfom this action." });
+      }
+    }
+  }
+
+
+
+  await deleteFCMFromServer(server_id, unique_id);
 
   // server channels
   const channels = await Channels.find({ server: server._id });
@@ -66,10 +84,10 @@ module.exports = async (req, res, next) => {
 
 
   //if bot, delete bot role
-  const role = await Roles.findOneAndDelete({bot: userToBeKicked._id, server: server._id});
+  const role = await Roles.findOneAndDelete({ bot: userToBeKicked._id, server: server._id });
 
   if (role) {
-    io.in("server:" + role.server_id).emit("server:delete_role", {role_id: role.id, server_id: role.server_id});
+    io.in("server:" + role.server_id).emit("server:delete_role", { role_id: role.id, server_id: role.server_id });
   }
 
   // delete member from server members
@@ -122,9 +140,11 @@ module.exports = async (req, res, next) => {
   });
 
 
-  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, { $set: {
-    lastMessaged: Date.now()
-  }}).lean()
+  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, {
+    $set: {
+      lastMessaged: Date.now()
+    }
+  }).lean()
 
   defaultChannel.server = req.server;
   sendServerPush({
@@ -138,7 +158,7 @@ module.exports = async (req, res, next) => {
   })
 
 
-  
+
 };
 
 

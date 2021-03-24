@@ -5,12 +5,15 @@ module.exports = async (req, res, next) => {
   const {roleID, order} = req.body
 
 
+  const isCreator = req.server.creator === req.user._id
   // less = higher priority
   // higher = less priority
-  if (order <= req.highestRolePosition) {
-    return res
-    .status(403)
-    .json({ message: "Your Role priority is too low to perfom this action." });
+  if (!isCreator) {
+    if (order <= req.highestRolePosition) {
+      return res
+      .status(403)
+      .json({ message: "Your Role priority is too low to perfom this action." });
+    }
   }
 
 
