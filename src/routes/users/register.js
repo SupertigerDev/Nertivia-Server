@@ -65,7 +65,7 @@ module.exports = async (req, res, next) => {
   const newUser = new User({ username, email: email.toLowerCase(), password, ip: req.userIP });
   const created = await newUser.save();
 
-  if (process.env.DEV_MODE) {
+  if (process.env.DEV_MODE === "true") {
     return res.status(403).json({
       errors: [{param: "other", msg: "Dev mode. email confirm code: " + created.email_confirm_code}]
     });

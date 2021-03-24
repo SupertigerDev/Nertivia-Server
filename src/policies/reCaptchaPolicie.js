@@ -3,7 +3,7 @@ module.exports = (req, res, next) => {
 
 
   // decide if the captcha is required
-  if (process.env.DEV_MODE) {
+  if (process.env.DEV_MODE === "true") {
     next();
     return;
   }
