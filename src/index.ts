@@ -50,7 +50,7 @@ function start() {
 		});
 		if (!client) return;
 		client.on("ready", () => {
-			// client.flushall();
+			client.flushall();
 			console.log("\x1b[33mRedis>\x1b[1m Connected!\x1b[0m");
 			startHTTPServer();
 		});
