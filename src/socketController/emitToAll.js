@@ -32,22 +32,19 @@ module.exports = async (name, id, data, io, emitToSelf = true) => {
   }
 
 
-  
   if (emitToSelf) {
     roomIDArr.push(user.uniqueID);
   } else {
-    // remove existing 
-    io.in(user.uniqueID).clients((err, clients) => {
-      roomIDArr = roomIDArr.filter(id => !clients.includes(id))
-      emitTo(name, data, roomIDArr, io)
-    })
+    roomIDArr.filter(r => r !== user.uniqueID)
   }
-}
-function emitTo(name, data, roomIDArr, io) {
   io.of('/').adapter.clients(roomIDArr, (err, clients) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit(name, data)
     }
   })
+
+
 }
+
+
