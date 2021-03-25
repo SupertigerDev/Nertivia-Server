@@ -72,6 +72,7 @@ MainServerRouter.route('/:server_id/members/:unique_id').delete(
 MainServerRouter.route('/:server_id/bans').get(
   authenticate(true),
   UserPresentVerification,
+  checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./bannedMembers")
 )
 
@@ -89,6 +90,7 @@ MainServerRouter.route('/:server_id/bans/:unique_id').put(
 MainServerRouter.route('/:server_id/bans/:unique_id').delete(
   authenticate(true),
   UserPresentVerification,
+  checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./unBanMember")
 )
 
