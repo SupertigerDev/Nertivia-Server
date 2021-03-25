@@ -1,13 +1,6 @@
 
 const Servers = require("../../models/servers");
 module.exports = async (req, res, next) => {
-  // check if this function is executed by the guild owner.
-  if (req.server.creator !== req.user._id){
-    return res
-    .status(403)
-    .json({ message: "You do not have permission to view this data." });
-  }
-
   const server = req.server;
 
   // get banned list
