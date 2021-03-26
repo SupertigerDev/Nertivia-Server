@@ -14,7 +14,7 @@ if (cluster.isMaster) {
 	console.log("Master PID: ", process.pid);
 
 	// run workers
-	for (let i = 0; i < (process.env.DEV_MODE === true ? 1 : numCPUs); i++) {
+	for (let i = 0; i < (process.env.DEV_MODE === "true" ? 1 : numCPUs); i++) {
 	// for (let i = 0; i < 4; i++) {
 		cluster.fork();
 	}
