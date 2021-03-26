@@ -63,6 +63,7 @@ interface Channel {
   _id: string,
   server: Server
   recipients: any[]
+  rateLimit?: number
 }
 interface Server {
   server_id: string

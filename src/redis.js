@@ -159,6 +159,9 @@ module.exports = {
   delAllServerMembers: (serverID) => {
     return wrapper('del', `serverMembers:${serverID}`);
   },
+  removeRateLimit: (key) => {
+    return wrapper('del', `rateLimit:${key}`);
+  },
   //member
 
   rateLimitSetExpire: async (key, expire, currentTTL) => {

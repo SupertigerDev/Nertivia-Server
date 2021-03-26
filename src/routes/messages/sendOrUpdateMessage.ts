@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction} from 'express';
-import { zip, unzip } from '../../utils/zip'
+import { zip } from '../../utils/zip'
 import {jsonToHtml} from 'jsonhtmlfyer';
 const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
@@ -7,12 +7,10 @@ const MessageQuotes = require("../../models/messageQuotes");
 const matchAll = require("match-all");
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
-const Devices = require("../../models/Devices");
 
 const sendMessageNotification = require('./../../utils/SendMessageNotification');
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
-import { json } from 'body-parser';
 import channels from '../../models/channels';
 
 export default async (req: Request, res: Response, next: NextFunction) => {

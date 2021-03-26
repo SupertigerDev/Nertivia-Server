@@ -19,6 +19,8 @@ const channelsSchema = new Schema({
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
   server_id: {type: String, required: false},
   lastMessaged: {type: Number},
+  // in seconds
+  rateLimit: {type: Number, required: false},
   status: {
     type: Number,
     default: 0,

@@ -163,7 +163,7 @@ module.exports = async client => {
 
         const serverChannels = await channels
           .find({ server: { $in: serverIDs } })
-          .select("name channelID server server_id lastMessaged")
+          .select("name channelID server server_id lastMessaged rateLimit")
           .lean();
 
         user.servers = user.servers.map(server => {

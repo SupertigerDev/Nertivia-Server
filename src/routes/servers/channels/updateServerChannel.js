@@ -16,6 +16,17 @@ module.exports = async (req, res, next) => {
     if (data.permissions) {
       dataFiltered.permissions = data.permissions
     }
+    if (data.rateLimit) {
+      if (typeof data.rateLimit !== "number") {
+        res.status(403).json({ message: "Rate limit must be type number." });
+        return;
+      } 
+      if (data.rateLimit > 600) {
+        res.status(403).json({ message: "Max rate limit: 600 seconds." });
+        return;
+      }
+      dataFiltered.rateLimit = data.rateLimit;
+    }
 
     if (!dataFiltered.name || !dataFiltered.name.trim()) {
       delete dataFiltered.name;

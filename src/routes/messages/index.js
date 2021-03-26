@@ -11,6 +11,7 @@ import URLEmbed from '../../middlewares/URLEmbed';
 const serverChannelPermissions = require('./../../middlewares/serverChannelPermissions');
 const busboy = require('connect-busboy');
 const rateLimit = require('./../../middlewares/rateLimit');
+const channelRateLimit = require('./../../middlewares/channelRateLimit');
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const disAllowBlockedUser = require('../../middlewares/disAllowBlockedUser');
@@ -62,6 +63,7 @@ MainMessageRouter.route("/channels/:channelID").post(
   messagePolicy.post,
   rateLimit({name: 'message_send', expire: 20, requestsLimit: 15 }),
   channelVerification,
+  channelRateLimit,
   disAllowBlockedUser,
   serverChannelPermissions('send_message', true),
   checkRolePerms('Send Message', permissions.roles.SEND_MESSAGES),
