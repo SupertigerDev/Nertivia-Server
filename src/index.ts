@@ -1,5 +1,5 @@
 import cluster from 'cluster';
-const numCPUs = require('os').cpus().length;
+let numCPUs = require('os').cpus().length;
 import { getRedisInstance, redisInstanceExists } from "./redis/instance";
 import { getIOInstance } from "./socket/instance";
 import app from './app';
@@ -14,7 +14,10 @@ if (cluster.isMaster) {
 	console.log("Master PID: ", process.pid);
 
 	// run workers
-	for (let i = 0; i < (process.env.DEV_MODE === "true" ? 1 : numCPUs); i++) {
+	if (process.env.DEV_MODE === "true") {
+		numCPUs = 1;
+	}
+	for (let i = 0; i < numCPUs; i++) {
 	// for (let i = 0; i < 4; i++) {
 		cluster.fork();
 	}
