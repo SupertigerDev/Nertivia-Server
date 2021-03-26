@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  const roles = await Roles.find({ server: req.server._id }).select("name id color permissions server_id deletable order default hideRole").lean();
+  const roles = await Roles.find({ server: req.server._id }).select("name id color permissions server_id deletable order default hideRole bot").lean();
 
   // order roles
   let ordered = roles.sort((a, b) => a.order - b.order);
