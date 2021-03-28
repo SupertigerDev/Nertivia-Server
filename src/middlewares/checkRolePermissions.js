@@ -10,12 +10,12 @@ module.exports = function (name, flag, sendError = true) {
         return;
       }
     } else if (!server) {
-      return next(true);
+      return next();
     }
     // owner always has the permission
     const isCreator = server.creator === req.user._id
     if (isCreator) {
-      return next(true);
+      return next();
     }
 
     if (req.permissions === undefined) {
@@ -23,7 +23,7 @@ module.exports = function (name, flag, sendError = true) {
       return;
     }
     if (containsPerm(req.permissions, flag | ADMIN)) {
-      return next(true);
+      return next();
     } else {
       sendErrorMessage(req, res, `Missing permission! (${name})`, sendError, next)
       return;
@@ -37,5 +37,5 @@ function sendErrorMessage(req, res, message, sendError, next) {
     return;
   }
   req.permErrorMessage = message;
-  next(false);
+  next();
 }
