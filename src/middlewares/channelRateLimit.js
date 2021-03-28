@@ -1,6 +1,6 @@
 const checkRolePermissions = require("./checkRolePermissions");
 const rateLimit = require("./rateLimit");
-const permissions = require('../../utils/rolePermConstants');
+const permissions = require('../utils/rolePermConstants');
 
 module.exports = function (req, res, next) {
   if (!req.channel.rateLimit) {
