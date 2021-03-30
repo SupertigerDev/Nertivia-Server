@@ -89,16 +89,12 @@ const usersSchema = new Schema({
       4 // Looking to play
     ]
   },
-  admin: {
-    type: Number,
+  type: {
+    type: String,
     default: 0,
     enum: [
-      0, // Member 
-      1, // Admin
-      2, // Mod
-      3, // Creator,
-      4, // cute
-      5, // supporter
+      "CREATOR",
+      "ADMIN"
     ]
   },
   friends: {
@@ -118,7 +114,16 @@ const usersSchema = new Schema({
     select: false
   },
   badges: {
-    type: [{ type: Number }],
+    type: [{ type: String, enum: [
+      "CREATOR",
+      "CUTE",
+      "SUPPORTER",
+      "DEVELOPER",
+      "IDEA_QUEEN",
+      "BUG_CATCHER",
+      "TRANSLATOR",
+      "CONTRIBUTOR",
+    ] }],
     select: false,
   },
   about_me: {

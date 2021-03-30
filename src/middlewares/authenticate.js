@@ -53,7 +53,7 @@ module.exports = function (allowBot = false, allowInvalid = false, allowNonTerms
 
     const user = await Users.findOne({ uniqueID: decryptedToken })
       .select(
-        "avatar status admin _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned bot passwordVersion readTerms"
+        "avatar status type _id username uniqueID tag created GDriveRefreshToken email_confirm_code banned bot passwordVersion readTerms"
       )
       .lean();
     // If user doesn't exists, handle it

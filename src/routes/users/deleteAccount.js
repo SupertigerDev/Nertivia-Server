@@ -70,7 +70,7 @@ module.exports = async (req, res, next) => {
       servers: 1,
       lastSeen: 1,
       status: 1,
-      admin: 1,
+      type: 1,
       badges: 1,
     }
   })
