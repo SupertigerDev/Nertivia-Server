@@ -114,16 +114,15 @@ const usersSchema = new Schema({
     select: false
   },
   badges: {
-    type: [{ type: String, enum: [
-      "CREATOR",
-      "CUTE",
-      "SUPPORTER",
-      "DEVELOPER",
-      "IDEA_QUEEN",
-      "BUG_CATCHER",
-      "TRANSLATOR",
-      "CONTRIBUTOR",
-    ] }],
+    // "CREATOR": 1,
+    // "CUTE": 2,
+    // "DEVELOPER": 4,
+    // "SUPPORTER": 8,
+    // "IDEA_QUEEN": 16,
+    // "BUG_CATCHER": 32,
+    // "TRANSLATOR": 64,
+    // "CONTRIBUTOR": 128
+    type: Number,
     select: false,
   },
   about_me: {

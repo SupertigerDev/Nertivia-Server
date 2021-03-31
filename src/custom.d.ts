@@ -53,6 +53,7 @@ interface User {
   avatar: string
   admin: string
   bot?: boolean,
+  badges?: number
 }
 
 interface uploadFile {

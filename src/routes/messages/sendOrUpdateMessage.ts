@@ -203,7 +203,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     username: req.user.username,
     tag: req.user.tag,
     avatar: req.user.avatar,
-    admin: req.user.admin,
+    badges: req.user.badges,
     bot: req.user.bot,
   };
 
