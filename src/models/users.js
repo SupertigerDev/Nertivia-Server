@@ -91,7 +91,6 @@ const usersSchema = new Schema({
   },
   type: {
     type: String,
-    default: 0,
     enum: [
       "CREATOR",
       "ADMIN"
