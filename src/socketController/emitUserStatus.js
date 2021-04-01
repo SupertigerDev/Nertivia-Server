@@ -1,18 +1,16 @@
-const Friends = require ('./../models/friends');
-const Users = require ('./../models/users');
 const emitToAll = require("./emitToAll");
-module.exports = async (uniqueID, id, status, io, modifyDB) => {
 
-  if (modifyDB) {
-    await Users.updateOne({_id: id}, 
-    {$set: {"status": status}})
+module.exports = function emitStatus(uniqueID, id, status, io, emitOffline = true, customStatus, connected = false) {
+    // dont emit if the status is offline (0)
+    if (emitOffline || (!emitOffline && status !== 0)) {
+      let payload = { uniqueID, status}
+      if (connected) {
+        payload.custom_status = customStatus
+        payload.connected = true
+      } 
+      emitToAll("userStatusChange", id, payload, io);
+    }
+
+    // send owns status to every connected device 
+    io.in(uniqueID).emit('multiDeviceStatus', { status });
   }
-
-
-  emitToAll("userStatusChange", id, {uniqueID, status}, io);
-
-  // send owns status to every connected device 
-  io.in(uniqueID).emit('multiDeviceStatus', {status});
-    
-
-}

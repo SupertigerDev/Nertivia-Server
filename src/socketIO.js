@@ -21,7 +21,7 @@ import getUsrDetails from './utils/getUserDetails';
 // disable socket events when not authorized .
 for (let key in getIOInstance().nsps) {
   const nsp = getIOInstance().nsps[key];
-  nsp.on("connect", function(socket) {
+  nsp.on("connect", function (socket) {
     if (!socket.auth) {
       delete nsp.connected[socket.id];
     }
@@ -59,7 +59,7 @@ const populateServers = {
 module.exports = async client => {
 
   //If the socket didn't authenticate(), disconnect it
-  let timeout = setTimeout(function() {
+  let timeout = setTimeout(function () {
     if (!client.auth) {
       client.emit("auth_err", "Invalid Token");
       client.disconnect(true);
@@ -194,7 +194,7 @@ module.exports = async client => {
       }
 
       const dms = channels
-        .find({ creator: user._id, hide: {$ne: true} }, { _id: 0 })
+        .find({ creator: user._id, hide: { $ne: true } }, { _id: 0 })
         .select("recipients channelID lastMessaged")
         .populate({
           path: "recipients",
@@ -216,8 +216,8 @@ module.exports = async client => {
         {
           member: user._id,
           $or: [
-            {muted_channels: { $exists: true, $not: { $size: 0 }}},
-            {muted: { $exists: true, $ne: 0 }}
+            { muted_channels: { $exists: true, $not: { $size: 0 } } },
+            { muted: { $exists: true, $ne: 0 } }
           ]
         },
         { _id: 0 }
@@ -225,15 +225,15 @@ module.exports = async client => {
 
       const lastSeenServerChannels = (await ServerMembers.find({
         member: user._id,
-        last_seen_channels: {$exists: true, $not: {$size: 0}}
-      }, {_id: 0}).select("last_seen_channels").lean()).map(res => res.last_seen_channels).reduce((accumulator, currentValue) => {
-        return {...accumulator, ...currentValue}
+        last_seen_channels: { $exists: true, $not: { $size: 0 } }
+      }, { _id: 0 }).select("last_seen_channels").lean()).map(res => res.last_seen_channels).reduce((accumulator, currentValue) => {
+        return { ...accumulator, ...currentValue }
       }, {})
 
 
-      const customEmojisList = customEmojis.find({ user: user._id }, {_id: 0}).select("emojiID gif name");
+      const customEmojisList = customEmojis.find({ user: user._id }, { _id: 0 }).select("emojiID gif name");
 
-      const bannedUserIDs = (await blockedUsers.find({requester: user._id}).populate("recipient", "uniqueID")).map(d => d.recipient.uniqueID)
+      const bannedUserIDs = (await blockedUsers.find({ requester: user._id }).populate("recipient", "uniqueID")).map(d => d.recipient.uniqueID)
 
       const results = await Promise.all([
         dms,
@@ -262,7 +262,7 @@ module.exports = async client => {
         ...serverMemberUniqueIDs
       ]
 
-      const {customStatusArr, memberStatusArr, programActivityArr} = await getUsrDetails(arr.filter((u, i) => arr.indexOf(u) === i))
+      const { customStatusArr, memberStatusArr, programActivityArr } = await getUsrDetails(arr.filter((u, i) => arr.indexOf(u) === i))
 
 
       const settings = {
@@ -274,14 +274,9 @@ module.exports = async client => {
 
       // check if user is already online on other clients
       const checkAlready = await redis.connectedUserCount(user.uniqueID);
-      // if multiple users are still online
+      // only emit if there are no other users online (1 because we just connected)
       if (checkAlready && checkAlready.result === 1) {
-        emitUserStatus(
-          user.uniqueID,
-          user._id,
-          user.status,
-          getIOInstance()
-        );
+        emitUserStatus(user.uniqueID, user._id, user.status, getIOInstance(), false, user.custom_status, true)
       }
 
       // nsps = namespaces.
@@ -298,7 +293,7 @@ module.exports = async client => {
       let concatedMutedChannels = [];
       for (let i = 0; i < results[3].length; i++) {
         const res = results[3][i].muted_channels;
-        if (res && res.length){
+        if (res && res.length) {
           concatedMutedChannels = [...concatedMutedChannels, ...res]
         }
       }
@@ -306,7 +301,7 @@ module.exports = async client => {
       for (let i = 0; i < results[3].length; i++) {
         const res = results[3][i];
         if (res.muted) {
-          mutedServers.push({muted: res.muted, server_id: res.server_id});
+          mutedServers.push({ muted: res.muted, server_id: res.server_id });
         }
       }
 
@@ -318,7 +313,7 @@ module.exports = async client => {
         serverRoles: serverRoles,
         dms: results[0],
         mutedChannels: concatedMutedChannels,
-        mutedServers:  mutedServers,
+        mutedServers: mutedServers,
         notifications: results[1],
         memberStatusArr,
         customStatusArr,
@@ -327,11 +322,13 @@ module.exports = async client => {
         lastSeenServerChannels,
         bannedUserIDs,
         pid: process.pid
-        
+
       });
     } catch (e) {
       delete client.auth;
       client.emit("auth_err", "Invalid Token");
+      console.log("Error when connecting:")
+      console.log(e)
       client.disconnect(true);
       clearTimeout(timeout);
     }
@@ -343,20 +340,21 @@ module.exports = async client => {
     if (!client.auth) return;
     const { ok, result, error } = await redis.getConnectedBySocketID(client.id);
     if (!ok || !result) return;
+    const presence = await redis.getPresence(result.u_id);
 
     const response = await redis.disconnected(result.u_id, client.id);
 
     // if all users have gone offline, emit offline status to friends.
-    if (response.result === 1) {
+    if (response.result === 1 && presence?.result?.[1] !== '0') {
       emitUserStatus(result.u_id, result._id, 0, getIOInstance());
     } else {
       // remove program activity status if the socket id matches
       const programActivity = await redis.getProgramActivity(result.u_id);
       if (!programActivity.ok || !programActivity.result) return;
-      const {socketID} = JSON.parse(programActivity.result);
+      const { socketID } = JSON.parse(programActivity.result);
       if (socketID === client.id) {
         await redis.setProgramActivity(result.u_id, null);
-        emitToAll("programActivity:changed", result._id, {uniqueID: result.u_id}, getIOInstance())
+        emitToAll("programActivity:changed", result._id, { uniqueID: result.u_id }, getIOInstance())
       }
 
     }
@@ -378,17 +376,17 @@ module.exports = async client => {
       if (data.status) {
         data.status = data.status.substring(0, 100)
       }
-      const res = await redis.setProgramActivity(uniqueID, {name: data.name, status: data.status, socketID: client.id})
+      const res = await redis.setProgramActivity(uniqueID, { name: data.name, status: data.status, socketID: client.id })
       const json = JSON.parse(res.result[0])
       // only emit if: 
       // json is empty
       // json is not the same.
-      if ( (json && (json.name !== data.name || json.status !== data.status)) || (!json) ) {
-        emitToAll("programActivity:changed", _id, {name: data.name, status: data.status, uniqueID}, getIOInstance())
+      if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
+        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, uniqueID }, getIOInstance())
       }
     } else {
       await redis.setProgramActivity(uniqueID, null);
-      emitToAll("programActivity:changed", _id, {uniqueID}, getIOInstance())
+      emitToAll("programActivity:changed", _id, { uniqueID }, getIOInstance())
     }
   })
 };
