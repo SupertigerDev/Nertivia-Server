@@ -27,7 +27,7 @@ function getSessionInstance() {
     genid: req => {
       const token = process.env.JWT_HEADER + req.headers.authorization;
       try {
-        // will contain uniqueID
+        // will contain user id
         const decryptedToken = JWT.verify(token, process.env.JWT_SECRET);
         return decryptedToken.toString().split("-")[0];
       } catch (err) {

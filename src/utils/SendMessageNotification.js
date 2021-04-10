@@ -3,19 +3,19 @@ const ServerMembers = require("./../models/ServerMembers");
 const Notifications = require("./../models/notifications");
 const messages = require("./../models/messages");
 
-// recipient_uniqueID: Only required for DMs.
+// recipientUserID: Only required for DMs.
 // server_id: Only required for server messages.
 async function sendNotification({
   message,
   server_id,
-  recipient_uniqueID,
+  recipientUserID,
   channelID,
   sender
 }) {
   const bulk = Notifications.collection.initializeUnorderedBulkOp();
   // If messages are to be sent to dm.
-  if (recipient_uniqueID) {
-    await addToBulk(bulk, recipient_uniqueID, sender._id, channelID, message, false);
+  if (recipientUserID) {
+    await addToBulk(bulk, recipientUserID, sender._id, channelID, message, false);
     bulk.execute();
     return;
   }
@@ -31,23 +31,23 @@ async function sendNotification({
 
   for (let i = 0; i < filteredMentions.length; i++) {
     const member = filteredMentions[i];
-    addServerMentioned(bulk, member.uniqueID, sender._id, channelID, message);
+    addServerMentioned(bulk, member.id, sender._id, channelID, message);
   }
   bulk.execute();
   return;
 }
 
 
-function addServerMentioned(bulk, recipient_uniqueID, sender_id, channelID, message, isServer) {
+function addServerMentioned(bulk, recipientUserID, sender_id, channelID, message, isServer) {
   const $set = {
-    recipient: recipient_uniqueID,
+    recipient: recipientUserID,
     channelID,
     type: "MESSAGE_CREATED",
     sender: sender_id,
     mentioned: true,
   };
   const find = {
-    recipient: recipient_uniqueID,
+    recipient: recipientUserID,
     channelID
   }
 
@@ -65,21 +65,21 @@ function addServerMentioned(bulk, recipient_uniqueID, sender_id, channelID, mess
 
 
 
-function addToBulk(bulk, recipient_uniqueID, sender_id, channelID, message, isServer) {
+function addToBulk(bulk, recipientUserID, sender_id, channelID, message, isServer) {
   const $set = {
-    recipient: recipient_uniqueID,
+    recipient: recipientUserID,
     channelID,
     type: "MESSAGE_CREATED",
     sender: sender_id
   };
   const mentioned =
     message.mentions &&
-    !!message.mentions.find(m => m.uniqueID === recipient_uniqueID);
+    !!message.mentions.find(m => m.id === recipientUserID);
   if (mentioned) {
     $set.mentioned = true;
   }
   const find = {
-    recipient: recipient_uniqueID,
+    recipient: recipientUserID,
     channelID
   }
 

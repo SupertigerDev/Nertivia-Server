@@ -19,5 +19,5 @@ module.exports = async (req, res, next) => {
 
 
   res.json({ status: true, channelID: channel_id });
-  req.io.in(req.user.uniqueID).emit("channel:remove", { channelID: channel_id });
+  req.io.in(req.user.id).emit("channel:remove", { channelID: channel_id });
 };

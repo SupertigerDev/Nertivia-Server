@@ -27,7 +27,7 @@ module.exports = async (req, res, next) => {
     });
     const io = req.io;
     // send owns status to every connected device
-    io.in(req.user.uniqueID).emit("customEmoji:remove", {
+    io.in(req.user.id).emit("customEmoji:remove", {
       emoji: item
     });
   });

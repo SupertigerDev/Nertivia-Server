@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
         });
       }
       // send to other clients.
-      req.io.in(req.user.uniqueID).emit("survey:completed");
+      req.io.in(req.user.id).emit("survey:completed");
 
       res.json({
         message: "Saved!"

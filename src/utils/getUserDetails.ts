@@ -1,21 +1,21 @@
 const redis = require('../redis')
-export default async function (uniqueIDArr: String[]){
+export default async function (userIDArr: String[]){
 
-  let { ok, error, result } = await redis.getPresences(uniqueIDArr);
+  let { ok, error, result } = await redis.getPresences(userIDArr);
 
   const memberStatusArr =  result.filter((s: string[]) => s[0] !== null && s[1] !== "0");
 
   // its ugly, but watever. Most of my code is ugly 🤡
-  const onlineMemberUniqueIDArr = memberStatusArr.map((f: string[]) => f[0]);
-  const customStatusArr = (await redis.getCustomStatusArr(onlineMemberUniqueIDArr)).result.filter((s: string[]) => s[0] !== null && s[1] !== null)
+  const onlineMemberUserIDArr = memberStatusArr.map((f: string[]) => f[0]);
+  const customStatusArr = (await redis.getCustomStatusArr(onlineMemberUserIDArr)).result.filter((s: string[]) => s[0] !== null && s[1] !== null)
 
-  const programActivityArr = (await redis.getProgramActivityArr(onlineMemberUniqueIDArr)).result
+  const programActivityArr = (await redis.getProgramActivityArr(onlineMemberUserIDArr)).result
     .map((pa: any, i: number)  => {
       if (!pa) return undefined;
-      const uniqueID = onlineMemberUniqueIDArr[i];
+      const user_id = onlineMemberUserIDArr[i];
       const json = JSON.parse(pa);
       delete json.socketID;
-      return {...json, uniqueID}
+      return {...json, uniqueID: user_id}
     })
     .filter((pa: any) => pa)
     return {memberStatusArr, customStatusArr, programActivityArr};

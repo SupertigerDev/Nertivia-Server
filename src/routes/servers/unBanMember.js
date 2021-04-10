@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
   const server = req.server;
 
 
-  const userToBeUnbanned = await Users.findOne({uniqueID: unique_id}).select('username tag avatar uniqueID');
+  const userToBeUnbanned = await Users.findOne({id: unique_id}).select('username tag avatar uniqueID id');
 
   if (!userToBeUnbanned) {
     return res.status(404).json({message: "User doesn't exist."})

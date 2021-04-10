@@ -28,12 +28,12 @@ module.exports = async (req, res, next) => {
   await Users.updateOne({_id: req.user._id}, obj)
 
   // change the status in redis.
-  await redis.changeCustomStatus(req.user.uniqueID, customStatus);
+  await redis.changeCustomStatus(req.user.id, customStatus);
 
   // emit status to users.
-  emitAll("member:custom_status_change", req.user._id, {uniqueID: req.user.uniqueID, custom_status: customStatus}, io)
+  emitAll("member:custom_status_change", req.user._id, {uniqueID: req.user.id, id: req.user.id, custom_status: customStatus}, io)
 
-  io.in(req.user.uniqueID).emit('multiDeviceCustomStatus', { custom_status: customStatus});
+  io.in(req.user.id).emit('multiDeviceCustomStatus', { custom_status: customStatus});
     
 
   res.json({

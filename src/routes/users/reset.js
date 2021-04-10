@@ -19,8 +19,8 @@ module.exports = async (req, res, next) => {
 
 
   // Find the user given the email
-  const user = await Users.findOne({uniqueID}).select(
-    "email avatar status admin _id username uniqueID tag created GDriveRefreshToken banned email_confirm_code passwordVersion reset_password_code"
+  const user = await Users.findOne({id: uniqueID}).select(
+    "email avatar status admin _id username uniqueID id tag created GDriveRefreshToken banned email_confirm_code passwordVersion reset_password_code"
   );
 
   // If not, handle it
@@ -74,7 +74,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  kickUser(req.io, user.uniqueID)
+  kickUser(req.io, user.id)
   // send email
   const mailOptions = {
     from: process.env.SMTP_FROM,
@@ -94,10 +94,10 @@ module.exports = async (req, res, next) => {
  * @param {sio.Server} io
  */
 // also used in user update password.
-async function kickUser(io, uniqueID, socketID) {
+async function kickUser(io, user_id, socketID) {
 
 
-  io.in(uniqueID).clients((err, clients) => {
+  io.in(user_id).clients((err, clients) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       if (id === socketID) continue;

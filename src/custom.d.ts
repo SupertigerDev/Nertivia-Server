@@ -47,6 +47,7 @@ declare global {
 }
 interface User {
   uniqueID: string
+  id: string
   _id: string
   username: string
   tag: string

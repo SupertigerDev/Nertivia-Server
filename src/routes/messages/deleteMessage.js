@@ -39,8 +39,8 @@ module.exports = async (req, res, next) => {
     if (server) {
       io.in("server:" + server.server_id).emit("delete_message", resObj);
     } else {
-      io.in(user.uniqueID).emit("delete_message", resObj);
-      io.in(channel.recipients[0].uniqueID).emit("delete_message", resObj);
+      io.in(user.id).emit("delete_message", resObj);
+      io.in(channel.recipients[0].id).emit("delete_message", resObj);
     }
 
     // delete image if exists

@@ -5,15 +5,15 @@ const Channels = require('../../models/channels');
 const redis = require('../../redis');
 
 module.exports = async (req, res, next) => {
-  const recipientUniqueID = req.body.uniqueID; 
+  const recipientUserID = req.body.uniqueID; 
 
   // check if the recipient exists
-  const recipient = await User.findOne({uniqueID: recipientUniqueID});
+  const recipient = await User.findOne({id: recipientUserID});
   if (!recipient) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "User not found."}] });
 
   // check if the blocker exists
-  const requester = await User.findOne({uniqueID: req.user.uniqueID})
+  const requester = await User.findOne({id: req.user.id})
   if (!requester) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
 
@@ -41,13 +41,13 @@ module.exports = async (req, res, next) => {
   ]}).select("channelID")
 
   if (openedChannel) {
-    await redis.deleteDmChannel(requester.uniqueID, openedChannel.channelID)
-    await redis.deleteDmChannel(recipient.uniqueID, openedChannel.channelID)
+    await redis.deleteDmChannel(requester.id, openedChannel.channelID)
+    await redis.deleteDmChannel(recipient.id, openedChannel.channelID)
   }
 
   const io = req.io
   
-  io.in(requester.uniqueID).emit('user:unblock', recipient.uniqueID);
+  io.in(requester.id).emit('user:unblock', recipient.id);
 
   return res.json({message: "User unblocked." })
 }

@@ -11,8 +11,8 @@ export default async function createBot(req: Request, res: Response) {
   const { bot_id, server_id } = req.params;
   const permissions = parseInt(req.body.permissions) || 0;
 
-  const bot: any = await Users.findOne({ uniqueID: bot_id, bot: true })
-    .select("avatar tag uniqueID username admin _id")
+  const bot: any = await Users.findOne({ id: bot_id, bot: true })
+    .select("avatar tag uniqueID id username admin _id")
     .lean();
 
   if (!bot) {

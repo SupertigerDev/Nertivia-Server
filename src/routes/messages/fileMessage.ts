@@ -122,11 +122,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     if (upload_cdn === 1) {
 
       if (cancelRequest) return;
-      const success = await nertiviaCDN.uploadFile(fs.createReadStream(dirPath), req.user.uniqueID, fileid, filename)
+      const success = await nertiviaCDN.uploadFile(fs.createReadStream(dirPath), req.user.id, fileid, filename)
         .catch((err: any) => { res.status(403).json({ message: err }) })
       if (!success) return deleteFile(dirPath);
       const fileObj: { url: string, dimensions?: object } = {
-        url: `https://media.nertivia.net/${req.user.uniqueID}/${fileid}/${encodeURIComponent(filename)}`
+        url: `https://media.nertivia.net/${req.user.id}/${fileid}/${encodeURIComponent(filename)}`
       };
       if (metadata) {
         fileObj.dimensions = { width: metadata.width, height: metadata.height };

@@ -38,14 +38,14 @@ module.exports = async (req, res, next) => {
     const userTagExists = await Users.exists({
       username: data.username || user.username,
       tag: data.tag || user.tag,
-      uniqueID: { $ne: user.uniqueID }
+      id: { $ne: user.id }
     });
 
     if (data.email) {
       data.email = data.email.toLowerCase()
       const userEmailExists = await Users.exists({
         email: data.email,
-        uniqueID: { $ne: user.uniqueID }
+        id: { $ne: user.id }
       });
       if (userEmailExists) {
         return res
@@ -99,7 +99,7 @@ module.exports = async (req, res, next) => {
   }
 
   if (data.avatar) {
-    const url = await uploadAvatar(data.avatar, req.user.uniqueID).catch(err => {res.status(403).json({message: err})});
+    const url = await uploadAvatar(data.avatar, req.user.id).catch(err => {res.status(403).json({message: err})});
     if (!url) return;
     delete data.avatar;
     data.avatar = url;
@@ -113,24 +113,25 @@ module.exports = async (req, res, next) => {
     delete resObj.password;
     const updateSession = Object.assign({}, req.session["user"], resObj, {passwordVersion: req.user.passwordVersion});
     req.session["user"] = updateSession;
-    resObj.uniqueID = user.uniqueID;
+    resObj.uniqueID = user.id;
+    resObj.id = user.id;
     const io = req.io;
     if (updatePassword) {
-      res.json({...resObj, token: JWT.sign(`${user.uniqueID}-${req.user.passwordVersion}`, process.env.JWT_SECRET).split(".").splice(1).join(".")});
+      res.json({...resObj, token: JWT.sign(`${user.id}-${req.user.passwordVersion}`, process.env.JWT_SECRET).split(".").splice(1).join(".")});
 
       // logout other accounts
-      kickUser(io, user.uniqueID, socketID)
+      kickUser(io, user.id, socketID)
 
     } else {
       res.json(resObj);
     }
 
 
-    io.in(req.user.uniqueID).emit("update_member", resObj);
+    io.in(req.user.id).emit("update_member", resObj);
 
     // emit public data
     if (!data.avatar && !data.username) return;
-    const publicObj = {uniqueID: req.user.uniqueID}
+    const publicObj = {uniqueID: req.user.id, id: req.user.id}
     if (data.avatar) publicObj.avatar = data.avatar;
     if (data.username) publicObj.username = data.username;
     if (data.tag) publicObj.tag = data.tag;
@@ -143,7 +144,7 @@ module.exports = async (req, res, next) => {
 };
 
 
-async function uploadAvatar(base64, uniqueID) {
+async function uploadAvatar(base64, user_id) {
   return new Promise(async (resolve, reject) => {
     let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
@@ -168,10 +169,10 @@ async function uploadAvatar(base64, uniqueID) {
     const id = flakeId.gen();
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, uniqueID, id, `avatar.${type}`)
+    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `avatar.${type}`)
       .catch(err => {reject(err)})
     if (!success) return;
-    resolve(`${uniqueID}/${id}/avatar.${type}`);
+    resolve(`${user_id}/${id}/avatar.${type}`);
   })
 }
 
@@ -207,8 +208,8 @@ function checkMimeType(mimeType) {
  * @param {sio.Server} io
  */
 // also used in reset password.
-async function kickUser(io, uniqueID, socketID) {
-  io.in(uniqueID).clients((err, clients) => {
+async function kickUser(io, user_id, socketID) {
+  io.in(user_id).clients((err, clients) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       if (id === socketID) continue;

@@ -45,7 +45,7 @@ module.exports = async (req, res, next) => {
     .json({error: "You must leave / Delete all of your servers before deleting your account."})
   }
 
-  await deleteAllUserFCM(req.user.uniqueID);
+  await deleteAllUserFCM(req.user.id);
 
 
 
@@ -77,9 +77,9 @@ module.exports = async (req, res, next) => {
 
   
   // delete files from cdn
-  nertiviaCDN.deletePath("/" + req.user.uniqueID).catch(err => {console.log("Error deleting from CDN", err)});
+  nertiviaCDN.deletePath("/" + req.user.id).catch(err => {console.log("Error deleting from CDN", err)});
 
-  kickUser(req.io, req.user.uniqueID);
+  kickUser(req.io, req.user.id);
   req.session.destroy();
 
   res
@@ -89,10 +89,10 @@ module.exports = async (req, res, next) => {
 
 
 };
-async function kickUser(io, uniqueID) {
-  await redis.deleteSession(uniqueID);
+async function kickUser(io, user_id) {
+  await redis.deleteSession(user_id);
 
-  io.in(uniqueID).clients((err, clients) => {
+  io.in(user_id).clients((err, clients) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit("auth_err",  "Token outdated.");

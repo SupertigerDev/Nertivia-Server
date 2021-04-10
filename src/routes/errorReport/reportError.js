@@ -10,7 +10,7 @@ const server_id = "6768469298621976577"
 module.exports = async (req, res, next) => {
   const { message, name, stack, user_message, url } = req.body;
 
-  const bot = await Users.findOne({uniqueID: bot_id});
+  const bot = await Users.findOne({id: bot_id});
   if (!bot) {
     res.status(403).json({message: "Bot could not be found."});
     return;

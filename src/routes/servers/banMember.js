@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
   const {server_id, unique_id} = req.params;
 
 
-  if (unique_id === req.user.uniqueID) {
+  if (unique_id === req.user.id) {
     return res
     .status(403)
     .json({ message: "Why would you ban yourself?" });
@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
   const server = req.server;
 
   // allow members that are not in this server to be banned.
-  const userToBeBanned = await Users.findOne({uniqueID: unique_id}).select('_id uniqueID username tag avatar admin');
+  const userToBeBanned = await Users.findOne({id: unique_id}).select('_id uniqueID id username tag avatar admin');
 
   if (!userToBeBanned) return res
     .status(404)
@@ -120,6 +120,7 @@ module.exports = async (req, res, next) => {
   // emit leave event 
   io.in("server:" + req.server.server_id).emit("server:member_remove", {
     uniqueID: unique_id,
+    id: unique_id,
     server_id: server_id
   });
 

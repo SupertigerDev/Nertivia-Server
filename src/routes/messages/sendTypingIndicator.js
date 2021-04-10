@@ -9,16 +9,16 @@ module.exports = async (req, res, next) => {
   if (req.channel && req.channel.server) {
     io.in("server:" + req.channel.server.server_id).emit("typingStatus", {
       channel_id: channelID,
-      user: { unique_id: req.user.uniqueID, username: req.user.username }
+      user: { unique_id: req.user.uniqueID, id: req.user.id, username: req.user.username }
     });
     return;
   }
 
   if (req.channel && req.channel.recipients) {
     for (let recipients of req.channel.recipients) {
-      io.in(recipients.uniqueID).emit("typingStatus", {
+      io.in(recipients.id).emit("typingStatus", {
         channel_id: channelID,
-        user: { unique_id: req.user.uniqueID, username: req.user.username }
+        user: { unique_id: req.user.id, id: req.user.id, username: req.user.username }
       });
     }
   }

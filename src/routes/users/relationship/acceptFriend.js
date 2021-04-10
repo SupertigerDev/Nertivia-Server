@@ -2,14 +2,14 @@ const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
 
 module.exports = async (req, res, next) => {
-  const recipientUniqueID = req.body.uniqueID;
+  const recipientUserID = req.body.uniqueID;
     
   // check if the recipient exists
-  const recipient = await User.findOne({uniqueID: recipientUniqueID});
+  const recipient = await User.findOne({id: recipientUserID});
   if (!recipient) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "User not found."}] });
   // get accepter and check if the user exists.
-  const accepter = await User.findOne({uniqueID: req.user.uniqueID})
+  const accepter = await User.findOne({id: req.user.id})
   if (!accepter) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
   
@@ -39,9 +39,9 @@ module.exports = async (req, res, next) => {
     docRecipient.recipient = accepter
 
   const io = req.io
-  io.in(accepter.uniqueID).emit('relationshipAccept', recipient.uniqueID);
+  io.in(accepter.id).emit('relationshipAccept', recipient.id);
 
-  io.in(recipient.uniqueID).emit('relationshipAccept', accepter.uniqueID);
+  io.in(recipient.id).emit('relationshipAccept', accepter.id);
 
   return res.json({ status: true, message: `Request accepted` })
 

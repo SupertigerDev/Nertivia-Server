@@ -4,20 +4,20 @@ const BlockedUsers = require('../../models/blockedUsers');
 const Channels = require('../../models/channels');
 const redis = require('../../redis');
 module.exports = async (req, res, next) => {
-  const recipientUniqueID = req.body.uniqueID; 
+  const recipientUserID = req.body.uniqueID; 
 
-  if (recipientUniqueID === req.user.uniqueID) {
+  if (recipientUserID === req.user.id) {
     return res.status(403)
     .json({ message: "You cannot block yourself ♥" });
   }
 
   // check if the recipient exists
-  const recipient = await User.findOne({uniqueID: recipientUniqueID});
+  const recipient = await User.findOne({id: recipientUserID});
   if (!recipient) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "User not found."}] });
 
   // check if the blocker exists
-  const requester = await User.findOne({uniqueID: req.user.uniqueID})
+  const requester = await User.findOne({id: req.user.id})
   if (!requester) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
 
@@ -58,18 +58,18 @@ module.exports = async (req, res, next) => {
   ]}).select("channelID")
 
   if (openedChannel) {
-    await redis.deleteDmChannel(requester.uniqueID, openedChannel.channelID)
-    await redis.deleteDmChannel(recipient.uniqueID, openedChannel.channelID)
+    await redis.deleteDmChannel(requester.id, openedChannel.channelID)
+    await redis.deleteDmChannel(recipient.id, openedChannel.channelID)
   }
 
   const io = req.io
   
   
-  io.in(requester.uniqueID).emit('relationshipRemove', recipient.uniqueID);
+  io.in(requester.id).emit('relationshipRemove', recipient.id);
   
-  io.in(recipient.uniqueID).emit('relationshipRemove', requester.uniqueID);
+  io.in(recipient.id).emit('relationshipRemove', requester.id);
   
-  io.in(requester.uniqueID).emit('user:block', recipient.uniqueID);
+  io.in(requester.id).emit('user:block', recipient.id);
  
 
   return res.json({ message: `User blocked` })

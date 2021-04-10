@@ -64,7 +64,7 @@ export default async function join(server: any, user: any, socketID: string | un
   }).lean();
 
   const createServerObj = Object.assign({}, server);
-  createServerObj.creator = { uniqueID: createServerObj.creator.uniqueID };
+  createServerObj.creator = { uniqueID: createServerObj.creator.id, id: createServerObj.creator.id };
   createServerObj.__v = undefined;
   createServerObj._id = undefined;
 
@@ -80,12 +80,13 @@ export default async function join(server: any, user: any, socketID: string | un
       username: user.username,
       tag: user.tag,
       avatar: user.avatar,
-      uniqueID: user.uniqueID
+      uniqueID: user.id,
+      id: user.id
     }
   };
   // get user presence
-  const presence = await redis.getPresence(serverMember.member.uniqueID);
-  const customStatus = await redis.getCustomStatus(serverMember.member.uniqueID);
+  const presence = await redis.getPresence(serverMember.member.id);
+  const customStatus = await redis.getCustomStatus(serverMember.member.id);
   io.in("server:" + server.server_id).emit("server:member_add", {
     serverMember,
     custom_status: customStatus.result[1],
@@ -96,7 +97,7 @@ export default async function join(server: any, user: any, socketID: string | un
   createServerObj.channels = serverChannels;
 
   // join room
-  io.in(user.uniqueID).clients((err: any, clients: string[]) => {
+  io.in(user.id).clients((err: any, clients: string[]) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit(
@@ -118,7 +119,8 @@ export default async function join(server: any, user: any, socketID: string | un
 
   let messageCreated = await messageCreate.save();
   user = {
-    uniqueID: user.uniqueID,
+    uniqueID: user.id,
+    id: user.id,
     username: user.username,
     tag: user.tag,
     avatar: user.avatar,
@@ -140,7 +142,7 @@ export default async function join(server: any, user: any, socketID: string | un
   defaultChannel.server = server;
 
 
-  await AddFCMUserToServer(server.server_id, user.uniqueID)
+  await AddFCMUserToServer(server.server_id, user.id)
 
   sendServerPush({
     channel: defaultChannel,
@@ -160,17 +162,17 @@ export default async function join(server: any, user: any, socketID: string | un
     { _id: 0 }
   ).select("name id color permissions server_id deletable order default hideRole");
 
-  io.to(user.uniqueID).emit("server:roles", {
+  io.to(user.id).emit("server:roles", {
     server_id: server.server_id,
     roles: serverRoles
   });
 
   // send members list
   let serverMembers = await ServerMembers.find({ server: server._id })
-    .populate("member", "username tag avatar uniqueID bot")
+    .populate("member", "username tag avatar uniqueID id bot")
     .lean();
 
-  const  {programActivityArr, memberStatusArr, customStatusArr} = await getUserDetails(serverMembers.map((sm: any) => sm.member.uniqueID))   
+  const  {programActivityArr, memberStatusArr, customStatusArr} = await getUserDetails(serverMembers.map((sm: any) => sm.member.id))   
 
   serverMembers = serverMembers.map((sm: any) => {
     delete sm.server;
@@ -179,7 +181,7 @@ export default async function join(server: any, user: any, socketID: string | un
     sm.server_id = server.server_id;
     return sm;
   });
-  io.to(user.uniqueID).emit("server:members", {
+  io.to(user.id).emit("server:members", {
     serverMembers,
     memberPresences: memberStatusArr,
     memberCustomStatusArr: customStatusArr,

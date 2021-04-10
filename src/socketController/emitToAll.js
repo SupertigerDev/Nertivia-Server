@@ -28,14 +28,14 @@ module.exports = async (name, id, data, io, emitToSelf = true) => {
   for (let index = 0; index < friends.length; index++) {
     const friend = friends[index];
     if (!friend.recipient?.length) continue;
-    roomIDArr.push(friend.recipient.uniqueID);
+    roomIDArr.push(friend.recipient.id);
   }
 
 
   if (emitToSelf) {
-    roomIDArr.push(user.uniqueID);
+    roomIDArr.push(user.id);
   } else {
-    roomIDArr.filter(r => r !== user.uniqueID)
+    roomIDArr.filter(r => r !== user.id)
   }
   io.of('/').adapter.clients(roomIDArr, (err, clients) => {
     for (let i = 0; i < clients.length; i++) {

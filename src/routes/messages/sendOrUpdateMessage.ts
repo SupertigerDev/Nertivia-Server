@@ -116,7 +116,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
   let mentions = [];
   if (mentionIds.length) {
-    mentions = await Users.find({uniqueID: {$in: mentionIds}}).select('_id uniqueID avatar tag username').lean();
+    mentions = await Users.find({id: {$in: mentionIds}}).select('_id uniqueID id avatar tag username').lean();
   } 
   const _idMentionsArr = mentions.map((m:any)=> m._id )
   
@@ -138,13 +138,13 @@ export default async (req: Request, res: Response, next: NextFunction) => {
           select: "creator message messageID",
           populate: {
             path: "creator",
-            select: "avatar username uniqueID tag admin -_id",
+            select: "avatar username uniqueID id tag admin -_id",
             model: "users"
           }
         },
         {
           path: "creator",
-          select: "username uniqueID avatar"
+          select: "username uniqueID id avatar"
         }
       ]).lean()
     quotes_idArr = (await MessageQuotes.insertMany(quotedMessages.map((q: any) => {
@@ -200,6 +200,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
   const user = {
     uniqueID: req.user.uniqueID,
+    id: req.user.id,
     username: req.user.username,
     tag: req.user.tag,
     avatar: req.user.avatar,
@@ -313,7 +314,7 @@ function filterNestedQuotes(baseQuote: string, quotes: any[]) {
 
 async function directMessage(req: any, io: any, channelID: any, messageCreated: any, socketID: any, tempID: any) {
 
-  const isSavedNotes = req.user.uniqueID === req.channel.recipients[0].uniqueID
+  const isSavedNotes = req.user.id === req.channel.recipients[0].id
 
   // checks if its sending to saved notes or not.
   if (!isSavedNotes) {
@@ -336,7 +337,7 @@ async function directMessage(req: any, io: any, channelID: any, messageCreated: 
 
     const sendNotification = sendMessageNotification({
       message: messageCreated,
-      recipient_uniqueID: req.channel.recipients[0].uniqueID,
+      recipient_uniqueID: req.channel.recipients[0].id,
       channelID,
       sender: req.user,
     })
@@ -348,13 +349,13 @@ async function directMessage(req: any, io: any, channelID: any, messageCreated: 
 
   if (!isSavedNotes){
     // for group messaging, do a loop instead of [0]
-    io.in(req.channel.recipients[0].uniqueID).emit("receiveMessage", {
+    io.in(req.channel.recipients[0].id).emit("receiveMessage", {
       message: messageCreated
     });
   }
 
   // Loop for other users logged in to the same account and emit (exclude the sender account.).
-  io.in(req.user.uniqueID).clients((err: any, clients: any[]) => {
+  io.in(req.user.id).clients((err: any, clients: any[]) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       if (id !== socketID) {
@@ -386,8 +387,8 @@ function updateMessage(req: any,server: any, resObj: any, io: any) {
       embed: 0
     });
   } else {
-    io.in(req.user.uniqueID).emit("update_message", { ...resObj, embed: {} });
-    io.in(req.channel.recipients[0].uniqueID).emit("update_message", {
+    io.in(req.user.id).emit("update_message", { ...resObj, embed: {} });
+    io.in(req.channel.recipients[0].id).emit("update_message", {
       ...resObj,
       embed: 0
     });

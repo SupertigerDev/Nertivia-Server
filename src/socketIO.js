@@ -33,7 +33,7 @@ const populateFriends = {
   populate: [
     {
       path: "recipient",
-      select: "username uniqueID tag admin -_id avatar"
+      select: "username uniqueID id tag admin -_id avatar"
     }
   ],
   select: "recipient status -_id"
@@ -44,7 +44,7 @@ const populateServers = {
   populate: [
     {
       path: "creator",
-      select: "uniqueID -_id"
+      select: "uniqueID id -_id"
       //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
     }
   ],
@@ -83,9 +83,9 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar username type badges email uniqueID tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
+        "avatar username type badges email uniqueID id tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
 
-      const user = await User.findOne({ uniqueID: decryptedToken })
+      const user = await User.findOne({ id: decryptedToken })
         .select(userSelect)
         .populate(populateFriends)
         .populate(populateServers)
@@ -102,7 +102,7 @@ module.exports = async client => {
       }
 
       if (user.banned) {
-        console.log("Disconnect Reason: User is banned", user.username, user.uniqueID);
+        console.log("Disconnect Reason: User is banned", user.username, user.id);
         delete client.auth;
         client.emit("auth_err", "You are banned.");
         client.disconnect(true);
@@ -134,7 +134,7 @@ module.exports = async client => {
       const ipBanned = await BannedIPs.exists({ ip: ip });
 
       if (ipBanned) {
-        console.log("loggedOutReason: IP is banned.", user.username, user.uniqueID);
+        console.log("loggedOutReason: IP is banned.", user.username, user.id);
         delete client.auth;
         client.emit("auth_err", "IP is Banned.");
         client.disconnect(true);
@@ -151,7 +151,7 @@ module.exports = async client => {
       }
       delete user.readTerms;
 
-      await redis.connected(user.uniqueID, user._id, user.status, user.custom_status, client.id);
+      await redis.connected(user.id, user._id, user.status, user.custom_status, client.id);
 
       let serverMembers = [];
 
@@ -182,7 +182,7 @@ module.exports = async client => {
           .select("type member server_id roles")
           .populate({
             path: "member",
-            select: "username tag avatar uniqueID member -_id bot botPrefix"
+            select: "username tag avatar uniqueID id member -_id bot botPrefix"
           })
           .lean();
 
@@ -198,17 +198,17 @@ module.exports = async client => {
         .select("recipients channelID lastMessaged")
         .populate({
           path: "recipients",
-          select: "avatar username uniqueID tag bot -_id"
+          select: "avatar username uniqueID id tag bot -_id"
         })
         .lean();
 
-      const notifications = Notifications.find({ recipient: user.uniqueID })
+      const notifications = Notifications.find({ recipient: user.id })
         .select(
           "mentioned type sender lastMessageID count recipient channelID -_id"
         )
         .populate({
           path: "sender",
-          select: "avatar username uniqueID tag -_id"
+          select: "avatar username uniqueID id tag -_id"
         })
         .lean();
 
@@ -233,7 +233,7 @@ module.exports = async client => {
 
       const customEmojisList = customEmojis.find({ user: user._id }, { _id: 0 }).select("emojiID gif name");
 
-      const bannedUserIDs = (await blockedUsers.find({ requester: user._id }).populate("recipient", "uniqueID")).map(d => d.recipient.uniqueID)
+      const bannedUserIDs = (await blockedUsers.find({ requester: user._id }).populate("recipient", "uniqueID id")).map(d => d.recipient.id)
 
       const results = await Promise.all([
         dms,
@@ -242,7 +242,7 @@ module.exports = async client => {
         mutedChannelsAndServers
       ]);
 
-      client.join(user.uniqueID);
+      client.join(user.id);
 
       if (user.servers && user.servers.length) {
         for (let index = 0; index < user.servers.length; index++) {
@@ -252,10 +252,10 @@ module.exports = async client => {
       }
 
       let friendUniqueIDs = user.friends.map(m => {
-        if (m.recipient) return m.recipient.uniqueID;
+        if (m.recipient) return m.recipient.id;
       });
 
-      let serverMemberUniqueIDs = serverMembers.map(m => m.member.uniqueID);
+      let serverMemberUniqueIDs = serverMembers.map(m => m.member.id);
 
       const arr = [
         ...friendUniqueIDs,
@@ -273,10 +273,10 @@ module.exports = async client => {
       user.GDriveRefreshToken = undefined;
 
       // check if user is already online on other clients
-      const checkAlready = await redis.connectedUserCount(user.uniqueID);
+      const checkAlready = await redis.connectedUserCount(user.id);
       // only emit if there are no other users online (1 because we just connected)
       if (checkAlready && checkAlready.result === 1) {
-        emitUserStatus(user.uniqueID, user._id, user.status, getIOInstance(), false, user.custom_status, true)
+        emitUserStatus(user.id, user._id, user.status, getIOInstance(), false, user.custom_status, true)
       }
 
       // nsps = namespaces.
@@ -354,7 +354,7 @@ module.exports = async client => {
       const { socketID } = JSON.parse(programActivity.result);
       if (socketID === client.id) {
         await redis.setProgramActivity(result.id, null);
-        emitToAll("programActivity:changed", result._id, { uniqueID: result.id }, getIOInstance())
+        emitToAll("programActivity:changed", result._id, { uniqueID: result.id, user_id: result.id }, getIOInstance())
       }
 
     }
@@ -367,7 +367,7 @@ module.exports = async client => {
   client.on("programActivity:set", async data => {
     const { ok, result } = await redis.getConnectedBySocketID(client.id);
     if (!ok || !result) return;
-    const uniqueID = result.id
+    const userID = result.id
     const _id = result._id;
     if (data) {
       if (data.name) {
@@ -376,17 +376,17 @@ module.exports = async client => {
       if (data.status) {
         data.status = data.status.substring(0, 100)
       }
-      const res = await redis.setProgramActivity(uniqueID, { name: data.name, status: data.status, socketID: client.id })
+      const res = await redis.setProgramActivity(userID, { name: data.name, status: data.status, socketID: client.id })
       const json = JSON.parse(res.result[0])
       // only emit if: 
       // json is empty
       // json is not the same.
       if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
-        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, uniqueID }, getIOInstance())
+        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, uniqueID: userID, user_id: userID  }, getIOInstance())
       }
     } else {
-      await redis.setProgramActivity(uniqueID, null);
-      emitToAll("programActivity:changed", _id, { uniqueID }, getIOInstance())
+      await redis.setProgramActivity(userID, null);
+      emitToAll("programActivity:changed", _id, { uniqueID: userID, user_id: userID }, getIOInstance())
     }
   })
 };

@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
   const { recipient_id } = req.params;
 
   // Check if recipient_id is valid
-  const recipient = await users.findOne({ uniqueID: recipient_id });
+  const recipient = await users.findOne({ id: recipient_id });
   if (!recipient) {
     return res
       .status(403)
@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
     });
   if (channel) {
     await channels.updateOne({ recipients: recipient._id, creator: req.user._id }, {hide: false});
-    req.io.in(req.user.uniqueID).emit("channel:created", { channel });
+    req.io.in(req.user.id).emit("channel:created", { channel });
     return res.json({ status: true, channel });
   }
 
@@ -59,5 +59,5 @@ module.exports = async (req, res, next) => {
 
   res.json({ status: true, channel: newChannel });
   // sends the open channel to other clients.
-  req.io.in(req.user.uniqueID).emit("channel:created", { channel: newChannel });
+  req.io.in(req.user.id).emit("channel:created", { channel: newChannel });
 };

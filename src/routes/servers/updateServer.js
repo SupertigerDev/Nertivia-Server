@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
 
 
   if (data.avatar) {
-    const url = await uploadAvatar(data.avatar, req.user.uniqueID, false).catch(err => { res.status(403).json({ message: err }) });
+    const url = await uploadAvatar(data.avatar, req.user.id, false).catch(err => { res.status(403).json({ message: err }) });
     if (!url) return;
     delete data.avatar;
     data.avatar = url;
@@ -44,7 +44,7 @@ module.exports = async (req, res, next) => {
 
 
   if (data.banner) {
-    const url = await uploadAvatar(data.banner, req.user.uniqueID, true).catch(err => { res.status(403).json({ message: err }) });
+    const url = await uploadAvatar(data.banner, req.user.id, true).catch(err => { res.status(403).json({ message: err }) });
     if (!url) return;
     delete data.banner;
     data.banner = url;
@@ -89,7 +89,7 @@ function checkMimeType(mimeType) {
   return false;
 }
 
-async function uploadAvatar(base64, uniqueID, isBanner) {
+async function uploadAvatar(base64, user_id, isBanner) {
   return new Promise(async (resolve, reject) => {
     let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
@@ -131,11 +131,11 @@ async function uploadAvatar(base64, uniqueID, isBanner) {
     }
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, uniqueID, id, `${name}.${type}`)
+    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
       .catch(err => { reject(err) })
     if (isBanner) deleteFile(dirPath);
     if (!success) return;
-    resolve(`${uniqueID}/${id}/${name}.${type}`);
+    resolve(`${user_id}/${id}/${name}.${type}`);
   })
 }
 

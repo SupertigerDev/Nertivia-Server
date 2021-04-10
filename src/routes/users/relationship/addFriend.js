@@ -18,16 +18,16 @@ module.exports = async (req, res, next) => {
   }
   
   // Find requester
-  const requester = await User.findOne({ uniqueID: req.user.uniqueID });
+  const requester = await User.findOne({ id: req.user.id });
   if (!requester) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
 
   // Check if user is adding theirselfs
-  if (requester.id === recipient.id) return res.status(403)
+  if (requester._id === recipient._id) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "You cant friend with yourself!"}] });
   
   // check if the request already exists
-  const requestExists = await Friend.findOne({ requester: requester.id, recipient: recipient.id})
+  const requestExists = await Friend.findOne({ requester: requester._id, recipient: recipient._id})
   if (requestExists) {
     if (requestExists.status == 2) {
       // If they are already friended
@@ -68,19 +68,19 @@ module.exports = async (req, res, next) => {
 
   // update user model
   const updateUserRequester = await User.findOneAndUpdate(
-    { _id: requester.id },
+    { _id: requester._id },
     { $push: { friends: docRequester._id }}
   )
   const updateUserRecipient = await User.findOneAndUpdate(
-    { _id: recipient.id },
+    { _id: recipient._id },
     { $push: { friends: docRecipient._id }}
   )
   
   const io = req.io
   
-  const presence = (await redis.getPresences([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
-  const customStatus = (await redis.getCustomStatusArr([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
-  const programActivity = (await redis.getProgramActivityArr([docRequester.recipient.uniqueID, docRecipient.recipient.uniqueID])).result;
+  const presence = (await redis.getPresences([docRequester.recipient.id, docRecipient.recipient.id])).result;
+  const customStatus = (await redis.getCustomStatusArr([docRequester.recipient.id, docRecipient.recipient.id])).result;
+  const programActivity = (await redis.getProgramActivityArr([docRequester.recipient.id, docRecipient.recipient.id])).result;
   
   docRequester.recipient.status = parseInt(presence[0][1]) || null;
   docRequester.recipient.custom_status = customStatus[0][1] || null;
@@ -90,8 +90,8 @@ module.exports = async (req, res, next) => {
   docRecipient.recipient.custom_status = customStatus[1][1] || null;
 
 
-  io.in(requester.uniqueID).emit('relationshipAdd', {...docRequester, program_activity: JSON.parse(programActivity[0]) || null});
-  io.in(recipient.uniqueID).emit('relationshipAdd', {...docRecipient, program_activity: JSON.parse(programActivity[1]) || null});
+  io.in(requester.id).emit('relationshipAdd', {...docRequester, program_activity: JSON.parse(programActivity[0]) || null});
+  io.in(recipient.id).emit('relationshipAdd', {...docRecipient, program_activity: JSON.parse(programActivity[1]) || null});
 
   return res.json({ status: true, message: `Request sent to ${recipient.username}` })
 }

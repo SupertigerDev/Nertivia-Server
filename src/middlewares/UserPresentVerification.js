@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
 
   if (cacheServer) {
     // check if member is in cache
-    const cacheMember = JSON.parse((await redis.getServerMember(req.user.uniqueID, serverID)).result || null);
+    const cacheMember = JSON.parse((await redis.getServerMember(req.user.id, serverID)).result || null);
     if (cacheMember) {
       req.permissions = cacheMember.permissions;
       req.highestRolePosition = cacheMember.highestRolePosition;
@@ -78,7 +78,7 @@ module.exports = async (req, res, next) => {
 
   req.permissions = permissions;
   req.highestRolePosition = highestRolePosition;
-  await redis.addServerMember(req.user.uniqueID, server.server_id, JSON.stringify({permissions, highestRolePosition}));
+  await redis.addServerMember(req.user.id, server.server_id, JSON.stringify({permissions, highestRolePosition}));
   
 
   if (channelID) {
@@ -89,7 +89,7 @@ module.exports = async (req, res, next) => {
         message: "ChannelID is invalid or does not exist in the server."
       });
     }
-    await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: server.server_id}), req.user.uniqueID );
+    await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: server.server_id}), req.user.id );
     req.channel = channel;
   }
 

@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
     .select("id description screenshot theme stars creator")
     .populate([
       { path: "theme", select: "-_id name id"},
-      {path: "creator", select: "-_id username tag uniqueID"}
+      {path: "creator", select: "-_id username tag uniqueID id"}
     ])
 
   res.json(themes);

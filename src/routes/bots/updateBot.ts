@@ -9,7 +9,7 @@ const flakeId = new (require('flakeid'))();
 export default async function updateBot(req: Request, res: Response) {
   const { bot_id } = req.params;
 
-  const bot = await Users.findOne({createdBy: req.user._id, uniqueID: bot_id}).select("avatar bot created tag uniqueID username").lean();
+  const bot = await Users.findOne({createdBy: req.user._id, id: bot_id}).select("avatar bot created tag uniqueID id username").lean();
   if (!bot) {
     res.status(403).json({message: "Could not find bot."})
     return;
@@ -21,7 +21,7 @@ export default async function updateBot(req: Request, res: Response) {
     const userTagExists = await Users.exists({
       username: data.username || (bot as any).username,
       tag: data.tag || (bot as any).tag,
-      uniqueID: { $ne: (bot as any).uniqueID }
+      id: { $ne: (bot as any).id }
     });
     if (userTagExists) {
       return res.status(403).json({
@@ -33,7 +33,7 @@ export default async function updateBot(req: Request, res: Response) {
   }
 
   if (data.avatar) {
-    const url = await uploadAvatar(data.avatar, req.user.uniqueID).catch(err => {res.status(403).json({message: err})});
+    const url = await uploadAvatar(data.avatar, req.user.id).catch(err => {res.status(403).json({message: err})});
     if (!url) return;
     delete data.avatar;
     data.avatar = url;
@@ -45,15 +45,15 @@ export default async function updateBot(req: Request, res: Response) {
     res.status(403).json({message: "Something went wrong while storing to database."})
     return;
   }
-  data.uniqueID = (bot as any).uniqueID;
+  data.id = (bot as any).id;
   
-  req.io.in((bot as any).uniqueID).emit("update_member", data);
+  req.io.in((bot as any).id).emit("update_member", data);
   emitToAll('update_member', bot._id, data, req.io, false);
   res.json(data);
 
 }
 
-async function uploadAvatar(base64: string, uniqueID: string) {
+async function uploadAvatar(base64: string, user_id: string) {
   return new Promise(async (resolve, reject) => {
     let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
@@ -78,10 +78,10 @@ async function uploadAvatar(base64: string, uniqueID: string) {
     const id = flakeId.gen();
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, uniqueID, id, `avatar.${type}`)
+    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `avatar.${type}`)
       .catch(err => {reject(err)})
     if (!success) return;
-    resolve(`${uniqueID}/${id}/avatar.${type}`);
+    resolve(`${user_id}/${id}/avatar.${type}`);
   })
 }
 

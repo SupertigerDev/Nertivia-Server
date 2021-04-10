@@ -44,7 +44,7 @@ MainUserRouter.route("/agreeingPolicies").post(
 );
 
 // Details
-MainUserRouter.route("/:uniqueID?").get(authenticate(true), require("./userDetails"));
+MainUserRouter.route("/:user_id?").get(authenticate(true), require("./userDetails"));
 
 // Register
 MainUserRouter.route("/register").post(

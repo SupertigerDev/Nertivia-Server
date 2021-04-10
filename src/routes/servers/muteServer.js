@@ -30,14 +30,14 @@ module.exports = async (req, res, next) => {
 
     await Notifications.deleteOne({
       channelID: {$in: serverChannels},
-      recipient: req.user.uniqueID
+      recipient: req.user.id
     });
   }
   
   res.json({ message: "Done" });
 
   const io = req.io;
-  io.in(req.user.uniqueID).emit("server:mute", {server_id: req.server.server_id, muted: type});
+  io.in(req.user.id).emit("server:mute", {server_id: req.server.server_id, muted: type});
 
   
 };

@@ -5,16 +5,16 @@ module.exports = async (req, res, next) => {
 
   const populate = [{
     path: "creator",
-    select: "avatar username uniqueID tag admin -_id bot"
+    select: "avatar username uniqueID id tag admin -_id bot"
   }, {
     path: "mentions",
-    select: "avatar username uniqueID tag admin -_id"
+    select: "avatar username uniqueID id tag admin -_id"
   }, {
     path: "quotes",
     select: "creator message messageID -_id",
     populate: {
       path: "creator",
-      select: "avatar username uniqueID tag admin -_id",
+      select: "avatar username uniqueID id tag admin -_id",
       model: "users"
     }
   }

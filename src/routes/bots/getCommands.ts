@@ -12,7 +12,7 @@ export default async function updateBot(req: Request, res: Response) {
     return;
   }
 
-  const bot = await Users.find({uniqueID: {$in: bot_ids}}, {_id: 0}).select("uniqueID botCommands").lean();
+  const bot = await Users.find({id: {$in: bot_ids}}, {_id: 0}).select("uniqueID id botCommands").lean();
   res.json(bot);
 
 }

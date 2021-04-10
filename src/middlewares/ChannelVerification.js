@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
 
   // check if exists in redis
   // check dm channel
-  const dmChannel = await redis.getChannel(channelID, req.user.uniqueID);
+  const dmChannel = await redis.getChannel(channelID, req.user.id);
   
   if (dmChannel.result) {
     const channel = JSON.parse(dmChannel.result);
@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
   if (serverChannel.result) {
     const channel = JSON.parse(serverChannel.result);
     //check if member in server
-    let isInServer = await redis.getServerMember(req.user.uniqueID, channel.server_id);
+    let isInServer = await redis.getServerMember(req.user.id, channel.server_id);
     if (isInServer.result) {
       const data = JSON.parse(isInServer.result);
       req.channel = channel;
@@ -90,13 +90,13 @@ module.exports = async (req, res, next) => {
     req.permissions = permissions;
     req.highestRolePosition = highestRolePosition;
     next();
-    await redis.addServerMember(req.user.uniqueID, channel.server.server_id, JSON.stringify({permissions, highestRolePosition}));
+    await redis.addServerMember(req.user.id, channel.server.server_id, JSON.stringify({permissions, highestRolePosition}));
 
     await redis.addServer(channel.server.server_id, channel.server);
 
   
     	
-    await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.uniqueID);
+    await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.id);
   } else {
 
     // check if blocked by recipient.
@@ -112,6 +112,6 @@ module.exports = async (req, res, next) => {
 
     req.channel = newChannel;
     next();
-    await redis.addChannel(channelID, newChannel, req.user.uniqueID);
+    await redis.addChannel(channelID, newChannel, req.user.id);
   }
 };

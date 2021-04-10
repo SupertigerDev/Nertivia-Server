@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
   }
   // Find the user given the email
   const user = await Users.findOne(obj).select(
-    "avatar status admin _id username uniqueID tag created GDriveRefreshToken banned email_confirm_code passwordVersion"
+    "avatar status admin _id username uniqueID id tag created GDriveRefreshToken banned email_confirm_code passwordVersion"
   );
 
   // If not, handle it
@@ -66,7 +66,7 @@ module.exports = async (req, res, next) => {
     from: process.env.SMTP_FROM,
     to: email.toLowerCase().trim(), 
     subject: 'Nertivia - Reset Password',
-    html: `<p>Hello, ${user.username}!<br> Click on this link to reset your password: <strong>https://nertivia.net/reset?unique-id=${user.uniqueID}&code=${resetCode}</strong></p>`
+    html: `<p>Hello, ${user.username}!<br> Click on this link to reset your password: <strong>https://nertivia.net/reset?unique-id=${user.id}&code=${resetCode}</strong></p>`
   };
 
   transporter.sendMail(mailOptions, (err, info) => {})

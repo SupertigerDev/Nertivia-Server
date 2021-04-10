@@ -13,15 +13,15 @@
     await Users.updateOne({ _id: req.user._id },
       { $set: { "status": status } })
     // change the status in redis.
-    await redis.changeStatus(req.user.uniqueID, status);
+    await redis.changeStatus(req.user.id, status);
 
     // emit status to users.
     if (beforeStatus === 0) {
-      const customStatus = await redis.getCustomStatus(req.user.uniqueID)
-      emitStatus(req.user.uniqueID, req.user._id, status, io, false, customStatus?.result?.[1], true)
+      const customStatus = await redis.getCustomStatus(req.user.id)
+      emitStatus(req.user.id, req.user._id, status, io, false, customStatus?.result?.[1], true)
   
     } else {
-      emitStatus(req.user.uniqueID, req.user._id, status, io);
+      emitStatus(req.user.id, req.user._id, status, io);
     }
     res.json({
       status: true,

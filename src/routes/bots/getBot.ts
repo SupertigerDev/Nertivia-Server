@@ -11,9 +11,9 @@ export default async function createBot(req: Request, res: Response) {
   const { token, myservers } = req.query;
 
   let servers: any[] | undefined;
-  const bot: any = await Users.findOne({ uniqueID: bot_id, bot: true }, { _id: 0 })
-    .select("avatar tag uniqueID username createdBy passwordVersion botPrefix botCommands")
-    .populate("createdBy", "username tag avatar uniqueID")
+  const bot: any = await Users.findOne({ id: bot_id, bot: true }, { _id: 0 })
+    .select("avatar tag uniqueID id username createdBy passwordVersion botPrefix botCommands")
+    .populate("createdBy", "username tag avatar uniqueID id")
     .lean();
 
   if (!bot || !bot.createdBy) {
@@ -22,7 +22,7 @@ export default async function createBot(req: Request, res: Response) {
   }
 
   if (token && req.user && bot.createdBy._id.toString() === req.user._id) {
-    bot.token = sign(bot.uniqueID + (bot.passwordVersion !== undefined ? `-${bot.passwordVersion}` : ''), process.env.JWT_SECRET)
+    bot.token = sign(bot.id + (bot.passwordVersion !== undefined ? `-${bot.passwordVersion}` : ''), process.env.JWT_SECRET)
       .split(".")
       .splice(1)
       .join(".");

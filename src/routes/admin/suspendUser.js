@@ -6,7 +6,7 @@ const redis = require("../../redis");
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
-  const uniqueID = req.params.unique_id;
+  const user_id = req.params.unique_id;
   const adminPassword = req.body.password;
   const reason = req.body.reason;
 
@@ -17,14 +17,14 @@ module.exports = async (req, res, next) => {
   const verify = await bcrypt.compare(adminPassword, admin.password);
   if (!verify) return res.status(403).json({ message: "Invalid password" });
 
-  const userToSuspend = await Users.findOne({ uniqueID: uniqueID }).select(
+  const userToSuspend = await Users.findOne({ id: user_id }).select(
     "ip banned"
   );
   if (!userToSuspend){
     return res.status(404).json({ message: "unique id not found" });
   }
 
-  await deleteAllUserFCM(uniqueID);  
+  await deleteAllUserFCM(user_id);  
 
   const reasonDB = reason.trim() ? reason : "Not Provided.";
   await Users.updateOne(
@@ -44,16 +44,16 @@ module.exports = async (req, res, next) => {
 
     // kick everyone with that IP
     const usersArr = await Users.find({ ip: userToSuspend.ip }).select(
-      "uniqueID"
+      "id"
     );
 
 
     for (let index = 0; index < usersArr.length; index++) {
-      const _uniqueID = usersArr[index].uniqueID;
-      if (_uniqueID === uniqueID) {
-        await kickUser(io, _uniqueID, "You have been suspended for: " + reasonDB);
+      const kick_user_id = usersArr[index].id;
+      if (kick_user_id === user_id) {
+        await kickUser(io, kick_user_id, "You have been suspended for: " + reasonDB);
       } else {
-        await kickUser(io, _uniqueID, "IP is banned.");
+        await kickUser(io, kick_user_id, "IP is banned.");
       }
     }
   }
@@ -65,10 +65,10 @@ module.exports = async (req, res, next) => {
  *
  * @param {sio.Server} io
  */
-async function kickUser(io, uniqueID, message) {
-  await redis.deleteSession(uniqueID);
+async function kickUser(io, user_id, message) {
+  await redis.deleteSession(user_id);
 
-  io.in(uniqueID).clients((err, clients) => {
+  io.in(user_id).clients((err, clients) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit("auth_err", message);

@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
       res.json({
         server_position
       });
-      io.in(req.user.uniqueID).emit("self:server_position", {server_position} );
+      io.in(req.user.id).emit("self:server_position", {server_position} );
       return;
   } catch(e) {
     return res.status(403).json({

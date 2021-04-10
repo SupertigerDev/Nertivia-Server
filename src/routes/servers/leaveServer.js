@@ -18,18 +18,18 @@ module.exports = async (req, res, next) => {
   const channelIDArray = channels.map(c => c.channelID)
 
   // Leave server
-  await deleteFCMFromServer(req.server.server_id, req.user.uniqueID);
+  await deleteFCMFromServer(req.server.server_id, req.user.id);
 
   // delete all leavers notification from the server 
   if (channelIDArray) {
     await Notifications.deleteMany({
       channelID: { $in: channelIDArray },
-      recipient: req.user.uniqueID
+      recipient: req.user.id
     });
   }
 
 
-  await redis.remServerMember(req.user.uniqueID, req.server.server_id);
+  await redis.remServerMember(req.user.id, req.server.server_id);
 
   // remove server from users server list.
   await User.updateOne(
@@ -50,7 +50,7 @@ module.exports = async (req, res, next) => {
   // leave room
 
 
-  io.in(req.user.uniqueID).clients((err, clients) => {
+  io.in(req.user.id).clients((err, clients) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit("server:leave", {
@@ -64,7 +64,8 @@ module.exports = async (req, res, next) => {
 
   // emit leave event 
   io.in("server:" + req.server.server_id).emit("server:member_remove", {
-    uniqueID: req.user.uniqueID,
+    uniqueID: req.user.id,
+    id: req.user.id,
     server_id: req.server.server_id
   });
 
@@ -80,7 +81,8 @@ module.exports = async (req, res, next) => {
 
   
   const user = {
-    uniqueID: req.user.uniqueID,
+    uniqueID: req.user.id,
+    id: req.user.id,
     username: req.user.username,
     tag: req.user.tag,
     avatar: req.user.avatar,

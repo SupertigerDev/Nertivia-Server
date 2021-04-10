@@ -4,17 +4,17 @@ const Servers = require("./../../models/servers");
 const Friends = require("./../../models/friends");
 
 module.exports = async (req, res, next) => {
-  let uniqueID = req.params.uniqueID;
+  let userID = req.params.user_id;
 
-  if (!uniqueID) {
-    uniqueID = req.user.uniqueID;
+  if (!userID) {
+    userID = req.user.id;
   }
 
   const user = await Users.findOne({
-    uniqueID
+    id: userID
   })
     .select("-status -__v -friends +about_me +badges +servers +createdBy")
-    .populate('createdBy', 'username tag uniqueID -_id')
+    .populate('createdBy', 'username tag uniqueID id -_id')
     .lean();
 
   if (!user) {
@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
   const requesterFriendsArr = (await Friends.find({requester: req.user._id, status: 2})).map(f => f.recipient.toString());
   const userFriendsArr = (await Friends.find({requester: user._id, status: 2})).map(f => f.recipient.toString());
   const commonFriend_idArr = requesterFriendsArr.filter(r => userFriendsArr.includes(r));
-  const commonFriendID = (await Users.find({_id: {$in: commonFriend_idArr}}).select("uniqueID")).map(u => u.uniqueID);
+  const commonFriendID = (await Users.find({_id: {$in: commonFriend_idArr}}).select("id")).map(u => u.id);
 
 
   //check if user is blocked.

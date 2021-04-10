@@ -12,14 +12,14 @@ const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNot
 module.exports = async (req, res, next) => {
   const { server_id, unique_id } = req.params;
 
-  if (unique_id === req.user.uniqueID) {
+  if (unique_id === req.user.id) {
     return res
       .status(403)
       .json({ message: "Why would you kick yourself?" });
   }
   const server = req.server;
 
-  const userToBeKicked = await Users.findOne({ uniqueID: unique_id }).select('_id uniqueID username tag avatar admin');
+  const userToBeKicked = await Users.findOne({ id: unique_id }).select('_id uniqueID id username tag avatar admin');
 
 
   if (!userToBeKicked) return res
@@ -118,6 +118,7 @@ module.exports = async (req, res, next) => {
   // emit leave event 
   io.in("server:" + req.server.server_id).emit("server:member_remove", {
     uniqueID: unique_id,
+    id: unique_id,
     server_id: server_id
   });
 

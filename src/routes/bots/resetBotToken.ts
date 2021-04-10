@@ -7,7 +7,7 @@ import JWT from 'jsonwebtoken'
 export default async function resetBotToken(req: Request, res: Response) {
   const { bot_id } = req.params;
 
-  const bot: any = await Users.findOne({createdBy: req.user._id, uniqueID: bot_id}).select("passwordVersion").lean();
+  const bot: any = await Users.findOne({createdBy: req.user._id, id: bot_id}).select("passwordVersion").lean();
   if (!bot) {
     res.status(403).json({message: "Could not find bot."})
     return;
@@ -22,10 +22,10 @@ export default async function resetBotToken(req: Request, res: Response) {
 
 
 
-async function kickBot(io: any, uniqueID: string) {
-  await redis.deleteSession(uniqueID);
+async function kickBot(io: any, bot_id: string) {
+  await redis.deleteSession(bot_id);
 
-  io.in(uniqueID).clients((err: any, clients: any[]) => {
+  io.in(bot_id).clients((err: any, clients: any[]) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit("auth_err", "Token outdated.");
