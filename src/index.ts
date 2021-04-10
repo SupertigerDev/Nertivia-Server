@@ -5,6 +5,7 @@ import { getIOInstance } from "./socket/instance";
 import app from './app';
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
+import Users from './models/users';
 dotenv.config();
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
@@ -38,9 +39,27 @@ function start() {
 
 	let httpServerInitialized = false;
 
-	mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, function (err) {
+	mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, async function (err) {
 		if (err) throw err;
 		console.log("\x1b[32m" + "MongoDB> " + "\x1b[1m" + "Connected!\x1b[0m");
+
+
+		// console.log("converting uniqueID to id...")
+
+		// const bulkAction = Users.collection.initializeUnorderedBulkOp();
+		// await Users.find({}).select('uniqueID').then(async (docs) => {
+		// 	for (let i = 0; i < docs.length; i++) {
+		// 		const doc: any = docs[i];
+		// 		bulkAction.find({_id: doc._id}).updateOne({$set: {id: doc.uniqueID}})
+		// 	}
+		// 	await bulkAction.execute().then((res) => {
+		// 		console.log(res)
+		// 		console.log("done")
+		// 	})
+			
+		// })
+
+
 		connectToRedis();
 	});
 

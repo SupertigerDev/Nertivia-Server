@@ -2,18 +2,18 @@ import {getRedisInstance} from './redis/instance';
 
 module.exports = {
 
-  connected: (uniqueID, _id, status, customStatus, socketID) => {
+  connected: (userID, _id, status, customStatus, socketID) => {
     const multi = getRedisInstance().multi()
-      .hset(`user:${uniqueID}`, 'status', status)
-      .hset(`user:${uniqueID}`, 'id', _id.toString())
-      .hset(`user:${uniqueID}`, 'uniqueID', uniqueID)
+      .hset(`user:${userID}`, 'status', status)
+      .hset(`user:${userID}`, 'id', _id.toString())
+      .hset(`user:${userID}`, 'userID', userID)
 
-      .hset(`connected:${socketID}`, 'u_id' , uniqueID)
+      .hset(`connected:${socketID}`, 'id' , userID)
       .hset(`connected:${socketID}`, '_id',  _id.toString())
-      .sadd(`uniqueID:${uniqueID}`, socketID) 
+      .sadd(`userID:${userID}`, socketID) 
 
     if (customStatus) {
-      multi.hset(`user:${uniqueID}`, 'custom_status', customStatus)
+      multi.hset(`user:${userID}`, 'customStatus', customStatus)
     }
 
     return multiWrapper(multi)
@@ -21,96 +21,96 @@ module.exports = {
   getConnectedBySocketID: (socketID) => {
     return wrapper('hgetall',`connected:${socketID}`); 
   },
-  connectedUserCount: async (uniqueID) => {
-    return await wrapper('scard', `uniqueID:${uniqueID}`);
+  connectedUserCount: async (userID) => {
+    return await wrapper('scard', `userID:${userID}`);
   },
   // only to be used for admins.
   connectedUserIds: async () => {
-    return await wrapper('keys', `uniqueID:*`);
+    return await wrapper('keys', `userID:*`);
   },
-  disconnected: async (uniqueID, socketID) => {
+  disconnected: async (userID, socketID) => {
     const response = await multiWrapper(
       getRedisInstance().multi()
-      .srem(`uniqueID:${uniqueID}`, socketID)
-      .scard(`uniqueID:${uniqueID}`)
+      .srem(`userID:${userID}`, socketID)
+      .scard(`userID:${userID}`)
       .del(`connected:${socketID}`)
     );
     if(response.result[1] == 0) {
-      await wrapper("del", `programActivity:${uniqueID}`);
-      return wrapper("del", `user:${uniqueID}`)
+      await wrapper("del", `programActivity:${userID}`);
+      return wrapper("del", `user:${userID}`)
     } else {
       return response
     }
   },
-  getProgramActivity: (uniqueID) => {
-    return wrapper("get", `programActivity:${uniqueID}`);
+  getProgramActivity: (userID) => {
+    return wrapper("get", `programActivity:${userID}`);
   },
   getProgramActivityArr: async (array) => {
     const multi = getRedisInstance().multi();
     for (let index = 0; index < array.length; index++) {
-      const uniqueID = array[index];
-        multi.get(`programActivity:${uniqueID}`)
+      const userID = array[index];
+        multi.get(`programActivity:${userID}`)
     }
     return multiWrapper(multi) 
   },
-  setProgramActivity: (uniqueID, data) => {
+  setProgramActivity: (userID, data) => {
     const multi = getRedisInstance().multi();
     if (!data) {
-      multi.del(`programActivity:${uniqueID}`)
+      multi.del(`programActivity:${userID}`)
     } else {
       const {name, status, socketID} = data;
-      multi.get(`programActivity:${uniqueID}`);
-      multi.set(`programActivity:${uniqueID}`, JSON.stringify({name, status, socketID}))
-      multi.expire(`programActivity:${uniqueID}`, 240) // 4 minutes
+      multi.get(`programActivity:${userID}`);
+      multi.set(`programActivity:${userID}`, JSON.stringify({name, status, socketID}))
+      multi.expire(`programActivity:${userID}`, 240) // 4 minutes
     }
     return multiWrapper(multi) 
   },
   getPresences: async (array) => {
     const multi = getRedisInstance().multi();
     for (let index = 0; index < array.length; index++) {
-      const uniqueID = array[index];
-        multi.hmget(`user:${uniqueID}`, "uniqueID", "status")
+      const userID = array[index];
+        multi.hmget(`user:${userID}`, "userID", "status")
     }
     return multiWrapper(multi) 
   },
   getCustomStatusArr: async (array) => {
     const multi = getRedisInstance().multi();
     for (let index = 0; index < array.length; index++) {
-      const uniqueID = array[index];
-        multi.hmget(`user:${uniqueID}`, "uniqueID", "custom_status")
+      const userID = array[index];
+        multi.hmget(`user:${userID}`, "userID", "customStatus")
     }
     return multiWrapper(multi) 
   },
-  getCustomStatus(uniqueID) {
-    return wrapper('hmget', `user:${uniqueID}`, 'uniqueID', 'custom_status'); 
+  getCustomStatus(userID) {
+    return wrapper('hmget', `user:${userID}`, 'userID', 'customStatus'); 
   },
-  getPresence: async (uniqueID) => {
-    return wrapper('hmget', `user:${uniqueID}`, 'uniqueID', 'status'); 
+  getPresence: async (userID) => {
+    return wrapper('hmget', `user:${userID}`, 'userID', 'status'); 
   },
-  changeStatus: async (uniqueID, status) => {
-    return wrapper('hset', `user:${uniqueID}`, 'status', status);
+  changeStatus: async (userID, status) => {
+    return wrapper('hset', `user:${userID}`, 'status', status);
   },
-  changeCustomStatus: async (uniqueID, customStatus) => {
+  changeCustomStatus: async (userID, customStatus) => {
     if (customStatus) {
-      return wrapper('hset', `user:${uniqueID}`, 'custom_status', customStatus);
+      return wrapper('hset', `user:${userID}`, 'customStatus', customStatus);
     } else {
-      return wrapper('hdel', `user:${uniqueID}`, 'custom_status');
+      return wrapper('hdel', `user:${userID}`, 'customStatus');
     }
   },
-  addChannel: async (channelID, channelData, uniqueID) => {
+  addChannel: async (channelID, channelData, userID) => {
     if (channelData.server_id) {
       return wrapper('set', `serverChannels:${channelID}`,JSON.stringify(channelData)); 
     } 
-    return wrapper('hset', `user:${uniqueID}`, `channel:${channelID}`, JSON.stringify(channelData));
+    return wrapper('hset', `user:${userID}`, `channel:${channelID}`, JSON.stringify(channelData));
   },
-  deleteDmChannel: async (uniqueID, channelID) => {
-    return wrapper('hdel', `user:${uniqueID}`, `channel:${channelID}`);
+  deleteDmChannel: async (userID, channelID) => {
+    return wrapper('hdel', `user:${userID}`, `channel:${channelID}`);
   },
   serverChannelExists: (channelID) => {
     return wrapper('exists', `serverChannels:${channelID}`);
   },
-  deleteSession(uniqueID) {
-    return wrapper('del', `sess:${uniqueID}`);
+  deleteSession(userID) {
+    return wrapper('del', `sess:${userID}`);
   },
   remServerChannels: (channelIDArr) => {
     const multi = getRedisInstance().multi();
@@ -123,8 +123,8 @@ module.exports = {
   removeServerChannel: (channelID) => {
     return wrapper('del', `serverChannels:${channelID}`); 
   },
-  getChannel: (channelID, uniqueID) => {
-    return wrapper('hget', `user:${uniqueID}`, `channel:${channelID}`);
+  getChannel: (channelID, userID) => {
+    return wrapper('hget', `user:${userID}`, `channel:${channelID}`);
   },
   getServerChannel: (channelID) => {
     return wrapper('get', `serverChannels:${channelID}`);
@@ -141,20 +141,20 @@ module.exports = {
 
   //member
 
-  // for setting: hset serverMembers:S_ID u_id "{perm: 2}"
-  // for exists: hexists serverMembers:S_ID u_id
-  // for deleting a member: hdel serverMembers:S_ID u_id
+  // for setting: hset serverMembers:S_ID id "{perm: 2}"
+  // for exists: hexists serverMembers:S_ID id
+  // for deleting a member: hdel serverMembers:S_ID id
   // for deleting all: del serverMembers:S_ID
   // getting hget serverMembers:6604056106056552448 184288888616859408
 
-  addServerMember: (uniqueID, serverID, data) => {
-    return wrapper('hset', `serverMembers:${serverID}`, uniqueID, data || "{}");
+  addServerMember: (userID, serverID, data) => {
+    return wrapper('hset', `serverMembers:${serverID}`, userID, data || "{}");
   },
-  getServerMember: (uniqueID, serverID) => {
-    return wrapper('hget', `serverMembers:${serverID}`, uniqueID);
+  getServerMember: (userID, serverID) => {
+    return wrapper('hget', `serverMembers:${serverID}`, userID);
   },
-  remServerMember: (uniqueID, serverID) => {
-    return wrapper('hdel', `serverMembers:${serverID}`, uniqueID);
+  remServerMember: (userID, serverID) => {
+    return wrapper('hdel', `serverMembers:${serverID}`, userID);
   },
   delAllServerMembers: (serverID) => {
     return wrapper('del', `serverMembers:${serverID}`);
@@ -207,8 +207,8 @@ function wrapper(method, ...args) {
   // emit status to friends.
 
   //const multi = getRedisInstance().multi();
-  // multi.hget(`user:${client.request.user.uniqueID}`, "status")
-  // multi.hget(`user:${client.request.user.uniqueID}test`, "status")
+  // multi.hget(`user:${client.request.user.userID}`, "status")
+  // multi.hget(`user:${client.request.user.userID}test`, "status")
   // multi.exec((err, res) => {
   //   console.log(res)
   // })

@@ -64,6 +64,11 @@ const usersSchema = new Schema({
     type: Number,
     select: false,
   },
+  id: {
+    type: String,
+    unique: true
+  },
+  // replace uniqueID with id ^
   uniqueID: {
     type: String,
     unique: true
@@ -158,8 +163,11 @@ usersSchema.pre('save', async function (next) {
       this.password = passwordHash;
     }
 
-    // generate uniqueID
-    this.uniqueID = flake.gen();
+    const id = flake.gen();
+    this.uniqueID = id
+    // uniqueID to be removed soon.
+    this.id = id;
+
     // generate tag
     this.tag = generateString(4);
     if (!this.bot) {

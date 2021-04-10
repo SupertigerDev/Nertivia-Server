@@ -340,21 +340,21 @@ module.exports = async client => {
     if (!client.auth) return;
     const { ok, result, error } = await redis.getConnectedBySocketID(client.id);
     if (!ok || !result) return;
-    const presence = await redis.getPresence(result.u_id);
+    const presence = await redis.getPresence(result.id);
 
-    const response = await redis.disconnected(result.u_id, client.id);
+    const response = await redis.disconnected(result.id, client.id);
 
     // if all users have gone offline, emit offline status to friends.
     if (response.result === 1 && presence?.result?.[1] !== '0') {
-      emitUserStatus(result.u_id, result._id, 0, getIOInstance());
+      emitUserStatus(result.id, result._id, 0, getIOInstance());
     } else {
       // remove program activity status if the socket id matches
-      const programActivity = await redis.getProgramActivity(result.u_id);
+      const programActivity = await redis.getProgramActivity(result.id);
       if (!programActivity.ok || !programActivity.result) return;
       const { socketID } = JSON.parse(programActivity.result);
       if (socketID === client.id) {
-        await redis.setProgramActivity(result.u_id, null);
-        emitToAll("programActivity:changed", result._id, { uniqueID: result.u_id }, getIOInstance())
+        await redis.setProgramActivity(result.id, null);
+        emitToAll("programActivity:changed", result._id, { uniqueID: result.id }, getIOInstance())
       }
 
     }
@@ -367,7 +367,7 @@ module.exports = async client => {
   client.on("programActivity:set", async data => {
     const { ok, result } = await redis.getConnectedBySocketID(client.id);
     if (!ok || !result) return;
-    const uniqueID = result.u_id
+    const uniqueID = result.id
     const _id = result._id;
     if (data) {
       if (data.name) {
