@@ -6,7 +6,7 @@ module.exports = function (allowBot = false, allowInvalid = false, allowNonTerms
   return async function (req, res, next) {
 
     const token = process.env.JWT_HEADER + req.headers.authorization;
-    // will contain uniqueID
+    // will contain user id
     let decryptedToken;
     let passwordVersion = 0;
 
@@ -25,6 +25,7 @@ module.exports = function (allowBot = false, allowInvalid = false, allowNonTerms
 
     // check if details exist in redis session
     if (req.session["user"]) {
+
       req.user = req.session["user"];
       const iPBanned = await checkIPChangeAndIsBanned(req, res);
       if (iPBanned) {
@@ -39,11 +40,12 @@ module.exports = function (allowBot = false, allowInvalid = false, allowNonTerms
       }
 
 
-      if (req.user.uniqueID === decryptedToken) {
+      if (req.user.id === decryptedToken) {
         if (req.user.bot && !allowBot) {
           res.status(403).json({message: "Bots are not allowed to access this."})
           return;
         }
+
         return next();
       }
     }
@@ -51,9 +53,9 @@ module.exports = function (allowBot = false, allowInvalid = false, allowNonTerms
 
 
 
-    const user = await Users.findOne({ uniqueID: decryptedToken })
+    const user = await Users.findOne({ id: decryptedToken })
       .select(
-        "avatar status type _id username uniqueID badges tag created GDriveRefreshToken email_confirm_code banned bot passwordVersion readTerms"
+        "avatar status type _id username uniqueID id badges tag created GDriveRefreshToken email_confirm_code banned bot passwordVersion readTerms"
       )
       .lean();
     // If user doesn't exists, handle it
