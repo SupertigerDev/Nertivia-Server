@@ -40,7 +40,7 @@ module.exports = async (req, res, next) => {
     messages = await Messages.find({
       channelID,
       _id: {
-        $lt: continueFromMessage.id
+        $lt: continueFromMessage._id
       }
     })
       .sort({
@@ -64,7 +64,7 @@ module.exports = async (req, res, next) => {
     messages = await Messages.find({
       channelID,
       _id: {
-        $gt: beforeFromMessage.id
+        $gt: beforeFromMessage._id
       }
     })
       .populate(populate)
@@ -87,7 +87,7 @@ module.exports = async (req, res, next) => {
     let above = await Messages.find({
       channelID,
       _id: {
-        $lte: message.id
+        $lte: message._id
       }
     }).sort({
       _id: -1
@@ -96,7 +96,7 @@ module.exports = async (req, res, next) => {
     let bottom = await Messages.find({
       channelID,
       _id: {
-        $gt: message.id
+        $gt: message._id
       }
     }).limit(25).populate(populate).select(select);
 
@@ -105,7 +105,7 @@ module.exports = async (req, res, next) => {
       above = await Messages.find({
         channelID,
         _id: {
-          $lte: message.id
+          $lte: message._id
         }
       }).sort({
         _id: -1
@@ -115,7 +115,7 @@ module.exports = async (req, res, next) => {
       bottom = await Messages.find({
         channelID,
         _id: {
-          $gt: message.id
+          $gt: message._id
         }
       }).limit(50 - above.length).populate(populate).select(select);
     }

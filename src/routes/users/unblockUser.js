@@ -5,7 +5,7 @@ const Channels = require('../../models/channels');
 const redis = require('../../redis');
 
 module.exports = async (req, res, next) => {
-  const recipientUserID = req.body.uniqueID; 
+  const recipientUserID = req.body.id; 
 
   // check if the recipient exists
   const recipient = await User.findOne({id: recipientUserID});
