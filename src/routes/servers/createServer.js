@@ -86,7 +86,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  createServerObj.creator = { uniqueID: req.user.id, id: req.user.id };
+  createServerObj.creator = { id: req.user.id };
   createServerObj.__v = undefined;
   createServerObj._id = undefined;
   res.json(createServerObj);
@@ -98,7 +98,6 @@ module.exports = async (req, res, next) => {
     username: req.user.username,
     tag: req.user.tag,
     avatar: req.user.avatar,
-    uniqueID: req.user.id,
     id: req.user.id
   };
   serverMember.server_id = createServer.server_id;

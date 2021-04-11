@@ -11,6 +11,6 @@ module.exports = async (req, res, next) => {
     doc.creator = req.user._id
   }
 
-  const invites = await ServerInvites.find(doc, {_id: 0}).select("creator invite_code uses custom").populate("creator", "username avatar tag uniqueID id");
+  const invites = await ServerInvites.find(doc, {_id: 0}).select("creator invite_code uses custom").populate("creator", "username avatar tag id");
   res.json(invites);
 };

@@ -6,7 +6,7 @@ const redis = require("../../redis");
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
-  const user_id = req.params.unique_id;
+  const user_id = req.params.id;
   const adminPassword = req.body.password;
   const reason = req.body.reason;
 

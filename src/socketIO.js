@@ -33,7 +33,7 @@ const populateFriends = {
   populate: [
     {
       path: "recipient",
-      select: "username uniqueID id tag admin -_id avatar"
+      select: "username id tag admin -_id avatar"
     }
   ],
   select: "recipient status -_id"
@@ -44,7 +44,7 @@ const populateServers = {
   populate: [
     {
       path: "creator",
-      select: "uniqueID id -_id"
+      select: "id -_id"
       //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
     }
   ],
@@ -83,7 +83,7 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar username type badges email uniqueID id tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
+        "avatar username type badges email id tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
 
       const user = await User.findOne({ id: decryptedToken })
         .select(userSelect)
@@ -142,7 +142,7 @@ module.exports = async client => {
         return;
       }
       if (!user.bot && !user.readTerms) {
-        //console.log("Disconnect Reason: Terms not accepted", user.username, user.uniqueID);
+        //console.log("Disconnect Reason: Terms not accepted", user.username, user.id);
         delete client.auth;
         client.emit("auth_err", "terms_not_agreed");
         client.disconnect(true);
@@ -182,7 +182,7 @@ module.exports = async client => {
           .select("type member server_id roles")
           .populate({
             path: "member",
-            select: "username tag avatar uniqueID id member -_id bot botPrefix"
+            select: "username tag avatar id member -_id bot botPrefix"
           })
           .lean();
 
@@ -198,7 +198,7 @@ module.exports = async client => {
         .select("recipients channelID lastMessaged")
         .populate({
           path: "recipients",
-          select: "avatar username uniqueID id tag bot -_id"
+          select: "avatar username id tag bot -_id"
         })
         .lean();
 
@@ -208,7 +208,7 @@ module.exports = async client => {
         )
         .populate({
           path: "sender",
-          select: "avatar username uniqueID id tag -_id"
+          select: "avatar username id tag -_id"
         })
         .lean();
 
@@ -233,7 +233,7 @@ module.exports = async client => {
 
       const customEmojisList = customEmojis.find({ user: user._id }, { _id: 0 }).select("emojiID gif name");
 
-      const bannedUserIDs = (await blockedUsers.find({ requester: user._id }).populate("recipient", "uniqueID id")).map(d => d.recipient.id)
+      const bannedUserIDs = (await blockedUsers.find({ requester: user._id }).populate("recipient", "id")).map(d => d.recipient.id)
 
       const results = await Promise.all([
         dms,
@@ -354,7 +354,7 @@ module.exports = async client => {
       const { socketID } = JSON.parse(programActivity.result);
       if (socketID === client.id) {
         await redis.setProgramActivity(result.id, null);
-        emitToAll("programActivity:changed", result._id, { uniqueID: result.id, user_id: result.id }, getIOInstance())
+        emitToAll("programActivity:changed", result._id, { user_id: result.id }, getIOInstance())
       }
 
     }
@@ -382,11 +382,11 @@ module.exports = async client => {
       // json is empty
       // json is not the same.
       if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
-        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, uniqueID: userID, user_id: userID  }, getIOInstance())
+        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, user_id: userID  }, getIOInstance())
       }
     } else {
       await redis.setProgramActivity(userID, null);
-      emitToAll("programActivity:changed", _id, { uniqueID: userID, user_id: userID }, getIOInstance())
+      emitToAll("programActivity:changed", _id, { user_id: userID }, getIOInstance())
     }
   })
 };

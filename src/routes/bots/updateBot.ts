@@ -9,7 +9,7 @@ const flakeId = new (require('flakeid'))();
 export default async function updateBot(req: Request, res: Response) {
   const { bot_id } = req.params;
 
-  const bot = await Users.findOne({createdBy: req.user._id, id: bot_id}).select("avatar bot created tag uniqueID id username").lean();
+  const bot = await Users.findOne({createdBy: req.user._id, id: bot_id}).select("avatar bot created tag id username").lean();
   if (!bot) {
     res.status(403).json({message: "Could not find bot."})
     return;

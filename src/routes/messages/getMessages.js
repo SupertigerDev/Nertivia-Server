@@ -8,16 +8,16 @@ module.exports = async (req, res, next) => {
 
   const populate = [{
     path: "creator",
-    select: "avatar username uniqueID id tag badges -_id bot"
+    select: "avatar username id tag badges -_id bot"
   }, {
     path: "mentions",
-    select: "avatar username uniqueID id tag -_id"
+    select: "avatar username id tag -_id"
   }, {
     path: "quotes",
     select: "creator message messageID id -_id",
     populate: {
       path: "creator",
-      select: "avatar username uniqueID id tag -_id",
+      select: "avatar username id tag -_id",
       model: "users"
     }
   }

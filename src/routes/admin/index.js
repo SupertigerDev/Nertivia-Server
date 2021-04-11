@@ -17,7 +17,7 @@ MainAdminRouter.route("/users/search/:value").get(
   require("./searchUsers")
 );
 
-MainAdminRouter.route("/users/:unique_id").delete(
+MainAdminRouter.route("/users/:id").delete(
   authenticate(),
   isAdmin,
   require("./suspendUser")

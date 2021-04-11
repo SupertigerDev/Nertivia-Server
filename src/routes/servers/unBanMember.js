@@ -8,13 +8,13 @@ const Channels = require("../../models/channels");
 
 
 module.exports = async (req, res, next) => {
-  const {server_id, unique_id} = req.params;
+  const {server_id, id} = req.params;
 
 
   const server = req.server;
 
 
-  const userToBeUnbanned = await Users.findOne({id: unique_id}).select('username tag avatar uniqueID id');
+  const userToBeUnbanned = await Users.findOne({id: id}).select('username tag avatar id');
 
   if (!userToBeUnbanned) {
     return res.status(404).json({message: "User doesn't exist."})

@@ -116,7 +116,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
   let mentions = [];
   if (mentionIds.length) {
-    mentions = await Users.find({id: {$in: mentionIds}}).select('_id uniqueID id avatar tag username').lean();
+    mentions = await Users.find({id: {$in: mentionIds}}).select('_id id avatar tag username').lean();
   } 
   const _idMentionsArr = mentions.map((m:any)=> m._id )
   
@@ -138,13 +138,13 @@ export default async (req: Request, res: Response, next: NextFunction) => {
           select: "creator message messageID",
           populate: {
             path: "creator",
-            select: "avatar username uniqueID id tag admin -_id",
+            select: "avatar username id tag admin -_id",
             model: "users"
           }
         },
         {
           path: "creator",
-          select: "username uniqueID id avatar"
+          select: "username id avatar"
         }
       ]).lean()
     quotes_idArr = (await MessageQuotes.insertMany(quotedMessages.map((q: any) => {
@@ -199,7 +199,6 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   }
 
   const user = {
-    uniqueID: req.user.uniqueID,
     id: req.user.id,
     username: req.user.username,
     tag: req.user.tag,

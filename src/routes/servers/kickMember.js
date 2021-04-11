@@ -10,16 +10,16 @@ const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
-  const { server_id, unique_id } = req.params;
+  const { server_id, id } = req.params;
 
-  if (unique_id === req.user.id) {
+  if (id === req.user.id) {
     return res
       .status(403)
       .json({ message: "Why would you kick yourself?" });
   }
   const server = req.server;
 
-  const userToBeKicked = await Users.findOne({ id: unique_id }).select('_id uniqueID id username tag avatar admin');
+  const userToBeKicked = await Users.findOne({ id: id }).select('_id id username tag avatar admin');
 
 
   if (!userToBeKicked) return res
@@ -59,7 +59,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  await deleteFCMFromServer(server_id, unique_id);
+  await deleteFCMFromServer(server_id, id);
 
   // server channels
   const channels = await Channels.find({ server: server._id });
@@ -69,12 +69,12 @@ module.exports = async (req, res, next) => {
   if (channelIDs) {
     await Notifications.deleteMany({
       channelID: { $in: channelIDs },
-      recipient: unique_id
+      recipient: id
     });
   }
 
-  await redis.remServerMember(unique_id, server_id);
-  await redis.remServerChannels(unique_id, channelIDs)
+  await redis.remServerMember(id, server_id);
+  await redis.remServerChannels(id, channelIDs)
   const io = req.io;
   // remove server from users server list.
   await Users.updateOne(
@@ -103,7 +103,7 @@ module.exports = async (req, res, next) => {
 
   // leave room
 
-  io.in(unique_id).clients((err, clients) => {
+  io.in(id).clients((err, clients) => {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit("server:leave", {
@@ -117,8 +117,7 @@ module.exports = async (req, res, next) => {
 
   // emit leave event 
   io.in("server:" + req.server.server_id).emit("server:member_remove", {
-    uniqueID: unique_id,
-    id: unique_id,
+    id: id,
     server_id: server_id
   });
 

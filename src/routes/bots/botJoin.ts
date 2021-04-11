@@ -12,7 +12,7 @@ export default async function createBot(req: Request, res: Response) {
   const permissions = parseInt(req.body.permissions) || 0;
 
   const bot: any = await Users.findOne({ id: bot_id, bot: true })
-    .select("avatar tag uniqueID id username admin _id")
+    .select("avatar tag id username admin _id")
     .lean();
 
   if (!bot) {

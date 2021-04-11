@@ -60,7 +60,7 @@ MainServerRouter.route('/:server_id/delete').post(
 );
 
 // kick member
-MainServerRouter.route('/:server_id/members/:unique_id').delete(
+MainServerRouter.route('/:server_id/members/:id').delete(
   authenticate(true),
   UserPresentVerification,
   checkRolePerms('Kick', permissions.roles.KICK_USER),
@@ -78,7 +78,7 @@ MainServerRouter.route('/:server_id/bans').get(
 
 // ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
-MainServerRouter.route('/:server_id/bans/:unique_id').put(
+MainServerRouter.route('/:server_id/bans/:id').put(
   authenticate(true),
   UserPresentVerification,
   checkRolePerms('Ban', permissions.roles.BAN_USER),
@@ -87,7 +87,7 @@ MainServerRouter.route('/:server_id/bans/:unique_id').put(
 
 // un ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
-MainServerRouter.route('/:server_id/bans/:unique_id').delete(
+MainServerRouter.route('/:server_id/bans/:id').delete(
   authenticate(true),
   UserPresentVerification,
   checkRolePerms('Ban', permissions.roles.BAN_USER),

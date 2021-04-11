@@ -64,7 +64,6 @@ module.exports = async (req, res, next) => {
 
   // emit leave event 
   io.in("server:" + req.server.server_id).emit("server:member_remove", {
-    uniqueID: req.user.id,
     id: req.user.id,
     server_id: req.server.server_id
   });
@@ -81,7 +80,6 @@ module.exports = async (req, res, next) => {
 
   
   const user = {
-    uniqueID: req.user.id,
     id: req.user.id,
     username: req.user.username,
     tag: req.user.tag,
