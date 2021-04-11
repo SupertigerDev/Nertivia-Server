@@ -64,7 +64,7 @@ export default async function join(server: any, user: any, socketID: string | un
   }).lean();
 
   const createServerObj = Object.assign({}, server);
-  createServerObj.creator = { uniqueID: createServerObj.creator.id, id: createServerObj.creator.id };
+  createServerObj.creator = { id: createServerObj.creator.id };
   createServerObj.__v = undefined;
   createServerObj._id = undefined;
 
@@ -80,7 +80,6 @@ export default async function join(server: any, user: any, socketID: string | un
       username: user.username,
       tag: user.tag,
       avatar: user.avatar,
-      uniqueID: user.id,
       id: user.id
     }
   };
@@ -119,7 +118,6 @@ export default async function join(server: any, user: any, socketID: string | un
 
   let messageCreated = await messageCreate.save();
   user = {
-    uniqueID: user.id,
     id: user.id,
     username: user.username,
     tag: user.tag,
@@ -169,7 +167,7 @@ export default async function join(server: any, user: any, socketID: string | un
 
   // send members list
   let serverMembers = await ServerMembers.find({ server: server._id })
-    .populate("member", "username tag avatar uniqueID id bot")
+    .populate("member", "username tag avatar id bot")
     .lean();
 
   const  {programActivityArr, memberStatusArr, customStatusArr} = await getUserDetails(serverMembers.map((sm: any) => sm.member.id))   

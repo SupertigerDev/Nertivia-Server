@@ -113,7 +113,6 @@ module.exports = async (req, res, next) => {
     delete resObj.password;
     const updateSession = Object.assign({}, req.session["user"], resObj, {passwordVersion: req.user.passwordVersion});
     req.session["user"] = updateSession;
-    resObj.uniqueID = user.id;
     resObj.id = user.id;
     const io = req.io;
     if (updatePassword) {
@@ -131,7 +130,7 @@ module.exports = async (req, res, next) => {
 
     // emit public data
     if (!data.avatar && !data.username) return;
-    const publicObj = {uniqueID: req.user.id, id: req.user.id}
+    const publicObj = {id: req.user.id}
     if (data.avatar) publicObj.avatar = data.avatar;
     if (data.username) publicObj.username = data.username;
     if (data.tag) publicObj.tag = data.tag;

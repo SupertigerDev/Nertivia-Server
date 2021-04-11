@@ -15,7 +15,7 @@ export default async function (userIDArr: String[]){
       const user_id = onlineMemberUserIDArr[i];
       const json = JSON.parse(pa);
       delete json.socketID;
-      return {...json, uniqueID: user_id}
+      return {...json, user_id: user_id}
     })
     .filter((pa: any) => pa)
     return {memberStatusArr, customStatusArr, programActivityArr};

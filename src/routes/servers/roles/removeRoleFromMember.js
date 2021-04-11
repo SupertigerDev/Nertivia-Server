@@ -68,7 +68,6 @@ module.exports = async (req, res, next) => {
   const io = req.io;
   io.in("server:" + req.server.server_id).emit("server_member:remove_role", {
     role_id: role_id,
-    uniqueID: member_id,
     id: member_id,
     server_id: server_id,
   });  

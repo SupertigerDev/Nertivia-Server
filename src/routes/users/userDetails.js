@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
     id: userID
   })
     .select("-status -__v -friends +about_me +badges +servers +createdBy")
-    .populate('createdBy', 'username tag uniqueID id -_id')
+    .populate('createdBy', 'username tag id -_id')
     .lean();
 
   if (!user) {

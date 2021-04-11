@@ -8,10 +8,10 @@ const { emit } = require('./../models/users');
  *
  * @param {SocketIO.Server} io
  */
-module.exports = async (name, id, data, io, emitToSelf = true) => {
+module.exports = async (name, _id, data, io, emitToSelf = true) => {
 
-  const friends = await Friends.find({requester: id}).populate('recipient');
-  const user = await Users.findById(id).populate('servers');
+  const friends = await Friends.find({requester: _id}).populate('recipient');
+  const user = await Users.findById(_id).populate('servers');
 
 
   let roomIDArr = [];

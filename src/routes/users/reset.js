@@ -13,14 +13,14 @@ const transporter = nodemailer.createTransport({
 
 
 module.exports = async (req, res, next) => {
-  const {uniqueID, password} = req.body;
+  const {id, password} = req.body;
   const code = req.params.code;
   req.session.destroy();
 
 
   // Find the user given the email
-  const user = await Users.findOne({id: uniqueID}).select(
-    "email avatar status admin _id username uniqueID id tag created GDriveRefreshToken banned email_confirm_code passwordVersion reset_password_code"
+  const user = await Users.findOne({id: id}).select(
+    "email avatar status admin _id username id tag created GDriveRefreshToken banned email_confirm_code passwordVersion reset_password_code"
   );
 
   // If not, handle it

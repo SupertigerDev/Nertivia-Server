@@ -15,9 +15,9 @@ const flake = require('../../utils/genFlakeId').default;
 
 module.exports = async (req, res, next) => {
   const { name } = req.body;
-  const user_id = req.user._id;
+  const userDocID = req.user._id;
   // A user can only create 10 servers.
-  const checkLimitExceeded = await Servers.find({ creator: user_id });
+  const checkLimitExceeded = await Servers.find({ creator: userDocID });
 
   if (checkLimitExceeded.length >= 10)
     return res.status(403).json({
@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
   const serverID = flake.gen();
   const createServer = await Servers.create({
     name: name.trim(),
-    creator: user_id,
+    creator: userDocID,
     default_channel_id: channelID,
     server_id: serverID,
   });
@@ -44,13 +44,13 @@ module.exports = async (req, res, next) => {
   });
 
   const addServerUser = await User.updateOne(
-    { _id: user_id },
+    { _id: userDocID },
     { $push: { servers: createServer._id } }
   );
   const addServerMember = await ServerMembers.create({
     server: createServer._id,
     server_id: createServer.server_id,
-    member: user_id,
+    member: userDocID,
     type: "OWNER"
   });
 

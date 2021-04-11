@@ -20,7 +20,7 @@ module.exports = async (req, res, next) => {
     .populate({
       path: "recipients",
       select:
-        "-_id -id -password -__v -email -friends -status -created -lastSeen"
+        "-_id -password -__v -email -friends -status -created -lastSeen"
     });
   if (channel) {
     await channels.updateOne({ recipients: recipient._id, creator: req.user._id }, {hide: false});
@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
     .populate({
       path: "recipients",
       select:
-        "-_id -id -password -__v -email -friends -status -created -lastSeen"
+        "-_id -password -__v -email -friends -status -created -lastSeen"
     });
 
   // create channel because it doesnt exist.
@@ -54,7 +54,7 @@ module.exports = async (req, res, next) => {
   });
   newChannel = await channels.findOne(newChannel).populate({
     path: "recipients",
-    select: "-_id -id -password -__v -email -friends -status -created -lastSeen"
+    select: "-_id -password -__v -email -friends -status -created -lastSeen"
   });
 
   res.json({ status: true, channel: newChannel });

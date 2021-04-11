@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
   }
   // Find the user given the email
   const user = await Users.findOne(obj).select(
-    "avatar status admin _id username uniqueID id tag created GDriveRefreshToken banned email_confirm_code passwordVersion"
+    "avatar status admin _id username id tag created GDriveRefreshToken banned email_confirm_code passwordVersion"
   );
 
   // If not, handle it

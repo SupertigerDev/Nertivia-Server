@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
 
   // Check if there is a user with the same email
   const foundUser = await User.findOne({ email: email.toLowerCase() }).select(
-    "uniqueID id email_confirm_code passwordVersion"
+    "id email_confirm_code passwordVersion"
   );
   if (!foundUser) {
     return res.status(404).json({
