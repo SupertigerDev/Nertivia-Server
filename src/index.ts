@@ -44,20 +44,6 @@ function start() {
 		console.log("\x1b[32m" + "MongoDB> " + "\x1b[1m" + "Connected!\x1b[0m");
 
 
-		// console.log("converting uniqueID to id...")
-
-		// const bulkAction = Users.collection.initializeUnorderedBulkOp();
-		// await Users.find({}).select('uniqueID').then(async (docs) => {
-		// 	for (let i = 0; i < docs.length; i++) {
-		// 		const doc: any = docs[i];
-		// 		bulkAction.find({_id: doc._id}).updateOne({$set: {id: doc.uniqueID}})
-		// 	}
-		// 	await bulkAction.execute().then((res) => {
-		// 		console.log(res)
-		// 		console.log("done")
-		// 	})
-			
-		// })
 
 
 		connectToRedis();
