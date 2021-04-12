@@ -104,6 +104,12 @@ module.exports = async (req, res, next) => {
     delete data.avatar;
     data.avatar = url;
   }
+  if (data.banner) {
+    const url = await uploadBanner(data.banner, req.user.id).catch(err => {res.status(403).json({message: err})});
+    if (!url) return;
+    delete data.banner;
+    data.banner= url;
+  }
 
   try {
     await Users.updateOne({ _id: user._id }, data);
@@ -142,8 +148,16 @@ module.exports = async (req, res, next) => {
   }
 };
 
-
 async function uploadAvatar(base64, user_id) {
+  return uploadImage(base64, user_id, 200, 'avatar')
+}
+async function uploadBanner(base64, user_id) {
+  return uploadImage(base64, user_id, 1900, 'banner')
+}
+
+
+
+async function uploadImage(base64, user_id, size, name) {
   return new Promise(async (resolve, reject) => {
     let buffer = Buffer.from(base64.split(',')[1], 'base64');
 
@@ -156,11 +170,11 @@ async function uploadAvatar(base64, user_id) {
     const mimeType = base64MimeType(base64);
     const type = base64.split(';')[0].split('/')[1];
     if (!checkMimeType(mimeType)) {
-      return reject("Invalid avatar.")
+      return reject("Invalid " + name)
 
     }
 
-    buffer = await cropImage(buffer, mimeType, 200);
+    buffer = await cropImage(buffer, mimeType, size);
 
     if (!buffer) {
       return reject("Something went wrong while cropping image.")
@@ -168,10 +182,10 @@ async function uploadAvatar(base64, user_id) {
     const id = flakeId.gen();
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `avatar.${type}`)
+    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
       .catch(err => {reject(err)})
     if (!success) return;
-    resolve(`${user_id}/${id}/avatar.${type}`);
+    resolve(`${user_id}/${id}/${name}.${type}`);
   })
 }
 

@@ -11,6 +11,7 @@ const policies = {
     check('email').isEmail().withMessage('Invalid email.').optional({ checkFalsy: true }),
     check('new_password').isString().withMessage('Invalid Format.').isLength({ min: 3 }).withMessage("New password must be at least 3 chars long.").optional({ checkFalsy: true }),
     check('avatar').isString().withMessage('Invalid Format.').optional({ checkFalsy: true }),
+    check('banner').isString().withMessage('Invalid Format.').optional({ checkFalsy: true }),
     policyHandler
   ],
   updateBot: [

@@ -77,6 +77,10 @@ const usersSchema = new Schema({
     type: String,
     default: null
   },
+  banner: {
+    type: String,
+    default: null
+  },
   custom_status: { type: String, select: false },
   status: {
     type: Number,
