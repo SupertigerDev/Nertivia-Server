@@ -68,11 +68,6 @@ const usersSchema = new Schema({
     type: String,
     unique: true
   },
-  // replace uniqueID with id ^
-  uniqueID: {
-    type: String,
-    unique: true
-  },
   lastSeen: {
     type: Number,
     default: 0,
@@ -163,10 +158,7 @@ usersSchema.pre('save', async function (next) {
       this.password = passwordHash;
     }
 
-    const id = flake.gen();
-    this.uniqueID = id
-    // uniqueID to be removed soon.
-    this.id = id;
+    this.id = flake.gen();
 
     // generate tag
     this.tag = generateString(4);
