@@ -3,10 +3,13 @@ const { matchedData } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 const cropImage = require('../../utils/cropImage');
+import compressImage from '../../utils/compressImage';
+import tempSaveImage from '../../utils/tempSaveImage';
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 const flakeId = new (require('flakeid'))();
 const emitToAll = require('../../socketController/emitToAll');
 const sio = require("socket.io");
+const fs = require("fs");
 
 
 module.exports = async (req, res, next) => {
@@ -174,9 +177,19 @@ async function uploadImage(base64, user_id, size, name) {
 
     }
 
-    buffer = await cropImage(buffer, mimeType, size);
+    let dirPath = "";
+
+    if (name === "banner") {
+      dirPath = (await tempSaveImage(`bnr.${type}`, buffer)).dirPath;
+      dirPath = await compressImage(`bnr.${type}`, dirPath).catch(err => {reject("Something went wrong while compressing image.") })
+      if (!dirPath) return;
+      buffer = fs.createReadStream(dirPath);
+    } else {
+      buffer = await cropImage(buffer, mimeType, size);
+    }
 
     if (!buffer) {
+      if (name === "banner") deleteFile(dirPath);
       return reject("Something went wrong while cropping image.")
     }
     const id = flakeId.gen();
@@ -184,13 +197,19 @@ async function uploadImage(base64, user_id, size, name) {
 
     const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
       .catch(err => {reject(err)})
+    if (name === "banner") deleteFile(dirPath);
+
     if (!success) return;
     resolve(`${user_id}/${id}/${name}.${type}`);
   })
 }
 
 
-
+function deleteFile(path) {
+  fs.unlink(path, err => {
+    if (err) console.error(err)
+  });
+}
 function base64MimeType(encoded) {
   var result = null;
 
