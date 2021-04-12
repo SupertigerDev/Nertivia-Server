@@ -26,7 +26,7 @@ interface Args {
 interface User {
   _id: string;
   username: string;
-  uniqueID: string;
+  id: string;
   avatar: string;
 }
 interface Message {
@@ -63,7 +63,7 @@ export async function sendDMPush(args: DMArgs) {
   const data: any = {
     username: args.sender.username,
     channel_id: args.message.channelID,
-    unique_id: args.sender.uniqueID,
+    user_id: args.sender.id,
     message: contentBuilder(args.message)
   }
   if (args.sender.avatar) {
@@ -77,12 +77,12 @@ export async function sendServerPush(args: ServerArgs) {
   if (!serverKey) return;
   const devices = await Servers.findOne({server_id: args.server_id}).select("FCM_devices").populate("FCM_devices") as any;
   if (!devices.FCM_devices || !devices.FCM_devices.length) return;
-  const tokensArr = devices.FCM_devices.filter((d: any) => d.user_id !== args.sender.uniqueID).map((t: any) => t.token);
+  const tokensArr = devices.FCM_devices.filter((d: any) => d.user_id !== args.sender.id).map((t: any) => t.token);
   if (!tokensArr.length) return; 
   const data: any = {
     username: args.sender.username,
     channel_id: args.message.channelID,
-    unique_id: args.sender.uniqueID,
+    user_id: args.sender.id,
     server_id: args.channel.server.server_id,
     server_name: args.channel.server.name,
     channel_name: args.channel.name,
@@ -116,27 +116,27 @@ function sendToDevice(tokenArr: string[], data: any) {
 
 
 // join /create server 
-export async function AddFCMUserToServer(server_id: string, uniqueID: string) {
+export async function AddFCMUserToServer(server_id: string, user_id: string) {
   if (!serverKey) return;
-  const devices = await Devices.find({user_id: uniqueID});
+  const devices = await Devices.find({user_id});
   if (!devices.length) return;
   const deviceIDArr = devices.map(d => d._id)
   await Servers.updateOne({server_id}, {$addToSet: {FCM_devices: deviceIDArr}});
 }
 
 // leave, kick, banned from server
-export async function deleteFCMFromServer(server_id: string, uniqueID: string) {
+export async function deleteFCMFromServer(server_id: string, user_id: string) {
   if (!serverKey) return;
-  const devices = await Devices.find({user_id: uniqueID});
+  const devices = await Devices.find({user_id});
   if (!devices.length) return;
   const deviceIDArr = devices.map(d => d._id)
   await Servers.updateOne({server_id}, {$pullAll: {FCM_devices: deviceIDArr}});
 }
 
 // suspended / account deleted from nertivia
-export async function deleteAllUserFCM(uniqueID: string) {
+export async function deleteAllUserFCM(user_id: string) {
   if (!serverKey) return;
-  const devices = await Devices.find({user_id: uniqueID});
+  const devices = await Devices.find({user_id});
   if (!devices.length) return;
   const deviceIDArr = devices.map(d => d._id)
   await Servers.updateMany({FCM_devices: {$in: deviceIDArr}}, {$pullAll: {FCM_devices: deviceIDArr}});
