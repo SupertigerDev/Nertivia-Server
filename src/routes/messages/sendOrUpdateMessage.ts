@@ -336,7 +336,7 @@ async function directMessage(req: any, io: any, channelID: any, messageCreated: 
 
     const sendNotification = sendMessageNotification({
       message: messageCreated,
-      recipient_uniqueID: req.channel.recipients[0].id,
+      recipientUserID: req.channel.recipients[0].id,
       channelID,
       sender: req.user,
     })
