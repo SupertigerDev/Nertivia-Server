@@ -16,13 +16,8 @@ import channels from '../../models/channels';
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID, messageID } = req.params;
   let { tempID, socketID, color, buttons, htmlEmbed } = req.body;
-  let message = undefined;
-  if (req.body.message) {
-    message = req.body.message.replace(
-      /[\xA0\x00-\x09\x0B\x0C\x0E-\x1F\x7F\u{2000}-\u{200F}\u{202F}\u{2800}\u{17B5}\u{17B5}\u{17B5}\u{17B5}\u{17B5}\u{17B5}]/gu,
-      ""
-    );
-  } 
+  let message = req.body.message;
+
 
   // If messageID exists, message wants to update.
   let messageDoc;
