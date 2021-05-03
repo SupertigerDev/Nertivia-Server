@@ -66,7 +66,7 @@ module.exports = async (req, res, next) => {
     from: process.env.SMTP_FROM,
     to: email.toLowerCase().trim(), 
     subject: 'Nertivia - Reset Password',
-    html: `<p>Hello, ${user.username}!<br> Click on this link to reset your password: <strong>https://nertivia.net/reset?unique-id=${user.id}&code=${resetCode}</strong></p>`
+    html: `<p>Hello, ${user.username}!<br> Click on this link to reset your password: <strong>https://nertivia.net/reset-password?unique-id=${user.id}&code=${resetCode}</strong></p>`
   };
 
   transporter.sendMail(mailOptions, (err, info) => {})
