@@ -14,7 +14,8 @@ const publicThemesSchema = new Schema({
   theme: { type: Schema.Types.ObjectId, ref: 'themes' },
   screenshot: {type: String},
   creator: { type: Schema.Types.ObjectId, ref: 'users' },
-  stars: {type: Number, default: 0,}
+  likes: {type: [Schema.Types.ObjectId], ref: 'users'},
+  compatible_client_version: {type: String}
 })
 
 

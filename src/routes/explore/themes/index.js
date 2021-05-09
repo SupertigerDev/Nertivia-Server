@@ -12,7 +12,7 @@ MainThemesRouter.route('/:id').post(
   authenticate(),
   policies.submit,
   GDriveOauthClient,
-  require("./addThemePublic")
+  require("./addTheme")
 );
 
 // update theme
@@ -20,7 +20,7 @@ MainThemesRouter.route('/:id').patch(
   authenticate(),
   policies.update,
   GDriveOauthClient,
-  require("./saveThemePublic")
+  require("./updateTheme")
 );
 
 
@@ -28,14 +28,27 @@ MainThemesRouter.route('/:id').patch(
 MainThemesRouter.route('/:id/apply').get(
   authenticate(),
   rateLimit({name: 'public_theme_apply', expire: 60, requestsLimit: 120 }),
-  require("./applyThemePublic")
+  require("./applyPublicTheme")
+);
+
+// like a theme
+MainThemesRouter.route('/:id/like').post(
+  authenticate(),
+  rateLimit({name: 'public_theme_like', expire: 60, requestsLimit: 120 }),
+  require("./AddLike")
+);
+// unlike a theme
+MainThemesRouter.route('/:id/like').delete(
+  authenticate(),
+  rateLimit({name: 'public_theme_like', expire: 60, requestsLimit: 120 }),
+  require("./removeLike")
 );
 
 
 // get a theme
 MainThemesRouter.route('/:id').get(
   authenticate(),
-  require("./getThemePublic")
+  require("./getPublicTheme")
 );
 
 // get all themes

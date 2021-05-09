@@ -2,7 +2,7 @@ const Users = require("../../models/users");
 const Themes = require("../../models/themes");
 
 module.exports = async (req, res, next) => {
-  const { name, css } = req.body;
+  const { name, css, client_version } = req.body;
   const { id } = req.params;
   const _id = req.user._id;
 
@@ -18,9 +18,10 @@ module.exports = async (req, res, next) => {
     { id },
     {
       name: name,
-      css: css
+      css: css,
+      client_version
     },
     { upsert: true }
   );
-  res.json({name, css, id});
+  res.json({name, css, id, client_version});
 };

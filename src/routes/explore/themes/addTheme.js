@@ -38,6 +38,7 @@ module.exports = async (req, res, next) => {
   const create = await PublicThemes.create({
     id,
     css: theme.css,
+    compatible_client_version: theme.client_version,
     description,
     theme: theme._id,
     creator: req.user._id,
@@ -49,6 +50,7 @@ module.exports = async (req, res, next) => {
   res.json({
     id: create.id,
     description: create.description,
+    compatible_client_version: theme.client_version,
     screenshot: create.screenshot,
     approved: false,
   })

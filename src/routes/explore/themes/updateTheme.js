@@ -12,6 +12,7 @@ module.exports = async (req, res, next) => {
 
   // check if theme exists
   const theme = await Themes.findOne({id: themeID, creator: req.user._id});
+  data.compatible_client_version = theme.client_version;
   if (!theme) {
     return res.status(404).json({message: 'id is invalid.'});
   }
@@ -54,6 +55,7 @@ module.exports = async (req, res, next) => {
     description: data.description || publicTheme.description,
     screenshot: data.screenshot || publicTheme.screenshot,
     approved: publicTheme.approved,
+    compatible_client_version: theme.client_version,
     updatedCss: !!data.updatedCss
   })
 };
