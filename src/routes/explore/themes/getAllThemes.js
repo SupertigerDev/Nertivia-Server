@@ -46,6 +46,7 @@ module.exports = async (req, res, next) => {
         }
       }
     },
+    { "$sort": { "likes": -1 } },
   ]);
 
   res.json(themes);

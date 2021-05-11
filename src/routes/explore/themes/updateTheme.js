@@ -29,9 +29,6 @@ module.exports = async (req, res, next) => {
   if (!publicTheme) {
     return res.status(403).json({message: 'Theme does not exist.'});
   }
-  if (!oauth2Client) {
-    return res.status(403).json({message: 'You must link your Google Drive to continue.'});
-  }
 
   if (data.screenshot) {
     const url = await uploadScreenshot(data.screenshot, req.user.id, true).catch(err => { res.status(403).json({ message: err }) });
