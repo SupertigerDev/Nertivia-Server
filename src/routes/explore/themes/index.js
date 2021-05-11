@@ -1,7 +1,6 @@
 const MainThemesRouter = require("express").Router();
 
 // Middleware
-const GDriveOauthClient = require("./../../../middlewares/GDriveOauthClient");
 const authenticate = require("../../../middlewares/authenticate");
 const policies = require('../../../policies/publicThemePolicies');
 const rateLimit = require('../../../middlewares/rateLimit');
@@ -11,7 +10,6 @@ const rateLimit = require('../../../middlewares/rateLimit');
 MainThemesRouter.route('/:id').post(
   authenticate(),
   policies.submit,
-  GDriveOauthClient,
   require("./addTheme")
 );
 
@@ -19,7 +17,6 @@ MainThemesRouter.route('/:id').post(
 MainThemesRouter.route('/:id').patch(
   authenticate(),
   policies.update,
-  GDriveOauthClient,
   require("./updateTheme")
 );
 

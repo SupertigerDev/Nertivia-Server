@@ -4,6 +4,14 @@ const Themes = require('../../../models/themes');
 const PublicThemes = require('../../../models/publicThemes');
 const { matchedData } = require("express-validator");
 
+import * as nertiviaCDN from '../../../utils/uploadCDN/nertiviaCDN'
+import fs from 'fs';
+
+import tempSaveImage from '../../../utils/tempSaveImage';
+import compressImage from '../../../utils/compressImage';
+const flake = require('../../../utils/genFlakeId').default;
+
+
 /** @type {Express.RequestHandler} */
 module.exports = async (req, res, next) => {
   const oauth2Client = req.oauth2Client;
@@ -26,13 +34,10 @@ module.exports = async (req, res, next) => {
   }
 
   if (data.screenshot) {
-    // 2092000 = 2mb
-    const maxSize = 2092000;
-    const {ok, error, result, message} = await uploadImage(data.screenshot, oauth2Client, maxSize, 'theme-screenshot-' + themeID);
-    if (!ok) {
-      return res.status(403).json({message});
-    }
-    data.screenshot = result.data.id;
+    const url = await uploadScreenshot(data.screenshot, req.user.id, true).catch(err => { res.status(403).json({ message: err }) });
+    if (!url) return;
+    delete data.screenshot;
+    data.screenshot = url;
   }
 
    
@@ -59,3 +64,81 @@ module.exports = async (req, res, next) => {
     updatedCss: !!data.updatedCss
   })
 };
+
+function base64MimeType(encoded) {
+  var result = null;
+
+  if (typeof encoded !== "string") {
+    return result;
+  }
+
+  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+
+  if (mime && mime.length) {
+    result = mime[1];
+  }
+
+  return result;
+}
+function checkMimeType(mimeType) {
+  const filetypes = /jpeg|jpg|gif|png/;
+  const mime = filetypes.test(mimeType);
+  if (mime) {
+    return true;
+  }
+  return false;
+}
+
+async function uploadScreenshot(base64, user_id) {
+  return new Promise(async (resolve, reject) => {
+    let buffer = Buffer.from(base64.split(',')[1], 'base64');
+
+    // 8092000 = 8mb
+    const maxSize = 8092000;
+    if (buffer.byteLength > maxSize) {
+      return reject("Image is larger than 8MB.")
+
+    }
+    const mimeType = base64MimeType(base64);
+    let type = base64.split(';')[0].split('/')[1];
+    if (!checkMimeType(mimeType)) {
+      return reject("Invalid image.")
+
+    }
+
+    let dirPath = "";
+    // buffer = await cropImage(buffer, mimeType, 500);
+    // TODO: ADD ERROR HANDLING
+    // DELETE TEMP FILE
+    dirPath = (await tempSaveImage(`bnr.${type}`, buffer)).dirPath;
+    dirPath = await compressImage(`bnr.${type}`, dirPath).catch(err => { reject("Something went wrong while compressing image.") })
+    if (!dirPath) return;
+    buffer = fs.createReadStream(dirPath);
+
+    if (!buffer) {
+      deleteFile(dirPath);
+      return reject("Something went wrong while compressing image.")
+    }
+    const id = flake.gen();
+    const name = "screenshot";
+
+    if (type !== "gif") {
+      type = "webp"
+    }
+
+
+    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
+      .catch(err => { reject(err) })
+    deleteFile(dirPath);
+    if (!success) return;
+    resolve(`${user_id}/${id}/${name}.${type}`);
+  })
+}
+
+function deleteFile(path) {
+  fs.unlink(path, err => {
+    if (err) console.error(err)
+  });
+}
+
+
