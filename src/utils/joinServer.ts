@@ -61,7 +61,9 @@ export default async function join(server: any, user: any, socketID: string | un
 
   let serverChannels = await Channels.find({
     server: server._id
-  }).lean();
+  })
+  .select("name channelID server server_id lastMessaged rateLimit icon")
+  .lean();
 
   const createServerObj = Object.assign({}, server);
   createServerObj.creator = { id: createServerObj.creator.id };

@@ -4,10 +4,12 @@ const policyHandler = require("./policyHandler");
 const policies = {
   updateChannel: [
     check("name")
-      .isString()
-      .withMessage("Invalid Format.")
-      .isLength({ min: 0, max: 30 })
-      .withMessage("Name must be shorter than 30 characters"),
+      .isString().withMessage("Invalid Format.")
+      .isLength({ min: 0, max: 30 }).withMessage("Name must be shorter than 30 characters"),
+    check("icon")
+    .isString().withMessage("Invalid Format.")
+    .optional({ nullable: true })
+    .isLength({ min: 0, max: 60 }).withMessage("icon must be shorter than 60 characters"),
     policyHandler
   ],
   createChannel: [

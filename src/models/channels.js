@@ -18,6 +18,7 @@ const channelsSchema = new Schema({
   hide: {type: Boolean, select: false, required: false}, // only used for recent dms.
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
   server_id: {type: String, required: false},
+  icon: {type: String, required: false},
   lastMessaged: {type: Number},
   // in seconds
   rateLimit: {type: Number, required: false},
