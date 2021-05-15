@@ -107,7 +107,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   }
 
   // converted to a Set to remove duplicates.
-  const mentionIds = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
+  let mentionIds = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
+
+  //\[@:([\d]+)]
+  // newMentionIDs
+  mentionIds = Array.from(new Set([...mentionIds, ...matchAll(message, /\[@:([\d]+)]/g).toArray()]))
 
   let mentions = [];
   if (mentionIds.length) {
