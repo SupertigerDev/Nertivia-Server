@@ -5,6 +5,7 @@ import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 import tempSaveImage from '../../utils/tempSaveImage';
 import compressImage from '../../utils/compressImage';
 import fs from 'fs';
+import redis from '../../redis'
 
 
 const { matchedData } = require("express-validator");
@@ -59,6 +60,8 @@ module.exports = async (req, res, next) => {
       "server:update_server",
       Object.assign(data, { server_id: server.server_id })
     );
+    // clear cache
+    await redis.deleteServer(server.server_id)
     res.json(Object.assign(data, { server_id: server.server_id }));
   } catch (e) {
     res.status(403).json({ message: "Something went wrong. Try again later." });
