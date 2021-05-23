@@ -63,15 +63,14 @@ module.exports = async client => {
 
     let decryptedToken = await asyncVerifyJWT(token)
       .catch(e => {
-      console.log(e)
-      client.emit("auth_err", "Invalid Token");
-    })
+        client.emit("auth_err", "Invalid Token");
+      })
     if (!decryptedToken) return;
 
     try {
       client.auth = true;
       clearTimeout(timeout);
-      
+
       // get the user
 
       const userSelect =
