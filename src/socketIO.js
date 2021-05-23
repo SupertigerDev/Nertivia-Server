@@ -19,14 +19,7 @@ import getUsrDetails from './utils/getUserDetails';
 
 // nsps = namespaces.
 // disable socket events when not authorized .
-for (let key in getIOInstance().nsps) {
-  const nsp = getIOInstance().nsps[key];
-  nsp.on("connect", function (socket) {
-    if (!socket.auth) {
-      delete nsp.connected[socket.id];
-    }
-  });
-}
+disableEvents()
 
 const populateFriends = {
   path: "friends",
@@ -45,7 +38,6 @@ const populateServers = {
     {
       path: "creator",
       select: "id -_id"
-      //select: "-servers -friends -_id -__v -avatar -status -created -admin -username -tag"
     }
   ],
   select:
@@ -53,7 +45,6 @@ const populateServers = {
 };
 
 /**
- *
  * @param {sio.Socket} client
  */
 module.exports = async client => {
@@ -61,7 +52,7 @@ module.exports = async client => {
   //If the socket didn't authenticate(), disconnect it
   let timeout = setTimeout(function () {
     if (!client.auth) {
-      client.emit("auth_err", "Invalid Token");
+      client.emit("auth_err", "Token Timeout!");
       client.disconnect(true);
     }
   }, 10000);
@@ -70,22 +61,23 @@ module.exports = async client => {
   client.on("authentication", async data => {
     const { token } = data;
 
-    try {
-      let decryptedToken = await jwt.verify(
-        process.env.JWT_HEADER + token,
-        process.env.JWT_SECRET
-      );
-      const split = decryptedToken.split("-");
-      decryptedToken = split[0];
-      const passwordVersion = split[1] ? parseInt(split[1]) : 0;
-      client.auth = true;
+    let decryptedToken = await asyncVerifyJWT(token)
+      .catch(e => {
+      console.log(e)
+      client.emit("auth_err", "Invalid Token");
+    })
+    if (!decryptedToken) return;
 
+    try {
+      client.auth = true;
+      clearTimeout(timeout);
+      
       // get the user
 
       const userSelect =
         "avatar banner username type badges email id tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
 
-      const user = await User.findOne({ id: decryptedToken })
+      const user = await User.findOne({ id: decryptedToken.userID })
         .select(userSelect)
         .populate(populateFriends)
         .populate(populateServers)
@@ -97,7 +89,6 @@ module.exports = async client => {
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
         client.disconnect(true);
-        clearTimeout(timeout);
         return;
       }
 
@@ -119,8 +110,8 @@ module.exports = async client => {
       }
 
 
-      const pswdVerNotEmpty = user.passwordVersion === undefined && passwordVersion !== 0;
-      if (pswdVerNotEmpty || user.passwordVersion !== undefined && user.passwordVersion !== passwordVersion) {
+      const pswdVerNotEmpty = user.passwordVersion === undefined && decryptedToken.passwordVersion !== 0;
+      if (pswdVerNotEmpty || user.passwordVersion !== undefined && user.passwordVersion !== decryptedToken.passwordVersion) {
         console.log("loggedOutReason: Invalid Password Version");
         delete client.auth;
         client.emit("auth_err", "Token invalidated.");
@@ -382,7 +373,7 @@ module.exports = async client => {
       // json is empty
       // json is not the same.
       if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
-        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, user_id: userID  }, getIOInstance())
+        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, user_id: userID }, getIOInstance())
       }
     } else {
       await redis.setProgramActivity(userID, null);
@@ -390,3 +381,31 @@ module.exports = async client => {
     }
   })
 };
+
+
+function disableEvents() {
+  const nsps = getIOInstance().nsps;
+  for (let key in nsps) {
+    const nsp = nsps[key];
+    nsp.on("connect", function (socket) {
+      if (!socket.auth) {
+        delete nsp.connected[socket.id];
+      }
+    });
+  }
+}
+
+
+function asyncVerifyJWT(token) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(process.env.JWT_HEADER + token, process.env.JWT_SECRET, (err, value) => {
+      if (err) { reject(err); return; }
+      const [userID, passwordVersion] = value.split("-");
+      const payload = {
+        userID,
+        passwordVersion: parseInt(passwordVersion | "0")
+      }
+      resolve(payload)
+    })
+  })
+}
