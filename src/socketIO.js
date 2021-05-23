@@ -402,7 +402,7 @@ function asyncVerifyJWT(token) {
       const [userID, passwordVersion] = value.split("-");
       const payload = {
         userID,
-        passwordVersion: parseInt(passwordVersion | "0")
+        passwordVersion: parseInt(passwordVersion || "0")
       }
       resolve(payload)
     })
