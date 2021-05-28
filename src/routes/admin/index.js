@@ -17,7 +17,13 @@ MainAdminRouter.route("/users/search/:value").get(
   require("./searchUsers")
 );
 
+// for legacy nertivia (probably should remove after a while)
 MainAdminRouter.route("/users/:id").delete(
+  authenticate(),
+  isAdmin,
+  require("./suspendUser")
+);
+MainAdminRouter.route("/users/:id/suspend").post(
   authenticate(),
   isAdmin,
   require("./suspendUser")

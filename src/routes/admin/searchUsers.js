@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
       {tag: value},
       {id: value},
     ]
-  }, {_id: 0}).select('avatar email id ip username tag created banned bot').sort({_id: -1}).limit(30).lean()
+  }, {_id: 0}).select('avatar email id ip username tag created banned bot banner').sort({_id: -1}).limit(30).lean()
   res.json(users)
   
 };

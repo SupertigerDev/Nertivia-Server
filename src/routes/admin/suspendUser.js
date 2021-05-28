@@ -1,9 +1,10 @@
-const Users = require("../../models/users");
+  const Users = require("../../models/users");
 const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require("bcryptjs");
 const sio = require("socket.io");
 const redis = require("../../redis");
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
+const AdminActions = require("../../models/AdminActions");
 
 module.exports = async (req, res, next) => {
   const user_id = req.params.id;
@@ -18,19 +19,35 @@ module.exports = async (req, res, next) => {
   if (!verify) return res.status(403).json({ message: "Invalid password" });
 
   const userToSuspend = await Users.findOne({ id: user_id }).select(
-    "ip banned"
+    "ip banned type"
   );
-  if (!userToSuspend){
+  if (!userToSuspend) {
     return res.status(404).json({ message: "unique id not found" });
   }
+  if (userToSuspend.type === "CREATOR") {
+    return res.status(403).json({ message: "Cannot suspend creator." });
+  }
 
-  await deleteAllUserFCM(user_id);  
+  await deleteAllUserFCM(user_id);
 
   const reasonDB = reason.trim() ? reason : "Not Provided.";
   await Users.updateOne(
     { _id: userToSuspend._id },
     { banned: true, $set: { about_me: { "Suspend Reason": reasonDB } } }
   );
+
+  await AdminActions.create({
+    action: "SUSPEND",
+    admin: req.user._id,
+    user: userToSuspend._id,
+    date: Date.now()
+  })
+  await AdminActions.create({
+    action: "IP_BAN",
+    admin: req.user._id,
+    ip_ban: userToSuspend.ip,
+    date: Date.now()
+  })
 
   const io = req.io;
 
@@ -72,7 +89,7 @@ async function kickUser(io, user_id, message) {
     for (let i = 0; i < clients.length; i++) {
       const id = clients[i];
       io.to(id).emit("auth_err", message);
-      io.of('/').adapter.remoteDisconnect(id, true) 
+      io.of('/').adapter.remoteDisconnect(id, true)
     }
   });
 }
