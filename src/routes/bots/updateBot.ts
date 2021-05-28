@@ -40,7 +40,7 @@ export default async function updateBot(req: Request, res: Response) {
   }
 
   let error = false
-  await Users.updateOne({ _id: bot._id }, data).catch(err => { error = true });
+  await Users.updateOne({ _id: bot._id }, data).catch((err: any) => { error = true });
   if (error) {
     res.status(403).json({message: "Something went wrong while storing to database."})
     return;
