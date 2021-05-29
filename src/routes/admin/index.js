@@ -28,6 +28,11 @@ MainAdminRouter.route("/users/:id/suspend").post(
   isAdmin,
   require("./suspendUser")
 );
+MainAdminRouter.route("/actions/recent").get(
+  authenticate(),
+  isAdmin,
+  require("./recentAdminActions")
+);
 MainAdminRouter.route("/stats").get(
   authenticate(),
   isAdmin,

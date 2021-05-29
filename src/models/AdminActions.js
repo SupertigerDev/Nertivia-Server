@@ -16,7 +16,7 @@ const AdminActionsSchema = new Schema({
   ip_ban: String,
   admin: { type: Schema.Types.ObjectId, ref: 'users'},
   user: { type: Schema.Types.ObjectId, ref: 'users'},
-  date: Date
+  date: Number
 });
 
 
