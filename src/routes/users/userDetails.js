@@ -23,6 +23,21 @@ module.exports = async (req, res, next) => {
     });
   }
 
+
+  //check if user is blocked.
+  const isBlocked = await BlockedUsers.exists({
+    requester: req.user._id, // blocked by
+    recipient: user._id // blocked user
+  })
+  
+  if (userID === req.user.id) {
+    res.json({
+      user: {...user, servers: undefined},
+      isBlocked
+    });
+    return;
+  }
+
   // get common servers
   const requesterServersIDs = ((await Users.findOne({_id: req.user._id}).select("servers").lean()).servers || []).map(s => s.toString());
   const userServerIDs = (user.servers || []).map(s => s.toString());
@@ -39,11 +54,6 @@ module.exports = async (req, res, next) => {
   const commonFriendID = (await Users.find({_id: {$in: commonFriend_idArr}}).select("id")).map(u => u.id);
 
 
-  //check if user is blocked.
-  const isBlocked = await BlockedUsers.exists({
-    requester: req.user._id, // blocked by
-    recipient: user._id // blocked user
-  })
 
   res.json({
     user: {...user, servers: undefined},
