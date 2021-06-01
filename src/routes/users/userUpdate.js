@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
 const cropImage = require('../../utils/cropImage');
 import compressImage from '../../utils/compressImage';
+import { kickUser } from '../../utils/kickUser';
 import tempSaveImage from '../../utils/tempSaveImage';
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 const flakeId = new (require('flakeid'))();
@@ -128,7 +129,7 @@ module.exports = async (req, res, next) => {
       res.json({...resObj, token: JWT.sign(`${user.id}-${req.user.passwordVersion}`, process.env.JWT_SECRET).split(".").splice(1).join(".")});
 
       // logout other accounts
-      kickUser(io, user.id, socketID)
+      kickUser(user.id, "Password Changed.", socketID)
 
     } else {
       res.json(resObj);
@@ -233,20 +234,4 @@ function checkMimeType(mimeType) {
     return true;
   }
   return false;
-}
-
-/**
- *
- * @param {sio.Server} io
- */
-// also used in reset password.
-async function kickUser(io, user_id, socketID) {
-  io.in(user_id).clients((err, clients) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      if (id === socketID) continue;
-      io.to(id).emit("auth_err", "Password Changed.");
-      io.of('/').adapter.remoteDisconnect(id, true) 
-    }
-  });
 }
