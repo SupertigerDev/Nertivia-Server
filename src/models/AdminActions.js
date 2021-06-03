@@ -8,9 +8,10 @@ const {
 
 const AdminActionsSchema = new Schema({
   action: {type: String, enum: [
-    "SUSPEND",
-    "UNSUSPEND",
-    "IP_BAN",
+    "SUSPEND_USER",
+    "UNSUSPEND_USER",
+    "BAN_IP",
+    "UNBAN_IP",
     "APPROVE_THEME"
   ]},
   ip_ban: String,

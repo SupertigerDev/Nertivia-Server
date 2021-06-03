@@ -17,6 +17,7 @@ MainAdminRouter.route("/users/search/:value").get(
   require("./searchUsers")
 );
 
+// suspend user
 // for legacy nertivia (probably should remove after a while)
 MainAdminRouter.route("/users/:id").delete(
   authenticate(),
@@ -27,6 +28,13 @@ MainAdminRouter.route("/users/:id/suspend").post(
   authenticate(),
   isAdmin,
   require("./suspendUser")
+);
+
+// remove Suspention
+MainAdminRouter.route("/users/:id/suspend").delete(
+  authenticate(),
+  isAdmin,
+  require("./unsuspendUser")
 );
 MainAdminRouter.route("/actions/recent").get(
   authenticate(),

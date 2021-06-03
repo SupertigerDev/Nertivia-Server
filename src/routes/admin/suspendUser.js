@@ -1,8 +1,7 @@
   const Users = require("../../models/users");
 const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require("bcryptjs");
-const sio = require("socket.io");
-const redis = require("../../redis");
+
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 const AdminActions = require("../../models/AdminActions");
 const { kickUser } = require("../../utils/kickUser");
@@ -34,26 +33,24 @@ module.exports = async (req, res, next) => {
   const reasonDB = reason.trim() ? reason : "Not Provided.";
   await Users.updateOne(
     { _id: userToSuspend._id },
-    { banned: true, $set: { about_me: { "Suspend Reason": reasonDB } } }
+    { banned: true, $set: {about_me: { "Suspend Reason": reasonDB }} } 
   );
 
   await AdminActions.create({
-    action: "SUSPEND",
+    action: "SUSPEND_USER",
     admin: req.user._id,
     reason: reasonDB,
     user: userToSuspend._id,
     date: Date.now()
   })
   await AdminActions.create({
-    action: "IP_BAN",
+    action: "BAN_IP",
     admin: req.user._id,
     ip_ban: userToSuspend.ip,
     date: Date.now()
   })
 
 
-
-  const io = req.io;
 
   // ban ip
   if (userToSuspend.ip) {
@@ -70,30 +67,14 @@ module.exports = async (req, res, next) => {
 
 
     for (let index = 0; index < usersArr.length; index++) {
-      const kick_user_id = usersArr[index].id;
-      if (kick_user_id === user_id) {
-        await kickUser(kick_user_id, "You have been suspended for: " + reasonDB)
+      const userToKickID = usersArr[index].id;
+      if (userToKickID === user_id) {
+        await kickUser(userToKickID, "You have been suspended for: " + reasonDB)
       } else {
-        await kickUser(kick_user_id, "IP is banned.")
+        await kickUser(userToKickID, "IP is banned.")
       }
     }
   }
 
   res.json("Account Suspended!");
 };
-
-// /**
-//  *
-//  * @param {sio.Server} io
-//  */
-// async function kickUser(io, user_id, message) {
-//   await redis.deleteSession(user_id);
-
-//   io.in(user_id).clients((err, clients) => {
-//     for (let i = 0; i < clients.length; i++) {
-//       const id = clients[i];
-//       io.to(id).emit("auth_err", message);
-//       io.of('/').adapter.remoteDisconnect(id, true)
-//     }
-//   });
-// }
