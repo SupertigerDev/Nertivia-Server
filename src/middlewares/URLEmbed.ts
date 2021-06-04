@@ -59,9 +59,14 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
   resObj = {...resObj, ...OGTagResult.result};
   if (OGTagResult.result?.image) {
     try {
-      const meta = await getImageMetadata(OGTagResult.result.image);
+      let embedImageURL = OGTagResult.result.image;
+      if (!embedImageURL.startsWith("http")) {
+        const embedURL = new URL(url)
+        embedImageURL = embedURL.origin + embedImageURL
+      }
+      const meta = await getImageMetadata(embedImageURL);
       resObj = {...resObj, image: {
-        url: OGTagResult.result.image,
+        url: embedImageURL,
         dimensions: {
           height:meta.height,
           width: meta.width
