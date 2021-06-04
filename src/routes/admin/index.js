@@ -16,6 +16,11 @@ MainAdminRouter.route("/users/search/:value").get(
   isAdmin,
   require("./searchUsers")
 );
+MainAdminRouter.route("/users/ip/:user_id").get(
+  authenticate(),
+  isAdmin,
+  require("./sameIPUsers")
+);
 
 // suspend user
 // for legacy nertivia (probably should remove after a while)
