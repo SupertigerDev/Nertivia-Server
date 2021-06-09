@@ -10,48 +10,46 @@ const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 
 module.exports = async (req, res, next) => {
-  const {server_id, id} = req.params;
+  const { server_id, id } = req.params;
 
 
   if (id === req.user.id) {
     return res
-    .status(403)
-    .json({ message: "Why would you ban yourself?" });
+      .status(403)
+      .json({ message: "Why would you ban yourself?" });
   }
   const server = req.server;
 
   // allow members that are not in this server to be banned.
-  const userToBeBanned = await Users.findOne({id: id}).select('_id id username tag avatar admin');
+  const userToBeBanned = await Users.findOne({ id: id }).select('_id id username tag avatar admin');
 
   if (!userToBeBanned) return res
     .status(404)
     .json({ message: "User not found." });
 
-  const userAlreadyBanned = await Servers.exists({"user_bans.user": userToBeBanned._id, server_id});
+  const userAlreadyBanned = await Servers.exists({ "user_bans.user": userToBeBanned._id, server_id });
 
   if (userAlreadyBanned) {
     res.json({ status: "Member is already banned." });
     return;
   }
 
-  if(userToBeBanned._id.toString() === req.server.creator.toString()) {
+  if (userToBeBanned._id.toString() === req.server.creator.toString()) {
     return res
-    .status(403)
-    .json({ message: "You can't ban the creator of the server." });
+      .status(403)
+      .json({ message: "You can't ban the creator of the server." });
   }
 
   const isCreator = req.server.creator === req.user._id
-  if (!isCreator) {
+  const memberToBeBanned = await ServerMembers.findOne({ server: req.server._id, member: userToBeBanned._id }).select("roles");
+  if (!isCreator && memberToBeBanned) {
     // check if requesters role is above the recipients
-    const member = await ServerMembers.findOne({ server: req.server._id, member: userToBeBanned._id }).select("roles");
-    if (member) {
-      const roles = await Roles.find({ id: { $in: member.roles } }, { _id: 0 }).select('order').lean();
-      let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
-      if (recipientHighestRolePosition <= req.highestRolePosition) {
-        return res
-          .status(403)
-          .json({ message: "Your Role priority is the same or lower than the recipient." });
-      }
+    const roles = await Roles.find({ id: { $in: memberToBeBanned.roles } }, { _id: 0 }).select('order').lean();
+    let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
+    if (recipientHighestRolePosition <= req.highestRolePosition) {
+      return res
+        .status(403)
+        .json({ message: "Your Role priority is the same or lower than the recipient." });
     }
   }
 
@@ -59,8 +57,8 @@ module.exports = async (req, res, next) => {
 
   await deleteFCMFromServer(server_id, id);
   await Servers.updateOne(
-    {_id: server._id},
-    {$push: {user_bans: {user: userToBeBanned._id}}}
+    { _id: server._id },
+    { $push: { user_bans: { user: userToBeBanned._id } } }
   );
 
 
@@ -88,10 +86,10 @@ module.exports = async (req, res, next) => {
 
 
   //if bot, delete bot role
-  const role = await Roles.findOneAndDelete({bot: userToBeBanned._id, server: server._id});
+  const role = await Roles.findOneAndDelete({ bot: userToBeBanned._id, server: server._id });
 
   if (role) {
-    io.in("server:" + role.server_id).emit("server:delete_role", {role_id: role.id, server_id: role.server_id});
+    io.in("server:" + role.server_id).emit("server:delete_role", { role_id: role.id, server_id: role.server_id });
   }
 
 
@@ -118,10 +116,12 @@ module.exports = async (req, res, next) => {
 
 
   // emit leave event 
-  io.in("server:" + req.server.server_id).emit("server:member_remove", {
-    id: id,
-    server_id: server_id
-  });
+  if (memberToBeBanned) {
+    io.in("server:" + req.server.server_id).emit("server:member_remove", {
+      id: id,
+      server_id: server_id
+    });
+  }
 
   // send kick message
   const messageCreate = new Messages({
@@ -142,10 +142,12 @@ module.exports = async (req, res, next) => {
     message: messageCreated
   });
 
-  
-  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, { $set: {
-    lastMessaged: Date.now()
-  }}).lean()
+
+  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, {
+    $set: {
+      lastMessaged: Date.now()
+    }
+  }).lean()
 
 
   defaultChannel.server = req.server;
@@ -162,7 +164,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  
+
 };
 
 
