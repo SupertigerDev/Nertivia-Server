@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
   // check if reaction exists
   const reactionExists = await MessageReactions.exists({...filter});
   if (!reactionExists) {
-    const count = await MessageReactions.count({messageID});
+    const count = await MessageReactions.countDocuments({messageID});
     if (count > 10) {
       return res.status(403).json({ message: "Maximum reaction limit reached!" });
   
