@@ -45,6 +45,25 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
   require('./deleteMessage')
 );
 
+// add reaction
+MainMessageRouter.route("/:messageID/channels/:channelID/reactions").post(
+  authenticate(true),
+  rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
+  channelVerification,
+  disAllowBlockedUser,
+  checkRolePerms('Admin', permissions.roles.ADMIN, false),
+  require('./addReaction')
+);
+// remove reaction
+MainMessageRouter.route("/:messageID/channels/:channelID/reactions").delete(
+  authenticate(true),
+  rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
+  channelVerification,
+  disAllowBlockedUser,
+  checkRolePerms('Admin', permissions.roles.ADMIN, false),
+  require('./removeReaction')
+);
+
 // update message
 MainMessageRouter.route("/:messageID/channels/:channelID").patch(
   authenticate(true),
