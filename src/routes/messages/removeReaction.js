@@ -49,7 +49,7 @@ module.exports = async (req, res, next) => {
       emojiID: reaction.emojiID,
       unicode: reaction.unicode,
       gif: reaction.gif,
-      count: reaction.reactedBy.length - 1,
+      count: count - 1,
     }
   }
 
