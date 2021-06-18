@@ -3,6 +3,7 @@ const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require('bcryptjs');
 const sio = require("socket.io");
 import nodemailer from 'nodemailer';
+import { kickUser } from '../../utils/kickUser';
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
   auth: {
@@ -74,7 +75,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  kickUser(req.io, user.id)
+  kickUser(user.id, "Password Changed.")
   // send email
   const mailOptions = {
     from: process.env.SMTP_FROM,
@@ -88,21 +89,3 @@ module.exports = async (req, res, next) => {
 
   res.send({ message: "Password reset" });
 };
-
-/**
- *
- * @param {sio.Server} io
- */
-// also used in user update password.
-async function kickUser(io, user_id, socketID) {
-
-
-  io.in(user_id).clients((err, clients) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      if (id === socketID) continue;
-      io.to(id).emit("auth_err", "Password Changed.");
-      io.of('/').adapter.remoteDisconnect(id, true) 
-    }
-  });
-}

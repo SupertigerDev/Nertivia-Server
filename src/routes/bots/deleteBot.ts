@@ -31,7 +31,7 @@ export default async function deleteBot(req: Request, res: Response) {
         }, 
         $inc: {passwordVersion: 1}
       }
-    ).catch((err) => {
+    ).catch((err: any) => {
       console.log(err)
       error = true;
     });

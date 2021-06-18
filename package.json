@@ -54,7 +54,7 @@
     "jsonhtmlfyer": "^0.2.1",
     "jsonwebtoken": "^8.5.1",
     "match-all": "^1.2.5",
-    "mongoose": "^5.11.14",
+    "mongoose": "^5.12.12",
     "mongoose-beautiful-unique-validation": "^7.1.1",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.8",

@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const MessageReactions = require("../../models/MessageReactions");
 const Messages = require("../../models/messages");
 
 module.exports = async (req, res, next) => {
@@ -91,14 +93,14 @@ module.exports = async (req, res, next) => {
       }
     }).sort({
       _id: -1
-    }).limit(25).populate(populate).select(select);
+    }).limit(25).populate(populate).select(select).lean();
 
     let bottom = await Messages.find({
       channelID,
       _id: {
         $gt: message._id
       }
-    }).limit(25).populate(populate).select(select);
+    }).limit(25).populate(populate).select(select).lean();
 
 
     if (above.length === 25 && bottom.length < 25) {
@@ -109,7 +111,7 @@ module.exports = async (req, res, next) => {
         }
       }).sort({
         _id: -1
-      }).limit(50 - bottom.length).populate(populate).select(select);
+      }).limit(50 - bottom.length).populate(populate).select(select).lean();
 
     } else if (bottom.length === 25 && above.length < 25) {
       bottom = await Messages.find({
@@ -117,7 +119,7 @@ module.exports = async (req, res, next) => {
         _id: {
           $gt: message._id
         }
-      }).limit(50 - above.length).populate(populate).select(select);
+      }).limit(50 - above.length).populate(populate).select(select).lean();
     }
 
 
@@ -138,6 +140,42 @@ module.exports = async (req, res, next) => {
       .lean();
   }
 
+  const messageIDs = messages.map(message => message.messageID);
+
+  const allReactions = await MessageReactions.aggregate([
+    { "$match": { "messageID": { "$in": messageIDs } } },
+    {
+      $addFields: {
+        reacted: {
+           $in: [mongoose.Types.ObjectId(req.user._id), '$reactedBy'] // it works now
+         }
+      }  
+    },
+    {
+      $project: {
+        _id: 0,
+        emojiID: 1,
+        unicode: 1,
+        gif: 1,
+        reacted: 1,
+        messageID: 1,
+        count: { $size: "$reactedBy" }
+
+      }
+    }
+  ])
+
+  if (allReactions.length) {
+    messages = messages.map(message => {
+    const reactions = [] 
+    allReactions.forEach(reaction => {
+        if (reaction.messageID !== message.messageID) return;
+        reactions.push({...reaction, messageID: undefined})
+      })
+      if (!reactions.length) return message;
+      return {...message, reactions}
+    })
+  }
 
 
 

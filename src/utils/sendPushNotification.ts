@@ -120,7 +120,7 @@ export async function AddFCMUserToServer(server_id: string, user_id: string) {
   if (!serverKey) return;
   const devices = await Devices.find({user_id});
   if (!devices.length) return;
-  const deviceIDArr = devices.map(d => d._id)
+  const deviceIDArr = devices.map((d: any) => d._id)
   await Servers.updateOne({server_id}, {$addToSet: {FCM_devices: deviceIDArr}});
 }
 
@@ -129,7 +129,7 @@ export async function deleteFCMFromServer(server_id: string, user_id: string) {
   if (!serverKey) return;
   const devices = await Devices.find({user_id});
   if (!devices.length) return;
-  const deviceIDArr = devices.map(d => d._id)
+  const deviceIDArr = devices.map((d: any) => d._id)
   await Servers.updateOne({server_id}, {$pullAll: {FCM_devices: deviceIDArr}});
 }
 
@@ -138,7 +138,7 @@ export async function deleteAllUserFCM(user_id: string) {
   if (!serverKey) return;
   const devices = await Devices.find({user_id});
   if (!devices.length) return;
-  const deviceIDArr = devices.map(d => d._id)
+  const deviceIDArr = devices.map((d: any) => d._id)
   await Servers.updateMany({FCM_devices: {$in: deviceIDArr}}, {$pullAll: {FCM_devices: deviceIDArr}});
   await Devices.deleteMany({ _id: { $in: deviceIDArr } });
 

@@ -3,6 +3,7 @@ const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 const redis = require("../../redis");
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
+const { kickUser } = require("../../utils/kickUser");
 
 
 
@@ -79,7 +80,7 @@ module.exports = async (req, res, next) => {
   // delete files from cdn
   nertiviaCDN.deletePath("/" + req.user.id).catch(err => {console.log("Error deleting from CDN", err)});
 
-  kickUser(req.io, req.user.id);
+  kickUser(req.user.id, "Token outdated.");
   req.session.destroy();
 
   res
@@ -89,15 +90,3 @@ module.exports = async (req, res, next) => {
 
 
 };
-async function kickUser(io, user_id) {
-  await redis.deleteSession(user_id);
-
-  io.in(user_id).clients((err, clients) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      io.to(id).emit("auth_err",  "Token outdated.");
-      io.of('/').adapter.remoteDisconnect(id, true) 
-    }
-  });
-}
-

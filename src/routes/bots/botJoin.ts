@@ -52,7 +52,8 @@ export default async function createBot(req: Request, res: Response) {
     deletable: false,
     bot: bot._id,
     server_id: req.server.server_id,
-    order: 0
+    order: 0,
+    hideRole: true
   };
   await Roles.create(doc);
 
@@ -64,7 +65,7 @@ export default async function createBot(req: Request, res: Response) {
     hideRole: true,
     id: roleId,
     server_id: server_id,
-    order: 0
+    order: 0,
   };
   const io = req.io;
   io.in("server:" + req.server.server_id).emit("server:create_role", data);
