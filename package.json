@@ -60,7 +60,7 @@
     "redis": "^3.0.2",
     "request": "^2.88.2",
     "sharp": "^0.25.4",
-    "socket.io": "^2.3.0",
+    "socket.io": "^2.4.0",
     "socket.io-redis": "^5.4.0",
     "vhost": "^3.0.2"
   },
