@@ -1,6 +1,7 @@
 import {Request, Response, NextFunction} from 'express';
 import { zip } from '../../utils/zip'
 import {jsonToHtml} from 'jsonhtmlfyer';
+import SocketIO from 'socket.io'
 const ServerMembers = require("../../models/ServerMembers");
 const Messages = require("../../models/messages");
 const MessageQuotes = require("../../models/messageQuotes");
@@ -259,20 +260,17 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
 };
 
-async function serverMessage(req: any, io: any, channelID: any, messageCreated: any, socketID: any) {
+async function serverMessage(req: any, io: SocketIO.Server, channelID: any, messageCreated: any, socketID: any) {
 
+  io.in("server:" + req.channel.server.server_id).allSockets().then(sockets => {
+    sockets.forEach(socket_id => {
+      if (socket_id === socketID) return;
+      io.to(socket_id).emit("receiveMessage", {
+        message: messageCreated
+      });
+    })
+  })
 
-  io.in("server:" + req.channel.server.server_id).clients((err: any, clients: any[]) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-
-      if (id !== socketID) {
-        io.to(id).emit("receiveMessage", {
-          message: messageCreated
-        });
-      }
-    }
-  });
   
 
   const date = Date.now();
@@ -310,7 +308,7 @@ function filterNestedQuotes(baseQuote: string, quotes: any[]) {
   return quotes.filter(q => quotesIDArr.includes(q.messageID))
 }
 
-async function directMessage(req: any, io: any, channelID: any, messageCreated: any, socketID: any, tempID: any) {
+async function directMessage(req: any, io: SocketIO.Server, channelID: any, messageCreated: any, socketID: any, tempID: any) {
 
   const isSavedNotes = req.user.id === req.channel.recipients[0].id
 
@@ -353,17 +351,15 @@ async function directMessage(req: any, io: any, channelID: any, messageCreated: 
   }
 
   // Loop for other users logged in to the same account and emit (exclude the sender account.).
-  io.in(req.user.id).clients((err: any, clients: any[]) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      if (id !== socketID) {
-        io.to(id).emit("receiveMessage", {
-          message: messageCreated,
-          tempID
-        });
-      }
-    }
-  });
+  io.in(req.user.id).allSockets().then(sockets => {
+    sockets.forEach(socket_id => {
+      if (socket_id === socketID) return;
+      io.to(socket_id).emit("receiveMessage", {
+        message: messageCreated,
+        tempID,
+      });
+    })
+  })
 
 
 

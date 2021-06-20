@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Users from '../../models/users';
 const redis = require("../../redis");
-import socketio from 'socket.io'
+import SocketIO from 'socket.io'
 import JWT from 'jsonwebtoken'
 
 export default async function resetBotToken(req: Request, res: Response) {
@@ -22,14 +22,10 @@ export default async function resetBotToken(req: Request, res: Response) {
 
 
 
-async function kickBot(io: any, bot_id: string) {
+async function kickBot(io: SocketIO.Server, bot_id: string) {
   await redis.deleteSession(bot_id);
 
-  io.in(bot_id).clients((err: any, clients: any[]) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      io.to(id).emit("auth_err", "Token outdated.");
-      io.of('/').adapter.remoteDisconnect(id, true) 
-    }
-  });
+  io.in(bot_id).emit("auth_err", "Token outdated.");
+  io.in(bot_id).disconnectSockets(true);
 }
+

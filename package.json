@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@socket.io/redis-adapter": "^7.0.0",
     "@types/cheerio": "^0.22.18",
     "@types/connect-busboy": "0.0.2",
     "@types/connect-redis": "0.0.14",
@@ -26,9 +27,7 @@
     "@types/node-fetch": "^2.5.7",
     "@types/nodemailer": "^6.4.0",
     "@types/pako": "^1.0.1",
-    "@types/redis": "^2.8.22",
     "@types/sharp": "^0.25.0",
-    "@types/socket.io": "^2.1.4",
     "abort-controller": "^3.0.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
@@ -57,15 +56,15 @@
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.4.8",
     "pako": "^1.0.11",
-    "redis": "^3.0.2",
     "request": "^2.88.2",
     "sharp": "^0.25.4",
-    "socket.io": "^2.3.0",
-    "socket.io-redis": "^5.4.0",
+    "socket.io": "^4.1.2",
     "vhost": "^3.0.2"
   },
   "devDependencies": {
+    "@types/redis": "^2.8.29",
     "copyfiles": "^2.3.0",
+    "redis": "^3.1.2",
     "tsc-watch": "^4.2.9",
     "typescript": "^3.9.5"
   }
