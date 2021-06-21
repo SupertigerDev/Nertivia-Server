@@ -49,10 +49,10 @@ module.exports = async (req, res, next) => {
 
   // leave room
 
-  io.in(user.id).emit("server:leave", {
+  io.in(req.user.id).emit("server:leave", {
     server_id: req.server.server_id
   });
-  io.in(user.id).socketsLeave("server:" + req.server.server_id)
+  io.in(req.user.id).socketsLeave("server:" + req.server.server_id)
 
 
 
