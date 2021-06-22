@@ -2,6 +2,7 @@ const Friends = require ('./../models/friends');
 const Users = require ('./../models/users');
 const SocketIO = require('socket.io');
 const { emit } = require('./../models/users');
+const { getIOAdapter } = require('../socket/instance');
 
 
 /**
@@ -37,12 +38,8 @@ module.exports = async (name, _id, data, io, emitToSelf = true) => {
   } else {
     roomIDArr.filter(r => r !== user.id)
   }
-  io.of('/').adapter.clients(roomIDArr, (err, clients) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      io.to(id).emit(name, data)
-    }
-  })
+  io.to(roomIDArr).emit(name, data)
+
 
 
 }

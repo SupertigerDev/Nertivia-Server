@@ -104,15 +104,10 @@ module.exports = async (req, res, next) => {
 
 
   // leave room
-  io.in(id).clients((err, clients) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      io.to(id).emit("server:leave", {
-        server_id: server.server_id
-      });
-      io.of('/').adapter.remoteLeave(id, "server:" + server.server_id)
-    }
+  io.in(id).emit("server:leave", {
+    server_id: server.server_id
   });
+  io.in(id).socketsLeave("server:" + server.server_id)
 
 
   // emit leave event 

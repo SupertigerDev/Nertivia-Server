@@ -108,12 +108,6 @@ module.exports = async (req, res, next) => {
     serverMember: serverMember
   });
   // join room
-
-  io.in(req.user.id).clients((err, clients) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      io.of('/').adapter.remoteJoin(id, "server:" + createServer.server_id);
-    }
-  });
+  io.in(req.user.id).socketsJoin("server:" + createServer.server_id)
 
 };

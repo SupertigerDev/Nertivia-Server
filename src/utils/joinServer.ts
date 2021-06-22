@@ -9,6 +9,9 @@ const ServerRoles = require("../models/Roles");
 const redis = require("../redis");
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
+import { getIOAdapter, getIOInstance } from '../socket/instance';
+import { createAdapter } from '@socket.io/redis-adapter';
+import { getRedisInstance } from '../redis/instance';
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
   
@@ -98,16 +101,18 @@ export default async function join(server: any, user: any, socketID: string | un
   createServerObj.channels = serverChannels;
 
   // join room
-  io.in(user.id).clients((err: any, clients: string[]) => {
-    for (let i = 0; i < clients.length; i++) {
-      const id = clients[i];
-      io.to(id).emit(
-        "server:joined",
-        socketID ? {...createServerObj, socketID } : createServerObj
-      );
-      (io.of('/').adapter as any).remoteJoin(id, "server:" + createServerObj.server_id)
-    }
-  });
+
+  // Which one is better? (1)
+  io.in(user.id).socketsJoin("server:" + createServerObj.server_id)
+  io.in(user.id).emit("server:joined", {...createServerObj, socketID})
+
+  // // (2)
+  // io.in(user.id).allSockets().then(sockets => {
+  //   sockets.forEach(socket_id => {
+  //     getIOAdapter().remoteJoin(socket_id, "server:" + createServerObj.server_id);
+  //     io.to(socket_id).emit("server:joined", {...createServerObj, socketID})
+  //   })
+  // })
 
   // send join message
 

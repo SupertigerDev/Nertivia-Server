@@ -270,7 +270,7 @@ module.exports = async client => {
       }
 
       // nsps = namespaces.
-      // enabled socket events when authorized.
+      // enabled socket events when authorized. (dont think it works on socketio 4.0)
       for (const key in getIOInstance().nsps) {
         const nsp = getIOInstance().nsps[key];
         for (const _key in nsp.sockets) {
@@ -381,7 +381,7 @@ module.exports = async client => {
   })
 };
 
-
+//(dont think it works on socketio 4.0)
 function disableEvents() {
   const nsps = getIOInstance().nsps;
   for (let key in nsps) {
