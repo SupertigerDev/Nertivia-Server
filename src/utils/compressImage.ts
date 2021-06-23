@@ -28,6 +28,7 @@ export default async function compressImage(filename: string, dirPath?: string, 
           deleteFile(dirPath);
           return rej(err);
         }
+        if (!dirPath) return rej(undefined);
         res(dirPath);
       })
 
