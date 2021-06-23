@@ -1,5 +1,4 @@
 const MessageReactions = require("../../models/MessageReactions");
-const Messages = require("../../models/messages");
 
 module.exports = async (req, res, next) => {
   const {channelID, messageID} = req.params;

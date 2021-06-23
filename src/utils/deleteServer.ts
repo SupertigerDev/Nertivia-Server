@@ -2,9 +2,10 @@ const redis = require("../redis");
 const PublicServersList = require("../models/publicServersList");
 const Servers = require("../models/servers");
 const Channels = require("../models/channels");
-const MessageQuotes = require("../models/messageQuotes");
+import {MessageQuoteModel} from '../models/MessageQuote'
 const ServerInvites = require("../models/ServerInvites");
-const Messages = require("../models/messages");
+import {MessageModel} from '../models/Message'
+
 const Notifications = require('../models/notifications');
 const ServerMembers = require("../models/ServerMembers");
 const Roles = require("../models/Roles");
@@ -34,12 +35,12 @@ export default async function deleteServer(io: any, server_id: string, server: a
     await PublicServersList.deleteOne({ server: server._id });
 
     if (channelIDArray) {
-      await MessageQuotes.deleteMany({
+      await MessageQuoteModel.deleteMany({
         quotedChannel: {
           $in: channel_idArray
         }
       })
-      await Messages.deleteMany({ channelID: { $in: channelIDArray } });
+      await MessageModel.deleteMany({ channelID: { $in: channelIDArray } });
       await Notifications.deleteMany({ channelID: { $in: channelIDArray } });
     }
     await Channels.deleteMany({ server: server._id });

@@ -1,5 +1,3 @@
-const Channels = require("../../../models/channels");
-const Messages = require("../../../models/messages");
 const Notifications = require("../../../models/notifications");
 const ServerMembers = require("../../../models/ServerMembers");
 

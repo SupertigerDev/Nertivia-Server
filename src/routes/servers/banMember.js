@@ -2,7 +2,7 @@
 const Servers = require("../../models/servers");
 const Users = require("../../models/users");
 const ServerMembers = require("../../models/ServerMembers");
-const Messages = require("../../models/messages");
+import {MessageModel} from '../../models/Message'
 const Notifications = require("../../models/notifications");
 const Channels = require("../../models/channels");
 const Roles = require("../../models/Roles");
@@ -119,7 +119,7 @@ module.exports = async (req, res, next) => {
   }
 
   // send kick message
-  const messageCreate = new Messages({
+  const messageCreate = new MessageModel({
     channelID: server.default_channel_id,
     creator: userToBeBanned._id,
     messageID: "placeholder",

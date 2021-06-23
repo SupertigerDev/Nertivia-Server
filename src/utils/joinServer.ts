@@ -3,15 +3,14 @@ import { Request, Response } from 'express'
 const Channels = require("../models/channels");
 const User = require("../models/users");
 const ServerInvites = require("../models/ServerInvites");
-const Messages = require("../models/messages");
+import {MessageModel} from '../models/Message'
+
 const ServerMembers = require("../models/ServerMembers");
 const ServerRoles = require("../models/Roles");
 const redis = require("../redis");
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
-import { getIOAdapter, getIOInstance } from '../socket/instance';
-import { createAdapter } from '@socket.io/redis-adapter';
-import { getRedisInstance } from '../redis/instance';
+
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
   
@@ -116,14 +115,14 @@ export default async function join(server: any, user: any, socketID: string | un
 
   // send join message
 
-  const messageCreate = new Messages({
+  const messageCreate = new MessageModel({
     channelID: server.default_channel_id,
     creator: user._id,
     messageID: "placeholder",
     type: 1 // join message
   });
 
-  let messageCreated = await messageCreate.save();
+  let messageCreated: any = await messageCreate.save();
   user = {
     id: user.id,
     username: user.username,

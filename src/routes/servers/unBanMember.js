@@ -1,10 +1,7 @@
 
 const Servers = require("../../models/servers");
 const Users = require("../../models/users");
-const ServerMembers = require("../../models/ServerMembers");
-const Messages = require("../../models/messages");
-const Notifications = require("../../models/notifications");
-const Channels = require("../../models/channels");
+
 
 
 module.exports = async (req, res, next) => {
