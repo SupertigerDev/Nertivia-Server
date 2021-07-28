@@ -2,27 +2,9 @@ import {getRedisInstance} from './redis/instance';
 
 module.exports = {
 
-  connected: (userID, _id, status, customStatus, socketID) => {
-    const multi = getRedisInstance().multi()
-      .hset(`user:${userID}`, 'status', status)
-      .hset(`user:${userID}`, 'id', _id.toString())
-      .hset(`user:${userID}`, 'userID', userID)
 
-      .hset(`connected:${socketID}`, 'id' , userID)
-      .hset(`connected:${socketID}`, '_id',  _id.toString())
-      .sadd(`userID:${userID}`, socketID) 
-
-    if (customStatus) {
-      multi.hset(`user:${userID}`, 'customStatus', customStatus)
-    }
-
-    return multiWrapper(multi)
-  },
   getConnectedBySocketID: (socketID) => {
     return wrapper('hgetall',`connected:${socketID}`); 
-  },
-  connectedUserCount: async (userID) => {
-    return await wrapper('scard', `userID:${userID}`);
   },
   // only to be used for admins.
   connectedUserIds: async () => {

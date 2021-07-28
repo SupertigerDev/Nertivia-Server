@@ -6,6 +6,7 @@ const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import blockedUsers from "./models/blockedUsers";
+import { addConnectedUser, getConnectedUserCount } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
@@ -141,7 +142,7 @@ module.exports = async client => {
       }
       delete user.readTerms;
 
-      await redis.connected(user.id, user._id, user.status, user.custom_status, client.id);
+      await addConnectedUser(user.id, user._id, user.status, user.custom_status, client.id);
 
       let serverMembers = [];
 
@@ -263,9 +264,10 @@ module.exports = async client => {
       user.GDriveRefreshToken = undefined;
 
       // check if user is already online on other clients
-      const checkAlready = await redis.connectedUserCount(user.id);
+      const [error, connectedUserCount] = await getConnectedUserCount(user.id);
+
       // only emit if there are no other users online (1 because we just connected)
-      if (checkAlready && checkAlready.result === 1) {
+      if (connectedUserCount && connectedUserCount === 1) {
         emitUserStatus(user.id, user._id, user.status, getIOInstance(), false, user.custom_status, true)
       }
 
