@@ -367,7 +367,7 @@ module.exports = async client => {
       if (data.status) {
         data.status = data.status.substring(0, 100)
       }
-      const {result, error} = await setProgramActivity(user.id, { name: data.name, status: data.status, socketID: client.id })
+      const [result] = await setProgramActivity(user.id, { name: data.name, status: data.status, socketID: client.id })
       const json = JSON.parse(result[0])
       // only emit if: 
       // json is empty
