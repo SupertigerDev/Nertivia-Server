@@ -3,66 +3,6 @@ import {getRedisInstance} from './redis/instance';
 module.exports = {
 
 
-  getConnectedBySocketID: (socketID) => {
-    return wrapper('hgetall',`connected:${socketID}`); 
-  },
-  // only to be used for admins.
-  connectedUserIds: async () => {
-    return await wrapper('keys', `userID:*`);
-  },
-  disconnected: async (userID, socketID) => {
-    const response = await multiWrapper(
-      getRedisInstance().multi()
-      .srem(`userID:${userID}`, socketID)
-      .scard(`userID:${userID}`)
-      .del(`connected:${socketID}`)
-    );
-    if(response.result[1] == 0) {
-      await wrapper("del", `programActivity:${userID}`);
-      return wrapper("del", `user:${userID}`)
-    } else {
-      return response
-    }
-  },
-  getProgramActivity: (userID) => {
-    return wrapper("get", `programActivity:${userID}`);
-  },
-  getProgramActivityArr: async (array) => {
-    const multi = getRedisInstance().multi();
-    for (let index = 0; index < array.length; index++) {
-      const userID = array[index];
-        multi.get(`programActivity:${userID}`)
-    }
-    return multiWrapper(multi) 
-  },
-  setProgramActivity: (userID, data) => {
-    const multi = getRedisInstance().multi();
-    if (!data) {
-      multi.del(`programActivity:${userID}`)
-    } else {
-      const {name, status, socketID} = data;
-      multi.get(`programActivity:${userID}`);
-      multi.set(`programActivity:${userID}`, JSON.stringify({name, status, socketID}))
-      multi.expire(`programActivity:${userID}`, 240) // 4 minutes
-    }
-    return multiWrapper(multi) 
-  },
-  getPresences: async (array) => {
-    const multi = getRedisInstance().multi();
-    for (let index = 0; index < array.length; index++) {
-      const userID = array[index];
-        multi.hmget(`user:${userID}`, "userID", "status")
-    }
-    return multiWrapper(multi) 
-  },
-  getCustomStatusArr: async (array) => {
-    const multi = getRedisInstance().multi();
-    for (let index = 0; index < array.length; index++) {
-      const userID = array[index];
-        multi.hmget(`user:${userID}`, "userID", "customStatus")
-    }
-    return multiWrapper(multi) 
-  },
   getCustomStatus(userID) {
     return wrapper('hmget', `user:${userID}`, 'userID', 'customStatus'); 
   },

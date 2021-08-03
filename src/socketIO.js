@@ -6,7 +6,7 @@ const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import blockedUsers from "./models/blockedUsers";
-import { addConnectedUser, getConnectedUserCount } from "./newRedisWrapper";
+import { addConnectedUser, getConnectedUserBySocketID, getConnectedUserCount, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, setProgramActivity } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
@@ -264,7 +264,7 @@ module.exports = async client => {
       user.GDriveRefreshToken = undefined;
 
       // check if user is already online on other clients
-      const [error, connectedUserCount] = await getConnectedUserCount(user.id);
+      const [connectedUserCount, error] = await getConnectedUserCount(user.id);
 
       // only emit if there are no other users online (1 because we just connected)
       if (connectedUserCount && connectedUserCount === 1) {
@@ -330,23 +330,23 @@ module.exports = async client => {
 
   client.on("disconnect", async () => {
     if (!client.auth) return;
-    const { ok, result, error } = await redis.getConnectedBySocketID(client.id);
-    if (!ok || !result) return;
-    const presence = await redis.getPresence(result.id);
+    const [user, error] = await getConnectedUserBySocketID(client.id);
+    if (!user || error) return;
+    const presence = await redis.getPresence(user.id);
 
-    const response = await redis.disconnected(result.id, client.id);
+    const [response] = await removeConnectedUser(user.id, client.id);
 
     // if all users have gone offline, emit offline status to friends.
-    if (response.result === 1 && presence?.result?.[1] !== '0') {
-      emitUserStatus(result.id, result._id, 0, getIOInstance());
+    if (response === 1 && presence?.result?.[1] !== '0') {
+      emitUserStatus(user.id, user._id, 0, getIOInstance());
     } else {
       // remove program activity status if the socket id matches
-      const programActivity = await redis.getProgramActivity(result.id);
-      if (!programActivity.ok || !programActivity.result) return;
-      const { socketID } = JSON.parse(programActivity.result);
+      const [programActivity, error] = await getProgramActivityByUserId(user.id);
+      if (!programActivity || error) return;
+      const { socketID } = JSON.parse(programActivity);
       if (socketID === client.id) {
-        await redis.setProgramActivity(result.id, null);
-        emitToAll("programActivity:changed", result._id, { user_id: result.id }, getIOInstance())
+        await setProgramActivity(user.id, null);
+        emitToAll("programActivity:changed", user._id, { user_id: user.id }, getIOInstance())
       }
 
     }
@@ -357,10 +357,9 @@ module.exports = async client => {
   );
 
   client.on("programActivity:set", async data => {
-    const { ok, result } = await redis.getConnectedBySocketID(client.id);
-    if (!ok || !result) return;
-    const userID = result.id
-    const _id = result._id;
+    const [user, error] = await getConnectedUserBySocketID(client.id);
+
+    if (error || !user) return;
     if (data) {
       if (data.name) {
         data.name = data.name.substring(0, 100)
@@ -368,17 +367,17 @@ module.exports = async client => {
       if (data.status) {
         data.status = data.status.substring(0, 100)
       }
-      const res = await redis.setProgramActivity(userID, { name: data.name, status: data.status, socketID: client.id })
-      const json = JSON.parse(res.result[0])
+      const {result, error} = await setProgramActivity(user.id, { name: data.name, status: data.status, socketID: client.id })
+      const json = JSON.parse(result[0])
       // only emit if: 
       // json is empty
       // json is not the same.
       if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
-        emitToAll("programActivity:changed", _id, { name: data.name, status: data.status, user_id: userID }, getIOInstance())
+        emitToAll("programActivity:changed", user._id, { name: data.name, status: data.status, user_id: user.id }, getIOInstance())
       }
     } else {
-      await redis.setProgramActivity(userID, null);
-      emitToAll("programActivity:changed", _id, { user_id: userID }, getIOInstance())
+      await setProgramActivity(user.id, null);
+      emitToAll("programActivity:changed", user._id, { user_id: user.id }, getIOInstance())
     }
   })
 };
