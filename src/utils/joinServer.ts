@@ -10,6 +10,7 @@ const ServerRoles = require("../models/Roles");
 const redis = require("../redis");
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
+import { getCustomStatusByUserId, getPresenceByUserId } from '../newRedisWrapper';
 
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
@@ -88,12 +89,12 @@ export default async function join(server: any, user: any, socketID: string | un
     }
   };
   // get user presence
-  const presence = await redis.getPresence(serverMember.member.id);
-  const customStatus = await redis.getCustomStatus(serverMember.member.id);
+  const [presence] = await getPresenceByUserId(serverMember.member.id);
+  const [customStatus] = await getCustomStatusByUserId(serverMember.member.id);
   io.in("server:" + server.server_id).emit("server:member_add", {
     serverMember,
-    custom_status: customStatus.result[1],
-    presence: presence.result[1]
+    custom_status: customStatus[1],
+    presence: presence[1]
   });
 
   // send owns status to every connected device

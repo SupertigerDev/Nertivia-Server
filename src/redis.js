@@ -3,15 +3,8 @@ import {getRedisInstance} from './redis/instance';
 module.exports = {
 
 
-  getCustomStatus(userID) {
-    return wrapper('hmget', `user:${userID}`, 'userID', 'customStatus'); 
-  },
-  getPresence: async (userID) => {
-    return wrapper('hmget', `user:${userID}`, 'userID', 'status'); 
-  },
-  changeStatus: async (userID, status) => {
-    return wrapper('hset', `user:${userID}`, 'status', status);
-  },
+  
+
   changeCustomStatus: async (userID, customStatus) => {
     if (customStatus) {
       return wrapper('hset', `user:${userID}`, 'customStatus', customStatus);

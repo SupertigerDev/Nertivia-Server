@@ -6,7 +6,7 @@ const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import blockedUsers from "./models/blockedUsers";
-import { addConnectedUser, getConnectedUserBySocketID, getConnectedUserCount, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, setProgramActivity } from "./newRedisWrapper";
+import { addConnectedUser, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, setProgramActivity } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
@@ -332,12 +332,12 @@ module.exports = async client => {
     if (!client.auth) return;
     const [user, error] = await getConnectedUserBySocketID(client.id);
     if (!user || error) return;
-    const presence = await redis.getPresence(user.id);
+    const [presence] = await getPresenceByUserId(user.id);
 
     const [response] = await removeConnectedUser(user.id, client.id);
 
     // if all users have gone offline, emit offline status to friends.
-    if (response === 1 && presence?.result?.[1] !== '0') {
+    if (response === 1 && presence?.[1] !== '0') {
       emitUserStatus(user.id, user._id, 0, getIOInstance());
     } else {
       // remove program activity status if the socket id matches

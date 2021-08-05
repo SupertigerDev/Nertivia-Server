@@ -31,11 +31,21 @@ export async function removeConnectedUser(userID: string, socketID: string){
   return [response, error]
 }
 
-export function getConnectedUserCount(userID: string) {
-  return wrapper('scard', `userID:${userID}`);
+export function getConnectedUserCount(userId: string) {
+  return wrapper('scard', `userID:${userId}`);
 }
-export function getConnectedUserBySocketID (socketID: string): Promise<[{ id: string, _id: string }, any]> {
-  return wrapper('hgetall',`connected:${socketID}`); 
+export function getConnectedUserBySocketID (socketId: string): Promise<[{ id: string, _id: string }, any]> {
+  return wrapper('hgetall',`connected:${socketId}`); 
+}
+export function getCustomStatusByUserId(userId: string) {
+  return wrapper('hmget', `user:${userId}`, 'userID', 'customStatus'); 
+}
+export function getPresenceByUserId(userID: string) {
+  return wrapper('hmget', `user:${userID}`, 'userID', 'status'); 
+}
+
+export function changeStatusByUserId(userId: string, status: any) {
+  return (wrapper as any)('hset', `user:${userId}`, 'status', status);
 }
 
 // use Id instead of ID everywhere in this server.
