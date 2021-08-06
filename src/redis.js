@@ -5,13 +5,6 @@ module.exports = {
 
   
 
-  changeCustomStatus: async (userID, customStatus) => {
-    if (customStatus) {
-      return wrapper('hset', `user:${userID}`, 'customStatus', customStatus);
-    } else {
-      return wrapper('hdel', `user:${userID}`, 'customStatus');
-    }
-  },
   addChannel: async (channelID, channelData, userID) => {
     if (channelData.server_id) {
       return wrapper('set', `serverChannels:${channelID}`,JSON.stringify(channelData)); 

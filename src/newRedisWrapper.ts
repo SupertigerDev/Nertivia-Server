@@ -47,6 +47,19 @@ export function getPresenceByUserId(userID: string) {
 export function changeStatusByUserId(userId: string, status: any) {
   return (wrapper as any)('hset', `user:${userId}`, 'status', status);
 }
+export function changeCustomStatusByUserId(userID: string, customStatus: string) {
+  if (customStatus) {
+    return (wrapper as any)('hset', `user:${userID}`, 'customStatus', customStatus);
+  } else {
+    return wrapper('hdel', `user:${userID}`, 'customStatus');
+  }
+}
+export function addChannel(channelID: string, channel: any, userID?: string) {
+  if (channel.server_id) {
+    return (wrapper as any)('set', `serverChannels:${channelID}`,JSON.stringify(channel)); 
+  } 
+  return (wrapper as any)('hset', `user:${userID}`, `channel:${channelID}`, JSON.stringify(channel));
+}
 
 // use Id instead of ID everywhere in this server.
 // only to be used for admins.
@@ -110,6 +123,22 @@ function multiWrapper(multi?: Multi): Promise<[any, Error | null]> {
   })
 }
 
+
+
+
+// function wrapper(asyncMethod: Promise<any>): Promise<[any, Error | null]> {
+//   return new Promise(resolve => {
+//     asyncMethod.then(result => {
+//       resolve([result, null]);
+//     })
+//     .catch(err => {
+//       resolve([null, err]);
+//     })
+//   })
+// }
+
+
+
 type KeysOfType<T, U, B = false> = {
   [P in keyof T]: B extends true
   ? T[P] extends U
@@ -121,6 +150,8 @@ type KeysOfType<T, U, B = false> = {
   ? P
   : never
 }[keyof T]
+
+
 
 function wrapper<T extends KeysOfType<RedisClient, (...args: any[]) => {}>>(method: T, ...args: Parameters<RedisClient[T]>) : Promise<[any, Error | null]>  {
   return new Promise(resolve => {
