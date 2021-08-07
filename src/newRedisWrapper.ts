@@ -25,50 +25,52 @@ export async function removeConnectedUser(userID: string, socketID: string){
     .del(`connected:${socketID}`)
   );
   if(response?.[1] === 0) {
-    await wrapper("del", `programActivity:${userID}`);
-    return wrapper("del", `user:${userID}`)
+    await wrapper(getRedisInstance()?.batch().del(`programActivity:${userID}`))
+    return wrapper(getRedisInstance()?.batch().del(`user:${userID}`))
   } 
   return [response, error]
 }
 
 export function getConnectedUserCount(userId: string) {
-  return wrapper('scard', `userID:${userId}`);
+  return wrapper(getRedisInstance()?.batch().scard(`userID:${userId}`))
+
 }
 export function getConnectedUserBySocketID (socketId: string): Promise<[{ id: string, _id: string }, any]> {
-  return wrapper('hgetall',`connected:${socketId}`); 
+  return wrapper(getRedisInstance()?.batch().hgetall(`connected:${socketId}`))
 }
 export function getCustomStatusByUserId(userId: string) {
-  return wrapper('hmget', `user:${userId}`, 'userID', 'customStatus'); 
+  return wrapper(getRedisInstance()?.batch().hmget(`user:${userId}`, 'userID', 'customStatus'))
 }
 export function getPresenceByUserId(userID: string) {
-  return wrapper('hmget', `user:${userID}`, 'userID', 'status'); 
+  return wrapper(getRedisInstance()?.batch().hmget(`user:${userID}`, 'userID', 'status'))
 }
 
 export function changeStatusByUserId(userId: string, status: any) {
-  return (wrapper as any)('hset', `user:${userId}`, 'status', status);
+  return wrapper(getRedisInstance()?.batch().hset(`user:${userId}`, 'status', status))
 }
 export function changeCustomStatusByUserId(userID: string, customStatus: string) {
   if (customStatus) {
-    return (wrapper as any)('hset', `user:${userID}`, 'customStatus', customStatus);
+    return wrapper(getRedisInstance()?.batch().hset(`user:${userID}`, 'customStatus', customStatus))
   } else {
-    return wrapper('hdel', `user:${userID}`, 'customStatus');
+    return wrapper(getRedisInstance()?.batch().hdel(`user:${userID}`, 'customStatus'))
   }
 }
 export function addChannel(channelID: string, channel: any, userID?: string) {
   if (channel.server_id) {
-    return (wrapper as any)('set', `serverChannels:${channelID}`,JSON.stringify(channel)); 
+    return wrapper(getRedisInstance()?.batch().set(`serverChannels:${channelID}`,JSON.stringify(channel)))
   } 
-  return (wrapper as any)('hset', `user:${userID}`, `channel:${channelID}`, JSON.stringify(channel));
+  return wrapper(getRedisInstance()?.batch().hset(`user:${userID}`, `channel:${channelID}`, JSON.stringify(channel)))
 }
 
 // use Id instead of ID everywhere in this server.
 // only to be used for admins.
 export function getConnectedUserIds(): Promise<[string[], any]> {
-  return  wrapper('keys', `userID:*`);
+  return wrapper(getRedisInstance()?.batch().keys(`userID:*`))
+
 }
 
 export function getProgramActivityByUserId(userId: string): Promise<[any, any]> {
-  return wrapper("get", `programActivity:${userId}`);
+  return wrapper(getRedisInstance()?.batch().get(`programActivity:${userId}`))
 }
 export function getProgramActivityByUserIds (userIds: string[]): Promise<[string[], Error | null]>{
   const multi = getRedisInstance?.()?.multi();
@@ -124,44 +126,13 @@ function multiWrapper(multi?: Multi): Promise<[any, Error | null]> {
 }
 
 
-
-
-// function wrapper(asyncMethod: Promise<any>): Promise<[any, Error | null]> {
-//   return new Promise(resolve => {
-//     asyncMethod.then(result => {
-//       resolve([result, null]);
-//     })
-//     .catch(err => {
-//       resolve([null, err]);
-//     })
-//   })
-// }
-
-
-
-type KeysOfType<T, U, B = false> = {
-  [P in keyof T]: B extends true
-  ? T[P] extends U
-  ? U extends T[P]
-  ? P
-  : never
-  : never
-  : T[P] extends U
-  ? P
-  : never
-}[keyof T]
-
-
-
-function wrapper<T extends KeysOfType<RedisClient, (...args: any[]) => {}>>(method: T, ...args: Parameters<RedisClient[T]>) : Promise<[any, Error | null]>  {
+function wrapper(multi?: Multi): Promise<[any, Error | null]> {
   return new Promise(resolve => {
-    const redisInstance = getRedisInstance()
-    if (!redisInstance) return;
-    (redisInstance[method] as any)(args, (error: Error | null, result: any) => {
+    multi?.exec((error, result) => {
       if (error) {
         return resolve([null, error]);
       }
-      return resolve([result, null]);
-    })
-  });
+      return resolve([result[0], null]);
+    });
+  })
 }
