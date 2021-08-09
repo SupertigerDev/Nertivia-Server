@@ -3,6 +3,7 @@ const Friend = require('../../models/friends');
 const BlockedUsers = require('../../models/blockedUsers');
 const Channels = require('../../models/channels');
 const redis = require('../../redis');
+const { deleteDmChannel } = require('../../newRedisWrapper');
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id; 
 
@@ -58,8 +59,8 @@ module.exports = async (req, res, next) => {
   ]}).select("channelID")
 
   if (openedChannel) {
-    await redis.deleteDmChannel(requester.id, openedChannel.channelID)
-    await redis.deleteDmChannel(recipient.id, openedChannel.channelID)
+    await deleteDmChannel(requester.id, openedChannel.channelID)
+    await deleteDmChannel(recipient.id, openedChannel.channelID)
   }
 
   const io = req.io

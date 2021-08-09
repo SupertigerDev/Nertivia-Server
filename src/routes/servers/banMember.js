@@ -3,6 +3,7 @@ const Servers = require("../../models/servers");
 const Users = require("../../models/users");
 const ServerMembers = require("../../models/ServerMembers");
 import {MessageModel} from '../../models/Message'
+import { deleteServerChannels } from '../../newRedisWrapper';
 const Notifications = require("../../models/notifications");
 const Channels = require("../../models/channels");
 const Roles = require("../../models/Roles");
@@ -76,7 +77,7 @@ module.exports = async (req, res, next) => {
   }
 
   await redis.remServerMember(id, server_id);
-  await redis.remServerChannels(id, channelIDs)
+  await deleteServerChannels(id, channelIDs)
   const io = req.io;
   // remove server from users server list.
   await Users.updateOne(

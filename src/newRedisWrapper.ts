@@ -45,6 +45,46 @@ export function getPresenceByUserId(userID: string) {
   return wrapper(getRedisInstance()?.batch().hmget(`user:${userID}`, 'userID', 'status'))
 }
 
+export function deleteDmChannel (userID: string, channelID: string) {
+  return wrapper(getRedisInstance()?.batch().hdel(`user:${userID}`, `channel:${channelID}`))
+}
+
+export function deleteServerChannel (channelID: string) {
+  return wrapper(getRedisInstance()?.batch().del(`serverChannels:${channelID}`))
+}
+
+export function serverChannelExists (channelID: string) {
+  return wrapper(getRedisInstance()?.batch().exists(`serverChannels:${channelID}`))
+}
+export function deleteSession (userId: string) {
+  return wrapper(getRedisInstance()?.batch().del(`sess:${userId}`))
+}
+export function getDmChannel (channelId: string, userId: string) {
+  return wrapper(getRedisInstance()?.batch().hget(`user:${userId}`, `channel:${channelId}`))
+}
+export function getServerChannel (channelId: string) {
+  return wrapper(getRedisInstance()?.batch().get(`serverChannels:${channelId}`))
+}
+export function addServer(serverId: string, data: string) {
+  return wrapper(getRedisInstance()?.batch().set(`servers:${serverId}`, JSON.stringify(data)))
+}
+
+export function deleteServer (serverId: string) {
+  return wrapper(getRedisInstance()?.batch().del(`servers:${serverId}`))
+}
+export function getServer (serverId: string) {
+  return wrapper(getRedisInstance()?.batch().get(`servers:${serverId}`))
+}
+
+export function deleteServerChannels (channelIds: string[]){
+  const multi = getRedisInstance?.()?.multi();
+  for (let index = 0; index < channelIds.length; index++) {
+    const channelId = channelIds[index];
+    multi?.del(`serverChannels:${channelId}`)
+  }
+  return multiWrapper(multi) 
+}
+
 export function changeStatusByUserId(userId: string, status: any) {
   return wrapper(getRedisInstance()?.batch().hset(`user:${userId}`, 'status', status))
 }

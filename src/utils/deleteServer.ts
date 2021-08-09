@@ -5,6 +5,7 @@ const Channels = require("../models/channels");
 import {MessageQuoteModel} from '../models/MessageQuote'
 const ServerInvites = require("../models/ServerInvites");
 import {MessageModel} from '../models/Message'
+import { deleteServerChannels, deleteServer as deleteServerRedis } from '../newRedisWrapper';
 
 const Notifications = require('../models/notifications');
 const ServerMembers = require("../models/ServerMembers");
@@ -28,9 +29,9 @@ export default async function deleteServer(io: any, server_id: string, server: a
 
   
 
-    await redis.remServerChannels(channelIDArray)
+    await deleteServerChannels(channelIDArray)
     await redis.delAllServerMembers(server.server_id);
-    await redis.deleteServer(server.server_id);
+    await deleteServerRedis(server.server_id);
     await Servers.deleteOne({ _id: server._id });
     await PublicServersList.deleteOne({ server: server._id });
 

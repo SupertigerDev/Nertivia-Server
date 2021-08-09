@@ -1,3 +1,4 @@
+import { deleteSession } from "../newRedisWrapper";
 import { getIOAdapter, getIOInstance } from "../socket/instance";
 const redis = require("../redis");
 
@@ -5,7 +6,7 @@ const redis = require("../redis");
 export async function kickUser(userID: string, message: string, excludeSocketID?: string) {
   const io = getIOInstance();
 
-  await redis.deleteSession(userID);
+  await deleteSession(userID);
   
 
   io.in(userID).allSockets().then(clients => {

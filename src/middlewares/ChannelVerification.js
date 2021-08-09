@@ -3,6 +3,7 @@ const Roles = require("../models/Roles");
 const ServerMembers = require("../models/ServerMembers");
 const BlockedUser = require("../models/blockedUsers");
 const redis = require("../redis");
+const { getDmChannel, getServerChannel, addServer, getServer, addChannel } = require("../newRedisWrapper");
 
 module.exports = async (req, res, next) => {
 
@@ -10,18 +11,18 @@ module.exports = async (req, res, next) => {
 
   // check if exists in redis
   // check dm channel
-  const dmChannel = await redis.getChannel(channelID, req.user.id);
+  const [dmChannel] = await getDmChannel(channelID, req.user.id);
   
-  if (dmChannel.result) {
-    const channel = JSON.parse(dmChannel.result);
+  if (dmChannel) {
+    const channel = JSON.parse(dmChannel);
     req.channel = channel;
     next();
     return;
   }
   // check server
-  const serverChannel = await redis.getServerChannel(channelID);
-  if (serverChannel.result) {
-    const channel = JSON.parse(serverChannel.result);
+  const [serverChannel] = await getServerChannel(channelID);
+  if (serverChannel) {
+    const channel = JSON.parse(serverChannel);
     //check if member in server
     let isInServer = await redis.getServerMember(req.user.id, channel.server_id);
     if (isInServer.result) {
@@ -31,9 +32,9 @@ module.exports = async (req, res, next) => {
       req.highestRolePosition = data.highestRolePosition;
 
       // get server
-      const server = await redis.getServer(channel.server_id);
-      if (server.result) {
-        req.channel.server = JSON.parse(server.result);
+      const [server] = await getServer(channel.server_id);
+      if (server) {
+        req.channel.server = JSON.parse(server);
         next();
         return;
       }
@@ -92,11 +93,11 @@ module.exports = async (req, res, next) => {
     next();
     await redis.addServerMember(req.user.id, channel.server.server_id, JSON.stringify({permissions, highestRolePosition}));
 
-    await redis.addServer(channel.server.server_id, channel.server);
+    await addServer(channel.server.server_id, channel.server);
 
   
     	
-    await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.id);
+    await addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.id);
   } else {
 
     // check if blocked by recipient.
@@ -112,6 +113,6 @@ module.exports = async (req, res, next) => {
 
     req.channel = newChannel;
     next();
-    await redis.addChannel(channelID, newChannel, req.user.id);
+    await addChannel(channelID, newChannel, req.user.id);
   }
 };
