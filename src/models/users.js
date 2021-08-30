@@ -128,6 +128,7 @@ const usersSchema = new Schema({
     type: Number,
     select: false,
   },
+  htmlProfile: {type: String, select: false, required: false},
   about_me: {
     type: aboutMeSchema,
     select: false

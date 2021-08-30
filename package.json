@@ -47,6 +47,7 @@
     "flakeid": "^1.0.0",
     "gm": "^1.23.1",
     "googleapis": "^52.1.0",
+    "html-safe-checker": "^1.1.2",
     "ip-range-check": "^0.2.0",
     "jsdom": "^16.2.2",
     "jsonhtmlfyer": "^0.3.3",

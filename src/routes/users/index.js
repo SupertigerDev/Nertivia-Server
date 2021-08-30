@@ -17,6 +17,8 @@ MainUserRouter.use("/relationship", require("./relationship"));
 // Survey
 MainUserRouter.use("/survey", require("./survey"));
 
+MainUserRouter.use("/html-profile", require("./htmlProfile").htmlProfileRouter);
+
 // Update
 MainUserRouter.route("/").patch(
   authenticate(true),
