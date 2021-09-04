@@ -153,29 +153,29 @@ export function getCustomStatusByUserIds (userIds: string[]) {
 }
 
 
-// calls
+// voice calls
 
-export function getUserIdsFromServerChannel(channelId: string, serverId: string) {
-  return wrapper(getRedisInstance()?.batch().hget(`serverUsersInCall:${serverId}`, channelId));
+export function getVoiceUsersByServer(channelId: string, serverId: string) {
+  return wrapper(getRedisInstance()?.batch().hget(`serverUsersInVoice:${serverId}`, channelId));
 
 }
-export async function addUserToCall(channelId: string, userId: string, data: {socketId: string, serverId?: string}) { 
+export async function addUserToVoice(channelId: string, userId: string, data: {socketId: string, serverId?: string}) { 
   if (data.serverId) {
-    let [userIds] = await getUserIdsFromServerChannel(channelId, data.serverId);
+    let [userIds] = await getVoiceUsersByServer(channelId, data.serverId);
     userIds = userIds ? JSON.parse(userIds) : [];
-    await wrapper(getRedisInstance()?.batch().hset(`serverUsersInCall:${data.serverId}`, channelId, JSON.stringify([...userIds, userId])));
+    await wrapper(getRedisInstance()?.batch().hset(`serverUsersInVoice:${data.serverId}`, channelId, JSON.stringify([...userIds, userId])));
   }
-  wrapper(getRedisInstance()?.batch().set(`usersInCall:${userId}`, channelId))
-  return wrapper(getRedisInstance()?.batch().hset(`usersCallingInChannel:${channelId}`, userId, JSON.stringify(data)))
+  wrapper(getRedisInstance()?.batch().set(`userIdToVoiceChannelId:${userId}`, channelId))
+  return wrapper(getRedisInstance()?.batch().hset(`voiceChannelIdToUserId:${channelId}`, userId, JSON.stringify(data)))
 }
 
 
 
-export async function getCallingUsersFromServerIds(serverIds: string[]) {
+export async function getVoiceUsersFromServerIds(serverIds: string[]) {
   const multi = getRedisInstance?.()?.multi();
   for (let index = 0; index < serverIds.length; index++) {
     const serverId = serverIds[index];
-    multi?.hgetall(`serverUsersInCall:${serverId}`)
+    multi?.hgetall(`serverUsersInVoice:${serverId}`)
   }
   return multiWrapper(multi).then(([results, err]) => {
     if (!results) return [results, err]
@@ -193,32 +193,32 @@ export async function getCallingUsersFromServerIds(serverIds: string[]) {
   })
 }
 
-export function userExistsInCallByChannelId(channelId: string, userId: string) {
-  return wrapper(getRedisInstance()?.batch().hexists(`usersCallingInChannel:${channelId}`, userId))
+export function voiceUserExists(channelId: string, userId: string) {
+  return wrapper(getRedisInstance()?.batch().hexists(`voiceChannelIdToUserId:${channelId}`, userId))
 }
-export async function getCallingUserByUserId(userId: string) {
-  const [channelId] = await wrapper(getRedisInstance()?.batch().get(`usersInCall:${userId}`));
-  return await wrapper(getRedisInstance()?.batch().hget(`usersCallingInChannel:${channelId}`, userId)).then((details) => {
+export async function getUserInVoiceByUserId(userId: string) {
+  const [channelId] = await wrapper(getRedisInstance()?.batch().get(`userIdToVoiceChannelId:${userId}`));
+  return await wrapper(getRedisInstance()?.batch().hget(`voiceChannelIdToUserId:${channelId}`, userId)).then((details) => {
     if (!channelId) return details;
     if (!details[0]) return details;
     return [{...JSON.parse(details[0]), channelId}, details[1]]
   });
 }
 
-export async function removeUserFromCall(userId: string) {
-  const [details] = await getCallingUserByUserId(userId);
+export async function removeUserFromVoice(userId: string) {
+  const [details] = await getUserInVoiceByUserId(userId);
   if (details.serverId) {
-    let [userIds] = await getUserIdsFromServerChannel(details.channelId, details.serverId);
+    let [userIds] = await getVoiceUsersByServer(details.channelId, details.serverId);
     userIds = userIds ? JSON.parse(userIds) : [];
     userIds = userIds.filter((id: string) => id !== userId);
     if (!userIds.length) {
-      await wrapper(getRedisInstance()?.batch().hdel(`serverUsersInCall:${details.serverId}`, details.channelId));
+      await wrapper(getRedisInstance()?.batch().hdel(`serverUsersInVoice:${details.serverId}`, details.channelId));
     } else  {
-      await wrapper(getRedisInstance()?.batch().hset(`serverUsersInCall:${details.serverId}`, details.channelId, JSON.stringify(userIds)));
+      await wrapper(getRedisInstance()?.batch().hset(`serverUsersInVoice:${details.serverId}`, details.channelId, JSON.stringify(userIds)));
     }
   }
-  await wrapper(getRedisInstance()?.batch().del(`usersInCall:${userId}`))
-  return wrapper(getRedisInstance()?.batch().hdel(`usersCallingInChannel:${details.channelId}`, userId))
+  await wrapper(getRedisInstance()?.batch().del(`userIdToVoiceChannelId:${userId}`))
+  return wrapper(getRedisInstance()?.batch().hdel(`voiceChannelIdToUserId:${details.channelId}`, userId))
 }
 
 

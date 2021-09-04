@@ -6,7 +6,7 @@ const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import blockedUsers from "./models/blockedUsers";
-import { addConnectedUser, getCallingUserByUserId, getCallingUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromCall, setProgramActivity } from "./newRedisWrapper";
+import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
@@ -156,7 +156,7 @@ module.exports = async client => {
         const serverIds = user.servers.map(s => s.server_id);
 
 
-        [callingChannelUserIds] = await getCallingUsersFromServerIds(serverIds)
+        [callingChannelUserIds] = await getVoiceUsersFromServerIds(serverIds)
 
 
         const serverChannels = await channels
@@ -344,10 +344,10 @@ module.exports = async client => {
 
     const [response] = await removeConnectedUser(user.id, client.id);
 
-    const [callingUserDetails] = await getCallingUserByUserId(user.id);
+    const [callingUserDetails] = await getUserInVoiceByUserId(user.id);
     if (callingUserDetails && callingUserDetails.socketId === client.id) {
       // emit to channel id that user has left the call or something
-      removeUserFromCall(user.id)
+      removeUserFromVoice(user.id)
 
     }
 

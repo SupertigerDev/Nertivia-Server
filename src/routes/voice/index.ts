@@ -6,13 +6,13 @@ import rateLimit from "../../middlewares/rateLimit";
 
 import {joinCall} from './join'
 
-const CallRouter = Router();
+const VoiceRouter = Router();
 
 
 // Join Call
-CallRouter.route("/channels/:channelID").post(
+VoiceRouter.route("/channels/:channelID").post(
   authenticate(true),
-  rateLimit({name: 'join_call', expire: 20, requestsLimit: 15 }),
+  rateLimit({name: 'join_voice', expire: 20, requestsLimit: 15 }),
   ChannelVerification,
   // checkRolePermissions('Send Message', permissions.roles.SEND_MESSAGES),
   joinCall
@@ -21,4 +21,4 @@ CallRouter.route("/channels/:channelID").post(
 
 
 
-export default CallRouter;
+export default VoiceRouter;
