@@ -153,6 +153,76 @@ export function getCustomStatusByUserIds (userIds: string[]) {
 }
 
 
+// calls
+
+export function getUserIdsFromServerChannel(channelId: string, serverId: string) {
+  return wrapper(getRedisInstance()?.batch().hget(`serverUsersInCall:${serverId}`, channelId));
+
+}
+export async function addUserToCall(channelId: string, userId: string, data: {socketId: string, serverId?: string}) { 
+  if (data.serverId) {
+    let [userIds] = await getUserIdsFromServerChannel(channelId, data.serverId);
+    userIds = userIds ? JSON.parse(userIds) : [];
+    await wrapper(getRedisInstance()?.batch().hset(`serverUsersInCall:${data.serverId}`, channelId, JSON.stringify([...userIds, userId])));
+  }
+  wrapper(getRedisInstance()?.batch().set(`usersInCall:${userId}`, channelId))
+  return wrapper(getRedisInstance()?.batch().hset(`usersCallingInChannel:${channelId}`, userId, JSON.stringify(data)))
+}
+
+
+
+export async function getCallingUsersFromServerIds(serverIds: string[]) {
+  const multi = getRedisInstance?.()?.multi();
+  for (let index = 0; index < serverIds.length; index++) {
+    const serverId = serverIds[index];
+    multi?.hgetall(`serverUsersInCall:${serverId}`)
+  }
+  return multiWrapper(multi).then(([results, err]) => {
+    if (!results) return [results, err]
+    let newResults: any = {};
+    for (let index = 0; index < results?.length; index++) {
+      const obj = results[index];
+      if (obj === null) continue;
+      for (var channelId in obj) { 
+        const usersArr = JSON.parse(obj[channelId]);
+        newResults[channelId] = usersArr;
+      }
+    }
+    return [newResults, err]
+
+  })
+}
+
+export function userExistsInCallByChannelId(channelId: string, userId: string) {
+  return wrapper(getRedisInstance()?.batch().hexists(`usersCallingInChannel:${channelId}`, userId))
+}
+export async function getCallingUserByUserId(userId: string) {
+  const [channelId] = await wrapper(getRedisInstance()?.batch().get(`usersInCall:${userId}`));
+  return await wrapper(getRedisInstance()?.batch().hget(`usersCallingInChannel:${channelId}`, userId)).then((details) => {
+    if (!channelId) return details;
+    if (!details[0]) return details;
+    return [{...JSON.parse(details[0]), channelId}, details[1]]
+  });
+}
+
+export async function removeUserFromCall(userId: string) {
+  const [details] = await getCallingUserByUserId(userId);
+  if (details.serverId) {
+    let [userIds] = await getUserIdsFromServerChannel(details.channelId, details.serverId);
+    userIds = userIds ? JSON.parse(userIds) : [];
+    userIds = userIds.filter((id: string) => id !== userId);
+    if (!userIds.length) {
+      await wrapper(getRedisInstance()?.batch().hdel(`serverUsersInCall:${details.serverId}`, details.channelId));
+    } else  {
+      await wrapper(getRedisInstance()?.batch().hset(`serverUsersInCall:${details.serverId}`, details.channelId, JSON.stringify(userIds)));
+    }
+  }
+  await wrapper(getRedisInstance()?.batch().del(`usersInCall:${userId}`))
+  return wrapper(getRedisInstance()?.batch().hdel(`usersCallingInChannel:${details.channelId}`, userId))
+}
+
+
+
 // wrappers
 function multiWrapper(multi?: Multi): Promise<[any, Error | null]> {
   return new Promise(resolve => {

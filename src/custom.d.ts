@@ -46,7 +46,6 @@ declare global {
   }
 }
 interface User {
-  uniqueID: string
   id: string
   _id: string
   username: string
@@ -63,6 +62,7 @@ interface uploadFile {
 }
 interface Channel {
   _id: string,
+  channelID: string,
   server: Server
   recipients: any[]
   rateLimit?: number

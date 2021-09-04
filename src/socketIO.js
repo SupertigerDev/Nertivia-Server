@@ -6,7 +6,7 @@ const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import blockedUsers from "./models/blockedUsers";
-import { addConnectedUser, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, setProgramActivity } from "./newRedisWrapper";
+import { addConnectedUser, getCallingUserByUserId, getCallingUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromCall, setProgramActivity } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
@@ -14,6 +14,7 @@ const jwt = require("jsonwebtoken");
 // const { getIOInstance() } = require("./app");
 const redis = require("./redis");
 // const sio = require("socket.getIOInstance()");
+import {Socket} from 'socket.io'
 
 import { getIOInstance } from "./socket/instance";
 import getUsrDetails from './utils/getUserDetails';
@@ -46,7 +47,7 @@ const populateServers = {
 };
 
 /**
- * @param {sio.Socket} client
+ * @param {Socket} client
  */
 module.exports = async client => {
 
@@ -146,14 +147,20 @@ module.exports = async client => {
 
       let serverMembers = [];
 
+      let callingChannelUserIds = {};
       let serverRoles = [];
 
       if (user.servers) {
-        // Map serverIDs
-        const serverIDs = user.servers.map(a => a._id);
+        // Map serverObjectIds
+        const serverObjectIds = user.servers.map(a => a._id);
+        const serverIds = user.servers.map(s => s.server_id);
+
+
+        [callingChannelUserIds] = await getCallingUsersFromServerIds(serverIds)
+
 
         const serverChannels = await channels
-          .find({ server: { $in: serverIDs } })
+          .find({ server: { $in: serverObjectIds } })
           .select("name channelID server server_id lastMessaged rateLimit icon")
           .lean();
 
@@ -167,7 +174,7 @@ module.exports = async client => {
 
         // Get server members TODO: add server_id to all serverMembers in the database.
         serverMembers = await ServerMembers.find(
-          { server: { $in: serverIDs } },
+          { server: { $in: serverObjectIds } },
           { _id: 0 }
         )
           .select("type member server_id roles")
@@ -179,7 +186,7 @@ module.exports = async client => {
 
         // get roles from all servers
         serverRoles = await ServerRoles.find(
-          { server: { $in: serverIDs } },
+          { server: { $in: serverObjectIds } },
           { _id: 0 }
         ).select("name id color permissions server_id deletable order default bot hideRole");
       }
@@ -313,6 +320,7 @@ module.exports = async client => {
         settings,
         lastSeenServerChannels,
         bannedUserIDs,
+        callingChannelUserIds,
         pid: process.pid
 
       });
@@ -335,6 +343,13 @@ module.exports = async client => {
     const [presence] = await getPresenceByUserId(user.id);
 
     const [response] = await removeConnectedUser(user.id, client.id);
+
+    const [callingUserDetails] = await getCallingUserByUserId(user.id);
+    if (callingUserDetails && callingUserDetails.socketId === client.id) {
+      // emit to channel id that user has left the call or something
+      removeUserFromCall(user.id)
+
+    }
 
     // if all users have gone offline, emit offline status to friends.
     if (response === 1 && presence?.[1] !== '0') {
