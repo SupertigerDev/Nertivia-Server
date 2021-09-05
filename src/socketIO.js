@@ -6,7 +6,7 @@ const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import blockedUsers from "./models/blockedUsers";
-import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity } from "./newRedisWrapper";
+import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
 const BannedIPs = require("./models/BannedIPs");
 const customEmojis = require("./models/customEmojis");
@@ -335,6 +335,37 @@ module.exports = async client => {
   });
 
 
+  client.on("voice:send_signal", async ({channelId, signalToUserId, signal}) => {
+    const [requester] = await getConnectedUserBySocketID(client.id);
+    const [isRequesterInVoice] = await voiceUserExists(channelId, requester.id);
+    const [userToSignal] = await getUserInVoiceByUserId(signalToUserId);
+    if (!isRequesterInVoice) {
+      console.log("You must join the voice channel.")
+      return;
+    }
+    if (userToSignal?.channelId !== channelId) {
+      console.log("Recipient must join the voice channel.")
+      return;
+    }
+    getIOInstance().to(userToSignal.socketId).emit("voice:receive_signal", {channelId, requesterId: requester.id, signal})
+  })
+
+  client.on("voice:send_return_signal", async ({channelId, signalToUserId, signal}) => {
+    const [requester] = await getConnectedUserBySocketID(client.id);
+    const [isRequesterInVoice] = await voiceUserExists(channelId, requester.id);
+    const [userToSignal] = await getUserInVoiceByUserId(signalToUserId);
+    if (!isRequesterInVoice) {
+      console.log("You must join the voice channel.")
+      return;
+    }
+    if (userToSignal?.channelId !== channelId) {
+      console.log("Recipient must join the voice channel.")
+      return;
+    }
+    getIOInstance().to(userToSignal.socketId).emit("voice:receive_return_signal", {channelId, requesterId: requester.id, signal})
+  })
+
+
 
   client.on("disconnect", async () => {
     if (!client.auth) return;
@@ -346,9 +377,10 @@ module.exports = async client => {
 
     const [callingUserDetails] = await getUserInVoiceByUserId(user.id);
     if (callingUserDetails && callingUserDetails.socketId === client.id) {
-      // emit to channel id that user has left the call or something
-      removeUserFromVoice(user.id)
-
+      await removeUserFromVoice(user.id)
+      if (callingUserDetails.serverId) {
+        getIOInstance().in("server:" + callingUserDetails.serverId).emit("user:left_call", {channelId: callingUserDetails.channelId, userId: user.id})
+      }
     }
 
     // if all users have gone offline, emit offline status to friends.
