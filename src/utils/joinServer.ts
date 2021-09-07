@@ -10,7 +10,7 @@ const ServerRoles = require("../models/Roles");
 const redis = require("../redis");
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
-import { getCustomStatusByUserId, getPresenceByUserId } from '../newRedisWrapper';
+import { getCustomStatusByUserId, getPresenceByUserId, getVoiceUsersFromServerIds } from '../newRedisWrapper';
 
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
@@ -96,6 +96,8 @@ export default async function join(server: any, user: any, socketID: string | un
     custom_status: customStatus[1],
     presence: presence[1]
   });
+  // get joined voice users
+  const [callingChannelUserIds] = await getVoiceUsersFromServerIds([server.server_id])
 
   // send owns status to every connected device
   createServerObj.channels = serverChannels;
@@ -190,7 +192,8 @@ export default async function join(server: any, user: any, socketID: string | un
     serverMembers,
     memberPresences: memberStatusArr,
     memberCustomStatusArr: customStatusArr,
-    programActivityArr
+    programActivityArr,
+    callingChannelUserIds
   });
 
 
