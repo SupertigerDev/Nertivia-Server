@@ -3,6 +3,7 @@ const ServerMembers = require("../../models/ServerMembers");
 const Channels = require("../../models/channels");
 const User = require("../../models/users");
 import {MessageModel} from '../../models/Message'
+import { getUserInVoiceByUserId, removeUserFromVoice, removeUserFromVoice } from '../../newRedisWrapper';
 
 const Notifications = require('../../models/notifications');
 const redis = require("../../redis");
@@ -47,6 +48,14 @@ module.exports = async (req, res, next) => {
   res.json({ status: "Done!" });
   const io = req.io;
 
+  // leave call if inside call
+  const [voiceDetails, err] = await getUserInVoiceByUserId(req.user.id);
+  if (voiceDetails?.serverId === req.server.server_id) {
+    await removeUserFromVoice(req.user.id)
+    io.in("server:" + voiceDetails.serverId).emit("user:left_call", {channelId: voiceDetails.channelId, userId: req.user.id})
+  }
+
+
 
   // leave room
 
@@ -54,6 +63,8 @@ module.exports = async (req, res, next) => {
     server_id: req.server.server_id
   });
   io.in(req.user.id).socketsLeave("server:" + req.server.server_id)
+
+
 
 
 

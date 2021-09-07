@@ -153,6 +153,93 @@ export function getCustomStatusByUserIds (userIds: string[]) {
 }
 
 
+// voice calls
+
+export function getVoiceUsersByServer(channelId: string, serverId: string) {
+  return wrapper(getRedisInstance()?.batch().hget(`serverUsersInVoice:${serverId}`, channelId));
+
+}
+export async function addUserToVoice(channelId: string, userId: string, data: {socketId: string, serverId?: string}) { 
+  if (data.serverId) {
+    let [userIds] = await getVoiceUsersByServer(channelId, data.serverId);
+    userIds = userIds ? JSON.parse(userIds) : [];
+    await wrapper(getRedisInstance()?.batch().hset(`serverUsersInVoice:${data.serverId}`, channelId, JSON.stringify([...userIds, userId])));
+  }
+  wrapper(getRedisInstance()?.batch().set(`userIdToVoiceChannelId:${userId}`, channelId))
+  return wrapper(getRedisInstance()?.batch().hset(`voiceChannelIdToUserId:${channelId}`, userId, JSON.stringify(data)))
+}
+
+
+
+export async function getVoiceUsersFromServerIds(serverIds: string[]) {
+  const multi = getRedisInstance?.()?.multi();
+  for (let index = 0; index < serverIds.length; index++) {
+    const serverId = serverIds[index];
+    multi?.hgetall(`serverUsersInVoice:${serverId}`)
+  }
+  return multiWrapper(multi).then(([results, err]) => {
+    if (!results) return [results, err]
+    let newResults: any = {};
+    for (let index = 0; index < results?.length; index++) {
+      const obj = results[index];
+      if (obj === null) continue;
+      for (var channelId in obj) { 
+        const usersArr = JSON.parse(obj[channelId]);
+        newResults[channelId] = usersArr;
+      }
+    }
+    return [newResults, err]
+
+  })
+}
+
+export function voiceUserExists(channelId: string, userId: string) {
+  return wrapper(getRedisInstance()?.batch().hexists(`voiceChannelIdToUserId:${channelId}`, userId))
+}
+export async function getUserInVoiceByUserId(userId: string) {
+  const [channelId] = await wrapper(getRedisInstance()?.batch().get(`userIdToVoiceChannelId:${userId}`));
+  return await wrapper(getRedisInstance()?.batch().hget(`voiceChannelIdToUserId:${channelId}`, userId)).then((details) => {
+    if (!channelId) return details;
+    if (!details[0]) return details;
+    return [{...JSON.parse(details[0]), channelId}, details[1]]
+  });
+}
+
+export async function removeUserFromVoice(userId: string) {
+  const [details] = await getUserInVoiceByUserId(userId);
+  if (details.serverId) {
+    let [userIds] = await getVoiceUsersByServer(details.channelId, details.serverId);
+    userIds = userIds ? JSON.parse(userIds) : [];
+    userIds = userIds.filter((id: string) => id !== userId);
+    if (!userIds.length) {
+      await wrapper(getRedisInstance()?.batch().hdel(`serverUsersInVoice:${details.serverId}`, details.channelId));
+    } else  {
+      await wrapper(getRedisInstance()?.batch().hset(`serverUsersInVoice:${details.serverId}`, details.channelId, JSON.stringify(userIds)));
+    }
+  }
+  await wrapper(getRedisInstance()?.batch().del(`userIdToVoiceChannelId:${userId}`))
+  return wrapper(getRedisInstance()?.batch().hdel(`voiceChannelIdToUserId:${details.channelId}`, userId))
+}
+
+export async function deleteAllServerVoice(serverId: string) {
+  const multi = getRedisInstance?.()?.multi();
+  const [voiceChannelObj] = await getVoiceUsersFromServerIds([serverId])
+  await wrapper(getRedisInstance()?.batch().del(`serverUsersInVoice:${serverId}`));
+  if (voiceChannelObj) {
+    for (const channelId in voiceChannelObj) {
+      const userIds = voiceChannelObj[channelId];
+      multi?.del(`voiceChannelIdToUserId:${channelId}`)
+      if (userIds) {
+        userIds.forEach((userId: string) => {
+          multi?.del(`userIdToVoiceChannelId:${userId}`)
+        });
+      }
+    }
+  }
+  return multiWrapper(multi)
+}
+
+
 // wrappers
 function multiWrapper(multi?: Multi): Promise<[any, Error | null]> {
   return new Promise(resolve => {
