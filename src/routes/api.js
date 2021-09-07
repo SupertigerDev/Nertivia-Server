@@ -5,50 +5,36 @@ const router = express.Router();
 const loadMedia = require('./../middlewares/loadMedia');
 
 
+import { getAndRemoveAllRequests, ipRequestIncrement } from '../newRedisWrapper';
 import avatars from './avatars';
 
-let requests = {}
-let rateLimited = {}
 
-setInterval(() => {
-  for (let index = 0; index < Object.keys(requests).length; index++) {
-    const ip = Object.keys(requests)[index]
-    const requestSentCount = Object.values(requests)[index].count
-    const param = Object.values(requests)[index].param
-    if (requestSentCount >= 100) {
-      console.log(`IP: ${ip} is sending a lot of requests (${requestSentCount} in 60 seconds) at ${param}`)
+
+
+
+setInterval(async () => {
+  const [requests, err] = await getAndRemoveAllRequests();
+  if (requests) {
+    for (const ip in requests) {
+      const count = requests[ip];
+      if (count >= 100) {
+        console.log(`IP: ${ip} is sending a lot of requests (${count} in 60 seconds)`)
+      }
     }
   }
-  requests = {};
 }, 60000);
 
 
-router.use('/*', (req, res, next) => {
-  if (requests[req.userIP]) {
-    requests[req.userIP] = { param: req.originalUrl, count: requests[req.userIP].count + 1 }
-  } else {
-    requests[req.userIP] = { param: req.originalUrl, count: 1 }
-  }
 
-  if (rateLimited[req.userIP] ||  requests[req.userIP].count >=500) {
-    if (!rateLimited[req.userIP]) {
-      rateLimited[req.userIP] = Date.now();
-      console.log(`Rate limited IP: ${req.userIP}`)
-    }
-    if (diff_minutes(rateLimited[req.userIP], Date.now()) > 5) {
-      delete rateLimited[req.userIP];
-      return next();
-    }
+router.use('/*', async (req, res, next) => {
+  const [count, err] = await ipRequestIncrement(req.userIP);
+  if (count >= 500) {
     res.status(403).json({message: "You have been rate limited!"})
     return;
   }
   next();
 })
-function diff_minutes(dt2, dt1) {
-  let diff =(dt2 - dt1) / 1000;
-  diff /= 60;
-  return Math.abs(Math.round(diff));
-}
+
 
 router.use('/error_report', require('./errorReport'));
 router.use('/user', require('./users'));

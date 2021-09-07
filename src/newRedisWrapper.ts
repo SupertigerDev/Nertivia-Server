@@ -1,6 +1,19 @@
 import { Multi, RedisClient } from 'redis';
 import { getRedisInstance } from './redis/instance';
 
+export function ipRequestIncrement(ip: string) {
+  return wrapper(getRedisInstance()?.batch().hincrby(`requestsSent`, ip, 1))
+}
+export async function getAndRemoveAllRequests(){
+  const multi = getRedisInstance?.()?.multi()
+  multi?.hgetall(`requestsSent`)
+  multi?.del(`requestsSent`)
+
+  return multiWrapper(multi).then(([results, err]) => {
+    return [results[0], err]
+  })
+}
+
 export function addConnectedUser(userID: string, _id: string, status: string, customStatus: string, socketID: string) {
   const multi = getRedisInstance?.()?.multi()
     .hset(`user:${userID}`, 'status', status)

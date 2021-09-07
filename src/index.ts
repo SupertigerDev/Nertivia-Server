@@ -1,5 +1,5 @@
 import cluster from 'cluster';
-let numCPUs = require('os').cpus().length;
+const numCPUs = require('os').cpus().length;
 import { getRedisInstance, redisInstanceExists } from "./redis/instance";
 import { getIOInstance } from "./socket/instance";
 import app from './app';
@@ -10,22 +10,26 @@ dotenv.config();
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
 
+main();
 
-if (cluster.isMaster) {
-	console.log("Master PID: ", process.pid);
-
-	// run workers
+function main() {
 	if (process.env.DEV_MODE === "true") {
-		numCPUs = 1;
+		start();
+		return;
 	}
-	for (let i = 0; i < numCPUs; i++) {
-	// for (let i = 0; i < 4; i++) {
-		cluster.fork();
+	if (cluster.isMaster) {
+		console.log("Master PID: ", process.pid);
+	
+		// run workers
+		for (let i = 0; i < numCPUs; i++) {
+		// for (let i = 0; i < 4; i++) {
+			cluster.fork();
+		}
+		cluster.on('exit', (worker, code, signal) => {
+			console.log(`Worker Died! PID:`, process.pid);
+		});
+		return;
 	}
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker Died! PID:`, process.pid);
-  });
-} else {
 	start();
 }
 
@@ -42,10 +46,6 @@ function start() {
 	mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, async function (err) {
 		if (err) throw err;
 		console.log("\x1b[32m" + "MongoDB> " + "\x1b[1m" + "Connected!\x1b[0m");
-
-
-
-
 		connectToRedis();
 	});
 
