@@ -221,6 +221,23 @@ export async function removeUserFromVoice(userId: string) {
   return wrapper(getRedisInstance()?.batch().hdel(`voiceChannelIdToUserId:${details.channelId}`, userId))
 }
 
+export async function deleteAllServerVoice(serverId: string) {
+  const multi = getRedisInstance?.()?.multi();
+  const [voiceChannelObj] = await getVoiceUsersFromServerIds([serverId])
+  await wrapper(getRedisInstance()?.batch().del(`serverUsersInVoice:${serverId}`));
+  if (voiceChannelObj) {
+    for (const channelId in voiceChannelObj) {
+      const userIds = voiceChannelObj[channelId];
+      multi?.del(`voiceChannelIdToUserId:${channelId}`)
+      if (userIds) {
+        userIds.forEach((userId: string) => {
+          multi?.del(`userIdToVoiceChannelId:${userId}`)
+        });
+      }
+    }
+  }
+  return multiWrapper(multi)
+}
 
 
 // wrappers
