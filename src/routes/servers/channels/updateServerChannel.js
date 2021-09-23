@@ -1,5 +1,5 @@
 const Channels = require("../../../models/channels");
-const { addChannel } = require("../../../newRedisWrapper");
+const { addChannel, getServerChannel } = require("../../../newRedisWrapper");
 const redis = require("../../../redis");
 
 module.exports = async (req, res, next) => {
@@ -48,7 +48,7 @@ module.exports = async (req, res, next) => {
 };
 
 async function updateChannelCache(updateData, channelID) {
-  const {ok, result, error} = await redis.getServerChannel(channelID);
+  const [result, err] = await getServerChannel(channelID);
   if (!result) return;
   let channel = JSON.parse(result);
   const updateChannel = Object.assign({}, channel, updateData);
