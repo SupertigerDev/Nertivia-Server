@@ -13,6 +13,15 @@ module.exports = async (req, res, next) => {
       name: data.name,
       icon: data.icon
     }
+    const isGif = dataFiltered.icon?.startsWith("g_")
+    const isCustom = dataFiltered.icon?.startsWith("c_")
+    if (isGif || isCustom) {
+      const emojiId = dataFiltered.icon.split("_")[1];
+      if (/^\d+$/.test(emojiId) === false) {
+        res.status(403).json({ message: "Invalid Emoji Id" });
+        return;
+      }
+    }
     if (data.permissions) {
       dataFiltered.permissions = data.permissions
     }
