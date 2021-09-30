@@ -76,7 +76,7 @@ module.exports = async client => {
       // get the user
 
       const userSelect =
-        "avatar banner username type badges email id tag settings servers survey_completed GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
+        "avatar banner username type badges email id tag settings servers show_welcome GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
 
       const user = await User.findOne({ id: decryptedToken.userID })
         .select(userSelect)

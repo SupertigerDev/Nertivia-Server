@@ -59,7 +59,7 @@ module.exports = async (req, res, next) => {
     $unset: {
       ip: 1,
       about_me: 1,
-      survey_completed: 1,
+      show_welcome: 1,
       GDriveRefreshToken: 1,
       banned: 1,
       custom_status: 1,
