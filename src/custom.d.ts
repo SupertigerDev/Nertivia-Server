@@ -70,4 +70,5 @@ interface Channel {
 interface Server {
   server_id: string
   _id: string
+  default_channel_id: string
 }
