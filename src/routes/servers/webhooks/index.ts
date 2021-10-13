@@ -11,6 +11,7 @@ import rateLimit from "../../../middlewares/rateLimit";
 
 
 import {createWebhook} from './createWebhook'
+import {getWebhook} from './getWebhooks'
 
 // create webhook
 webhooksRouter.route("/:server_id/webhooks").post(
@@ -18,8 +19,13 @@ webhooksRouter.route("/:server_id/webhooks").post(
   UserPresentVerification,
   // checkRolePerms('Roles', MANAGE_ROLES),
   rateLimit({name: 'create_webhook', expire: 600, requestsLimit: 10}),
-
   createWebhook
+);
+webhooksRouter.route("/:server_id/webhooks").get(
+  authenticate(),
+  UserPresentVerification,
+  // checkRolePerms('Roles', MANAGE_ROLES),
+  getWebhook
 );
 
 
