@@ -6,6 +6,13 @@ export async function createWebhook (req: Request, res: Response, next: NextFunc
   const server = req.server;
   const defaultChannelId = server.default_channel_id;
 
+  const webhookCount = await WebhookModel.countDocuments({server: server._id});
+
+  if (webhookCount > 10) {
+    return res.status(403).json({message: "Cannot create more than 10 webhooks."})
+  }
+
+
   const channel = await Channels.findOne({channelID: defaultChannelId}).select("_id");
 
   if (!channel) {
