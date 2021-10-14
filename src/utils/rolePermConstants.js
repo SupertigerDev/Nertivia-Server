@@ -6,6 +6,7 @@ module.exports = {
     MANAGE_CHANNELS: 8,
     KICK_USER: 16,
     BAN_USER: 32,
+    MANAGE_WEBHOOKS: 64,
   },
   containsPerm (perms, flag) {
     return perms & (flag);
