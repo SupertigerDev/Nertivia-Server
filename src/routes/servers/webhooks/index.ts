@@ -13,6 +13,7 @@ import {createWebhook} from './createWebhook'
 import {getWebhook} from './getWebhooks'
 import {deleteWebhook} from './deleteWebhook'
 import {updateWebhook} from './updateWebhook'
+import {getWebhookToken} from './getWebhookToken'
 
 import checkRolePermissions from "../../../middlewares/checkRolePermissions";
 import {roles} from '../../../utils/rolePermConstants'
@@ -46,6 +47,13 @@ webhooksRouter.route("/:server_id/webhooks").get(
   UserPresentVerification,
   checkRolePermissions('Webhooks', roles.MANAGE_WEBHOOKS),
   getWebhook
+);
+// get webhook token
+webhooksRouter.route("/:server_id/webhooks/:webhook_id/token").get(
+  authenticate(),
+  UserPresentVerification,
+  checkRolePermissions('Webhooks', roles.MANAGE_WEBHOOKS),
+  getWebhookToken
 );
 
 
