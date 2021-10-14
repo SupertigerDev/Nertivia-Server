@@ -11,6 +11,7 @@ export async function getWebhook (req: Request, res: Response, next: NextFunctio
     .select("id name channel creator -_id")
     .populate("channel", "name channelID -_id")
     .populate("creator", "username tag id avatar -_id")
+    .sort({_id: -1})
     .lean();
 
   res.json(webhooks)
