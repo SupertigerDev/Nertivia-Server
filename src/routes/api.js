@@ -44,6 +44,7 @@ router.use('/channels', require('./channels'));
 router.use('/themes', require('./themes'))
 router.use('/bots', require('./bots'))
 router.use('/voice', require('./voice').default)
+router.use('/webhooks', require('./webhooks').default)
 
 router.use('/explore', require('./explore'))
 

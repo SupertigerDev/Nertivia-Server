@@ -4,7 +4,7 @@ module.exports = function (options) {
     const {name, expire, requestsLimit, useIP, nextIfInvalid} = options;
     let key = "";
     if (!useIP) {
-      key = `${req.user.id}-${name}`
+      key = `${req?.user?.id || req.session.webhook.id}-${name}`
     } else {
       key = `${req.userIP.replace(/:/g, '=')}-${name}`
     }

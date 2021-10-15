@@ -104,8 +104,8 @@ MainServerRouter.use('/', require('./invites'));
 // roles
 MainServerRouter.use('/', require('./roles'));
 
-// webhooks
-MainServerRouter.use('/', require('./webhooks'));
+// manage webhooks
+MainServerRouter.use('/', require('./manage-webhooks'));
 
 
 
