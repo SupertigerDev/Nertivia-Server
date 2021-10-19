@@ -1,6 +1,8 @@
 const Channels = require("../../../models/channels");
-const Messages = require("../../../models/messages");
-const MessageQuotes = require("../../../models/messageQuotes");
+import {MessageModel} from '../../../models/Message'
+
+import {MessageQuoteModel} from '../../../models/MessageQuote'
+import { deleteServerChannel } from '../../../newRedisWrapper';
 const Notifications = require("../../../models/notifications");
 const redis = require("./../../../redis");
 
@@ -13,11 +15,11 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({ message: "Cannot delete default channel." });
   }
   try {
-    await MessageQuotes.deleteMany({quotedChannel: req.channel._id})
+    await MessageQuoteModel.deleteMany({quotedChannel: req.channel._id})
     await Notifications.deleteMany({ channelID });
     await Channels.deleteOne({ channelID });
-    await Messages.deleteMany({ channelID });
-    await redis.removeServerChannel(channelID);
+    await MessageModel.deleteMany({ channelID });
+    await deleteServerChannel(channelID);
     const io = req.io;
     io.in("server:" + req.server.server_id).emit("server:remove_channel", {
       channelID,

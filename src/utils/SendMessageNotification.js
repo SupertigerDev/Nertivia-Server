@@ -1,7 +1,7 @@
-const Messages = require("./../models/messages");
 const ServerMembers = require("./../models/ServerMembers");
 const Notifications = require("./../models/notifications");
-const messages = require("./../models/messages");
+
+
 
 // recipientUserID: Only required for DMs.
 // server_id: Only required for server messages.

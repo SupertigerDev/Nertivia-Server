@@ -1,13 +1,4 @@
-// Models
-const ServerMembers = require("../../models/ServerMembers");
-const Channels = require("../../models/channels");
-const User = require("../../models/users");
-const Messages = require("../../models/messages");
-const Notifications = require('../../models/notifications');
-const redis = require("../../redis");
-
 import deleteServer from "../../utils/deleteServer";
-import { deleteFCMFromServer, sendServerPush } from "../../utils/sendPushNotification";
 module.exports = async (req, res, next) => {
   // check if its the creator and delete the server.
   if (req.server.creator !== req.user._id) {

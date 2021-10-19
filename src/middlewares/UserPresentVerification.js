@@ -3,6 +3,7 @@ const Servers = require("../models/servers");
 const Roles = require("../models/Roles");
 const ServerMembers = require("../models/ServerMembers");
 const redis = require("../redis");
+const { getServerChannel, addServer, getServer, addChannel } = require("../newRedisWrapper");
 //check if user is in the server.
 module.exports = async (req, res, next) => {
   const serverID = req.params.server_id;
@@ -12,7 +13,7 @@ module.exports = async (req, res, next) => {
 
 
   // check if server is in cache
-  const cacheServer = JSON.parse((await redis.getServer(serverID)).result || null);
+  const cacheServer = JSON.parse((await getServer(serverID))[0] || null);
 
   if (cacheServer) {
     // check if member is in cache
@@ -23,7 +24,7 @@ module.exports = async (req, res, next) => {
       req.server = cacheServer;
       if (channelID) {
         // check if channel is in cache
-        const cacheChannel = JSON.parse((await redis.getServerChannel(channelID)).result || null);
+        const cacheChannel = JSON.parse((await getServerChannel(channelID))[0] || null);
         if (cacheChannel && cacheChannel.server_id && cacheChannel.server_id === serverID) {
           req.channel = cacheChannel;
           return next()
@@ -44,7 +45,7 @@ module.exports = async (req, res, next) => {
       message: "Server doesn't exist!"
     });
   }
-  await redis.addServer(server.server_id, server);
+  await addServer(server.server_id, server);
 
   const member = await ServerMembers.findOne({
     server: server._id,
@@ -89,7 +90,7 @@ module.exports = async (req, res, next) => {
         message: "ChannelID is invalid or does not exist in the server."
       });
     }
-    await redis.addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: server.server_id}), req.user.id );
+    await addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: server.server_id}), req.user.id );
     req.channel = channel;
   }
 

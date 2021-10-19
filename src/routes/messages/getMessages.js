@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const MessageReactions = require("../../models/MessageReactions");
-const Messages = require("../../models/messages");
+import {MessageModel} from '../../models/Message'
 
 module.exports = async (req, res, next) => {
   const { channelID } = req.params;
@@ -30,7 +30,7 @@ module.exports = async (req, res, next) => {
   let messages;
   if (continueMessageID) {
     // check if continue param is entered
-    const continueFromMessage = await Messages.findOne({
+    const continueFromMessage = await MessageModel.findOne({
       messageID: continueMessageID
     }).select("_id");
     if (!continueFromMessage) {
@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
         message: "continue message was not found."
       });
     }
-    messages = await Messages.find({
+    messages = await MessageModel.find({
       channelID,
       _id: {
         $lt: continueFromMessage._id
@@ -54,7 +54,7 @@ module.exports = async (req, res, next) => {
       .lean();
   } else if (beforeMessageID) {
     // check if continue param is entered
-    const beforeFromMessage = await Messages.findOne({
+    const beforeFromMessage = await MessageModel.findOne({
       messageID: beforeMessageID
     }).select("_id");
     if (!beforeFromMessage) {
@@ -63,7 +63,7 @@ module.exports = async (req, res, next) => {
         message: "before message was not found."
       });
     }
-    messages = await Messages.find({
+    messages = await MessageModel.find({
       channelID,
       _id: {
         $gt: beforeFromMessage._id
@@ -76,7 +76,7 @@ module.exports = async (req, res, next) => {
   } else if (aroundMessageID) {
     // check if continue param is entered
 
-    const message = await Messages.findOne({
+    const message = await MessageModel.findOne({
       messageID: aroundMessageID
     }).select("_id");
     if (!message) {
@@ -86,7 +86,7 @@ module.exports = async (req, res, next) => {
       });
     }
 
-    let above = await Messages.find({
+    let above = await MessageModel.find({
       channelID,
       _id: {
         $lte: message._id
@@ -95,7 +95,7 @@ module.exports = async (req, res, next) => {
       _id: -1
     }).limit(25).populate(populate).select(select).lean();
 
-    let bottom = await Messages.find({
+    let bottom = await MessageModel.find({
       channelID,
       _id: {
         $gt: message._id
@@ -104,7 +104,7 @@ module.exports = async (req, res, next) => {
 
 
     if (above.length === 25 && bottom.length < 25) {
-      above = await Messages.find({
+      above = await MessageModel.find({
         channelID,
         _id: {
           $lte: message._id
@@ -114,7 +114,7 @@ module.exports = async (req, res, next) => {
       }).limit(50 - bottom.length).populate(populate).select(select).lean();
 
     } else if (bottom.length === 25 && above.length < 25) {
-      bottom = await Messages.find({
+      bottom = await MessageModel.find({
         channelID,
         _id: {
           $gt: message._id
@@ -126,7 +126,7 @@ module.exports = async (req, res, next) => {
 
     messages = [...bottom.reverse(), ...above];
   } else {
-    messages = await Messages.find(
+    messages = await MessageModel.find(
       {
         channelID
       },

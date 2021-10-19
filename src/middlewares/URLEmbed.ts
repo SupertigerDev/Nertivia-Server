@@ -2,7 +2,7 @@ import {Response, Request, NextFunction} from 'express'
 import AbortController from "abort-controller"
 import cheerio from 'cheerio';
 
-const Messages = require('./../models/messages');
+import {MessageModel} from './../models/Message'
 import sharp from 'sharp';
 import fetch from 'node-fetch';
 
@@ -77,7 +77,7 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
       resObj = OGTagResult;
     }
   }
-  await Messages.updateOne({messageID: message_id}, {embed: resObj});
+  await MessageModel.updateOne({messageID: message_id}, {embed: resObj});
 
   const io:any = req.io;
 

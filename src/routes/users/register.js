@@ -42,7 +42,7 @@ module.exports = async (req, res, next) => {
   // check if the email really exists
   const emailExists = await validate({email, validateTypo: false, validateSMTP: false});
 
-  if (!emailExists.valid) {
+  if (!emailExists.valid && !process.env.DEV_MODE) {
     return res.status(403).json({
       errors: [{param: "email", msg: `Email is Invalid (${emailExists.reason}).`}]})
   }

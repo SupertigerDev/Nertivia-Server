@@ -3,6 +3,7 @@ const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
 const BlockedUsers = require('../../../models/blockedUsers');
 const redis = require('../../../redis');
+const { getProgramActivityByUserIds, getPresenceByUserIds, getCustomStatusByUserIds } = require('../../../newRedisWrapper');
 
 module.exports = async (req, res, next) => {
   const {username, tag} = req.body;
@@ -78,9 +79,9 @@ module.exports = async (req, res, next) => {
   
   const io = req.io
   
-  const presence = (await redis.getPresences([docRequester.recipient.id, docRecipient.recipient.id])).result;
-  const customStatus = (await redis.getCustomStatusArr([docRequester.recipient.id, docRecipient.recipient.id])).result;
-  const programActivity = (await redis.getProgramActivityArr([docRequester.recipient.id, docRecipient.recipient.id])).result;
+  const [presence] = await getPresenceByUserIds([docRequester.recipient.id, docRecipient.recipient.id]);
+  const [customStatus] = await getCustomStatusByUserIds([docRequester.recipient.id, docRecipient.recipient.id])
+  const [programActivity] = await getProgramActivityByUserIds([docRequester.recipient.id, docRecipient.recipient.id])
   
   docRequester.recipient.status = parseInt(presence[0][1]) || null;
   docRequester.recipient.custom_status = customStatus[0][1] || null;

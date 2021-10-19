@@ -1,6 +1,7 @@
 const redis = require("./../../redis");
 const Users = require ('./../../models/users');
 const emitAll = require("../../socketController/emitToAll");
+const { changeCustomStatusByUserId } = require("../../newRedisWrapper");
 
 module.exports = async (req, res, next) => {
   const io = req.io;
@@ -28,7 +29,7 @@ module.exports = async (req, res, next) => {
   await Users.updateOne({_id: req.user._id}, obj)
 
   // change the status in redis.
-  await redis.changeCustomStatus(req.user.id, customStatus);
+  await changeCustomStatusByUserId(req.user.id, customStatus);
 
   // emit status to users.
   emitAll("member:custom_status_change", req.user._id, {user_id: req.user.id, custom_status: customStatus}, io)

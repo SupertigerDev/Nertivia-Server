@@ -17,6 +17,14 @@ MainUserRouter.use("/relationship", require("./relationship"));
 // Survey
 MainUserRouter.use("/survey", require("./survey"));
 
+MainUserRouter.use("/html-profile", require("./htmlProfile").htmlProfileRouter);
+
+
+// welcome popout completed
+MainUserRouter.route('/welcome-done')
+  .post(authenticate(), require('./welcomeDone'));
+
+
 // Update
 MainUserRouter.route("/").patch(
   authenticate(true),

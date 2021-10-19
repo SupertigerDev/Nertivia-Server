@@ -1,11 +1,10 @@
-const Messages = require("../../models/messages");
-const MessageQuotes = require("../../models/messageQuotes");
+import {MessageModel} from '../../models/Message'
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID, buttonID } = req.params;
   
 
-  const message = await Messages.findOne({ channelID, messageID, "buttons.id": buttonID }).select("creator").populate("creator", "id");
+  const message = await MessageModel.findOne({ channelID, messageID, "buttons.id": buttonID }).select("creator").populate("creator", "id");
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;

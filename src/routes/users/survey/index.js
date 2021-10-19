@@ -16,9 +16,7 @@ MainSurveyRouter.route('/')
   .put(authenticate(true), surveyPolicy.put, require('./surveyUpdate'));
 
 
-// Skip
-MainSurveyRouter.route('/skip')
-  .delete(authenticate(), require('./surveySkip'));
+
 
 
 module.exports = MainSurveyRouter;

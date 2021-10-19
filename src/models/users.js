@@ -111,9 +111,9 @@ const usersSchema = new Schema({
   created: {
     type: Number
   },
-  survey_completed: { //if about_me is completed or not.
+  show_welcome: { // show welcome popout when not completed/ notclosed
     type: Boolean,
-    default: false,
+    default: true,
     select: false
   },
   badges: {
@@ -128,6 +128,7 @@ const usersSchema = new Schema({
     type: Number,
     select: false,
   },
+  htmlProfile: {type: String, select: false, required: false},
   about_me: {
     type: aboutMeSchema,
     select: false

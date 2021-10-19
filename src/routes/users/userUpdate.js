@@ -30,8 +30,8 @@ module.exports = async (req, res, next) => {
   const user = req.user;
   const socketID = req.body.socketID
   let updatePassword = false
-  // if password is not supplied and user wants to change their username || tag || password || email.
-  if ( !data.password && (data.username || data.tag || data.new_password || data.email) ) {
+  // if password is not supplied and user wants to change their email or password.
+  if ( !data.password && (data.new_password || data.email) ) {
     return res
       .status(403)
       .json({ errors: [{ param: "password", msg: "Password is required." }] });

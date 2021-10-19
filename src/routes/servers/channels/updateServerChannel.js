@@ -1,4 +1,5 @@
 const Channels = require("../../../models/channels");
+const { addChannel, getServerChannel } = require("../../../newRedisWrapper");
 const redis = require("../../../redis");
 
 module.exports = async (req, res, next) => {
@@ -11,6 +12,15 @@ module.exports = async (req, res, next) => {
     const dataFiltered = {
       name: data.name,
       icon: data.icon
+    }
+    const isGif = dataFiltered.icon?.startsWith("g_")
+    const isCustom = dataFiltered.icon?.startsWith("c_")
+    if (isGif || isCustom) {
+      const emojiId = dataFiltered.icon.split("_")[1];
+      if (/^\d+$/.test(emojiId) === false) {
+        res.status(403).json({ message: "Invalid Emoji Id" });
+        return;
+      }
     }
     if (data.permissions) {
       dataFiltered.permissions = data.permissions
@@ -47,10 +57,10 @@ module.exports = async (req, res, next) => {
 };
 
 async function updateChannelCache(updateData, channelID) {
-  const {ok, result, error} = await redis.getServerChannel(channelID);
+  const [result, err] = await getServerChannel(channelID);
   if (!result) return;
   let channel = JSON.parse(result);
   const updateChannel = Object.assign({}, channel, updateData);
-  await redis.addChannel(channelID, updateChannel);
+  await addChannel(channelID, updateChannel);
 
 }

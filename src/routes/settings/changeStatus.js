@@ -3,6 +3,7 @@
   const Users = require("../../models/users");
   const redis = require("./../../redis");
   const emitStatus = require("../../socketController/emitUserStatus");
+const { getCustomStatusByUserId, changeStatusByUserId } = require("../../newRedisWrapper");
   
   module.exports = async (req, res, next) => {
     const io = req.io;
@@ -13,12 +14,12 @@
     await Users.updateOne({ _id: req.user._id },
       { $set: { "status": status } })
     // change the status in redis.
-    await redis.changeStatus(req.user.id, status);
+    await changeStatusByUserId(req.user.id, status);
 
     // emit status to users.
     if (beforeStatus === 0) {
-      const customStatus = await redis.getCustomStatus(req.user.id)
-      emitStatus(req.user.id, req.user._id, status, io, false, customStatus?.result?.[1], true)
+      const [customStatus] = await getCustomStatusByUserId(req.user.id)
+      emitStatus(req.user.id, req.user._id, status, io, false, customStatus?.[1], true)
   
     } else {
       emitStatus(req.user.id, req.user._id, status, io);

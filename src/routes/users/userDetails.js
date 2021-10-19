@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
   const user = await Users.findOne({
     id: userID
   })
-    .select("-status -__v -friends +about_me +badges +servers +createdBy")
+    .select("-status -__v -friends +about_me +badges +servers +createdBy +htmlProfile")
     .populate('createdBy', 'username tag id -_id')
     .lean();
 

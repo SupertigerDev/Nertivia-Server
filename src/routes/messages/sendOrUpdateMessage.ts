@@ -3,8 +3,9 @@ import { zip } from '../../utils/zip'
 import {jsonToHtml} from 'jsonhtmlfyer';
 import SocketIO from 'socket.io'
 const ServerMembers = require("../../models/ServerMembers");
-const Messages = require("../../models/messages");
-const MessageQuotes = require("../../models/messageQuotes");
+import {Message, MessageModel} from '../../models/Message'
+
+import {MessageQuoteModel} from '../../models/MessageQuote'
 const matchAll = require("match-all");
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
@@ -21,9 +22,9 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
 
   // If messageID exists, message wants to update.
-  let messageDoc;
+  let messageDoc: Message | null = null;
   if (messageID) {
-    messageDoc = await Messages.findOne({ channelID, messageID });
+    messageDoc = await MessageModel.findOne({ channelID, messageID });
     if (!messageDoc)
       return res.status(404).json({ message: "Message was not found." });
     if (messageDoc.creator.toString() !== req.user._id)
@@ -121,16 +122,17 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   const _idMentionsArr = mentions.map((m:any)=> m._id )
   
   // converted to a Set to remove duplicates.
-  const messageIds = Array.from(new Set(matchAll(message, /<m([\d]+)>/g).toArray()));
+  const messageIds: string[] = Array.from(new Set(matchAll(message, /<m([\d]+)>/g).toArray()));
 
-  let quotedMessages = [];
-  let quotes_idArr = []
+  let quotedMessages: Partial<Message>[] = [];
+  let quoteObjectIds = []
   if (messageIds.length) {
     if (messageDoc && messageIds.includes(messageDoc.messageID)) {
       res.status(403).json({message: "Cannot quote this message."})
       return;
     }
-    quotedMessages = await Messages.find({channelID, messageID: {$in: messageIds}}, {_id: 0})
+
+    quotedMessages = await MessageModel.find({channelID, messageID: {$in: messageIds}}, {_id: 0})
       .select('creator message messageID quotes')
       .populate([
         {
@@ -147,17 +149,26 @@ export default async (req: Request, res: Response, next: NextFunction) => {
           select: "username id avatar"
         }
       ]).lean()
-    quotes_idArr = (await MessageQuotes.insertMany(quotedMessages.map((q: any) => {
+
+
+
+
+    
+    const quoteInsertPayload = quotedMessages.map(q => {
       return {...q, creator: q.creator._id, quotedChannel: req.channel._id}
-    }))).map((qm: any)=> qm._id)
+    })
+
+
+    quoteObjectIds = (await MessageQuoteModel.insertMany(quoteInsertPayload)).map((qm)=> qm._id)
 
     for (let index = 0; index < quotedMessages.length; index++) {
-      const quotedMessage = quotedMessages[index];
+      const quotedMessage = quotedMessages[index] as Message;
       if (!quotedMessage.quotes) continue
       
-      const nestedArr= filterNestedQuotes (quotedMessage.message, quotedMessage.quotes);
-      quotes_idArr = [...quotes_idArr, ...nestedArr.map((q: any) => q._id)]
+      const nestedArr= filterNestedQuotes (quotedMessage?.message, quotedMessage.quotes);
+      quoteObjectIds = [...quoteObjectIds, ...nestedArr.map((q: any) => q._id)]
       quotedMessages = [...quotedMessages, ...nestedArr];
+      if (!quotedMessages[index].quotes) continue;
       delete quotedMessages[index].quotes;
 
     }
@@ -171,7 +182,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     creator: req.user._id,
     messageID: "placeholder",
     mentions: _idMentionsArr,
-    quotes: quotes_idArr
+    quotes: quoteObjectIds
   }
   if (req.uploadFile && req.uploadFile.file) {
     query.files = [req.uploadFile.file]
@@ -187,14 +198,14 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   let messageCreated: any = undefined;
   if (messageID) {
     query.messageID = messageID
-    query.created = messageDoc.created
+    query.created = messageDoc?.created
     query.timeEdited = Date.now()
-    if (!req.uploadFile && messageDoc.files) {
-      query.files = messageDoc.files;
+    if (!req.uploadFile && messageDoc?.files) {
+      query.files = messageDoc?.files;
     }
-    await Messages.replaceOne({messageID}, query);
+    await MessageModel.replaceOne({messageID}, query);
   } else {
-    const messageCreate = new Messages(query)
+    const messageCreate = new MessageModel(query)
     messageCreated = await messageCreate.save();
   }
 
@@ -212,7 +223,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     message,
     color: _color,
     creator: user,
-    created: messageCreated ? messageCreated.created : messageDoc.created,
+    created: messageCreated ? messageCreated.created : messageDoc?.created,
     mentions,
     quotes: quotedMessages,
     messageID: messageCreated ? messageCreated.messageID : messageID
@@ -222,8 +233,8 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   }
   if (req.uploadFile && req.uploadFile.file) {
     messageCreated.files = [req.uploadFile.file]
-  } else if (messageID && messageDoc.files) {
-    messageCreated.files = messageDoc.files
+  } else if (messageID && messageDoc?.files) {
+    messageCreated.files = messageDoc?.files
   }
   if (buttons && buttons.length) {
     messageCreated.buttons = buttons;

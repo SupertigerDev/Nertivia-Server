@@ -1,4 +1,4 @@
-const Messages = require("../../models/messages");
+import {MessageModel} from '../../models/Message'
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
   ]
 
   // Get message
-  let message = await Messages.findOne(
+  let message = await MessageModel.findOne(
     {
       channelID,
       messageID

@@ -16,12 +16,10 @@ module.exports = async (req, res, next) => {
           message: "User not found"
         });
       }
-      await User.updateOne({ _id: req.user._id }, { survey_completed: true });
       res.json({
         message: "Saved!"
       });
-      // send to other clients.
-      req.io.in(req.user.id).emit("survey:completed");
+
     }
   );
 };

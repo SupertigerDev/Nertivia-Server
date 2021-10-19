@@ -1,12 +1,12 @@
 const MessageReactions = require("../../models/MessageReactions");
-const Messages = require("../../models/messages");
-const mongoose = require("mongoose")
+import {MessageModel} from '../../models/Message'
+
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
   const { emojiID, gif, unicode } = req.body;
 
-  const message = await Messages.findOne({ channelID, messageID });
+  const message = await MessageModel.findOne({ channelID, messageID });
   if (!message) {
     return res.status(404).json({ message: "Message was not found." });
   }

@@ -2,7 +2,9 @@
 const Servers = require("../../models/servers");
 const Users = require("../../models/users");
 const ServerMembers = require("../../models/ServerMembers");
-const Messages = require("../../models/messages");
+import {MessageModel} from '../../models/Message'
+import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } from '../../newRedisWrapper';
+
 const Notifications = require("../../models/notifications");
 const Channels = require("../../models/channels");
 const Roles = require("../../models/Roles");
@@ -74,7 +76,7 @@ module.exports = async (req, res, next) => {
   }
 
   await redis.remServerMember(id, server_id);
-  await redis.remServerChannels(id, channelIDs)
+  await deleteServerChannels(id, channelIDs)
   const io = req.io;
   // remove server from users server list.
   await Users.updateOne(
@@ -101,6 +103,15 @@ module.exports = async (req, res, next) => {
 
 
 
+  // leave call if inside call
+  const [voiceDetails, err] = await getUserInVoiceByUserId(id);
+  if (voiceDetails?.serverId === server_id) {
+    await removeUserFromVoice(id)
+    io.in("server:" + voiceDetails.serverId).emit("user:left_call", {channelId: voiceDetails.channelId, userId: id})
+  }
+
+
+
   // leave room
 
   
@@ -119,7 +130,7 @@ module.exports = async (req, res, next) => {
   });
 
   // send kick message
-  const messageCreate = new Messages({
+  const messageCreate = new MessageModel({
     channelID: server.default_channel_id,
     creator: userToBeKicked._id,
     messageID: "placeholder",
