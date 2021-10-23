@@ -14,6 +14,7 @@ const sendMessageNotification = require('./../../utils/SendMessageNotification')
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
 import channels from '../../models/channels';
+import { Channel } from '../../custom';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID, messageID } = req.params;
@@ -45,42 +46,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     _color = color.substring(0, 7);
   }
 
-  if (buttons && buttons.length) {
 
-    if (buttons.length > 15) {
-      res.status(403).send({message: "You can only add up to 15 buttons."})
-      return;
-    }
-
-    // filter out user data
-    const newButtons = [];
-
-    for (let index = 0; index < buttons.length; index++) {
-      const button: {name: string, id: string} = buttons[index];
-      if (button.id.match(/[^A-Za-z0-9-]+/)){
-        res.status(403).send({message: "Button id can only contain alphanumeric characters and dashes."})
-        return;
-      }
-      if (!button.id) {
-        res.status(403).send({message: "Button must contain an id"})  
-        return;
-      }
-      if (!button.name || !button.name.trim()) {
-        res.status(403).send({message: "Button must contain a name"})  
-        return;
-      }
-     if (button.name.trim().length > 40) {
-      res.status(403).send({message: "Button name must be less than 40 characters."})  
-      return;
-     } 
-     if (button.id.length >= 40) {
-      res.status(403).send({message: "button id must be less than 40 characters."})  
-      return;
-     } 
-      newButtons.push({name: button.name.trim(), id: button.id});
-    }
-    buttons = newButtons;
-  }
+  buttons = await messageButtons().catch(message => {
+    res.status(403).json({message})
+  })
+  if (!buttons) return;
 
   let jsonToBase64HtmlEmbed: string | undefined = undefined;
   if (htmlEmbed) {
@@ -95,7 +65,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       jsonToHtml(htmlEmbed)
       jsonToBase64HtmlEmbed = zip(JSON.stringify(htmlEmbed));
     } catch(err) {
-      return res.status(403).send({message: err.message});
+      return res.status(403).send({message: (err as any).message});
     }
   }
 
@@ -120,60 +90,13 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     mentions = await Users.find({id: {$in: mentionIds}}).select('_id id avatar tag username').lean();
   } 
   const _idMentionsArr = mentions.map((m:any)=> m._id )
+
+  const quotes = await messageQuotes(message, req.channel, messageDoc).catch(message => {
+    res.status(403).json({message})
+  })
+  if (!quotes) return;
   
-  // converted to a Set to remove duplicates.
-  const messageIds: string[] = Array.from(new Set(matchAll(message, /<m([\d]+)>/g).toArray()));
 
-  let quotedMessages: Partial<Message>[] = [];
-  let quoteObjectIds = []
-  if (messageIds.length) {
-    if (messageDoc && messageIds.includes(messageDoc.messageID)) {
-      res.status(403).json({message: "Cannot quote this message."})
-      return;
-    }
-
-    quotedMessages = await MessageModel.find({channelID, messageID: {$in: messageIds}}, {_id: 0})
-      .select('creator message messageID quotes')
-      .populate([
-        {
-          path: "quotes",
-          select: "creator message messageID",
-          populate: {
-            path: "creator",
-            select: "avatar username id tag admin -_id",
-            model: "users"
-          }
-        },
-        {
-          path: "creator",
-          select: "username id avatar"
-        }
-      ]).lean()
-
-
-
-
-    
-    const quoteInsertPayload = quotedMessages.map(q => {
-      return {...q, creator: q.creator._id, quotedChannel: req.channel._id}
-    })
-
-
-    quoteObjectIds = (await MessageQuoteModel.insertMany(quoteInsertPayload)).map((qm)=> qm._id)
-
-    for (let index = 0; index < quotedMessages.length; index++) {
-      const quotedMessage = quotedMessages[index] as Message;
-      if (!quotedMessage.quotes) continue
-      
-      const nestedArr= filterNestedQuotes (quotedMessage?.message, quotedMessage.quotes);
-      quoteObjectIds = [...quoteObjectIds, ...nestedArr.map((q: any) => q._id)]
-      quotedMessages = [...quotedMessages, ...nestedArr];
-      if (!quotedMessages[index].quotes) continue;
-      delete quotedMessages[index].quotes;
-
-    }
-
-  }
 
 
   let query: any = {
@@ -182,7 +105,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     creator: req.user._id,
     messageID: "placeholder",
     mentions: _idMentionsArr,
-    quotes: quoteObjectIds
+    quotes: quotes.quoteObjectIds
   }
   if (req.uploadFile && req.uploadFile.file) {
     query.files = [req.uploadFile.file]
@@ -225,7 +148,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     creator: user,
     created: messageCreated ? messageCreated.created : messageDoc?.created,
     mentions,
-    quotes: quotedMessages,
+    quotes: quotes.quotedMessages,
     messageID: messageCreated ? messageCreated.messageID : messageID
   };
   if (query.timeEdited) {
@@ -267,9 +190,93 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     directMessage(req, io, channelID, messageCreated, socketID, tempID);
   }
   next();
-  
-
 };
+
+
+async function messageButtons(buttons?: any[]) {
+  if (!buttons?.length) return [];
+
+  if (buttons.length > 15) {
+    throw "You can only add up to 15 buttons.";
+  }
+
+  // filter out user data
+  const newButtons = [];
+
+  for (let index = 0; index < buttons.length; index++) {
+    const button: {name: string, id: string} = buttons[index];
+    if (button.id.match(/[^A-Za-z0-9-]+/)){
+      throw "Button id can only contain alphanumeric characters and dashes."
+    }
+    if (!button.id) {
+      throw "Button must contain an id"
+    }
+    if (!button.name || !button.name.trim()) {
+      throw "Button must contain a name"
+    }
+    if (button.name.trim().length > 40) {
+      throw "Button name must be less than 40 characters."
+    } 
+    if (button.id.length >= 40) {
+      throw "button id must be less than 40 characters."
+    } 
+    newButtons.push({name: button.name.trim(), id: button.id});
+  }
+  return newButtons;
+}
+
+async function messageQuotes(message: string, channel: Channel, messageDoc?: Message | null) {
+    // converted to a Set to remove duplicates.
+    const messageIds: string[] = Array.from(new Set(matchAll(message, /<m([\d]+)>/g).toArray()));
+
+    let quotedMessages: Partial<Message>[] = [];
+    let quoteObjectIds = []
+    if (!messageIds.length) return {quoteObjectIds: [], quotedMessages: []};
+      if (messageDoc && messageIds.includes(messageDoc.messageID)) {
+        throw "Cannot quote this message."
+      }
+  
+      quotedMessages = await MessageModel.find({channelID: channel.channelID, messageID: {$in: messageIds}}, {_id: 0})
+        .select('creator message messageID quotes')
+        .populate([
+          {
+            path: "quotes",
+            select: "creator message messageID",
+            populate: {
+              path: "creator",
+              select: "avatar username id tag admin -_id",
+              model: "users"
+            }
+          },
+          {
+            path: "creator",
+            select: "username id avatar"
+          }
+        ]).lean()
+  
+  
+  
+  
+      
+      const quoteInsertPayload = quotedMessages.map(q => {
+        return {...q, creator: q.creator._id, quotedChannel: channel._id}
+      })
+  
+  
+      quoteObjectIds = (await MessageQuoteModel.insertMany(quoteInsertPayload)).map((qm)=> qm._id)
+  
+      for (let index = 0; index < quotedMessages.length; index++) {
+        const quotedMessage = quotedMessages[index] as Message;
+        if (!quotedMessage.quotes) continue
+        
+        const nestedArr= filterNestedQuotes (quotedMessage?.message, quotedMessage.quotes);
+        quoteObjectIds = [...quoteObjectIds, ...nestedArr.map((q: any) => q._id)]
+        quotedMessages = [...quotedMessages, ...nestedArr];
+        if (!quotedMessages[index].quotes) continue;
+        delete quotedMessages[index].quotes;
+      }
+      return {quoteObjectIds, quotedMessages}
+}
 
 async function serverMessage(req: any, io: SocketIO.Server, channelID: any, messageCreated: any, socketID: any) {
 
