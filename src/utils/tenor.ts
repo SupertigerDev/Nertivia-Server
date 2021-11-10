@@ -25,14 +25,18 @@ export async function getTenorCategories() {
 
 interface ResponseSearch {
   results: {
+    media: any[],
     url: string,
   }[]
 }
 
 export async function getTenorSearch(value: string) {
-  const url = `https://g.tenor.com/v1/search?key=${process.env.TENOR_KEY}&contentfilter=high&media_filter=minimal&q=${encodeURIComponent(value)}`
+  const url = `https://g.tenor.com/v1/search?key=${process.env.TENOR_KEY}&contentfilter=high&media_filter=basic&q=${encodeURIComponent(value)}`
   return await fetch(url).then(async res => {
     const data: ResponseSearch = await res.json();
-    return data.results.map(result => result.url)
+    return data.results.map(result => {
+      result.media[0].tinymp4.siteUrl = result.url
+      return result.media[0].tinymp4;
+    })
   })
 }
