@@ -1,6 +1,5 @@
 import {getIOInstance} from './socket/instance'
 
-const vhost = require('vhost');
 import express from "express";
 import http from "http";
 // middlewares
@@ -8,6 +7,7 @@ import realIP from "./middlewares/realIP";
 import redisSession from './middlewares/redisSession'
 import cors from "./middlewares/cors";
 import bodyParser from 'body-parser';
+
 
 export default function initServer() {
   const app = express();
@@ -40,3 +40,4 @@ export default function initServer() {
 
   return server;
 }
+
