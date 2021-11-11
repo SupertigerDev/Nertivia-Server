@@ -2,11 +2,10 @@
 const express = require('express');
 const router = express.Router();
 
-const loadMedia = require('./../middlewares/loadMedia');
+const loadMedia = require('../middlewares/loadMedia');
 
 
 import { getAndRemoveAllRequests, ipRequestIncrement } from '../newRedisWrapper';
-import avatars from './avatars';
 
 
 
@@ -51,9 +50,8 @@ router.use('/messages', require('./messages'));
 
 router.use('/settings', require('./settings'));
 
-router.use('/avatars', avatars);
 router.use('/files/*', require('./files'));
-router.use('/media/*', loadMedia);
+router.use('/media/*', loadMedia.default);
 
 router.use('/admin', require('./admin'));
 

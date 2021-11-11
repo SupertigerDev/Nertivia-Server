@@ -32,6 +32,7 @@
     "fcm-node": "^1.5.2",
     "firebase-admin": "^9.3.0",
     "flakeid": "^1.0.0",
+    "form-data": "^4.0.0",
     "gm": "^1.23.1",
     "googleapis": "^52.1.0",
     "html-safe-checker": "^1.1.2",
@@ -45,7 +46,6 @@
     "nodemailer": "^6.4.8",
     "pako": "^1.0.11",
     "redis": "^3.1.2",
-    "request": "^2.88.2",
     "sharp": "^0.25.4",
     "socket.io": "^4.1.2",
     "vhost": "^3.0.2"
