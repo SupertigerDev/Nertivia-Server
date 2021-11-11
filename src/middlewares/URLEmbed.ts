@@ -20,6 +20,8 @@ interface Embed {
   image?: string
   site_name?: string,
   description?: string,
+  width?: number,
+  height?: number
 }
 
 //const imageFormatArr = ["png", "jpg", "jpeg", "webp", "gif"]
@@ -108,6 +110,9 @@ function getOGTags(url: string) {
       const embed:Embed = {};
       const html = await res.text();
       const parseHTML = cheerio.load(html);
+      if (url.startsWith("https://tenor.com")) {
+        return getTenorTags(embed, parseHTML, resolve)
+      }
       addIfExists(embed, "title", parseHTML('meta[property="og:title"]').attr('content'))
       addIfExists(embed, "type", parseHTML('meta[property="og:type"]').attr('content'))
       // addIfExists(embed, "url", parseHTML('meta[property="og:url"]').attr('content'))
@@ -124,10 +129,23 @@ function getOGTags(url: string) {
   })
 }
 
+function getTenorTags(embed: Embed, parseHTML: CheerioStatic, resolve: any) {
+  addIfExists(embed, "url", parseHTML('meta[property="og:video"]').attr('content'))
+  addIfExists(embed, "width", parseHTML('meta[property="og:video:width"]').attr('content'))
+  addIfExists(embed, "height", parseHTML('meta[property="og:video:height"]').attr('content'))
+
+  const keys = Object.keys(embed);
+  if (!keys.length || keys.length === 1) return resolve({ok: false})
+  embed.type = "tenor"
+  console.log(embed)
+  resolve({ok: true, result: embed});
+}
+
 function addIfExists(embed: Embed, key:keyof Embed , value?:string) {
   if (!value) return;
   if (value.length >= 2000) return;
-  embed[key] = value;
+  if(!key) return;
+  (embed as any)[key] = value;
 }
 
 
