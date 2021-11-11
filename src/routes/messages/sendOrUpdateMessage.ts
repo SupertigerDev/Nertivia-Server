@@ -94,7 +94,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       //use jsonToHtml to validate the json first before implimenting the new markdown!!!!!!
       jsonToHtml(htmlEmbed)
       jsonToBase64HtmlEmbed = zip(JSON.stringify(htmlEmbed));
-    } catch(err) {
+    } catch(err: any) {
       return res.status(403).send({message: err.message});
     }
   }
