@@ -54,5 +54,6 @@ router.use('/files/*', require('./files'));
 router.use('/media/*', loadMedia.default);
 
 router.use('/admin', require('./admin'));
+router.use('/tenor', require('./tenor').default);
 
 module.exports = router;
