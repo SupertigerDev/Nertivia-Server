@@ -19,7 +19,7 @@ export const addHtmlProfile = async (req: Request, res: Response, next: NextFunc
   let jsonHtml: any;
   try {
     jsonHtml = checkHTML(html);
-  } catch(err) {
+  } catch(err: any) {
     return res.status(403).json({error: err.message})
   }
   if (!jsonHtml) return;
