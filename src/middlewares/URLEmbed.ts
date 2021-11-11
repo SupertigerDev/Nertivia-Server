@@ -137,7 +137,6 @@ function getTenorTags(embed: Embed, parseHTML: CheerioStatic, resolve: any) {
   const keys = Object.keys(embed);
   if (!keys.length || keys.length === 1) return resolve({ok: false})
   embed.type = "tenor"
-  console.log(embed)
   resolve({ok: true, result: embed});
 }
 
