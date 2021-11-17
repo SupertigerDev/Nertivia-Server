@@ -28,7 +28,7 @@ module.exports = (req, res, next) => {
   const siteKey = process.env.CAPTCHA_SITE_KEY;
 
 
-  fetch(`${verifyUrl}?secret=${secret}&response=${token}&sitekey=${siteKey}&remoteip="${req.userIP}"`, {
+  fetch(`${verifyUrl}?secret=${secret}&response=${token}&sitekey=${siteKey}&remoteip=${req.userIP}`, {
     method: "post",
   })
   .then(res => res.json())
