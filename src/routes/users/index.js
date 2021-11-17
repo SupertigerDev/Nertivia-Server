@@ -8,6 +8,7 @@ const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
 // Policies
 const authPolicy = require("./../../policies/authenticationPolicies");
 const reCaptchaPolicy = require("./../../policies/reCaptchaPolicie");
+const forceCaptcha = require("../../policies/forceCaptcha");
 const userPolicy = require("./../../policies/UserPolicies");
 
 
@@ -58,6 +59,8 @@ MainUserRouter.route("/:user_id?").get(authenticate(true), require("./userDetail
 MainUserRouter.route("/register").post(
   authPolicy.register,
   rateLimit({name: 'register', expire: 600, requestsLimit: 5, useIP: true, nextIfInvalid: true }),
+  // show captcha if email is not from google mail.
+  forceCaptcha,
   reCaptchaPolicy,
   require("./register")
 );
