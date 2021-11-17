@@ -25,9 +25,10 @@ module.exports = (req, res, next) => {
 
   const verifyUrl = "https://hcaptcha.com/siteverify"
   const secret = process.env.CAPTCHA_KEY;
+  const siteKey = process.env.CAPTCHA_SITE_KEY;
 
 
-  fetch(`${verifyUrl}?secret=${secret}&response=${token}`, {
+  fetch(`${verifyUrl}?secret=${secret}&response=${token}&sitekey=${siteKey}&remoteip="${req.userIP}"`, {
     method: "post",
   })
   .then(res => res.json())
