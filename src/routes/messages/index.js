@@ -45,6 +45,16 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
   require('./deleteMessage')
 );
 
+// delete message bulk
+MainMessageRouter.route("/:channelID/bulk").delete(
+  authenticate(true),
+  rateLimit({name: 'message_delete_bulk', expire: 60, requestsLimit: 10 }),
+  channelVerification,
+  disAllowBlockedUser,
+  checkRolePerms('Admin', permissions.roles.ADMIN, false),
+  require('./deleteMessageBulk')
+);
+
 // add reaction
 MainMessageRouter.route("/:messageID/channels/:channelID/reactions").post(
   authenticate(true),
