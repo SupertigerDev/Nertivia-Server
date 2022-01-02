@@ -13,4 +13,4 @@ const customEmojisSchema = new Schema({
 })
 
 
-module.exports = mongoose.model('customEmojis', customEmojisSchema);
+module.exports = mongoose.model('custom_emojis', customEmojisSchema);
