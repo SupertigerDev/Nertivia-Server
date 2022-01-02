@@ -6,9 +6,9 @@ const {
 } = mongoose;
 
 const customEmojisSchema = new Schema({
+  id: {type: String, required: true},
   user: { type: Schema.Types.ObjectId, ref: 'users', required: true},
   name: { type: String, required: true},
-  emojiID: {type: String, required: true},
   gif: {type: Boolean}
 })
 

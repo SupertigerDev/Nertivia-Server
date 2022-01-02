@@ -73,10 +73,10 @@ module.exports = async (req, res, next) => {
       message: "Something went wrong while cropping image."
     });
   }
-  const emojiID = flake.gen();
+  const emojiId = flake.gen();
 
 
-  const success = await nertiviaCDN.uploadFile(buffer, null, null, `${emojiID}.${type === 'gif' ? 'gif' : 'png'}`, true).catch(err => {
+  const success = await nertiviaCDN.uploadFile(buffer, null, null, `${emojiId}.${type === 'gif' ? 'gif' : 'png'}`, true).catch(err => {
     res.status(403).json({
       message: err
     });
@@ -86,7 +86,7 @@ module.exports = async (req, res, next) => {
   const addEmoji = await CustomEmojis.create({
     gif: type === "gif",
     user: req.user._id,
-    emojiID: emojiID,
+    id: emojiId,
     name: emojiName
   });
   if (!addEmoji)

@@ -2,10 +2,10 @@ const CustomEmojis = require("../../models/customEmojis");
 
 
 module.exports = async (req, res, next) => {
-  const { emojiID } = req.body;
+  const { id } = req.body;
   const userID = req.user._id;
 
-  CustomEmojis.findOneAndRemove({ user: userID, emojiID }).exec(function(
+  CustomEmojis.findOneAndRemove({ user: userID, id }).exec(function(
     err,
     item
   ) {

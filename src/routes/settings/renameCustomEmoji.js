@@ -1,7 +1,7 @@
 const CustomEmojis = require("../../models/customEmojis");
 
 module.exports = async (req, res, next) => {
-  const { emojiID, name } = req.body;
+  const { id, name } = req.body;
   const userID = req.user._id;
 
   if (name.trim().length < 1)
@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
   const checkEmojiExists = await CustomEmojis.findOne({
     user: req.user._id,
     name: emojiName,
-    emojiID: {$ne: emojiID}
+    id: {$ne: id}
   });
   if (checkEmojiExists)
     return res.status(403).json({
@@ -33,7 +33,7 @@ module.exports = async (req, res, next) => {
 
 
   CustomEmojis.findOneAndUpdate(
-    { user: userID, emojiID },
+    { user: userID, id },
     {
       $set: {
         name: emojiName
