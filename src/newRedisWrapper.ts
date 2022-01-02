@@ -58,16 +58,16 @@ export function getPresenceByUserId(userID: string) {
   return wrapper(getRedisInstance()?.batch().hmget(`user:${userID}`, 'userID', 'status'))
 }
 
-export function deleteDmChannel (userID: string, channelID: string) {
-  return wrapper(getRedisInstance()?.batch().hdel(`user:${userID}`, `channel:${channelID}`))
+export function deleteDmChannel (userID: string, channelId: string) {
+  return wrapper(getRedisInstance()?.batch().hdel(`user:${userID}`, `channel:${channelId}`))
 }
 
-export function deleteServerChannel (channelID: string) {
-  return wrapper(getRedisInstance()?.batch().del(`serverChannels:${channelID}`))
+export function deleteServerChannel (channelId: string) {
+  return wrapper(getRedisInstance()?.batch().del(`serverChannels:${channelId}`))
 }
 
-export function serverChannelExists (channelID: string) {
-  return wrapper(getRedisInstance()?.batch().exists(`serverChannels:${channelID}`))
+export function serverChannelExists (channelId: string) {
+  return wrapper(getRedisInstance()?.batch().exists(`serverChannels:${channelId}`))
 }
 export function deleteSession (userId: string) {
   return wrapper(getRedisInstance()?.batch().del(`sess:${userId}`))
@@ -108,11 +108,11 @@ export function changeCustomStatusByUserId(userID: string, customStatus: string)
     return wrapper(getRedisInstance()?.batch().hdel(`user:${userID}`, 'customStatus'))
   }
 }
-export function addChannel(channelID: string, channel: any, userID?: string) {
+export function addChannel(channelId: string, channel: any, userID?: string) {
   if (channel.server_id) {
-    return wrapper(getRedisInstance()?.batch().set(`serverChannels:${channelID}`,JSON.stringify(channel)))
+    return wrapper(getRedisInstance()?.batch().set(`serverChannels:${channelId}`,JSON.stringify(channel)))
   } 
-  return wrapper(getRedisInstance()?.batch().hset(`user:${userID}`, `channel:${channelID}`, JSON.stringify(channel)))
+  return wrapper(getRedisInstance()?.batch().hset(`user:${userID}`, `channel:${channelId}`, JSON.stringify(channel)))
 }
 
 // use Id instead of ID everywhere in this server.
