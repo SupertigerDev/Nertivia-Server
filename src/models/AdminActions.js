@@ -14,7 +14,7 @@ const AdminActionsSchema = new Schema({
     "UNBAN_IP",
     "APPROVE_THEME"
   ]},
-  ip_ban: String,
+  bannedIP: String,
   reason: String,
   admin: { type: Schema.Types.ObjectId, ref: 'users'},
   user: { type: Schema.Types.ObjectId, ref: 'users'},

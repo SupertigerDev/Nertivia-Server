@@ -46,7 +46,7 @@ module.exports = async (req, res, next) => {
   await AdminActions.create({
     action: "BAN_IP",
     admin: req.user._id,
-    ip_ban: userToSuspend.ip,
+    bannedIP: userToSuspend.ip,
     date: Date.now()
   })
 
