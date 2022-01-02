@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
   try {
     const saveDevice = await Devices.create({
       user: req.user._id,
-      user_id: req.user.id,
+      userId: req.user.id,
       platform: "android",
       token
     });
