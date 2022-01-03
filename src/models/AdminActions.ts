@@ -1,12 +1,17 @@
-const mongoose = require("mongoose");
-const bcrypt = require('bcryptjs');
-const flake = require('../utils/genFlakeId').default;
-const {
-  Schema
-} = mongoose;
+import {model, Schema} from 'mongoose';
 
 
-const AdminActionsSchema = new Schema({
+export interface AdminAction {
+  action: string
+  bannedIP: string,
+  reason: string,
+  admin: any,
+  user: any,
+  date: number,
+  expireAt: number
+}
+
+const AdminActionsSchema = new Schema<AdminAction>({
   action: {type: String, enum: [
     "SUSPEND_USER",
     "UNSUSPEND_USER",
@@ -27,7 +32,4 @@ const AdminActionsSchema = new Schema({
 });
 
 
-const AdminActions = mongoose.model('admin_actions', AdminActionsSchema);
-
-
-module.exports = AdminActions;
+export const AdminActions = model<AdminAction>('admin_actions', AdminActionsSchema);

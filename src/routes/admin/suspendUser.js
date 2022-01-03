@@ -3,7 +3,7 @@ const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require("bcryptjs");
 
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
-const AdminActions = require("../../models/AdminActions");
+import {AdminActions} from "../../models/AdminActions";
 const { kickUser } = require("../../utils/kickUser");
 
 module.exports = async (req, res, next) => {
