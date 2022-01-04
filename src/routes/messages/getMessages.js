@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const MessageReactions = require("../../models/MessageReactions");
+import {MessageReactions} from '../../models/MessageReactions';
+
 import {MessageModel} from '../../models/Message'
 
 module.exports = async (req, res, next) => {
