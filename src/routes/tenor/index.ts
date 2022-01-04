@@ -1,5 +1,5 @@
 import { Router } from "express";
-import authenticate from "../../middlewares/authenticate";
+const authenticate = require("../../middlewares/authenticate");
 
 
 const TenorRouter = Router();

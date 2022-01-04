@@ -3,7 +3,7 @@ import Users from '../../models/users';
 import { matchedData } from "express-validator";
 import cropImage from "../../utils/cropImage";
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
-import emitToAll from "../../socketController/emitToAll";
+const emitToAll = require("../../socketController/emitToAll");
 const flakeId = new (require('flakeid'))();
 
 export default async function updateBot(req: Request, res: Response) {
