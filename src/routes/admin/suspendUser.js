@@ -1,5 +1,5 @@
-  const Users = require("../../models/users");
-const BannedIPs = require("../../models/BannedIPs");
+const Users = require("../../models/users");
+import {BannedIPs} from "../../models/BannedIPs";
 const bcrypt = require("bcryptjs");
 
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");

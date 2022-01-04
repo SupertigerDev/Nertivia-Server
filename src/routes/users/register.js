@@ -1,5 +1,5 @@
 const User = require('../../models/users');
-const BannedIPs = require("../../models/BannedIPs");
+import {BannedIPs} from "../../models/BannedIPs";
 import nodemailer from 'nodemailer';
 import validate from 'deep-email-validator'
 import blacklistArr from '../../emailBlacklist.json'

@@ -1,7 +1,7 @@
 
 const User = require('../../../models/users');
 const Friend = require('../../../models/friends');
-const BlockedUsers = require('../../../models/blockedUsers');
+import { BlockedUsers } from '../../../models/BlockedUsers';
 const redis = require('../../../redis');
 const { getProgramActivityByUserIds, getPresenceByUserIds, getCustomStatusByUserIds } = require('../../../newRedisWrapper');
 

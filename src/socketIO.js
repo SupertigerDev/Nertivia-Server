@@ -5,10 +5,10 @@ const User = require("./models/users");
 const ServerMembers = require("./models/ServerMembers");
 const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
-import blockedUsers from "./models/blockedUsers";
+import {BlockedUsers} from "./models/BlockedUsers";
 import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
-const BannedIPs = require("./models/BannedIPs");
+import {BannedIPs} from "./models/BannedIPs";
 const customEmojis = require("./models/customEmojis");
 const jwt = require("jsonwebtoken");
 // const { getIOInstance() } = require("./app");
@@ -231,7 +231,7 @@ module.exports = async client => {
 
       const customEmojisList = customEmojis.find({ user: user._id }, { _id: 0 }).select("id gif name");
 
-      const bannedUserIDs = (await blockedUsers.find({ requester: user._id }).populate("recipient", "id")).map(d => d.recipient.id)
+      const bannedUserIDs = (await BlockedUsers.find({ requester: user._id }).populate("recipient", "id")).map(d => d.recipient.id)
 
       const results = await Promise.all([
         dms,

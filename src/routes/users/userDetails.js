@@ -1,5 +1,6 @@
 const Users = require("./../../models/users");
-const BlockedUsers = require("./../../models/blockedUsers");
+import {BlockedUsers} from "./../../models/BlockedUsers";
+
 const Servers = require("./../../models/servers");
 const Friends = require("./../../models/friends");
 

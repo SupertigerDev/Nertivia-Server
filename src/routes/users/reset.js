@@ -1,5 +1,5 @@
 const Users = require("../../models/users");
-const BannedIPs = require("../../models/BannedIPs");
+import {BannedIPs} from "../../models/BannedIPs";
 const bcrypt = require('bcryptjs');
 const sio = require("socket.io");
 import nodemailer from 'nodemailer';

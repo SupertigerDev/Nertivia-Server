@@ -1,5 +1,4 @@
 const Users = require("../../models/users");
-const BannedIPs = require("../../models/BannedIPs");
 const bcrypt = require("bcryptjs");
 const { default: deleteServer } = require("../../utils/deleteServer");
 

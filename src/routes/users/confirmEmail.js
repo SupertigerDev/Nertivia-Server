@@ -1,5 +1,5 @@
 const User = require("../../models/users");
-const BannedIPs = require("../../models/BannedIPs");
+import {BannedIPs} from "../../models/BannedIPs";
 const JWT = require("jsonwebtoken");
 
 function signToken(user_id, pwdVer) {

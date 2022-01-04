@@ -1,10 +1,9 @@
-  const Users = require("../../models/users");
-const BannedIPs = require("../../models/BannedIPs");
+const Users = require("../../models/users");
+import {BannedIPs} from "../../models/BannedIPs";
+
 const bcrypt = require("bcryptjs");
 
-const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 import {AdminActions} from "../../models/AdminActions";
-const { kickUser } = require("../../utils/kickUser");
 
 module.exports = async (req, res, next) => {
   const user_id = req.params.id;

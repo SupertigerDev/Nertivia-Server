@@ -1,7 +1,8 @@
 const Channels = require("../models/channels");
 const Roles = require("../models/Roles");
 const ServerMembers = require("../models/ServerMembers");
-const BlockedUser = require("../models/blockedUsers");
+import {BlockedUsers} from "../models/BlockedUsers";
+
 const redis = require("../redis");
 const { getDmChannel, getServerChannel, addServer, getServer, addChannel } = require("../newRedisWrapper");
 
@@ -104,7 +105,7 @@ module.exports = async (req, res, next) => {
     const requester = req.user;
     const recipient = channel.recipients[0];
 
-    const isBlocked = await BlockedUser.exists({$or: [
+    const isBlocked = await BlockedUsers.exists({$or: [
       {requester: requester._id, recipient: recipient._id},
       {requester: recipient._id, recipient: requester._id}
     ]})

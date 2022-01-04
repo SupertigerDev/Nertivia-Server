@@ -1,6 +1,6 @@
 const User = require('../../models/users');
 const Friend = require('../../models/friends');
-const BlockedUsers = require('../../models/blockedUsers');
+import { BlockedUsers } from '../../models/BlockedUsers';
 const Channels = require('../../models/channels');
 const redis = require('../../redis');
 const { deleteDmChannel } = require('../../newRedisWrapper');

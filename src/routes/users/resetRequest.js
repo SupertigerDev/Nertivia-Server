@@ -1,5 +1,5 @@
 const Users = require("../../models/users");
-const BannedIPs = require("../../models/BannedIPs");
+import {BannedIPs} from "../../models/BannedIPs";
 const crypto = require("crypto")
 import nodemailer from 'nodemailer';
 const transporter = nodemailer.createTransport({
