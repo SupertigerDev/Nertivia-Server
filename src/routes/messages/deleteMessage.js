@@ -1,4 +1,4 @@
-import {MessageModel} from '../../models/Message'
+import {Messages} from '../../models/Messages'
 
 import {MessageQuoteModel} from '../../models/MessageQuote'
 const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
@@ -6,7 +6,7 @@ const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
 
-  const message = await MessageModel.findOne({ channelID, messageID });
+  const message = await Messages.findOne({ channelID, messageID });
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;

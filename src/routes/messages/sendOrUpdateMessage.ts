@@ -3,7 +3,7 @@ import { zip } from '../../utils/zip'
 import {jsonToHtml} from 'jsonhtmlfyer';
 import SocketIO from 'socket.io'
 const ServerMembers = require("../../models/ServerMembers");
-import {Message, MessageModel} from '../../models/Message'
+import {Message, Messages} from '../../models/Messages'
 
 import {MessageQuoteModel} from '../../models/MessageQuote'
 const matchAll = require("match-all");
@@ -24,7 +24,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   // If messageID exists, message wants to update.
   let messageDoc: Message | null = null;
   if (messageID) {
-    messageDoc = await MessageModel.findOne({ channelID, messageID });
+    messageDoc = await Messages.findOne({ channelID, messageID });
     if (!messageDoc)
       return res.status(404).json({ message: "Message was not found." });
     if (messageDoc.creator.toString() !== req.user._id)
@@ -132,7 +132,7 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
       return;
     }
 
-    quotedMessages = await MessageModel.find({channelID, messageID: {$in: messageIds}}, {_id: 0})
+    quotedMessages = await Messages.find({channelID, messageID: {$in: messageIds}}, {_id: 0})
       .select('creator message messageID quotes')
       .populate([
         {
@@ -203,9 +203,9 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
     if (!req.uploadFile && messageDoc?.files) {
       query.files = messageDoc?.files;
     }
-    await MessageModel.replaceOne({messageID}, query);
+    await Messages.replaceOne({messageID}, query);
   } else {
-    const messageCreate = new MessageModel(query)
+    const messageCreate = new Messages(query)
     messageCreated = await messageCreate.save();
   }
 

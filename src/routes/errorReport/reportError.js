@@ -1,4 +1,4 @@
-import {MessageModel} from '../../models/Message'
+import {Messages} from '../../models/Messages'
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
 const sendMessageNotification = require('../../utils/SendMessageNotification')
@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
 
   const message_string = `**Name**: ${name}\n**Message:** ${message}\n**User Message:** ${user_message}\n**URL:** ${url}\n\n**Stack:**` +  "```+ " +stack+ "```"
 
-  const messageCreated = await MessageModel.create({
+  const messageCreated = await Messages.create({
     channel_id,
     message: message_string,
     creator: bot._id,

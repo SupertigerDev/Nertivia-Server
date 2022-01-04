@@ -1,7 +1,7 @@
-import { Message } from './../../models/Message';
+import { Message } from './../../models/Messages';
 import { NextFunction, Request, Response } from "express";
 import { Document, FilterQuery, LeanDocument } from "mongoose";
-import { MessageModel } from "../../models/Message";
+import { Messages } from "../../models/Messages";
 
 
 module.exports = async (req: Request, res: Response, next: NextFunction) => {
@@ -40,7 +40,7 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
     });
   }
 
-  await MessageModel.deleteMany({messageID: { $in: messageIds}})
+  await Messages.deleteMany({messageID: { $in: messageIds}})
 
   const response = {
     channelId: channelID,
@@ -62,7 +62,7 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 async function findMessages(filter: FilterQuery<Message>) {
-  return messagesToIds(await MessageModel.find(filter, {_id: 0}).limit(200).select("messageID").lean());
+  return messagesToIds(await Messages.find(filter, {_id: 0}).limit(200).select("messageID").lean());
 }
 
 function messagesToIds(messages: LeanDocument<Message & Document<any, any>>[]) {

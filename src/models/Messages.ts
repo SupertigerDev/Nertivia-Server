@@ -75,4 +75,4 @@ messagesSchema.pre('save', function() {
 })
 
 
-export const MessageModel = model<Message>('messages', messagesSchema);
+export const Messages = model<Message>('messages', messagesSchema);

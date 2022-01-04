@@ -1,12 +1,12 @@
 import {MessageReactions} from '../../models/MessageReactions';
-import {MessageModel} from '../../models/Message'
+import {Messages} from '../../models/Messages'
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
   const { emojiID, unicode } = req.body;
 
 
-  const message = await MessageModel.findOne({ channelID, messageID });
+  const message = await Messages.findOne({ channelID, messageID });
   if (!message) {
     return res.status(404).json({ message: "Message was not found." });
   }

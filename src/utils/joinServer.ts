@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 const Channels = require("../models/channels");
 const User = require("../models/users");
 const ServerInvites = require("../models/ServerInvites");
-import {MessageModel} from '../models/Message'
+import {Messages} from '../models/Messages'
 
 const ServerMembers = require("../models/ServerMembers");
 const ServerRoles = require("../models/Roles");
@@ -118,7 +118,7 @@ export default async function join(server: any, user: any, socketID: string | un
 
   // send join message
 
-  const messageCreate = new MessageModel({
+  const messageCreate = new Messages({
     channelID: server.default_channel_id,
     creator: user._id,
     messageID: "placeholder",

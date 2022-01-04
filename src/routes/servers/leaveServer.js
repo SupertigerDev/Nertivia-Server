@@ -2,7 +2,7 @@
 const ServerMembers = require("../../models/ServerMembers");
 const Channels = require("../../models/channels");
 const User = require("../../models/users");
-import {MessageModel} from '../../models/Message'
+import {Messages} from '../../models/Messages'
 import { getUserInVoiceByUserId, removeUserFromVoice, removeUserFromVoice } from '../../newRedisWrapper';
 
 import { Notifications } from '../../models/Notifications';
@@ -75,7 +75,7 @@ module.exports = async (req, res, next) => {
   });
 
   // send leave message
-  const messageCreate = new MessageModel({
+  const messageCreate = new Messages({
     channelID: req.server.default_channel_id,
     creator: req.user._id,
     messageID: "placeholder",
