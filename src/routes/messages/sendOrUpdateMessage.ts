@@ -35,10 +35,10 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     message = req.uploadFile.message;
   }
 
-  if ((!message || !message.trim()) && (!req.uploadFile || !htmlEmbed)) {
-    res.status(403).send({message: "Cant send empty message."})
-    return;
-  }
+if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
+  res.status(403).send({message: "Cant send empty message."})
+  return;
+}
 
   let _color;
   if (typeof color === 'string' && color.startsWith('#')) {
