@@ -7,7 +7,7 @@ const ServerRoles = require("./models/Roles");
 const channels = require("./models/channels");
 import {BlockedUsers} from "./models/BlockedUsers";
 import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists } from "./newRedisWrapper";
-const Notifications = require("./models/notifications");
+import { Notifications } from "./models/Notifications";
 import {BannedIPs} from "./models/BannedIPs";
 import {CustomEmojis} from './models/CustomEmojis'
 const jwt = require("jsonwebtoken");

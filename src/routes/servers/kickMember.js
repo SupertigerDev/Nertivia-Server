@@ -5,7 +5,7 @@ const ServerMembers = require("../../models/ServerMembers");
 import {MessageModel} from '../../models/Message'
 import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } from '../../newRedisWrapper';
 
-const Notifications = require("../../models/notifications");
+import { Notifications } from '../../models/Notifications';
 const Channels = require("../../models/channels");
 const Roles = require("../../models/Roles");
 const redis = require("../../redis");

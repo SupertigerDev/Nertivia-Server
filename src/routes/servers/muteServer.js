@@ -1,5 +1,5 @@
 const ServerMembers = require("../../models/ServerMembers");
-const Notifications = require("../../models/notifications");
+import { Notifications } from "../../models/Notifications";
 const Channels = require("../../models/channels");
 
 

@@ -1,14 +1,20 @@
-const mongoose = require("mongoose");
+import {model, Schema} from 'mongoose';
+
+interface Notification {
+  recipient: string
+  type: string
+  mentioned: boolean
+  channelID: string
+  lastMessageID: string
+  sender: any
+  count: number
+}
 
 
-const {
-  Schema
-} = mongoose;
 // type MESSAGE_CREATED
-const notificationsSchema = new Schema({
+const schema = new Schema<Notification>({
   recipient: { type: String, required: true },
   type: { type: String, required: true },
-  // guildID: { type: String, required: false },
   mentioned: {type: Boolean},
   channelID: { type: String, required: false },
   lastMessageID: {type: String, required: false },
@@ -17,4 +23,4 @@ const notificationsSchema = new Schema({
 })
 
 
-module.exports = mongoose.model('notifications', notificationsSchema);
+export const Notifications = model<Notification>('notifications', schema);

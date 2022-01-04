@@ -1,4 +1,4 @@
-const Notifications = require("../../../models/notifications");
+import { Notifications } from "../../../models/Notifications";
 const ServerMembers = require("../../../models/ServerMembers");
 
 module.exports = async (req, res, next) => {

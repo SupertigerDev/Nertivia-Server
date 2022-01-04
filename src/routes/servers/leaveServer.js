@@ -5,7 +5,7 @@ const User = require("../../models/users");
 import {MessageModel} from '../../models/Message'
 import { getUserInVoiceByUserId, removeUserFromVoice, removeUserFromVoice } from '../../newRedisWrapper';
 
-const Notifications = require('../../models/notifications');
+import { Notifications } from '../../models/Notifications';
 const redis = require("../../redis");
 
 import deleteServer from "../../utils/deleteServer";
