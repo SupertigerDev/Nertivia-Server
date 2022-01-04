@@ -1,5 +1,4 @@
-const CustomEmojis = require("../../models/customEmojis");
-
+import {CustomEmojis} from '../../models/CustomEmojis';
 
 module.exports = async (req, res, next) => {
   const { id } = req.body;

@@ -9,7 +9,7 @@ import {BlockedUsers} from "./models/BlockedUsers";
 import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists } from "./newRedisWrapper";
 const Notifications = require("./models/notifications");
 import {BannedIPs} from "./models/BannedIPs";
-const customEmojis = require("./models/customEmojis");
+import {CustomEmojis} from './models/CustomEmojis'
 const jwt = require("jsonwebtoken");
 // const { getIOInstance() } = require("./app");
 const redis = require("./redis");
@@ -229,7 +229,7 @@ module.exports = async client => {
       }, {})
 
 
-      const customEmojisList = customEmojis.find({ user: user._id }, { _id: 0 }).select("id gif name");
+      const customEmojisList = CustomEmojis.find({ user: user._id }, { _id: 0 }).select("id gif name");
 
       const bannedUserIDs = (await BlockedUsers.find({ requester: user._id }).populate("recipient", "id")).map(d => d.recipient.id)
 

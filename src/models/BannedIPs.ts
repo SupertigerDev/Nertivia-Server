@@ -5,7 +5,7 @@ export interface BannedIP {
   expireAt: number
 }
 
-const bannedIPsSchema = new Schema<BannedIP>({
+const schema = new Schema<BannedIP>({
   ip: {type: String, unique: true},
   expireAt: {
     type: Date,
@@ -15,6 +15,6 @@ const bannedIPsSchema = new Schema<BannedIP>({
 });
 
 
-export const BannedIPs = model<BannedIP>('banned_ips', bannedIPsSchema);
+export const BannedIPs = model<BannedIP>('banned_ips', schema);
 
 

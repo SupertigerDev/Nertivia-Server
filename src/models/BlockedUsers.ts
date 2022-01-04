@@ -5,10 +5,10 @@ interface BlockedUser {
     recipient: any;
 }
 
-const blockedUserSchema = new Schema<BlockedUser>({
+const schema = new Schema<BlockedUser>({
     requester: { type: Schema.Types.ObjectId, ref: 'users'},
     recipient: { type: Schema.Types.ObjectId, ref: 'users'},
 })
 
 
-export const BlockedUsers = model<BlockedUser>('blocked_users', blockedUserSchema);
+export const BlockedUsers = model<BlockedUser>('blocked_users', schema);

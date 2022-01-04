@@ -11,7 +11,7 @@ export interface AdminAction {
   expireAt: number
 }
 
-const AdminActionsSchema = new Schema<AdminAction>({
+const schema = new Schema<AdminAction>({
   action: {type: String, enum: [
     "SUSPEND_USER",
     "UNSUSPEND_USER",
@@ -32,4 +32,4 @@ const AdminActionsSchema = new Schema<AdminAction>({
 });
 
 
-export const AdminActions = model<AdminAction>('admin_actions', AdminActionsSchema);
+export const AdminActions = model<AdminAction>('admin_actions', schema);

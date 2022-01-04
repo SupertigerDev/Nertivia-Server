@@ -158,9 +158,6 @@
     <entry file="file://$PROJECT_DIR$/fb-fcm.json">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/customEmojis.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/routes/settings/addCustomEmoji.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="96">

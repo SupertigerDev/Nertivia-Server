@@ -1,5 +1,5 @@
 const cropImage = require("../../utils/cropImage");
-const CustomEmojis = require("../../models/customEmojis");
+import { CustomEmojis } from '../../models/CustomEmojis';
 const flake = require('../../utils/genFlakeId').default;
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 
