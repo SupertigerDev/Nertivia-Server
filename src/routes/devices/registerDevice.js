@@ -1,4 +1,4 @@
-const Devices = require("../../models/Devices");
+import {Devices} from '../../models/Devices';
 const Servers = require("../../models/servers");
 const Users = require("../../models/users");
 

@@ -1,5 +1,5 @@
 import admin, { messaging } from 'firebase-admin'
-import Devices from "../models/Devices";
+import {Devices} from '../models/Devices';
 let serverKey: any;
 try {
   serverKey = require("../fb-fcm.json");
@@ -101,7 +101,7 @@ function sendToDevice(tokenArr: string[], data: any) {
   .then(async res => {
     const failedTokens = res.results.map((token, index) => token.error && tokenArr[index]).filter(r => r);
     if (failedTokens.length) {
-      const devices = (await Devices.find({ token: { $in: failedTokens } }).select("_id") as any);
+      const devices = (await Devices.find({ token: { $in: failedTokens as string[] } }).select("_id") as any);
       const devicesIDArr = devices.map((d: any) => d._id);
       // delete from servers
       await Servers.updateMany({FCM_devices: {$in: devicesIDArr}}, {$pullAll: {FCM_devices: devicesIDArr}})
