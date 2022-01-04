@@ -1,5 +1,5 @@
 const User = require('../../../models/users');
-const Friend = require('../../../models/friends');
+import {Friends} from '../../../models/Friends';
 
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id; 
@@ -15,13 +15,13 @@ module.exports = async (req, res, next) => {
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
   
   // check if the request exists
-  const request = await Friend.findOne({ requester: decliner, recipient: recipient });
+  const request = await Friends.findOne({ requester: decliner, recipient: recipient });
   if (!request) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Request doesnt exist."}] });
  
   // remove from database
-  const docA = await Friend.findOneAndRemove({ requester: decliner, recipient: recipient });
-  const docB = await Friend.findOneAndRemove({ requester: recipient, recipient: decliner });
+  const docA = await Friends.findOneAndRemove({ requester: decliner, recipient: recipient });
+  const docB = await Friends.findOneAndRemove({ requester: recipient, recipient: decliner });
 
   const updateUserA = await User.findOneAndUpdate({ _id: decliner },{ $pull: { friends: docA._id }});
   const updateUserB = await User.findOneAndUpdate({ _id: recipient },{ $pull: { friends: docB._id }});

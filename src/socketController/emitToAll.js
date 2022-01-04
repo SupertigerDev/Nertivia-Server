@@ -1,8 +1,8 @@
-const Friends = require ('./../models/friends');
+import {Friends} from './../models/Friends';
+
 const Users = require ('./../models/users');
 const SocketIO = require('socket.io');
-const { emit } = require('./../models/users');
-const { getIOAdapter } = require('../socket/instance');
+
 
 
 /**

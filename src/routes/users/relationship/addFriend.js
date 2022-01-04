@@ -1,6 +1,6 @@
 
 const User = require('../../../models/users');
-const Friend = require('../../../models/friends');
+const Friend = require('../../../models/Friends');
 import { BlockedUsers } from '../../../models/BlockedUsers';
 const redis = require('../../../redis');
 const { getProgramActivityByUserIds, getPresenceByUserIds, getCustomStatusByUserIds } = require('../../../newRedisWrapper');

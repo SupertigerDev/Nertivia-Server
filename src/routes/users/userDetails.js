@@ -2,7 +2,7 @@ const Users = require("./../../models/users");
 import {BlockedUsers} from "./../../models/BlockedUsers";
 
 const Servers = require("./../../models/servers");
-const Friends = require("./../../models/friends");
+import {Friends} from "./../../models/Friends";
 
 module.exports = async (req, res, next) => {
   let userID = req.params.user_id;

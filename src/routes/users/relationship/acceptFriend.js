@@ -1,5 +1,5 @@
 const User = require('../../../models/users');
-const Friend = require('../../../models/friends');
+import {Friends} from '../../../models/Friends';
 
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id;
@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
   if (!accepter) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
   
-  const request = await Friend.findOne({ requester: accepter, recipient: recipient });
+  const request = await Friends.findOne({ requester: accepter, recipient: recipient });
   if (!request) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Request doesn't exist."}] });
     // if the requester is accepting the invite
@@ -26,13 +26,13 @@ module.exports = async (req, res, next) => {
 
     // change status to 2 (friends)
 
-    const docAccepter = await Friend.findOneAndUpdate(
+    const docAccepter = await Friends.findOneAndUpdate(
       { requester: accepter, recipient: recipient },
       { $set: { status: 2 }}
     ).lean()
     docAccepter.recipient = recipient
 
-    const docRecipient = await Friend.findOneAndUpdate(
+    const docRecipient = await Friends.findOneAndUpdate(
       { requester: recipient, recipient: accepter },
       { $set: { status: 2 }}
     ).lean()

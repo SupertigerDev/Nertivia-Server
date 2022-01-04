@@ -1,5 +1,5 @@
 const User = require('../../models/users');
-const Friend = require('../../models/friends');
+import { Friends } from '../../models/Friends';
 import { BlockedUsers } from '../../models/BlockedUsers';
 const Channels = require('../../models/channels');
 const redis = require('../../redis');
@@ -36,12 +36,12 @@ module.exports = async (req, res, next) => {
 
   
   // check if the request exists
-  const request = await Friend.findOne({ requester: requester, recipient: recipient });
+  const request = await Friends.findOne({ requester: requester, recipient: recipient });
   
   if (request) {
     // remove from database
-    const docA = await Friend.findOneAndRemove({ requester: requester, recipient: recipient });
-    const docB = await Friend.findOneAndRemove({ requester: recipient, recipient: requester });
+    const docA = await Friends.findOneAndRemove({ requester: requester, recipient: recipient });
+    const docB = await Friends.findOneAndRemove({ requester: recipient, recipient: requester });
 
     await User.findOneAndUpdate({ _id: requester },{ $pull: { friends: docA._id }});
     await User.findOneAndUpdate({ _id: recipient },{ $pull: { friends: docB._id }});

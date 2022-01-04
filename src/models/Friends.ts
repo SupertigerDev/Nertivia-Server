@@ -1,11 +1,12 @@
-const mongoose = require("mongoose");
-const Users = require('./users');
+import {Schema, model} from 'mongoose';
 
-const {
-    Schema
-} = mongoose;
+interface Friend {
+    requester: any;
+    recipient: any;
+    status: number
+}
 
-const friendsSchema = new Schema({
+const schema = new Schema<Friend>({
     requester: { type: Schema.Types.ObjectId, ref: 'users'},
     recipient: { type: Schema.Types.ObjectId, ref: 'users'},
     status: {
@@ -19,4 +20,4 @@ const friendsSchema = new Schema({
 })
 
 
-module.exports = mongoose.model('friends', friendsSchema);
+export const Friends = model<Friend>('friends', schema);
