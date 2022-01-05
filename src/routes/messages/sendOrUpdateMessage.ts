@@ -5,7 +5,7 @@ import SocketIO from 'socket.io'
 import {ServerMembers} from "../../models/ServerMembers";
 import {Message, Messages} from '../../models/Messages'
 
-import {MessageQuoteModel} from '../../models/MessageQuote'
+import {MessageQuotes} from '../../models/MessageQuotes'
 const matchAll = require("match-all");
 const Users = require("../../models/users");
 import {Channels} from "../../models/Channels";
@@ -159,7 +159,7 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
     })
 
 
-    quoteObjectIds = (await MessageQuoteModel.insertMany(quoteInsertPayload)).map((qm)=> qm._id)
+    quoteObjectIds = (await MessageQuotes.insertMany(quoteInsertPayload)).map((qm)=> qm._id)
 
     for (let index = 0; index < quotedMessages.length; index++) {
       const quotedMessage = quotedMessages[index] as Message;

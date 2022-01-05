@@ -1,6 +1,6 @@
 import {Messages} from '../../models/Messages'
 
-import {MessageQuoteModel} from '../../models/MessageQuote'
+import {MessageQuotes} from '../../models/MessageQuotes'
 const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 module.exports = async (req, res, next) => {
@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
   try {
     await message.remove();
     if (message.quotes && message.quotes.length){
-      await MessageQuoteModel.deleteMany({
+      await MessageQuotes.deleteMany({
         _id: {
           $in: message.quotes
         }

@@ -1,6 +1,6 @@
 import {Schema, Document, model} from 'mongoose'
 import flake from '../utils/genFlakeId'
-import { MessageQuote } from './MessageQuote'
+import { MessageQuote } from './MessageQuotes'
 
 
 interface Embed {

@@ -3,7 +3,7 @@ import {PublicServers} from '../models/PublicServers';
 
 import {Servers} from "../models/Servers";
 import {Channels} from "../models/Channels";
-import {MessageQuoteModel} from '../models/MessageQuote'
+import {MessageQuotes} from '../models/MessageQuotes'
 import {ServerInvites} from '../models/ServerInvites'
 
 import {Messages} from '../models/Messages'
@@ -41,7 +41,7 @@ export default async function deleteServer(io: any, server_id: string, server: a
     await PublicServers.deleteOne({ server: server._id });
 
     if (channelIDArray) {
-      await MessageQuoteModel.deleteMany({
+      await MessageQuotes.deleteMany({
         quotedChannel: {
           $in: channel_idArray
         }

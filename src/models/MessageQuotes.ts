@@ -18,5 +18,5 @@ const schema = new Schema<MessageQuote>({
 });
 
 
-export const MessageQuoteModel = model<MessageQuote>('message_quotes', schema);
+export const MessageQuotes = model<MessageQuote>('message_quotes', schema);
 
