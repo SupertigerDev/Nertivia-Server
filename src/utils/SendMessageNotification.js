@@ -1,4 +1,4 @@
-const ServerMembers = require("./../models/ServerMembers");
+const ServerMembers = require("../models/ServerMembers");
 import {Notifications} from '../models/Notifications'
 
 

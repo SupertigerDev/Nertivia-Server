@@ -1,6 +1,6 @@
-import {Friends} from './../models/Friends';
+import {Friends} from '../models/Friends';
 
-const Users = require ('./../models/users');
+const Users = require ('../models/users');
 const SocketIO = require('socket.io');
 
 

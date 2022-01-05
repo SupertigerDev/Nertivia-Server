@@ -2,9 +2,9 @@ const botsRouter = require("express").Router();
 
 // Middleware
 const authenticate = require("../../middlewares/authenticate");
-const UserPresentVerification = require("./../../middlewares/UserPresentVerification");
-const checkRolePerms = require('./../../middlewares/checkRolePermissions');
-const { roles: {ADMIN} } = require("./../../utils/rolePermConstants");
+const UserPresentVerification = require("../../middlewares/UserPresentVerification");
+const checkRolePerms = require('../../middlewares/checkRolePermissions');
+const { roles: {ADMIN} } = require("../../utils/rolePermConstants");
 const rateLimit = require('../../middlewares/rateLimit');
 const UserPolicies = require('../../policies/UserPolicies');
 

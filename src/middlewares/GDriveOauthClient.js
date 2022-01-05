@@ -1,7 +1,7 @@
 const {
 	google
 } = require('googleapis');
-const User = require('./../models/users');
+const User = require('../models/users');
 
 module.exports = async (req, res, next) => {
 	const oauth2Client = new google.auth.OAuth2(

@@ -3,13 +3,13 @@ const MainUserRouter = require("express").Router();
 // Middleware
 const authenticate = require("../../middlewares/authenticate");
 const rateLimit = require("../../middlewares/rateLimit");
-const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
+const GDriveOauthClient = require("../../middlewares/GDriveOauthClient");
 
 // Policies
-const authPolicy = require("./../../policies/authenticationPolicies");
-const reCaptchaPolicy = require("./../../policies/reCaptchaPolicie");
+const authPolicy = require("../../policies/authenticationPolicies");
+const reCaptchaPolicy = require("../../policies/reCaptchaPolicie");
 const forceCaptcha = require("../../policies/forceCaptcha");
-const userPolicy = require("./../../policies/UserPolicies");
+const userPolicy = require("../../policies/UserPolicies");
 
 
 // Relationship

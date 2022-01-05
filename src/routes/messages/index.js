@@ -1,17 +1,17 @@
 const MainMessageRouter = require("express").Router();
 
 // Policies
-const messagePolicy = require('./../../policies/messagePolicies');
+const messagePolicy = require('../../policies/messagePolicies');
 
 // Middleware
 const authenticate = require("../../middlewares/authenticate");
-const channelVerification = require('./../../middlewares/ChannelVerification');
-const GDriveOauthClient = require('./../../middlewares/GDriveOauthClient');
+const channelVerification = require('../../middlewares/ChannelVerification');
+const GDriveOauthClient = require('../../middlewares/GDriveOauthClient');
 import URLEmbed from '../../middlewares/URLEmbed';
-const serverChannelPermissions = require('./../../middlewares/serverChannelPermissions');
+const serverChannelPermissions = require('../../middlewares/serverChannelPermissions');
 const busboy = require('connect-busboy');
-const rateLimit = require('./../../middlewares/rateLimit');
-const channelRateLimit = require('./../../middlewares/channelRateLimit');
+const rateLimit = require('../../middlewares/rateLimit');
+const channelRateLimit = require('../../middlewares/channelRateLimit');
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const disAllowBlockedUser = require('../../middlewares/disAllowBlockedUser');

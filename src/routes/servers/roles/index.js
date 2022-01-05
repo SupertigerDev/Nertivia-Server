@@ -2,11 +2,11 @@ const MainRolesRouter = require("express").Router();
 
 // Middleware
 const authenticate = require("../../../middlewares/authenticate");
-const UserPresentVerification = require("./../../../middlewares/UserPresentVerification");
-const checkRolePerms = require('./../../../middlewares/checkRolePermissions');
+const UserPresentVerification = require("../../../middlewares/UserPresentVerification");
+const checkRolePerms = require('../../../middlewares/checkRolePermissions');
 
-const rolePolicies = require('./../../../policies/RolesPolicies');
-const {roles: {MANAGE_ROLES}} = require("./../../../utils/rolePermConstants");
+const rolePolicies = require('../../../policies/RolesPolicies');
+const {roles: {MANAGE_ROLES}} = require("../../../utils/rolePermConstants");
 
 // create role
 MainRolesRouter.route("/:server_id/roles").post(

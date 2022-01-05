@@ -1,8 +1,8 @@
-const Users = require('./../../../models/users');
+const Users = require('../../../models/users');
 
 const jwt = require('jsonwebtoken')
 
-const DriveAPI = require('./../../../API/GDrive');
+const DriveAPI = require('../../../API/GDrive');
 
 module.exports = async (req, res, next) => {
 	const oauth2Client = req.oauth2Client;

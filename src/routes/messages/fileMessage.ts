@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import gm from 'gm';
 const gmInstance = gm.subClass({ imageMagick: true });
 import { Request, Response, NextFunction } from 'express';
-const oauth2Client = require('./../../middlewares/GDriveOauthClient')
+const oauth2Client = require('../../middlewares/GDriveOauthClient')
 import flake from '../../utils/genFlakeId'
 import compressImage from '../../utils/compressImage';
 import tempSaveImage from '../../utils/tempSaveImage';

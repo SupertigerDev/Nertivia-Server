@@ -1,5 +1,5 @@
 const flake = require('../../../utils/genFlakeId').default;
-import { ServerRoles } from './../../../models/ServerRoles';
+import { ServerRoles } from '../../../models/ServerRoles';
 const { matchedData } = require('express-validator');
 const rolePerms = require("../../../utils/rolePermConstants");
 

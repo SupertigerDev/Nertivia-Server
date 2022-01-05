@@ -2,11 +2,11 @@ const MainInviteRouter = require("express").Router();
 
 // Middleware
 const authenticate = require("../../../middlewares/authenticate");
-const UserPresentVerification = require("./../../../middlewares/UserPresentVerification");
-const rateLimit = require("./../../../middlewares/rateLimit");
+const UserPresentVerification = require("../../../middlewares/UserPresentVerification");
+const rateLimit = require("../../../middlewares/rateLimit");
 
-const reCaptchaPolicy = require("./../../../policies/reCaptchaPolicie");
-const forceCaptcha = require("./../../../policies/forceCaptcha");
+const reCaptchaPolicy = require("../../../policies/reCaptchaPolicie");
+const forceCaptcha = require("../../../policies/forceCaptcha");
 
 // Invites
 MainInviteRouter.route("/:server_id/invites").get(

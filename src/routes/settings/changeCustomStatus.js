@@ -1,5 +1,5 @@
-const redis = require("./../../redis");
-const Users = require ('./../../models/users');
+const redis = require("../../redis");
+const Users = require ('../../models/users');
 const emitAll = require("../../socketController/emitToAll");
 const { changeCustomStatusByUserId } = require("../../newRedisWrapper");
 

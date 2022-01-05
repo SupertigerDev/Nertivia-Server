@@ -1,8 +1,8 @@
-const Users = require("./../../models/users");
-import {BlockedUsers} from "./../../models/BlockedUsers";
+const Users = require("../../models/users");
+import {BlockedUsers} from "../../models/BlockedUsers";
 
-const Servers = require("./../../models/servers");
-import {Friends} from "./../../models/Friends";
+const Servers = require("../../models/servers");
+import {Friends} from "../../models/Friends";
 
 module.exports = async (req, res, next) => {
   let userID = req.params.user_id;

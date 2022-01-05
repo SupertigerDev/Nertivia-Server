@@ -4,7 +4,7 @@ import {Messages} from '../../../models/Messages'
 import {MessageQuoteModel} from '../../../models/MessageQuote'
 import { deleteServerChannel } from '../../../newRedisWrapper';
 import { Notifications } from '../../../models/Notifications';
-const redis = require("./../../../redis");
+const redis = require("../../../redis");
 
 module.exports = async (req, res, next) => {
 

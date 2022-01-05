@@ -1,5 +1,5 @@
 const flake = require('../../../utils/genFlakeId').default;
-const servers = require('./../../../models/servers');
+const servers = require('../../../models/servers');
 import {PublicServers} from '../../../models/PublicServers';
 
 module.exports = async (req, res, next) => {

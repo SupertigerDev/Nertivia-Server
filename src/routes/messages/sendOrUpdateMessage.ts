@@ -10,7 +10,7 @@ const matchAll = require("match-all");
 const Users = require("../../models/users");
 const Channels = require("../../models/channels");
 
-const sendMessageNotification = require('./../../utils/SendMessageNotification');
+const sendMessageNotification = require('../../utils/SendMessageNotification');
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
 import channels from '../../models/channels';

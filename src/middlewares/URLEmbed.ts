@@ -2,7 +2,7 @@ import {Response, Request, NextFunction} from 'express'
 import AbortController from "abort-controller"
 import cheerio from 'cheerio';
 
-import {Messages} from './../models/Messages'
+import {Messages} from '../models/Messages'
 import sharp from 'sharp';
 import fetch from 'node-fetch';
 

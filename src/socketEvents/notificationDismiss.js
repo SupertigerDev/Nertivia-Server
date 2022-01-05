@@ -1,8 +1,8 @@
 const channels = require("../models/channels");
 const ServerMembers = require("../models/ServerMembers");
 const { getConnectedUserBySocketID } = require("../newRedisWrapper");
-import { Notifications } from "./../models/Notifications";
-const redis = require('./../redis');
+import { Notifications } from "../models/Notifications";
+const redis = require('../redis');
 module.exports = async (data, client, io) => {
     const {channelID} = data;
     if (!channelID) return; 

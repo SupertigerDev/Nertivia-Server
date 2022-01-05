@@ -1,6 +1,6 @@
 import {PublicServers} from '../../../models/PublicServers';
 
-const servers = require('./../../../models/servers');
+const servers = require('../../../models/servers');
 
 module.exports = async (req, res, next) => {
   const {server_id} = req.params;

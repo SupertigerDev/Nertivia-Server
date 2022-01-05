@@ -1,4 +1,4 @@
-const servers = require('./../../../models/servers');
+const servers = require('../../../models/servers');
 import {PublicServers} from '../../../models/PublicServers';
 
 

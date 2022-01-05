@@ -1,4 +1,4 @@
-import { Message } from './../../models/Messages';
+import { Message } from '../../models/Messages';
 import { NextFunction, Request, Response } from "express";
 import { Document, FilterQuery, LeanDocument } from "mongoose";
 import { Messages } from "../../models/Messages";

@@ -2,13 +2,13 @@ const MainServerRouter = require("express").Router();
 
 // Middleware
 const authenticate = require("../../middlewares/authenticate");
-const GDriveOauthClient = require("./../../middlewares/GDriveOauthClient");
+const GDriveOauthClient = require("../../middlewares/GDriveOauthClient");
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const rateLimit = require('../../middlewares/rateLimit');
 
 // Policies
-const UserPresentVerification = require ('./../../middlewares/UserPresentVerification')
+const UserPresentVerification = require ('../../middlewares/UserPresentVerification')
 const serverPolicy = require("../../policies/ServerPolicies");
 
 // Create

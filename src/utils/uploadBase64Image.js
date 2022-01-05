@@ -1,4 +1,4 @@
-const GDriveApi = require("./../API/GDrive");
+const GDriveApi = require("../API/GDrive");
 const stream = require("stream");
 
 module.exports = (base64, oauth2Client, maxSize, name) => {

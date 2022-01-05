@@ -1,7 +1,7 @@
 
 import { ServerRoles } from '../../../models/ServerRoles';
-const ServerMembers = require('./../../../models/ServerMembers');
-const Users = require('./../../../models/users');
+const ServerMembers = require('../../../models/ServerMembers');
+const Users = require('../../../models/users');
 const redis = require("../../../redis");
 
 // /:server_id/members/:member_id/roles/:role_id
