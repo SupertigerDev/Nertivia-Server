@@ -146,7 +146,9 @@ export default async function join(server: any, user: any, socketID: string | un
   }})
   
   const defaultChannel = serverChannels.find((c:any) => c.channelID === server.default_channel_id);
-  defaultChannel.server = server;
+  if (defaultChannel) {
+    defaultChannel.server = server;
+  }
 
 
   await AddFCMUserToServer(server.server_id, user.id)

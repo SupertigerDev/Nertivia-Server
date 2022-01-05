@@ -13,7 +13,6 @@ import {Channels} from "../../models/Channels";
 const sendMessageNotification = require('../../utils/SendMessageNotification');
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
-import channels from '../../models/Channels';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID, messageID } = req.params;
@@ -285,7 +284,7 @@ async function serverMessage(req: any, io: SocketIO.Server, channelID: any, mess
   
 
   const date = Date.now();
-  await channels.updateOne({ channelID }, { $set: {
+  await Channels.updateOne({ channelID }, { $set: {
     lastMessaged: date
   }})
 
