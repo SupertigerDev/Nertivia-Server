@@ -1,4 +1,4 @@
-const ServerInvites = require("../../../models/ServerInvites");
+import {ServerInvites} from '../../../models/ServerInvites'
 import {PublicServers} from '../../../models/PublicServers';
 
 const Servers = require("../../../models/servers");

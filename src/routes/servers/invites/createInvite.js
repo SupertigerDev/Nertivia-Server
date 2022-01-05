@@ -1,4 +1,4 @@
-const ServerInvites = require("../../../models/ServerInvites");
+import {ServerInvites} from '../../../models/ServerInvites'
 
 module.exports = async (req, res, next) => {
   //check if invite limit reached.

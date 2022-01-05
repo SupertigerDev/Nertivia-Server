@@ -2,7 +2,8 @@ import { Request, Response } from 'express'
 
 const Channels = require("../models/channels");
 const User = require("../models/users");
-const ServerInvites = require("../models/ServerInvites");
+
+import {ServerInvites} from '../models/ServerInvites'
 import {Messages} from '../models/Messages'
 
 const ServerMembers = require("../models/ServerMembers");

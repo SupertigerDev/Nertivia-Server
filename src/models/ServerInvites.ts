@@ -1,11 +1,15 @@
-const mongoose = require("mongoose");
-const bcrypt = require('bcryptjs');
-const {
-    Schema
-} = mongoose;
+import {model, Schema} from 'mongoose'
 
 
-const serverInvitesSchema = new Schema({
+interface ServerInvite {
+  server: any
+  creator: any
+  invite_code: string
+  uses: number
+  custom: boolean
+}
+
+const schema = new Schema<ServerInvite>({
   server: { type: Schema.Types.ObjectId, ref: 'servers', required: true, select: false },
   creator: { type: Schema.Types.ObjectId, ref: 'users', required: true, select: false },
   invite_code: { type: String, unique: true, required: true },
@@ -15,7 +19,6 @@ const serverInvitesSchema = new Schema({
 
 
 
-const serverInvites = mongoose.model('server_invite', serverInvitesSchema);
+export const ServerInvites = model<ServerInvite>('server_invite', schema);
 
 
-module.exports = serverInvites;

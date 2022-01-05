@@ -4,7 +4,8 @@ import {PublicServers} from '../models/PublicServers';
 const Servers = require("../models/servers");
 const Channels = require("../models/channels");
 import {MessageQuoteModel} from '../models/MessageQuote'
-const ServerInvites = require("../models/ServerInvites");
+import {ServerInvites} from '../models/ServerInvites'
+
 import {Messages} from '../models/Messages'
 import { deleteServerChannels, deleteServer as deleteServerRedis, deleteAllServerVoice } from '../newRedisWrapper';
 
