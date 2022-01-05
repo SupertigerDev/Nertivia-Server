@@ -1,6 +1,5 @@
-const Users = require("../../models/users");
 const Themes = require("../../models/themes");
-const PublicThemes = require("../../models/publicThemes");
+import {PublicThemes} from '../../models/PublicThemes'
 
 
 module.exports = async (req, res, next) => {

@@ -1,6 +1,6 @@
 const Express = require("express");
 const Themes = require('../../../models/themes');
-const PublicThemes = require('../../../models/publicThemes');
+import {PublicThemes} from '../../../models/PublicThemes'
 
 
 /** @type {Express.RequestHandler} */

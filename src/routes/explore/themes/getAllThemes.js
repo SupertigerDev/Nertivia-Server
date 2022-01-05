@@ -1,6 +1,6 @@
 const Express = require("express");
-const Themes = require("../../../models/themes");
-const PublicThemes = require("../../../models/publicThemes");
+import {PublicThemes} from '../../../models/PublicThemes'
+
 import {ObjectId} from "mongodb"
 
 /** @type {Express.RequestHandler} */

@@ -1,10 +1,20 @@
-const {
-  Schema,
-  model,
-} = require("mongoose");
+import {model, Schema} from 'mongoose';
 
+interface PublicTheme {
+  id: string
+  css: string
+  updatedCss: string, 
+  description: string
+  created: number
+  approved: boolean
+  theme: any
+  screenshot: string
+  creator: any
+  likes: any[]
+  compatible_client_version: string
+}
 
-const publicThemesSchema = new Schema({
+const schema = new Schema<PublicTheme>({
   id: {type: String, required: true},
   css: {type: String, required: true},
   updatedCss: {type: String, required: false}, // When the creator updates their css, it will be added here for me to approve them.
@@ -19,11 +29,11 @@ const publicThemesSchema = new Schema({
 })
 
 
-publicThemesSchema.pre('save', async function(next) {
+schema.pre('save', async function(next) {
   // Date created
   this.created = Date.now();
   next();
 })
 
 
-module.exports = model('public_themes', publicThemesSchema);
+export const PublicThemes = model<PublicTheme>('public_themes', schema);

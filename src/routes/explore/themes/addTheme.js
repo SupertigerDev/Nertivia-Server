@@ -1,7 +1,7 @@
 const Express = require("express");
 const uploadImage = require('../../../utils/uploadBase64Image');
 const Themes = require('../../../models/themes');
-const PublicThemes = require('../../../models/publicThemes');
+import {PublicThemes} from '../../../models/PublicThemes'
 
 import * as nertiviaCDN from '../../../utils/uploadCDN/nertiviaCDN'
 import fs from 'fs';
