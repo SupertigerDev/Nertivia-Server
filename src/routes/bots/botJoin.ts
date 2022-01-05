@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 const Users = require('../../models/users')
 import Servers from '../../models/servers';
-import Roles from '../../models/Roles';
+import { ServerRoles } from "../../models/ServerRoles";
 import joinServer from "../../utils/joinServer";
 
 import flake from '../../utils/genFlakeId'
@@ -43,7 +43,7 @@ export default async function createBot(req: Request, res: Response) {
 
   // create role for bot
   const roleId = flake.gen();
-  await Roles.updateOne({server: req.server._id, default: true}, {$inc: {order: 2}})
+  await ServerRoles.updateOne({server: req.server._id, default: true}, {$inc: {order: 2}})
   const doc = {
     name: bot.username,
     id: roleId,
@@ -55,7 +55,7 @@ export default async function createBot(req: Request, res: Response) {
     order: 0,
     hideRole: true
   };
-  await Roles.create(doc);
+  await ServerRoles.create(doc);
 
   const data = {
     name: doc.name,

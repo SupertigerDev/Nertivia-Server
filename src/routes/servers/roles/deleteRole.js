@@ -1,5 +1,5 @@
 
-const Roles = require('./../../../models/Roles');
+import {ServerRoles} from '../../../models/ServerRoles';
 
 
 
@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
 
 
   // check if role exists.
-  const role = await Roles.findOne({id: roleID, server: req.server._id}).select("order default id");
+  const role = await ServerRoles.findOne({id: roleID, server: req.server._id}).select("order default id");
 
   // check if default
   if (role.default) {
@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
   
 
 
-  await Roles.deleteOne({_id: role._id});
+  await ServerRoles.deleteOne({_id: role._id});
 
   const io = req.io;
   io.in("server:" + req.server.server_id).emit("server:delete_role", {role_id: role.id, server_id: req.server.server_id});

@@ -7,8 +7,7 @@ import {ServerInvites} from '../models/ServerInvites'
 import {Messages} from '../models/Messages'
 
 const ServerMembers = require("../models/ServerMembers");
-const ServerRoles = require("../models/Roles");
-const redis = require("../redis");
+import { ServerRoles } from '../models/ServerRoles';
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
 import { getCustomStatusByUserId, getPresenceByUserId, getVoiceUsersFromServerIds } from '../newRedisWrapper';

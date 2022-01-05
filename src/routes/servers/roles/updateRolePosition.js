@@ -1,5 +1,5 @@
 
-const Roles = require("./../../../models/Roles");
+import {ServerRoles} from '../../../models/ServerRoles'
 module.exports = async (req, res, next) => {
 
   const {roleID, order} = req.body
@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
 
 
 
-  const roles = await Roles.find({ server: req.server._id }).select("name id color permissions server_id deletable order default hideRole bot").lean();
+  const roles = await ServerRoles.find({ server: req.server._id }).select("name id color permissions server_id deletable order default hideRole bot").lean();
 
   // order roles
   let ordered = roles.sort((a, b) => a.order - b.order);
@@ -48,7 +48,7 @@ module.exports = async (req, res, next) => {
   defaultRole.order = ordered.length;
   ordered.push(defaultRole);
 
-  await Roles.bulkWrite(
+  await ServerRoles.bulkWrite(
     itemsToUpdate.map(item => ({
       updateOne: {
         filter: {_id: item._id},

@@ -4,7 +4,7 @@ const ServerMembers = require("../../models/ServerMembers");
 const Channels = require("../../models/channels");
 const Servers = require("../../models/servers");
 const User = require("../../models/users");
-const Roles = require("../../models/Roles");
+import { ServerRoles } from "../../models/ServerRoles";
 const rolePerms = require("../../utils/rolePermConstants");
 const { AddFCMUserToServer } = require("../../utils/sendPushNotification");
 
@@ -71,7 +71,7 @@ module.exports = async (req, res, next) => {
     deletable: false,
     order: 0
   };
-  const createRole = await Roles.create(roleDoc);
+  const createRole = await ServerRoles.create(roleDoc);
 
   const roleData = {
     name: roleDoc.name,

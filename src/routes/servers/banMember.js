@@ -6,7 +6,7 @@ import {Messages} from '../../models/Messages'
 import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } from '../../newRedisWrapper';
 import { Notifications } from '../../models/Notifications';
 const Channels = require("../../models/channels");
-const Roles = require("../../models/Roles");
+import { ServerRoles } from '../../models/ServerRoles';
 const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 
@@ -45,7 +45,7 @@ module.exports = async (req, res, next) => {
   const memberToBeBanned = await ServerMembers.findOne({ server: req.server._id, member: userToBeBanned._id }).select("roles");
   if (!isCreator && memberToBeBanned) {
     // check if requesters role is above the recipients
-    const roles = await Roles.find({ id: { $in: memberToBeBanned.roles } }, { _id: 0 }).select('order').lean();
+    const roles = await ServerRoles.find({ id: { $in: memberToBeBanned.roles } }, { _id: 0 }).select('order').lean();
     let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
     if (recipientHighestRolePosition <= req.highestRolePosition) {
       return res
@@ -87,7 +87,7 @@ module.exports = async (req, res, next) => {
 
 
   //if bot, delete bot role
-  const role = await Roles.findOneAndDelete({ bot: userToBeBanned._id, server: server._id });
+  const role = await ServerRoles.findOneAndDelete({ bot: userToBeBanned._id, server: server._id });
 
   if (role) {
     io.in("server:" + role.server_id).emit("server:delete_role", { role_id: role.id, server_id: role.server_id });

@@ -1,6 +1,6 @@
 const Channels = require("../models/channels");
 const Servers = require("../models/servers");
-const Roles = require("../models/Roles");
+import { ServerRoles } from "../models/ServerRoles";
 const ServerMembers = require("../models/ServerMembers");
 const redis = require("../redis");
 const { getServerChannel, addServer, getServer, addChannel } = require("../newRedisWrapper");
@@ -62,7 +62,7 @@ module.exports = async (req, res, next) => {
   let highestRolePosition = 0;
 
   if (member.roles && member.roles.length) {
-    const roles = await Roles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions order').lean();
+    const roles = await ServerRoles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions order').lean();
     highestRolePosition = Math.min(...roles.map(r => r.order));
 
     for (let index = 0; index < roles.length; index++) {
@@ -74,7 +74,7 @@ module.exports = async (req, res, next) => {
   }
 
   // add default role
-  const defaultRole = await Roles.findOne({default: true, server: server._id}, {_id: 0}).select('permissions').lean();
+  const defaultRole = await ServerRoles.findOne({default: true, server: server._id}, {_id: 0}).select('permissions').lean();
   permissions = permissions| defaultRole.permissions;
 
   req.permissions = permissions;

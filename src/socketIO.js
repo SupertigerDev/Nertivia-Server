@@ -3,7 +3,7 @@ const emitUserStatus = require("./socketController/emitUserStatus");
 const emitToAll = require("./socketController/emitToAll");
 const User = require("./models/users");
 const ServerMembers = require("./models/ServerMembers");
-const ServerRoles = require("./models/Roles");
+import { ServerRoles } from "./models/ServerRoles";
 const channels = require("./models/channels");
 import {BlockedUsers} from "./models/BlockedUsers";
 import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists } from "./newRedisWrapper";

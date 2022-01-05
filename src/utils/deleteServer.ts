@@ -11,7 +11,7 @@ import { deleteServerChannels, deleteServer as deleteServerRedis, deleteAllServe
 
 import { Notifications } from '../models/Notifications';
 const ServerMembers = require("../models/ServerMembers");
-const Roles = require("../models/Roles");
+import { ServerRoles } from '../models/ServerRoles';
 const User = require("../models/users");
 
 
@@ -52,7 +52,7 @@ export default async function deleteServer(io: any, server_id: string, server: a
     await Channels.deleteMany({ server: server._id });
     await ServerMembers.deleteMany({ server: server._id });
     await ServerInvites.deleteMany({ server: server._id });
-    await Roles.deleteMany({ server: server._id });
+    await ServerRoles.deleteMany({ server: server._id });
 
     await User.updateMany({ $pullAll: { servers: [server._id] } });
     // res.json({ status: "Done!" });

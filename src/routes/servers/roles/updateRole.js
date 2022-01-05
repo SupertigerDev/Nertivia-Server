@@ -1,4 +1,4 @@
-const Roles = require('./../../../models/Roles');
+import { ServerRoles } from "../../../models/ServerRoles";
 const { matchedData } = require("express-validator");
 const redis = require("../../../redis");
 const rolePermConstants = require('../../../utils/rolePermConstants');
@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if role exists.
-  const role = await Roles.findOne({id: roleID, server: req.server._id}).select("order permissions");
+  const role = await ServerRoles.findOne({id: roleID, server: req.server._id}).select("order permissions");
 
   if (!role) {
     return res
@@ -49,7 +49,7 @@ module.exports = async (req, res, next) => {
     }
   }
 
-  await Roles.updateOne({_id: role._id}, dataMatched);
+  await ServerRoles.updateOne({_id: role._id}, dataMatched);
   
   redis.delAllServerMembers(req.server.server_id);
 

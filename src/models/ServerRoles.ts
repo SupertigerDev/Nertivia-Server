@@ -1,12 +1,20 @@
-const mongoose = require("mongoose");
-const {
-    Schema
-} = mongoose;
+import {model, Schema} from 'mongoose';
 
+interface ServerRole {
+  name: string;
+  id: string
+  color: boolean;
+  hideRole: boolean;
+  permissions: number
+  server: any
+  server_id: string
+  default: boolean,
+  bot: any
+  deletable: boolean
+  order: number
+}
 
-
-
-const serverRolesSchema = new Schema({
+const schema = new Schema<ServerRole>({
   name: {type: String, default: 'New Role'},
   id: {type: String},
   color: {type: String},
@@ -22,7 +30,4 @@ const serverRolesSchema = new Schema({
 
 
 
-const serverRoles = mongoose.model('server_roles', serverRolesSchema);
-
-
-module.exports = serverRoles;
+export const ServerRoles = model<ServerRole>('server_roles', schema);

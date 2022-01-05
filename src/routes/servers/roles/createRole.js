@@ -1,12 +1,12 @@
 const flake = require('../../../utils/genFlakeId').default;
-const Roles = require("./../../../models/Roles");
+import { ServerRoles } from './../../../models/ServerRoles';
 const { matchedData } = require('express-validator');
 const rolePerms = require("../../../utils/rolePermConstants");
 
 module.exports = async (req, res, next) => {
 
   // check if roles limit reached
-  const rolesCount = await Roles.countDocuments({ server: req.server._id });
+  const rolesCount = await ServerRoles.countDocuments({ server: req.server._id });
   const dataMatched = matchedData(req);
 
   if (rolesCount >= 30) {
@@ -25,8 +25,8 @@ module.exports = async (req, res, next) => {
   if (dataMatched.color) {
     doc.color = dataMatched.color;
   }
-  const create = await Roles.create(doc);
-  await Roles.updateOne({server: req.server._id, default: true}, {$inc: {order: 2}})
+  const create = await ServerRoles.create(doc);
+  await ServerRoles.updateOne({server: req.server._id, default: true}, {$inc: {order: 2}})
 
   const data = {
     name: doc.name,

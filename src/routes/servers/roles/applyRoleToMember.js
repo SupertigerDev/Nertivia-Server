@@ -1,5 +1,5 @@
 
-const Roles = require('./../../../models/Roles');
+import { ServerRoles } from '../../../models/ServerRoles';
 const ServerMembers = require('./../../../models/ServerMembers');
 const Users = require('./../../../models/users');
 const redis = require("../../../redis");
@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if role exists in that server
-  const role = await Roles.findOne({id: role_id, server_id: server_id}).select("bot order default");
+  const role = await ServerRoles.findOne({id: role_id, server_id: server_id}).select("bot order default");
 
   if (role.default === true) {
     return res
