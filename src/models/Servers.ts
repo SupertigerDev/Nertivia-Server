@@ -1,12 +1,34 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+import {model, Schema} from 'mongoose';
 
-const userBansSchema = new Schema({
+interface UserBan {
+  user: any,
+  reason: string
+}
+
+interface Server {
+  verified: boolean
+  name: string
+  avatar: string
+  banner: string
+  creator: any
+  server_id: string
+  created: number
+  default_channel_id: string
+  public: boolean
+  user_bans: UserBan[]
+  channel_position: string[]
+  FCM_devices: any[]
+}
+
+// TODO: separate this into another model.
+const userBansSchema = new Schema<UserBan>({
   user: { type: Schema.Types.ObjectId, ref: "users" },
   reason: { type: String, required: false }
 });
 
-const serversSchema = new Schema({
+
+
+const schema = new Schema<Server>({
   verified: {type: Boolean, select: false},
   name: {
     type: String,
@@ -29,16 +51,11 @@ const serversSchema = new Schema({
   FCM_devices: { type: [{ type: Schema.Types.ObjectId, ref: 'devices' }], select: false },
 });
 
-serversSchema.pre("save", async function(next) {
-  try {
-    // Date created
-    this.created = Date.now();
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
+schema.pre('save', async function(next) {
+  // Date created
+  this.created = Date.now();
+  next();
+})
 
-const Servers = mongoose.model("servers", serversSchema);
+export const Servers = model("servers", schema);
 
-module.exports = Servers;

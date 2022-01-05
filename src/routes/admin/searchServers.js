@@ -1,4 +1,4 @@
-const Servers = require("../../models/servers");
+import {Servers} from "../../models/Servers";
 
 module.exports = async (req, res, next) => {
   const value = req.params.value;

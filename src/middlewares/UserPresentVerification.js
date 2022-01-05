@@ -1,5 +1,5 @@
 const Channels = require("../models/channels");
-const Servers = require("../models/servers");
+import {Servers} from "../models/Servers";
 import { ServerRoles } from "../models/ServerRoles";
 import {ServerMembers} from "../models/ServerMembers";
 const redis = require("../redis");

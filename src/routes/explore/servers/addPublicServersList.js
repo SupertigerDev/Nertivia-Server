@@ -1,5 +1,5 @@
 const flake = require('../../../utils/genFlakeId').default;
-const servers = require('../../../models/servers');
+import {Servers} from '../../../models/Servers';
 import {PublicServers} from '../../../models/PublicServers';
 
 module.exports = async (req, res, next) => {
@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
   if (!server_id) return res.status(403).json({message: 'server_id missing.'});
   
   // get server by id
-  const server = await servers.findOne({server_id}).select('name server_id creator').lean(); 
+  const server = await Servers.findOne({server_id}).select('name server_id creator').lean(); 
   // if servers exists
   if (!server) return res.status(404).json({message: 'server does not exist.'});
   // if server creator is by request
@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
   // check if user added other servers
   const lastTwoCreated = await PublicServers.find({creator: req.user._id}, {_id: 0}).select('created').sort({_id: -1}).limit(6);
   if (lastTwoCreated.length >= 5) {
-    return res.status(403).json({message: 'You can only add up to 5 public servers.'});
+    return res.status(403).json({message: 'You can only add up to 5 public Servers.'});
   }
   if (lastTwoCreated.length >= 2) {
     let first = lastTwoCreated[0].created;
@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
 
   }
   // update server
-  const update = await servers.updateOne({_id: server._id}, {$set: {
+  const update = await Servers.updateOne({_id: server._id}, {$set: {
     public: true
   }})
 

@@ -7,7 +7,7 @@ try {
   console.log("Warning> fb-fcm.json was not provided. Mobile push notifications will not work.")
 }
 import path from 'path';
-import Servers from "../models/servers";
+import {Servers} from "../models/Servers";
 
 if (serverKey) {
   admin.initializeApp({

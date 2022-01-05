@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 const Users = require('../../models/users')
-import Servers from '../../models/servers';
+import {Servers} from '../../models/Servers';
 import { sign } from "jsonwebtoken";
 import {ServerMembers} from '../../models/ServerMembers';
 import { ServerRoles } from "../../models/ServerRoles";

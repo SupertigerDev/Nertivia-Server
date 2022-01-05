@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 const Users = require("../../models/users");
-const Servers = require("../../models/servers");
+import {Servers} from "../../models/Servers";
 import {Messages} from '../../models/Messages'
 
 module.exports = async (_req: Request, res: Response, _next: NextFunction) => {

@@ -1,11 +1,10 @@
 import {PublicServers} from '../../../models/PublicServers';
 
-const servers = require('../../../models/servers');
-
+import {Servers} from '../../../models/Servers';
 module.exports = async (req, res, next) => {
   const {server_id} = req.params;
 
-  const server = await servers.findOne({server_id}).select('_id');
+  const server = await Servers.findOne({server_id}).select('_id');
   if (!server) return res.status(404).json({message: 'server does not exist.'});
 
 

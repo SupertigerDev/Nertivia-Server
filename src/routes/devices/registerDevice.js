@@ -1,5 +1,5 @@
 import {Devices} from '../../models/Devices';
-const Servers = require("../../models/servers");
+import {Servers} from "../../models/Servers";
 const Users = require("../../models/users");
 
 module.exports = async (req, res, next) => {

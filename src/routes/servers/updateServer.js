@@ -1,4 +1,4 @@
-const Servers = require("../../models/servers");
+import {Servers} from "../../models/Servers";
 const Channels = require("../../models/channels");
 
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'

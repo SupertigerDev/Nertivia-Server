@@ -1,4 +1,4 @@
-const Servers = require('../../../models/servers');
+const Servers = require('../../../models/Servers');
 module.exports = async (req, res, next) => {
 
 

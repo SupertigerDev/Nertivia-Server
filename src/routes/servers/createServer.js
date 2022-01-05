@@ -2,7 +2,7 @@
 // Models
 import {ServerMembers} from "../../models/ServerMembers";
 const Channels = require("../../models/channels");
-const Servers = require("../../models/servers");
+import {Servers} from "../../models/Servers";
 const User = require("../../models/users");
 import { ServerRoles } from "../../models/ServerRoles";
 const rolePerms = require("../../utils/rolePermConstants");

@@ -1,7 +1,7 @@
 import {ServerInvites} from '../../../models/ServerInvites'
 import {PublicServers} from '../../../models/PublicServers';
 
-const Servers = require("../../../models/servers");
+import {Servers} from "../../../models/Servers";
 
 
 import joinServer from '../../../utils/joinServer';

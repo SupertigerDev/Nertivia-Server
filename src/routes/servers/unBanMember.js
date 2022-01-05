@@ -1,5 +1,5 @@
 
-const Servers = require("../../models/servers");
+import {Servers} from "../../models/Servers";
 const Users = require("../../models/users");
 
 
