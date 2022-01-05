@@ -2,7 +2,7 @@ const redis = require("../redis");
 import {PublicServers} from '../models/PublicServers';
 
 import {Servers} from "../models/Servers";
-const Channels = require("../models/channels");
+import {Channels} from "../models/Channels";
 import {MessageQuoteModel} from '../models/MessageQuote'
 import {ServerInvites} from '../models/ServerInvites'
 

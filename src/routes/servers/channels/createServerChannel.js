@@ -1,5 +1,5 @@
 const flake = require('../../../utils/genFlakeId').default;
-const Channels = require("../../../models/channels");
+import {Channels} from "../../../models/Channels";
 
 module.exports = async (req, res, next) => {
 

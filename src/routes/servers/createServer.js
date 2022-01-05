@@ -1,7 +1,7 @@
 
 // Models
 import {ServerMembers} from "../../models/ServerMembers";
-const Channels = require("../../models/channels");
+import {Channels} from "../../models/Channels";
 import {Servers} from "../../models/Servers";
 const User = require("../../models/users");
 import { ServerRoles } from "../../models/ServerRoles";

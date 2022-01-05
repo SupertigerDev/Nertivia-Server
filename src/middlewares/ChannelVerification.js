@@ -1,4 +1,4 @@
-const Channels = require("../models/channels");
+import {Channels} from "../models/Channels";
 import { ServerRoles } from "../models/ServerRoles";
 import {ServerMembers} from "../models/ServerMembers";
 import {BlockedUsers} from "../models/BlockedUsers";

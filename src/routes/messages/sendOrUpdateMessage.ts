@@ -8,12 +8,12 @@ import {Message, Messages} from '../../models/Messages'
 import {MessageQuoteModel} from '../../models/MessageQuote'
 const matchAll = require("match-all");
 const Users = require("../../models/users");
-const Channels = require("../../models/channels");
+import {Channels} from "../../models/Channels";
 
 const sendMessageNotification = require('../../utils/SendMessageNotification');
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
-import channels from '../../models/channels';
+import channels from '../../models/Channels';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID, messageID } = req.params;

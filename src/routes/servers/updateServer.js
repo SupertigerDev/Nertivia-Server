@@ -1,5 +1,5 @@
 import {Servers} from "../../models/Servers";
-const Channels = require("../../models/channels");
+import {Channels} from "../../models/Channels";
 
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 import tempSaveImage from '../../utils/tempSaveImage';

@@ -1,6 +1,6 @@
 const User = require('../../models/users');
 import { BlockedUsers } from '../../models/BlockedUsers';
-const Channels = require('../../models/channels');
+import {Channels} from '../../models/Channels';
 const { deleteDmChannel } = require('../../newRedisWrapper');
 
 module.exports = async (req, res, next) => {

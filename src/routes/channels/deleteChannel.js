@@ -1,11 +1,10 @@
-const channels = require("../../models/channels");
-
+import {Channels} from '../../models/Channels';
 module.exports = async (req, res, next) => {
   const { channel_id } = req.params;
 
 
   // check if channel exists
-  let channel = await channels
+  let channel = await Channels
     .findOne({ channelID: channel_id, creator: req.user._id, server_id: { $exists: false } })
   if (!channel) {
     return res
@@ -14,7 +13,7 @@ module.exports = async (req, res, next) => {
   }
 
 
-   await channels.updateOne({ channelID: channel_id, creator: req.user._id }, {hide: true});
+   await Channels.updateOne({ channelID: channel_id, creator: req.user._id }, {hide: true});
 
 
 

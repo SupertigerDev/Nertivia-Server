@@ -1,6 +1,6 @@
 import {ServerMembers} from "../../models/ServerMembers";
 import { Notifications } from "../../models/Notifications";
-const Channels = require("../../models/channels");
+import {Channels} from "../../models/Channels";
 
 
 

@@ -4,7 +4,7 @@ const emitToAll = require("./socketController/emitToAll");
 const User = require("./models/users");
 import {ServerMembers} from "./models/ServerMembers";
 import { ServerRoles } from "./models/ServerRoles";
-const channels = require("./models/channels");
+import { Channels } from "./models/Channels";
 import {BlockedUsers} from "./models/BlockedUsers";
 import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists } from "./newRedisWrapper";
 import { Notifications } from "./models/Notifications";
@@ -159,7 +159,7 @@ module.exports = async client => {
         [callingChannelUserIds] = await getVoiceUsersFromServerIds(serverIds)
 
 
-        const serverChannels = await channels
+        const serverChannels = await Channels
           .find({ server: { $in: serverObjectIds } })
           .select("name channelID server server_id lastMessaged rateLimit icon")
           .lean();
@@ -191,7 +191,7 @@ module.exports = async client => {
         ).select("name id color permissions server_id deletable order default bot hideRole");
       }
 
-      const dms = channels
+      const dms = Channels
         .find({ creator: user._id, hide: { $ne: true } }, { _id: 0 })
         .select("recipients channelID lastMessaged")
         .populate({

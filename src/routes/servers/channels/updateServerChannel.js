@@ -1,4 +1,4 @@
-const Channels = require("../../../models/channels");
+import {Channels} from "../../../models/Channels";
 const { addChannel, getServerChannel } = require("../../../newRedisWrapper");
 const redis = require("../../../redis");
 

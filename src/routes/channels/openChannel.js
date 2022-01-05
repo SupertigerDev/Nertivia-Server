@@ -1,5 +1,5 @@
 const users = require("../../models/users");
-const channels = require("../../models/channels");
+import { Channels } from "../../models/Channels";
 
 const flake = require('../../utils/genFlakeId').default;
 
@@ -15,7 +15,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if channel exists
-  let channel = await channels
+  let channel = await Channels
     .findOne({ recipients: recipient._id, creator: req.user._id })
     .populate({
       path: "recipients",
@@ -23,13 +23,13 @@ module.exports = async (req, res, next) => {
         "-_id -password -__v -email -friends -status -created -lastSeen"
     });
   if (channel) {
-    await channels.updateOne({ recipients: recipient._id, creator: req.user._id }, {hide: false});
+    await Channels.updateOne({ recipients: recipient._id, creator: req.user._id }, {hide: false});
     req.io.in(req.user.id).emit("channel:created", { channel });
     return res.json({ status: true, channel });
   }
 
   // check if channel exists
-  channel = await channels
+  channel = await Channels
     .findOne({ recipients: req.user._id, creator: recipient._id })
     .populate({
       path: "recipients",
@@ -46,13 +46,13 @@ module.exports = async (req, res, next) => {
     channelID = flake.gen();
   }
 
-  let newChannel = await channels.create({
+  let newChannel = await Channels.create({
     channelID,
     creator: req.user._id,
     recipients: [recipient._id],
     lastMessaged: Date.now()
   });
-  newChannel = await channels.findOne(newChannel).populate({
+  newChannel = await Channels.findOne(newChannel).populate({
     path: "recipients",
     select: "-_id -password -__v -email -friends -status -created -lastSeen"
   });

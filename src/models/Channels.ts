@@ -1,15 +1,30 @@
-const mongoose = require("mongoose");
+import {Schema, model} from 'mongoose';
 
 
-const {
-  Schema
-} = mongoose;
-
-const permissionsSchema = new Schema({
+// TODO: replace this with bitwise permissions
+interface Permissions {
+  send_message: boolean
+}
+interface Channel {
+  name: string,
+  channelID: string
+  visibility: boolean
+  creator: any
+  recipients: any[]
+  hide: boolean
+  server: any
+  server_id: any
+  icon: string,
+  lastMessaged: number
+  rateLimit: number,
+  status: number,
+  permissions: Permissions
+}
+const permissionsSchema = new Schema<Permissions>({
   send_message: Boolean
 })
 
-const channelsSchema = new Schema({
+const schema = new Schema<Channel>({
   name: {type: String},
   channelID: { type: String, required: true },
   visibility: {type: Boolean},
@@ -34,4 +49,4 @@ const channelsSchema = new Schema({
 })
 
 
-module.exports = mongoose.model('channels', channelsSchema);
+export const Channels = model<Channel>('channels', schema);

@@ -1,4 +1,4 @@
-const Channels = require("../../../models/channels");
+import {Channels} from "../../../models/Channels";
 import {Messages} from '../../../models/Messages'
 
 import {MessageQuoteModel} from '../../../models/MessageQuote'

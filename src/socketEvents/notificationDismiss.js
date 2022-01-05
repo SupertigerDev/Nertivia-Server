@@ -1,4 +1,5 @@
-const channels = require("../models/channels");
+import { Channels } from "../models/Channels";
+
 import {ServerMembers} from "../models/ServerMembers";
 const { getConnectedUserBySocketID } = require("../newRedisWrapper");
 import { Notifications } from "../models/Notifications";
@@ -13,7 +14,7 @@ module.exports = async (data, client, io) => {
     if (error || !user) return;
     
     // server channel
-    const serverChannel = await channels.findOne({channelID, server: {$exists: true, $ne: null}}).select("server");
+    const serverChannel = await Channels.findOne({channelID, server: {$exists: true, $ne: null}}).select("server");
     if (serverChannel) {
        await ServerMembers.updateOne({server: serverChannel.server, member: user._id}, {
             $set: {
