@@ -1,5 +1,6 @@
 const servers = require('./../../../models/servers');
-const publicServersList = require("./../../../models/publicServersList");
+import {PublicServers} from '../../../models/PublicServers';
+
 
 module.exports = async (req, res, next) => {
   const {server_id} = req.params;
@@ -15,7 +16,7 @@ module.exports = async (req, res, next) => {
 
 
   // check if exists
-  const publicList = await publicServersList.findOne({server: server._id});
+  const publicList = await PublicServers.findOne({server: server._id});
   if (!publicList) return res.status(404).json({message: 'Server does not exist in the public list.'});
 
 
@@ -25,7 +26,7 @@ module.exports = async (req, res, next) => {
   }})
 
   // remove Server
-  const deleteServer = await publicServersList.deleteOne({
+  const deleteServer = await PublicServers.deleteOne({
     server: server._id,
   })
 

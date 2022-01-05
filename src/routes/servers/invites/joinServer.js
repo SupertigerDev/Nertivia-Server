@@ -1,5 +1,6 @@
 const ServerInvites = require("../../../models/ServerInvites");
-const publicServersList = require("../../../models/publicServersList");
+import {PublicServers} from '../../../models/PublicServers';
+
 const Servers = require("../../../models/servers");
 
 
@@ -38,7 +39,7 @@ module.exports = async (req, res, next) => {
       .lean();
     // check if server is in public list
     if (server) {
-      const checkPublicList = await publicServersList.findOne({
+      const checkPublicList = await PublicServers.findOne({
         server: server._id
       });
       if (!checkPublicList) {

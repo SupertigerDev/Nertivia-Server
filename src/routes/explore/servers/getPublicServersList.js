@@ -1,4 +1,4 @@
-const publicServersList = require("./../../../models/publicServersList");
+import {PublicServers} from '../../../models/PublicServers';
 
 module.exports = async (req, res, next) => {
   const { verified, alphabetical, most_users, date_added } = req.query;
@@ -20,7 +20,7 @@ module.exports = async (req, res, next) => {
     sort = { created: -1 };
   }
 
-  const serversList = await publicServersList.aggregate([
+  const serversList = await PublicServers.aggregate([
     {
       $lookup: {
         from: "servers",

@@ -1,4 +1,5 @@
-const publicServersList = require("./../../../models/publicServersList");
+import {PublicServers} from '../../../models/PublicServers';
+
 const servers = require('./../../../models/servers');
 
 module.exports = async (req, res, next) => {
@@ -8,7 +9,7 @@ module.exports = async (req, res, next) => {
   if (!server) return res.status(404).json({message: 'server does not exist.'});
 
 
-  const serversList = await publicServersList.findOne({server: server._id}, {_id: 0})
+  const serversList = await PublicServers.findOne({server: server._id}, {_id: 0})
     .select('description id created')
     .populate({path: 'server', select: 'name server_id avatar -_id'})
   if (!serversList) return res.status(404).json({message: 'does not exist.'});

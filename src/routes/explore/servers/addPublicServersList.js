@@ -1,6 +1,6 @@
 const flake = require('../../../utils/genFlakeId').default;
 const servers = require('./../../../models/servers');
-const publicServersList = require("./../../../models/publicServersList");
+import {PublicServers} from '../../../models/PublicServers';
 
 module.exports = async (req, res, next) => {
   const {server_id, description} = req.body;
@@ -18,11 +18,11 @@ module.exports = async (req, res, next) => {
 
 
   // check if already public-ed
-  const publicList = await publicServersList.findOne({server: server._id});
+  const publicList = await PublicServers.findOne({server: server._id});
   if (publicList) return res.status(404).json({message: 'server is already in the public list.'});
 
   // check if user added other servers
-  const lastTwoCreated = await publicServersList.find({creator: req.user._id}, {_id: 0}).select('created').sort({_id: -1}).limit(6);
+  const lastTwoCreated = await PublicServers.find({creator: req.user._id}, {_id: 0}).select('created').sort({_id: -1}).limit(6);
   if (lastTwoCreated.length >= 5) {
     return res.status(403).json({message: 'You can only add up to 5 public servers.'});
   }
@@ -41,7 +41,7 @@ module.exports = async (req, res, next) => {
   }})
 
   // add server
-  const add = await publicServersList.create({
+  const add = await PublicServers.create({
     id: flake.gen(),
     server: server._id,
     creator: req.user._id,
