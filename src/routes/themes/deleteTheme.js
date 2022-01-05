@@ -1,4 +1,5 @@
-const Themes = require("../../models/themes");
+import {Themes} from '../../models/Themes';
+
 import {PublicThemes} from '../../models/PublicThemes'
 
 

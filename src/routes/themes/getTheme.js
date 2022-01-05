@@ -1,5 +1,5 @@
-const Users = require("../../models/users");
-const Themes = require("../../models/themes");
+import {Themes} from '../../models/Themes';
+
 
 module.exports = async (req, res, next) => {
   const { id } = req.params;

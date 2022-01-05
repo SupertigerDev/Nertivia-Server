@@ -1,5 +1,4 @@
-const Users = require("../../models/users");
-const Themes = require("../../models/themes");
+import {Themes} from '../../models/Themes';
 
 const flake = require('../../utils/genFlakeId').default;
 module.exports = async (req, res, next) => {

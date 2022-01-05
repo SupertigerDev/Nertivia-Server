@@ -1,4 +1,4 @@
-const Themes = require("../../models/themes");
+import {Themes} from '../../models/Themes';
 
 module.exports = async (req, res, next) => {
   const _id = req.user._id;
