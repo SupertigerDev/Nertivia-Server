@@ -6,7 +6,7 @@ const User = require("../models/users");
 import {ServerInvites} from '../models/ServerInvites'
 import {Messages} from '../models/Messages'
 
-const ServerMembers = require("../models/ServerMembers");
+import {ServerMembers} from "../models/ServerMembers";
 import { ServerRoles } from '../models/ServerRoles';
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";

@@ -2,7 +2,7 @@ import {Request, Response, NextFunction} from 'express';
 import { zip } from '../../utils/zip'
 import {jsonToHtml} from 'jsonhtmlfyer';
 import SocketIO from 'socket.io'
-const ServerMembers = require("../../models/ServerMembers");
+import {ServerMembers} from "../../models/ServerMembers";
 import {Message, Messages} from '../../models/Messages'
 
 import {MessageQuoteModel} from '../../models/MessageQuote'

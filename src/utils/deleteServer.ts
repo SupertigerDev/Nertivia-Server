@@ -10,7 +10,7 @@ import {Messages} from '../models/Messages'
 import { deleteServerChannels, deleteServer as deleteServerRedis, deleteAllServerVoice } from '../newRedisWrapper';
 
 import { Notifications } from '../models/Notifications';
-const ServerMembers = require("../models/ServerMembers");
+import {ServerMembers} from "../models/ServerMembers";
 import { ServerRoles } from '../models/ServerRoles';
 const User = require("../models/users");
 

@@ -1,4 +1,4 @@
-const ServerMembers = require("../../models/ServerMembers");
+import {ServerMembers} from "../../models/ServerMembers";
 import { Notifications } from "../../models/Notifications";
 const Channels = require("../../models/channels");
 

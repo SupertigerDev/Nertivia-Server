@@ -1,6 +1,6 @@
 
 // Models
-const ServerMembers = require("../../models/ServerMembers");
+import {ServerMembers} from "../../models/ServerMembers";
 const Channels = require("../../models/channels");
 const Servers = require("../../models/servers");
 const User = require("../../models/users");

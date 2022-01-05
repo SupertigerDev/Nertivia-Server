@@ -1,7 +1,7 @@
 const Channels = require("../models/channels");
 const Servers = require("../models/servers");
 import { ServerRoles } from "../models/ServerRoles";
-const ServerMembers = require("../models/ServerMembers");
+import {ServerMembers} from "../models/ServerMembers";
 const redis = require("../redis");
 const { getServerChannel, addServer, getServer, addChannel } = require("../newRedisWrapper");
 //check if user is in the server.

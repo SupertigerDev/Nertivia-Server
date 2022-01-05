@@ -2,7 +2,7 @@ const events = require("./socketEvents/index");
 const emitUserStatus = require("./socketController/emitUserStatus");
 const emitToAll = require("./socketController/emitToAll");
 const User = require("./models/users");
-const ServerMembers = require("./models/ServerMembers");
+import {ServerMembers} from "./models/ServerMembers";
 import { ServerRoles } from "./models/ServerRoles";
 const channels = require("./models/channels");
 import {BlockedUsers} from "./models/BlockedUsers";

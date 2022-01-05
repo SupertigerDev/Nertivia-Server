@@ -1,13 +1,19 @@
-const mongoose = require("mongoose");
-const bcrypt = require('bcryptjs');
-const {
-    Schema
-} = mongoose;
+
+import {Schema, model} from 'mongoose';
 
 
+interface ServerMember {
+  member: any
+  server: any
+  server_id: string
+  type: string
+  roles: any[]
+  muted: number
+  muted_channels: any[]
+  last_seen_channels: any
+}
 
-
-const serverMembersSchema = new Schema({
+const schema = new Schema<ServerMember>({
 
   member: { type: Schema.Types.ObjectId, ref: 'users'},
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
@@ -20,12 +26,6 @@ const serverMembersSchema = new Schema({
 
 });
 
+schema.index({member: 1, server: 1}, {unique: true});
 
-serverMembersSchema.index({member: 1, server: 1}, {unique: true});
-
-
-const serverMembers = mongoose.model('server_members', serverMembersSchema);
-
-
-
-module.exports = serverMembers;
+export const ServerMembers = model<ServerMember>('server_members', schema);

@@ -1,5 +1,5 @@
 import { Notifications } from "../../../models/Notifications";
-const ServerMembers = require("../../../models/ServerMembers");
+import {ServerMembers} from "../../../models/ServerMembers";
 
 module.exports = async (req, res, next) => {
   const { channel_id, server_id } = req.params;

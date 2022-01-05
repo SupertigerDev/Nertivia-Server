@@ -1,5 +1,5 @@
 const channels = require("../models/channels");
-const ServerMembers = require("../models/ServerMembers");
+import {ServerMembers} from "../models/ServerMembers";
 const { getConnectedUserBySocketID } = require("../newRedisWrapper");
 import { Notifications } from "../models/Notifications";
 const redis = require('../redis');

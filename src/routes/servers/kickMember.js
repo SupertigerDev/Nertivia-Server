@@ -1,6 +1,6 @@
 
 const Users = require("../../models/users");
-const ServerMembers = require("../../models/ServerMembers");
+import {ServerMembers} from "../../models/ServerMembers";
 import {Messages} from '../../models/Messages'
 import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } from '../../newRedisWrapper';
 
