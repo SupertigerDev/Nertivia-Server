@@ -11,7 +11,7 @@ import { deleteServer } from '../../newRedisWrapper';
 
 const { matchedData } = require("express-validator");
 const flake = require('../../utils/genFlakeId').default;
-const cropImage = require('../../utils/cropImage');
+import {cropImage} from '../../utils/cropImage'
 
 module.exports = async (req, res, next) => {
   // check if this function is executed by the guild owner.

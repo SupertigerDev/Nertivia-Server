@@ -2,7 +2,7 @@ import { Users } from "../../models/Users";
 const { matchedData } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const JWT = require('jsonwebtoken');
-const cropImage = require('../../utils/cropImage');
+import {cropImage} from '../../utils/cropImage'
 import compressImage from '../../utils/compressImage';
 import { kickUser } from '../../utils/kickUser';
 import tempSaveImage from '../../utils/tempSaveImage';

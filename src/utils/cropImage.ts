@@ -1,9 +1,14 @@
-const gm = require("gm").subClass({imageMagick: true});
-const sharp = require('sharp');
-module.exports = async (buffer, mimeType, size) => {
+import gm from 'gm';
+import sharp from 'sharp';
+
+const im = gm.subClass({imageMagick: true});
+
+
+
+export async function cropImage (buffer: Buffer, mimeType: string, size: number): Promise<Buffer | undefined> {
   if (mimeType === "image/gif") {
     return new Promise(resolve => {
-      gm(buffer)
+      im(buffer)
         .coalesce()
         .resize(size, size, "^")
         .gravity("Center")
@@ -18,9 +23,9 @@ module.exports = async (buffer, mimeType, size) => {
           resolve(buff);
         });
     });
-  } else {
-    return await sharp(buffer)
-      .resize(size, size)
-      .toBuffer();
   }
+  return sharp(buffer)
+    .resize(size, size)
+    .toBuffer();
+  
 };

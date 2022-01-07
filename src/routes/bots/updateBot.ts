@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import {Users} from '../../models/Users';
 import { matchedData } from "express-validator";
-import cropImage from "../../utils/cropImage";
+import {cropImage} from "../../utils/cropImage";
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
 const emitToAll = require("../../socketController/emitToAll");
 const flakeId = new (require('flakeid'))();
@@ -55,7 +55,7 @@ export default async function updateBot(req: Request, res: Response) {
 
 async function uploadAvatar(base64: string, user_id: string) {
   return new Promise(async (resolve, reject) => {
-    let buffer = Buffer.from(base64.split(',')[1], 'base64');
+    let buffer: Buffer | undefined = Buffer.from(base64.split(',')[1], 'base64');
 
     // 8092000 = 8mb
     const maxSize = 8092000; 
@@ -65,9 +65,8 @@ async function uploadAvatar(base64: string, user_id: string) {
     }
     const mimeType = base64MimeType(base64);
     const type = base64.split(';')[0].split('/')[1];
-    if (!checkMimeType(mimeType!!)) {
+    if (!mimeType || !checkMimeType(mimeType!!)) {
       return reject("Invalid avatar.")
-
     }
 
     buffer = await cropImage(buffer, mimeType, 200);
