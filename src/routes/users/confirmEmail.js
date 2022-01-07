@@ -1,4 +1,4 @@
-const User = require("../../models/users");
+import { Users } from "../../models/Users";
 import {BannedIPs} from "../../models/BannedIPs";
 const JWT = require("jsonwebtoken");
 
@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
   }
 
   // Check if there is a user with the same email
-  const foundUser = await User.findOne({ email: email.toLowerCase() }).select(
+  const foundUser = await Users.findOne({ email: email.toLowerCase() }).select(
     "id email_confirm_code passwordVersion"
   );
   if (!foundUser) {
@@ -43,7 +43,7 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  await User.updateOne({_id: foundUser._id}, {$unset: {email_confirm_code: 1}})
+  await Users.updateOne({_id: foundUser._id}, {$unset: {email_confirm_code: 1}})
 
   // Generate the token without header information
   const token = signToken(foundUser.id, foundUser.passwordVersion)

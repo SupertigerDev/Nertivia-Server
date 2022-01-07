@@ -1,5 +1,5 @@
 
-const User = require('../../../models/users');
+import { Users } from "../../../models/Users";
 const Friend = require('../../../models/Friends');
 import { BlockedUsers } from '../../../models/BlockedUsers';
 const redis = require('../../../redis');
@@ -9,9 +9,9 @@ module.exports = async (req, res, next) => {
   const {username, tag} = req.body;
 
   // Find the recipient.
-  const recipient = await User.findOne({ username, tag })
+  const recipient = await Users.findOne({ username, tag })
   if (!recipient) return res.status(403)
-    .json({ status: false, errors: [{param: "all", msg: "User not found."}] });
+    .json({ status: false, errors: [{param: "all", msg: "Users not found."}] });
 
   if (recipient.bot) {
     return res.status(403)
@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
   }
   
   // Find requester
-  const requester = await User.findOne({ id: req.user.id });
+  const requester = await Users.findOne({ id: req.user.id });
   if (!requester) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
 
@@ -47,7 +47,7 @@ module.exports = async (req, res, next) => {
   ]})
   if (isBlocked) {
     return res.status(403)
-    .json({ status: false, errors: [{param: "all", msg: "User is blocked by you / them"}] });
+    .json({ status: false, errors: [{param: "all", msg: "Users is blocked by you / them"}] });
   }
 
   
@@ -68,11 +68,11 @@ module.exports = async (req, res, next) => {
   docRecipient.recipient = requester
 
   // update user model
-  const updateUserRequester = await User.findOneAndUpdate(
+  const updateUserRequester = await Users.findOneAndUpdate(
     { _id: requester._id },
     { $push: { friends: docRequester._id }}
   )
-  const updateUserRecipient = await User.findOneAndUpdate(
+  const updateUserRecipient = await Users.findOneAndUpdate(
     { _id: recipient._id },
     { $push: { friends: docRecipient._id }}
   )

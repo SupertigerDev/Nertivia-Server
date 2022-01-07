@@ -1,6 +1,6 @@
 
 import {Servers} from "../../models/Servers";
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 
 
 

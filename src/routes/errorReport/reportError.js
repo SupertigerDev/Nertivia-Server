@@ -1,5 +1,5 @@
 import {Messages} from '../../models/Messages'
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 import {Channels} from "../../models/Channels";
 const sendMessageNotification = require('../../utils/SendMessageNotification')
 // create a bot in nertivia, create a server and copy the channel iDID

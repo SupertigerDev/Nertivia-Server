@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 
 import {Channels} from "../models/Channels";
-const User = require("../models/users");
+import { Users } from "../models/Users";
 
 import {ServerInvites} from '../models/ServerInvites'
 import {Messages} from '../models/Messages'
@@ -24,7 +24,7 @@ export default async function join(server: any, user: any, socketID: string | un
 
 
   // check if user is already joined
-  const joined = await User.exists({
+  const joined = await Users.exists({
     _id: user._id,
     servers: server._id
   });
@@ -40,7 +40,7 @@ export default async function join(server: any, user: any, socketID: string | un
 
 
 
-  const updatedUser = await User.updateOne(
+  const updatedUser = await Users.updateOne(
     { _id: user._id },
     { $push: { servers: server._id } }
   ).catch(() => {res.status(403).json({ message: "Something went wrong while upading user." })})
@@ -54,7 +54,7 @@ export default async function join(server: any, user: any, socketID: string | un
     type: type,
   }).catch(async () => {
     res.status(403).json({ message: "Something went wrong while creating server member." });
-    await User.updateOne(
+    await Users.updateOne(
       { _id: user._id },
       { $pullAll: { servers: [server.server_id] } }
     );

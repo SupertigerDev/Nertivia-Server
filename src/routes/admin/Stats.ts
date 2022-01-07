@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 import {Servers} from "../../models/Servers";
 import {Messages} from '../../models/Messages'
 

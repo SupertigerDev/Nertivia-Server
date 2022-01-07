@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-const Users = require('../../models/users')
+import { Users } from "../../models/Users";
 import {Servers} from '../../models/Servers';
 import { ServerRoles } from "../../models/ServerRoles";
 import joinServer from "../../utils/joinServer";
@@ -32,7 +32,7 @@ export default async function createBot(req: Request, res: Response) {
 
   const joined = await Users.exists({
     _id: bot._id,
-    servers: req.server._id
+    servers: req.server._id as any
   });
   if (joined) {
     res.status(403).json({ message: "Bot is already in that server." })

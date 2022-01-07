@@ -5,7 +5,7 @@ import { getIOInstance } from "./socket/instance";
 import app from './app';
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
-import Users from './models/users';
+import {Users} from './models/Users';
 dotenv.config();
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";

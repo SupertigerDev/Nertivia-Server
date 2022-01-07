@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Users from '../../models/users';
+import {Users} from '../../models/Users';
 import { matchedData } from "express-validator";
 import cropImage from "../../utils/cropImage";
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'

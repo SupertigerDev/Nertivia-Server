@@ -1,6 +1,6 @@
 import {Friends} from '../models/Friends';
 
-const Users = require ('../models/users');
+import { Users } from '../models/Users';
 const SocketIO = require('socket.io');
 
 

@@ -1,15 +1,15 @@
-const User = require('../../../models/users');
+import { Users } from "../../../models/Users";
 import {Friends} from '../../../models/Friends';
 
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id;
     
   // check if the recipient exists
-  const recipient = await User.findOne({id: recipientUserID});
+  const recipient = await Users.findOne({id: recipientUserID});
   if (!recipient) return res.status(403)
-    .json({ status: false, errors: [{param: "all", msg: "User not found."}] });
+    .json({ status: false, errors: [{param: "all", msg: "Users not found."}] });
   // get accepter and check if the user exists.
-  const accepter = await User.findOne({id: req.user.id})
+  const accepter = await Users.findOne({id: req.user.id})
   if (!accepter) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
   

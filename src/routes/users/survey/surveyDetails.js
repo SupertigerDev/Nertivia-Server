@@ -1,7 +1,7 @@
-const User = require("../../../models/users");
+import { Users } from "../../../models/Users";
 
 module.exports = async (req, res, next) => {
-  const result = await User.findById(req.user._id, "about_me").lean();
+  const result = await Users.findById(req.user._id, "about_me").lean();
 
   if (!result.about_me) {
     return res.status(403).json({

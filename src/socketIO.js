@@ -1,7 +1,7 @@
 const events = require("./socketEvents/index");
 const emitUserStatus = require("./socketController/emitUserStatus");
 const emitToAll = require("./socketController/emitToAll");
-const User = require("./models/users");
+import { Users } from "./models/Users";
 import {ServerMembers} from "./models/ServerMembers";
 import { ServerRoles } from "./models/ServerRoles";
 import { Channels } from "./models/Channels";
@@ -78,7 +78,7 @@ module.exports = async client => {
       const userSelect =
         "avatar banner username type badges email id tag settings servers show_welcome GDriveRefreshToken status custom_status email_confirm_code banned bot passwordVersion readTerms";
 
-      const user = await User.findOne({ id: decryptedToken.userID })
+      const user = await Users.findOne({ id: decryptedToken.userID })
         .select(userSelect)
         .populate(populateFriends)
         .populate(populateServers)
@@ -86,7 +86,7 @@ module.exports = async client => {
 
       // disconnect user if not found.
       if (!user) {
-        console.log("Disconnect Reason: User not found in db");
+        console.log("Disconnect Reason: Users not found in db");
         delete client.auth;
         client.emit("auth_err", "Invalid Token");
         client.disconnect(true);
@@ -94,7 +94,7 @@ module.exports = async client => {
       }
 
       if (user.banned) {
-        console.log("Disconnect Reason: User is banned", user.username, user.id);
+        console.log("Disconnect Reason: Users is banned", user.username, user.id);
         delete client.auth;
         client.emit("auth_err", "You are banned.");
         client.disconnect(true);

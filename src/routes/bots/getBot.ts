@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-const Users = require('../../models/users')
+import { Users } from "../../models/Users";
 import {Servers} from '../../models/Servers';
 import { sign } from "jsonwebtoken";
 import {ServerMembers} from '../../models/ServerMembers';

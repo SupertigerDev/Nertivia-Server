@@ -1,5 +1,5 @@
 
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 import {ServerMembers} from "../../models/ServerMembers";
 import {Messages} from '../../models/Messages'
 import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } from '../../newRedisWrapper';

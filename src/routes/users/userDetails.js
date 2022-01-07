@@ -1,4 +1,4 @@
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 import {BlockedUsers} from "../../models/BlockedUsers";
 
 import {Servers} from "../../models/Servers";

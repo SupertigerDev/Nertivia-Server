@@ -1,4 +1,4 @@
-const User = require('../../models/users');
+import { Users } from "../../models/Users";
 module.exports = async (req, res, next) => {
 
   const io = req.io;
@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
   }
 
   try {
-    const update = await User.updateOne(
+    const update = await Users.updateOne(
       { _id: req.user._id },
       {'settings.server_position': server_position},
       {upsert: true},

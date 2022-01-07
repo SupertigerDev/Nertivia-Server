@@ -1,7 +1,7 @@
 // Models
 import {ServerMembers} from "../../models/ServerMembers";
 import {Channels} from "../../models/Channels";
-const User = require("../../models/users");
+import { Users } from "../../models/Users";
 import {Messages} from '../../models/Messages'
 import { getUserInVoiceByUserId, removeUserFromVoice, removeUserFromVoice } from '../../newRedisWrapper';
 
@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
   await redis.remServerMember(req.user.id, req.server.server_id);
 
   // remove server from users server list.
-  await User.updateOne(
+  await Users.updateOne(
     { _id: req.user._id },
     { $pullAll: { servers: [req.server._id] } }
   );

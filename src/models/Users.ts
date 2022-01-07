@@ -1,12 +1,65 @@
-const mongoose = require("mongoose");
-const bcrypt = require('bcryptjs');
-const flake = require('../utils/genFlakeId').default;
-const {
-  Schema
-} = mongoose;
+import {model, Schema} from 'mongoose';
+import bcrypt from 'bcryptjs';
+import flake from '../utils/genFlakeId'
 
 
-const aboutMeSchema = new Schema({
+
+interface AboutMe {
+  name: string;
+  gender: string
+  age: string
+  continent: string
+  country: string
+  about_me: string
+  "Suspend Reason": string
+}
+
+interface Appearance {
+  own_message_right:boolean
+  "12h_time": boolean
+}
+
+interface Settings {
+  apperance: Appearance
+  server_position: string[]
+}
+
+interface User {
+  email: string
+  banned: boolean
+  email_confirm_code: string
+  reset_password_code: string,
+  ip: string
+  username: string,
+  tag: string,
+  password: string
+  passwordVersion: number,
+  id: string
+  lastSeen: number,
+  avatar: string,
+  banner: string
+  custom_status: string
+  status: number,
+  type: string
+  friends: any[]
+  servers: any[]
+  created: number
+  show_welcome: boolean
+  badges: number
+  htmlProfile: string
+  about_me: AboutMe
+  settings: Settings
+  GDriveRefreshToken: string,
+  readTerms: boolean,
+
+  bot: boolean
+  createdBy: any
+  botPrefix: string
+  botCommands: any[]
+}
+
+
+const aboutMeSchema = new Schema<AboutMe>({
   name: { type: String },
   gender: { type: String },
   age: { type: String },
@@ -17,19 +70,19 @@ const aboutMeSchema = new Schema({
 })
 
 
-const apperanceSchema = new Schema({
+const appearanceSchema = new Schema<Appearance>({
   own_message_right: { type: Boolean, default: false, required: false }, // make own messages appear on the right (for own client) settings
   "12h_time": { type: Boolean, default: false, required: false }, // Change time to 12 hour.
 
 })
 
-const settingsSchema = new Schema({
-  apperance: { type: apperanceSchema },
+const settingsSchema = new Schema<Settings>({
+  apperance: { type: appearanceSchema },
   server_position: [{ type: String, required: false }]
 })
 
 
-const usersSchema = new Schema({
+const schema = new Schema<User>({
   email: {
     type: String,
     unique: false,
@@ -152,7 +205,7 @@ const usersSchema = new Schema({
   }
 });
 
-usersSchema.pre('save', async function (next) {
+schema.pre('save', async function (next) {
   try {
     if (!this.bot) {
       // Generate salt
@@ -174,32 +227,30 @@ usersSchema.pre('save', async function (next) {
     this.created = Date.now();
     next();
 
-  } catch (error) {
+  } catch (error: any) {
     next(error);
   }
 })
 
-usersSchema.methods.isValidPassword = async function (newPassword) {
+schema.methods.isValidPassword = async function (newPassword) {
   try {
     return await bcrypt.compare(newPassword, this.password);
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error);
   }
 }
 
 
-function generateString(n) {
+function generateString(n: number) {
   var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
   var string_length = n;
-  var randomstring = '';
+  var randomString = '';
   for (var i = 0; i < string_length; i++) {
-    var rnum = Math.floor(Math.random() * chars.length);
-    randomstring += chars.substring(rnum, rnum + 1);
+    var rNum = Math.floor(Math.random() * chars.length);
+    randomString += chars.substring(rNum, rNum + 1);
   }
-  return randomstring;
+  return randomString;
 }
 
-const Users = mongoose.model('users', usersSchema);
+export const Users = model<User>('users', schema);
 
-
-module.exports = Users;

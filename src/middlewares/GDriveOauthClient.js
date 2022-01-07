@@ -1,7 +1,7 @@
 const {
 	google
 } = require('googleapis');
-const User = require('../models/users');
+import { Users } from "../models/Users";
 
 module.exports = async (req, res, next) => {
 	const oauth2Client = new google.auth.OAuth2(
@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
 	if (!req.session || !req.session['user']) return next()
 	// check if GDriveRefreshToken exists in db
 	if (!req.session['user'].GDriveRefreshToken) {
-		const user = await User.findById(req.session['user']._id, {_id: 0}).select('GDriveRefreshToken');
+		const user = await Users.findById(req.session['user']._id, {_id: 0}).select('GDriveRefreshToken');
 		if (user && user.GDriveRefreshToken) {
 			req.session['user'].GDriveRefreshToken = user.GDriveRefreshToken
 		}

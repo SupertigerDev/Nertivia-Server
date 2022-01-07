@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 const redis = require("../../redis");
-import Users from "../../models/users";
+import {Users} from "../../models/Users";
 import SocketIO from 'socket.io'
 import { deleteSession } from "../../newRedisWrapper";
 

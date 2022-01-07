@@ -1,4 +1,4 @@
-const User = require('../../models/users');
+import { Users } from "../../models/Users";
 import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
 const { deleteDmChannel } = require('../../newRedisWrapper');
@@ -7,12 +7,12 @@ module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id; 
 
   // check if the recipient exists
-  const recipient = await User.findOne({id: recipientUserID});
+  const recipient = await Users.findOne({id: recipientUserID});
   if (!recipient) return res.status(403)
-    .json({ status: false, errors: [{param: "all", msg: "User not found."}] });
+    .json({ status: false, errors: [{param: "all", msg: "Users not found."}] });
 
   // check if the blocker exists
-  const requester = await User.findOne({id: req.user.id})
+  const requester = await Users.findOne({id: req.user.id})
   if (!requester) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
 
@@ -25,7 +25,7 @@ module.exports = async (req, res, next) => {
 
   if (!isBlocked) {
     return res.status(403)
-      .json({ message:"User is not blocked." });
+      .json({ message:"Users is not blocked." });
   }
 
   await BlockedUsers.deleteOne({
@@ -48,5 +48,5 @@ module.exports = async (req, res, next) => {
   
   io.in(requester.id).emit('user:unblock', recipient.id);
 
-  return res.json({message: "User unblocked." })
+  return res.json({message: "Users unblocked." })
 }

@@ -1,4 +1,4 @@
-const users = require("../../models/users");
+const users = require("../../models/Users");
 import { Channels } from "../../models/Channels";
 
 const flake = require('../../utils/genFlakeId').default;

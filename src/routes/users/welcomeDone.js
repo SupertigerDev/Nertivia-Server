@@ -1,7 +1,7 @@
-const User = require("../../models/users");
+import { Users } from "../../models/Users";
 
 module.exports = async (req, res, next) => {
-  User.findOneAndUpdate({ _id: req.user._id }, { $unset: {show_welcome: 1} }).exec(
+  Users.findOneAndUpdate({ _id: req.user._id }, { $unset: {show_welcome: 1} }).exec(
     function(err, item) {
       if (err) {
         return res.status(403).json({
@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
       }
       if (!item) {
         return res.status(404).json({
-          message: "User not found"
+          message: "Users not found"
         });
       }
 

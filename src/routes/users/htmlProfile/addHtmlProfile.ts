@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express-serve-static-core";
 
 import {checkHTML} from 'html-safe-checker'
-import Users from "../../../models/users";
+import {Users} from "../../../models/Users";
 import { zip } from "../../../utils/zip";
 
 export const addHtmlProfile = async (req: Request, res: Response, next: NextFunction) => {

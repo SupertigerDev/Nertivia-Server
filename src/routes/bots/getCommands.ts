@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import Users from '../../models/users';
+import {Users} from '../../models/Users';
 
 export default async function updateBot(req: Request, res: Response) {
-  const bot_ids = Object.values(req.query)
+  const bot_ids = Object.values(req.query) as string[]
   if (!Array.isArray(bot_ids)) {
     res.status(403).send({message: "Invalid type"})
     return

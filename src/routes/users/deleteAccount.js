@@ -1,4 +1,4 @@
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 const redis = require("../../redis");

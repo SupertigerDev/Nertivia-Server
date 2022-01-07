@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-const Users = require('../../models/users')
+import { Users } from "../../models/Users";
 
 export default async function createBot(req: Request, res: Response) {
   

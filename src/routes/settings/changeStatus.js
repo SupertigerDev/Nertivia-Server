@@ -1,6 +1,6 @@
 
 
-  const Users = require("../../models/users");
+  import { Users } from "../../models/Users";
   const redis = require("../../redis");
   const emitStatus = require("../../socketController/emitUserStatus");
 const { getCustomStatusByUserId, changeStatusByUserId } = require("../../newRedisWrapper");

@@ -1,7 +1,7 @@
 
 import { ServerRoles } from '../../../models/ServerRoles';
 const ServerMembers = require('../../../models/ServerMembers');
-const Users = require('../../../models/users');
+import { Users } from "../../../models/Users";
 const redis = require("../../../redis");
 
 

@@ -1,4 +1,4 @@
-const Users = require('../../../models/users');
+import { Users } from "../../../models/Users";
 
 const jwt = require('jsonwebtoken')
 

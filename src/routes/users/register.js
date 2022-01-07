@@ -1,4 +1,4 @@
-const User = require('../../models/users');
+import { Users } from "../../models/Users";
 import {BannedIPs} from "../../models/BannedIPs";
 import nodemailer from 'nodemailer';
 import validate from 'deep-email-validator'
@@ -54,7 +54,7 @@ module.exports = async (req, res, next) => {
     });
   }  
   // Check if there is a user with the same email in the db
-  const foundUser = await User.findOne({ email: email.toLowerCase() });
+  const foundUser = await Users.findOne({ email: email.toLowerCase() });
   if (foundUser) { 
     return res.status(403).json({ 
         status: false,
@@ -62,7 +62,7 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  const newUser = new User({ username, email: email.toLowerCase(), password, ip: req.userIP });
+  const newUser = new Users({ username, email: email.toLowerCase(), password, ip: req.userIP });
   const created = await newUser.save();
 
   if (process.env.DEV_MODE === "true") {
@@ -81,7 +81,7 @@ module.exports = async (req, res, next) => {
 
   transporter.sendMail(mailOptions, async (err, info) => {
     if (err) {
-      await User.deleteOne({_id: created._id})
+      await Users.deleteOne({_id: created._id})
       return res.status(403).json({
         errors: [{param: "other", msg: "Something went wrong while sending email. Try again later."}]
       });

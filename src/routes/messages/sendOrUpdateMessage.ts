@@ -7,7 +7,7 @@ import {Message, Messages} from '../../models/Messages'
 
 import {MessageQuotes} from '../../models/MessageQuotes'
 const matchAll = require("match-all");
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 import {Channels} from "../../models/Channels";
 
 const sendMessageNotification = require('../../utils/SendMessageNotification');
@@ -108,13 +108,13 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
   }
 
   // converted to a Set to remove duplicates.
-  let mentionIds = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
+  let mentionIds: string[] = Array.from(new Set(matchAll(message, /<@([\d]+)>/g).toArray()));
 
   //\[@:([\d]+)]
   // newMentionIDs
   mentionIds = Array.from(new Set([...mentionIds, ...matchAll(message, /\[@:([\d]+)]/g).toArray()]))
 
-  let mentions = [];
+  let mentions: any[] = [];
   if (mentionIds.length) {
     mentions = await Users.find({id: {$in: mentionIds}}).select('_id id avatar tag username').lean();
   } 

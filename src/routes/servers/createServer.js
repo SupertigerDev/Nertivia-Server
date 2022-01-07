@@ -3,7 +3,7 @@
 import {ServerMembers} from "../../models/ServerMembers";
 import {Channels} from "../../models/Channels";
 import {Servers} from "../../models/Servers";
-const User = require("../../models/users");
+import { Users } from "../../models/Users";
 import { ServerRoles } from "../../models/ServerRoles";
 const rolePerms = require("../../utils/rolePermConstants");
 const { AddFCMUserToServer } = require("../../utils/sendPushNotification");
@@ -43,7 +43,7 @@ module.exports = async (req, res, next) => {
     lastMessaged: Date.now()
   });
 
-  const addServerUser = await User.updateOne(
+  const addServerUser = await Users.updateOne(
     { _id: userDocID },
     { $push: { servers: createServer._id } }
   );

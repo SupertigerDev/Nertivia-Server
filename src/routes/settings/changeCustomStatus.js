@@ -1,5 +1,5 @@
 const redis = require("../../redis");
-const Users = require ('../../models/users');
+import { Users } from "../../models/Users";
 const emitAll = require("../../socketController/emitToAll");
 const { changeCustomStatusByUserId } = require("../../newRedisWrapper");
 

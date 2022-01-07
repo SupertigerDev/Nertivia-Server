@@ -1,4 +1,4 @@
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 
 module.exports = async (req, res, next) => {
   const value = req.params.value;

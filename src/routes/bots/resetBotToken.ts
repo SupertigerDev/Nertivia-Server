@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Users from '../../models/users';
+import {Users} from '../../models/Users';
 const redis = require("../../redis");
 import SocketIO from 'socket.io'
 import JWT from 'jsonwebtoken'

@@ -1,4 +1,4 @@
-const User = require("../../models/users");
+import { Users } from "../../models/Users";
 
 module.exports = async (req, res, next) => {
   const setting = req.body;
@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
   const appearancePath = "settings.apperance." + settingName;
   const settingsValue = setting[settingName];
 
-  User.findOneAndUpdate(
+  Users.findOneAndUpdate(
     { _id: req.user._id },
     { [appearancePath]: settingsValue }
   ).exec(function(err, item) {
@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
     }
     if (!item) {
       return res.status(404).json({
-        message: "User not found"
+        message: "Users not found"
       });
     }
     res.json({

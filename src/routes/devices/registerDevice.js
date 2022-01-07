@@ -1,6 +1,6 @@
 import {Devices} from '../../models/Devices';
 import {Servers} from "../../models/Servers";
-const Users = require("../../models/users");
+import { Users } from "../../models/Users";
 
 module.exports = async (req, res, next) => {
   const { token } = req.body;
