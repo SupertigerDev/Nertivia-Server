@@ -5,7 +5,7 @@ import { getIOInstance } from "./socket/instance";
 import app from './app';
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
-import {Users} from './models/Users';
+import { Log } from './Log';
 dotenv.config();
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
@@ -20,9 +20,7 @@ function main() {
 	if (cluster.isMaster) {
 		console.log("Master PID: ", process.pid);
 	
-		// run workers
 		for (let i = 0; i < numCPUs; i++) {
-		// for (let i = 0; i < 4; i++) {
 			cluster.fork();
 		}
 		cluster.on('exit', (worker, code, signal) => {
@@ -34,22 +32,28 @@ function main() {
 }
 
 function start() {
-	const mongoOptions: mongoose.ConnectionOptions = {
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-		useFindAndModify: false,
-		useCreateIndex: true
-	};
+	console.log(`Worker Started! PID:`, process.pid);
 
-	let httpServerInitialized = false;
+	let isListening = false;
 
-	mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, async function (err) {
-		if (err) throw err;
-		console.log("\x1b[32m" + "MongoDB> " + "\x1b[1m" + "Connected!\x1b[0m");
-		connectToRedis();
-	});
-
-	function connectToRedis() {
+	connectMongoDB();
+	
+	function connectMongoDB() {
+		Log.info("Connecting to MongoDB...")
+		const mongoOptions: mongoose.ConnectionOptions = {
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+			useFindAndModify: false,
+			useCreateIndex: true
+		};
+		mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, err => {
+			if (err) throw err;
+			Log.info("Connected!")
+			connectRedis();
+		})
+	}
+	function connectRedis() {
+		Log.info("Connecting to Redis...")
 		if (redisInstanceExists()) return;
 		const client = getRedisInstance({
 			host: process.env.REDIS_HOST,
@@ -58,34 +62,26 @@ function start() {
 		});
 		if (!client) return;
 		client.on("ready", () => {
+			Log.info("Connected!")
 			client.flushall();
-			console.log("\x1b[33mRedis>\x1b[1m Connected!\x1b[0m");
-			startHTTPServer();
+			startServer();
 		});
 		client.on("error", err => {
 			throw err;
 		})
 	}
-
-
-	function startHTTPServer() {
-		if (httpServerInitialized) return;
-		httpServerInitialized = true;
+	function startServer() {
+		if (isListening) return;
 		const server = app();
-
 
 		const socketIO = require('./socketIO');
 
 		getIOInstance().on("connection", socketIO);
 
-
-
 		const port = process.env.PORT || 8000;
 		server.listen(port, function () {
-			console.log("\x1b[36mHTTP & Socket>\x1b[1m listening on *:" + (port) + "\x1b[0m");
+			Log.info("Listening on port", port);
 		});
-
 	}
-	console.log(`Worker Started! PID:`, process.pid);
 
 }

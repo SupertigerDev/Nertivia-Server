@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import connectRedis from "connect-redis";
 import session from "express-session";
 import JWT from 'jsonwebtoken';
-import {getRedisInstance, redisInstanceExists} from '../redis/instance'
+import {getRedisInstance} from '../redis/instance'
 import { RequestHandler } from "express-serve-static-core";
 
 const RedisStore = connectRedis(session);
