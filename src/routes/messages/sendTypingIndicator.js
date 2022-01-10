@@ -1,3 +1,4 @@
+const { USER_TYPING } = require("../../ServerEventNames");
 
 module.exports = async (req, res, next) => {
   const { channelID } = req.params;
@@ -7,7 +8,7 @@ module.exports = async (req, res, next) => {
   const io = req.io;
 
   if (req.channel && req.channel.server) {
-    io.in("server:" + req.channel.server.server_id).emit("typingStatus", {
+    io.in("server:" + req.channel.server.server_id).emit(USER_TYPING, {
       channel_id: channelID,
       user: { id: req.user.id, username: req.user.username }
     });
@@ -16,7 +17,7 @@ module.exports = async (req, res, next) => {
 
   if (req.channel && req.channel.recipients) {
     for (let recipients of req.channel.recipients) {
-      io.in(recipients.id).emit("typingStatus", {
+      io.in(recipients.id).emit(USER_TYPING, {
         channel_id: channelID,
         user: { id: req.user.id, username: req.user.username }
       });

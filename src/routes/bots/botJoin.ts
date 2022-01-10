@@ -5,6 +5,7 @@ import { ServerRoles } from "../../models/ServerRoles";
 import joinServer from "../../utils/joinServer";
 
 import flake from '../../utils/genFlakeId'
+import { SERVER_ROLE_CREATED } from "../../ServerEventNames";
 
 
 export default async function createBot(req: Request, res: Response) {
@@ -68,7 +69,7 @@ export default async function createBot(req: Request, res: Response) {
     order: 0,
   };
   const io = req.io;
-  io.in("server:" + req.server.server_id).emit("server:create_role", data);
+  io.in("server:" + req.server.server_id).emit(SERVER_ROLE_CREATED, data);
   
   
   // ready to perform join action

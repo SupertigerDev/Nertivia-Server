@@ -10,6 +10,7 @@ const redis = require("../../redis");
 
 import deleteServer from "../../utils/deleteServer";
 import { deleteFCMFromServer, sendServerPush } from "../../utils/sendPushNotification";
+import { MESSAGE_CREATED, SERVER_LEFT, SERVER_MEMBER_REMOVED, USER_CALL_LEFT } from "../../ServerEventNames";
 module.exports = async (req, res, next) => {
   // check if its the creator and send an error if it is.
   if (req.server.creator === req.user._id) {
@@ -52,14 +53,14 @@ module.exports = async (req, res, next) => {
   const [voiceDetails, err] = await getUserInVoiceByUserId(req.user.id);
   if (voiceDetails?.serverId === req.server.server_id) {
     await removeUserFromVoice(req.user.id)
-    io.in("server:" + voiceDetails.serverId).emit("user:left_call", {channelId: voiceDetails.channelId, userId: req.user.id})
+    io.in("server:" + voiceDetails.serverId).emit(USER_CALL_LEFT, {channelId: voiceDetails.channelId, userId: req.user.id})
   }
 
 
 
   // leave room
 
-  io.in(req.user.id).emit("server:leave", {
+  io.in(req.user.id).emit(SERVER_LEFT, {
     server_id: req.server.server_id
   });
   io.in(req.user.id).socketsLeave("server:" + req.server.server_id)
@@ -69,7 +70,7 @@ module.exports = async (req, res, next) => {
 
 
   // emit leave event 
-  io.in("server:" + req.server.server_id).emit("server:member_remove", {
+  io.in("server:" + req.server.server_id).emit(SERVER_MEMBER_REMOVED, {
     id: req.user.id,
     server_id: req.server.server_id
   });
@@ -97,7 +98,7 @@ module.exports = async (req, res, next) => {
 
   // emit message
 
-  io.in("server:" + req.server.server_id).emit("receiveMessage", {
+  io.in("server:" + req.server.server_id).emit(MESSAGE_CREATED, {
     message: messageCreated
   });
 

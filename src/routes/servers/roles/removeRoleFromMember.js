@@ -2,6 +2,7 @@
 import { ServerRoles } from '../../../models/ServerRoles';
 const ServerMembers = require('../../../models/ServerMembers');
 import { Users } from "../../../models/Users";
+import { SERVER_ROLE_REMOVED_FROM_MEMBER } from '../../../ServerEventNames';
 const redis = require("../../../redis");
 
 
@@ -66,7 +67,7 @@ module.exports = async (req, res, next) => {
   redis.remServerMember(member_id, req.server.server_id);
 
   const io = req.io;
-  io.in("server:" + req.server.server_id).emit("server_member:remove_role", {
+  io.in("server:" + req.server.server_id).emit(SERVER_ROLE_REMOVED_FROM_MEMBER, {
     role_id: role_id,
     id: member_id,
     server_id: server_id,

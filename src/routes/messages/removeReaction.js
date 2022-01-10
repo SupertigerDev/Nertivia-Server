@@ -1,5 +1,6 @@
 import {MessageReactions} from '../../models/MessageReactions';
 import {Messages} from '../../models/Messages'
+import { MESSAGE_REACTION_UPDATED } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID } = req.params;
@@ -55,10 +56,10 @@ module.exports = async (req, res, next) => {
 
   
   if (req.channel.server) {
-    req.io.in("server:" + req.channel.server.server_id).emit("message:update_reaction", response)
+    req.io.in("server:" + req.channel.server.server_id).emit(MESSAGE_REACTION_UPDATED, response)
   } else {
-    req.io.in(req.user.id).emit("message:update_reaction", response);
-    req.io.in(req.channel.recipients[0].id).emit("message:update_reaction", response);
+    req.io.in(req.user.id).emit(MESSAGE_REACTION_UPDATED, response);
+    req.io.in(req.channel.recipients[0].id).emit(MESSAGE_REACTION_UPDATED, response);
   }
 
   res.json(response);

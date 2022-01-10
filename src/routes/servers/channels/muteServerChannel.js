@@ -1,5 +1,6 @@
 import { Notifications } from "../../../models/Notifications";
 import {ServerMembers} from "../../../models/ServerMembers";
+import { CHANNEL_MUTED } from "../../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
   const { channel_id, server_id } = req.params;
@@ -28,5 +29,5 @@ module.exports = async (req, res, next) => {
   res.json({ message: "Channel muted." });
 
   const io = req.io;
-  io.in(req.user.id).emit("channel:mute", {channelID: channel_id});
+  io.in(req.user.id).emit(CHANNEL_MUTED, {channelID: channel_id});
 };

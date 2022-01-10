@@ -1,4 +1,5 @@
 import {Channels} from "../../../models/Channels";
+import { SERVER_CHANNEL_UPDATED } from "../../../ServerEventNames";
 const { addChannel, getServerChannel } = require("../../../newRedisWrapper");
 const redis = require("../../../redis");
 
@@ -47,7 +48,7 @@ module.exports = async (req, res, next) => {
 
     await Channels.updateOne({ channelID }, dataFiltered);
     const io = req.io;
-    io.in("server:" + req.server.server_id).emit("server:update_channel", Object.assign({}, dataFiltered, {channelID}) );
+    io.in("server:" + req.server.server_id).emit(SERVER_CHANNEL_UPDATED, Object.assign({}, dataFiltered, {channelID}) );
     res.json(Object.assign({}, dataFiltered, {channelID}));
     // update in cache
     updateChannelCache(dataFiltered, channelID)

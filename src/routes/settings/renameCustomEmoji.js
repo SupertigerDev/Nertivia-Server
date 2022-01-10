@@ -1,4 +1,5 @@
 import {CustomEmojis} from '../../models/CustomEmojis';
+import { CUSTOM_EMOJI_RENAMED } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
   const { id, name } = req.body;
@@ -59,7 +60,7 @@ module.exports = async (req, res, next) => {
     });
     const io = req.io;
     // send owns status to every connected device
-    io.in(req.user.id).emit("customEmoji:rename", {
+    io.in(req.user.id).emit(CUSTOM_EMOJI_RENAMED, {
       emoji: item
     });
   });

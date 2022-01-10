@@ -1,4 +1,5 @@
 import { deleteSession } from "../newRedisWrapper";
+import { AUTHENTICATION_ERROR } from "../ServerEventNames";
 import { getIOAdapter, getIOInstance } from "../socket/instance";
 const redis = require("../redis");
 
@@ -12,7 +13,7 @@ export async function kickUser(userID: string, message: string, excludeSocketID?
   io.in(userID).allSockets().then(clients => {
     clients.forEach(socket_id => {
       if (excludeSocketID === socket_id) return;
-      io.to(socket_id).emit("auth_err", message);
+      io.to(socket_id).emit(AUTHENTICATION_ERROR, message);
       getIOAdapter().remoteDisconnect(socket_id, true)
     })
   })

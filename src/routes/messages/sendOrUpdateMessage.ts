@@ -13,6 +13,7 @@ import {Channels} from "../../models/Channels";
 const sendMessageNotification = require('../../utils/SendMessageNotification');
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
+import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../../ServerEventNames';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID, messageID } = req.params;
@@ -275,7 +276,7 @@ async function serverMessage(req: any, io: SocketIO.Server, channelID: any, mess
   io.in("server:" + req.channel.server.server_id).allSockets().then(sockets => {
     sockets.forEach(socket_id => {
       if (socket_id === socketID) return;
-      io.to(socket_id).emit("receiveMessage", {
+      io.to(socket_id).emit(MESSAGE_CREATED, {
         message: messageCreated
       });
     })
@@ -355,7 +356,7 @@ async function directMessage(req: any, io: SocketIO.Server, channelID: any, mess
 
   if (!isSavedNotes){
     // for group messaging, do a loop instead of [0]
-    io.in(req.channel.recipients[0].id).emit("receiveMessage", {
+    io.in(req.channel.recipients[0].id).emit(MESSAGE_CREATED, {
       message: messageCreated
     });
   }
@@ -364,7 +365,7 @@ async function directMessage(req: any, io: SocketIO.Server, channelID: any, mess
   io.in(req.user.id).allSockets().then(sockets => {
     sockets.forEach(socket_id => {
       if (socket_id === socketID) return;
-      io.to(socket_id).emit("receiveMessage", {
+      io.to(socket_id).emit(MESSAGE_CREATED, {
         message: messageCreated,
         tempID,
       });
@@ -386,13 +387,13 @@ async function directMessage(req: any, io: SocketIO.Server, channelID: any, mess
 
 function updateMessage(req: any,server: any, resObj: any, io: any) {
   if (server) {
-    io.in("server:" + server.server_id).emit("update_message", {
+    io.in("server:" + server.server_id).emit(MESSAGE_UPDATED, {
       ...resObj,
       embed: 0
     });
   } else {
-    io.in(req.user.id).emit("update_message", { ...resObj, embed: {} });
-    io.in(req.channel.recipients[0].id).emit("update_message", {
+    io.in(req.user.id).emit(MESSAGE_UPDATED, { ...resObj, embed: {} });
+    io.in(req.channel.recipients[0].id).emit(MESSAGE_UPDATED, {
       ...resObj,
       embed: 0
     });

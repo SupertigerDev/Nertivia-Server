@@ -4,6 +4,7 @@ import {Messages} from '../../../models/Messages'
 import {MessageQuotes} from '../../../models/MessageQuotes'
 import { deleteServerChannel } from '../../../newRedisWrapper';
 import { Notifications } from '../../../models/Notifications';
+import { SERVER_CHANNEL_DELETED } from "../../../ServerEventNames";
 const redis = require("../../../redis");
 
 module.exports = async (req, res, next) => {
@@ -21,7 +22,7 @@ module.exports = async (req, res, next) => {
     await Messages.deleteMany({ channelID });
     await deleteServerChannel(channelID);
     const io = req.io;
-    io.in("server:" + req.server.server_id).emit("server:remove_channel", {
+    io.in("server:" + req.server.server_id).emit(SERVER_CHANNEL_DELETED, {
       channelID,
       server_id: server.server_id
     });

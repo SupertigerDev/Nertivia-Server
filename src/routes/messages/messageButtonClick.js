@@ -1,4 +1,5 @@
 import {Messages} from '../../models/Messages'
+import { MESSAGE_BUTTON_CLICKED } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID, buttonID } = req.params;
@@ -24,6 +25,6 @@ module.exports = async (req, res, next) => {
     resObj.serverID = server.server_id
   }
 
-  io.in(message.creator.id).emit("message_button_clicked", resObj)
+  io.in(message.creator.id).emit(MESSAGE_BUTTON_CLICKED, resObj)
   res.status(200).json({message: "Waiting for bot response..."});
 };

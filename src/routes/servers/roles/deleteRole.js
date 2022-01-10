@@ -1,5 +1,6 @@
 
 import {ServerRoles} from '../../../models/ServerRoles';
+import { SERVER_ROLE_DELETED } from '../../../ServerEventNames';
 
 
 
@@ -39,7 +40,7 @@ module.exports = async (req, res, next) => {
   await ServerRoles.deleteOne({_id: role._id});
 
   const io = req.io;
-  io.in("server:" + req.server.server_id).emit("server:delete_role", {role_id: role.id, server_id: req.server.server_id});
+  io.in("server:" + req.server.server_id).emit(SERVER_ROLE_DELETED, {role_id: role.id, server_id: req.server.server_id});
 
   res.json({role_id: role.id, server_id: req.server.server_id});
   

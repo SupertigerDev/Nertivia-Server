@@ -11,6 +11,7 @@ import { ServerRoles } from '../models/ServerRoles';
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
 import { getCustomStatusByUserId, getPresenceByUserId, getVoiceUsersFromServerIds } from '../newRedisWrapper';
+import { MESSAGE_CREATED, SERVER_JOINED, SERVER_MEMBERS, SERVER_MEMBER_ADDED, SERVER_ROLES } from '../ServerEventNames';
 
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
@@ -91,7 +92,7 @@ export default async function join(server: any, user: any, socketID: string | un
   // get user presence
   const [presence] = await getPresenceByUserId(serverMember.member.id);
   const [customStatus] = await getCustomStatusByUserId(serverMember.member.id);
-  io.in("server:" + server.server_id).emit("server:member_add", {
+  io.in("server:" + server.server_id).emit(SERVER_MEMBER_ADDED, {
     serverMember,
     custom_status: customStatus[1],
     presence: presence[1]
@@ -106,15 +107,9 @@ export default async function join(server: any, user: any, socketID: string | un
 
   // Which one is better? (1)
   io.in(user.id).socketsJoin("server:" + createServerObj.server_id)
-  io.in(user.id).emit("server:joined", {...createServerObj, socketID})
+  io.in(user.id).emit(SERVER_JOINED, {...createServerObj, socketID})
 
-  // // (2)
-  // io.in(user.id).allSockets().then(sockets => {
-  //   sockets.forEach(socket_id => {
-  //     getIOAdapter().remoteJoin(socket_id, "server:" + createServerObj.server_id);
-  //     io.to(socket_id).emit("server:joined", {...createServerObj, socketID})
-  //   })
-  // })
+
 
   // send join message
 
@@ -137,7 +132,7 @@ export default async function join(server: any, user: any, socketID: string | un
   messageCreated.creator = user;
 
   // emit message
-  io.in("server:" + createServerObj.server_id).emit("receiveMessage", {
+  io.in("server:" + createServerObj.server_id).emit(MESSAGE_CREATED, {
     message: messageCreated
   });
 
@@ -171,7 +166,7 @@ export default async function join(server: any, user: any, socketID: string | un
     { _id: 0 }
   ).select("name id color permissions server_id deletable order default hideRole");
 
-  io.to(user.id).emit("server:roles", {
+  io.to(user.id).emit(SERVER_ROLES, {
     server_id: server.server_id,
     roles: serverRoles
   });
@@ -190,7 +185,7 @@ export default async function join(server: any, user: any, socketID: string | un
     sm.server_id = server.server_id;
     return sm;
   });
-  io.to(user.id).emit("server:members", {
+  io.to(user.id).emit(SERVER_MEMBERS, {
     serverMembers,
     memberPresences: memberStatusArr,
     memberCustomStatusArr: customStatusArr,

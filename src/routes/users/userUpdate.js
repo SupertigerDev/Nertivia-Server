@@ -7,6 +7,7 @@ import compressImage from '../../utils/compressImage';
 import { kickUser } from '../../utils/kickUser';
 import tempSaveImage from '../../utils/tempSaveImage';
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import { USER_UPDATED } from "../../ServerEventNames";
 const flakeId = new (require('flakeid'))();
 const emitToAll = require('../../socketController/emitToAll');
 const sio = require("socket.io");
@@ -136,7 +137,7 @@ module.exports = async (req, res, next) => {
     }
 
 
-    io.in(req.user.id).emit("update_member", resObj);
+    io.in(req.user.id).emit(USER_UPDATED, resObj);
 
     // emit public data
     if (!data.avatar && !data.username) return;
@@ -144,7 +145,7 @@ module.exports = async (req, res, next) => {
     if (data.avatar) publicObj.avatar = data.avatar;
     if (data.username) publicObj.username = data.username;
     if (data.tag) publicObj.tag = data.tag;
-    emitToAll('update_member', req.user._id, publicObj, io, false)
+    emitToAll(USER_UPDATED, req.user._id, publicObj, io, false)
     
   } catch (e) {
     console.log(e);

@@ -1,4 +1,5 @@
 import { Users } from "../../../models/Users";
+import { GOOGLE_DRIVE_LINKED } from "../../../ServerEventNames";
 
 const jwt = require('jsonwebtoken')
 
@@ -28,7 +29,7 @@ module.exports = async (req, res, next) => {
 		const {ok, error, result} = await DriveAPI.createFolder( oauth2Client );
 		if ( ok ) {
 			const io = req.io
-			io.in(decryptedToken).emit('googleDrive:linked');
+			io.in(decryptedToken).emit(GOOGLE_DRIVE_LINKED);
 			return res.json ({ success: true })
 		} else {
 			return res.json ({ success: false })

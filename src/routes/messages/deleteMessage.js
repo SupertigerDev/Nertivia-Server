@@ -1,6 +1,7 @@
 import {Messages} from '../../models/Messages'
 
 import {MessageQuotes} from '../../models/MessageQuotes'
+import { MESSAGE_DELETED } from '../../ServerEventNames';
 const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 module.exports = async (req, res, next) => {
@@ -38,10 +39,10 @@ module.exports = async (req, res, next) => {
     res.json(resObj);
     const io = req.io;
     if (server) {
-      io.in("server:" + server.server_id).emit("delete_message", resObj);
+      io.in("server:" + server.server_id).emit(MESSAGE_DELETED, resObj);
     } else {
-      io.in(user.id).emit("delete_message", resObj);
-      io.in(channel.recipients[0].id).emit("delete_message", resObj);
+      io.in(user.id).emit(MESSAGE_DELETED, resObj);
+      io.in(channel.recipients[0].id).emit(MESSAGE_DELETED, resObj);
     }
 
     // delete image if exists

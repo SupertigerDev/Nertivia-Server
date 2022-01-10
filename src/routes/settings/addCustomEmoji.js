@@ -2,6 +2,7 @@ import {cropImage} from "../../utils/cropImage"
 import { CustomEmojis } from '../../models/CustomEmojis';
 const flake = require('../../utils/genFlakeId').default;
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import { CUSTOM_EMOJI_UPLOADED } from "../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
 
@@ -101,7 +102,7 @@ module.exports = async (req, res, next) => {
 
   const io = req.io;
   // send owns status to every connected device
-  io.in(req.user.id).emit("customEmoji:uploaded", {
+  io.in(req.user.id).emit(CUSTOM_EMOJI_UPLOADED, {
     emoji: addEmoji
   });
 };

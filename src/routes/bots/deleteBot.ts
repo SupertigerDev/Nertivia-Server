@@ -3,6 +3,7 @@ const redis = require("../../redis");
 import {Users} from "../../models/Users";
 import SocketIO from 'socket.io'
 import { deleteSession } from "../../newRedisWrapper";
+import { AUTHENTICATION_ERROR } from "../../ServerEventNames";
 
 export default async function deleteBot(req: Request, res: Response) {
   const { bot_id } = req.params;
@@ -54,6 +55,6 @@ export default async function deleteBot(req: Request, res: Response) {
 async function kickBot(io: SocketIO.Server, bot_id: string) {
   await deleteSession(bot_id);
 
-  io.in(bot_id).emit("auth_err", "Token outdated.");
+  io.in(bot_id).emit(AUTHENTICATION_ERROR, "Token outdated.");
   io.in(bot_id).disconnectSockets(true);
 }

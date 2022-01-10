@@ -1,3 +1,4 @@
+const { USER_STATUS_CHANGED, SELF_STATUS_CHANGE } = require("../ServerEventNames");
 const emitToAll = require("./emitToAll");
 
 module.exports = function emitStatus(user_id, id, status, io, emitOffline = true, customStatus, connected = false) {
@@ -8,9 +9,9 @@ module.exports = function emitStatus(user_id, id, status, io, emitOffline = true
         payload.custom_status = customStatus
         payload.connected = true
       } 
-      emitToAll("userStatusChange", id, payload, io);
+      emitToAll(USER_STATUS_CHANGED, id, payload, io);
     }
 
     // send owns status to every connected device 
-    io.in(user_id).emit('multiDeviceStatus', { status });
+    io.in(user_id).emit(SELF_STATUS_CHANGE, { status });
   }

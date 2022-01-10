@@ -2,6 +2,7 @@
 import { Users } from "../../../models/Users";
 const Friend = require('../../../models/Friends');
 import { BlockedUsers } from '../../../models/BlockedUsers';
+import { RELATIONSHIP_ADDED } from "../../../ServerEventNames";
 const redis = require('../../../redis');
 const { getProgramActivityByUserIds, getPresenceByUserIds, getCustomStatusByUserIds } = require('../../../newRedisWrapper');
 
@@ -91,8 +92,8 @@ module.exports = async (req, res, next) => {
   docRecipient.recipient.custom_status = customStatus[1][1] || null;
 
 
-  io.in(requester.id).emit('relationshipAdd', {...docRequester, program_activity: JSON.parse(programActivity[0]) || null});
-  io.in(recipient.id).emit('relationshipAdd', {...docRecipient, program_activity: JSON.parse(programActivity[1]) || null});
+  io.in(requester.id).emit(RELATIONSHIP_ADDED, {...docRequester, program_activity: JSON.parse(programActivity[0]) || null});
+  io.in(recipient.id).emit(RELATIONSHIP_ADDED, {...docRecipient, program_activity: JSON.parse(programActivity[1]) || null});
 
   return res.json({ status: true, message: `Request sent to ${recipient.username}` })
 }

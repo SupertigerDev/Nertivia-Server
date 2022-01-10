@@ -1,4 +1,5 @@
 const Servers = require('../../../models/Servers');
+const { SERVER_CHANNEL_POSITION_UPDATED } = require('../../../ServerEventNames');
 module.exports = async (req, res, next) => {
 
 
@@ -30,7 +31,7 @@ module.exports = async (req, res, next) => {
       res.json({
         channel_position
       });
-      io.in('server:' + req.server.server_id).emit("server:channel_position", {serverID: req.server.server_id, channel_position} );
+      io.in('server:' + req.server.server_id).emit(SERVER_CHANNEL_POSITION_UPDATED, {serverID: req.server.server_id, channel_position} );
       return;
   } catch(e) {
     return res.status(403).json({

@@ -1,4 +1,5 @@
 import { ServerRoles } from "../../../models/ServerRoles";
+import { SERVER_ROLE_UPDATED } from "../../../ServerEventNames";
 const { matchedData } = require("express-validator");
 const redis = require("../../../redis");
 const rolePermConstants = require('../../../utils/rolePermConstants');
@@ -57,7 +58,7 @@ module.exports = async (req, res, next) => {
 
   const data = Object.assign({}, dataMatched, {id: roleID, server_id: req.server.server_id});
   const io = req.io;
-  io.in("server:" + req.server.server_id).emit("server:update_role", data);
+  io.in("server:" + req.server.server_id).emit(SERVER_ROLE_UPDATED, data);
 
   res.json(data);
   

@@ -7,6 +7,7 @@ import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } fro
 import { Notifications } from '../../models/Notifications';
 import {Channels} from "../../models/Channels";
 import { ServerRoles } from '../../models/ServerRoles';
+import { MESSAGE_CREATED, SERVER_LEFT, SERVER_MEMBER_REMOVED, SERVER_ROLE_DELETED, USER_CALL_LEFT } from "../../ServerEventNames";
 const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 
@@ -88,7 +89,7 @@ module.exports = async (req, res, next) => {
   const role = await ServerRoles.findOneAndDelete({ bot: userToBeKicked._id, server: server._id });
 
   if (role) {
-    io.in("server:" + role.server_id).emit("server:delete_role", { role_id: role.id, server_id: role.server_id });
+    io.in("server:" + role.server_id).emit(SERVER_ROLE_DELETED, { role_id: role.id, server_id: role.server_id });
   }
 
   // delete member from server members
@@ -106,7 +107,7 @@ module.exports = async (req, res, next) => {
   const [voiceDetails, err] = await getUserInVoiceByUserId(id);
   if (voiceDetails?.serverId === server_id) {
     await removeUserFromVoice(id)
-    io.in("server:" + voiceDetails.serverId).emit("user:left_call", {channelId: voiceDetails.channelId, userId: id})
+    io.in("server:" + voiceDetails.serverId).emit(USER_CALL_LEFT, {channelId: voiceDetails.channelId, userId: id})
   }
 
 
@@ -114,7 +115,7 @@ module.exports = async (req, res, next) => {
   // leave room
 
   
-  io.in(id).emit("server:leave", {
+  io.in(id).emit(SERVER_LEFT, {
     server_id: server.server_id
   });
   io.in(id).socketsLeave("server:" + server.server_id)
@@ -123,7 +124,7 @@ module.exports = async (req, res, next) => {
 
 
   // emit leave event 
-  io.in("server:" + req.server.server_id).emit("server:member_remove", {
+  io.in("server:" + req.server.server_id).emit(SERVER_MEMBER_REMOVED, {
     id: id,
     server_id: server_id
   });
@@ -142,7 +143,7 @@ module.exports = async (req, res, next) => {
 
   // emit message
 
-  io.in("server:" + req.server.server_id).emit("receiveMessage", {
+  io.in("server:" + req.server.server_id).emit(MESSAGE_CREATED, {
     message: messageCreated
   });
 

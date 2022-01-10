@@ -3,6 +3,7 @@ import { Channels } from "../models/Channels";
 import {ServerMembers} from "../models/ServerMembers";
 const { getConnectedUserBySocketID } = require("../newRedisWrapper");
 import { Notifications } from "../models/Notifications";
+import { NOTIFICATION_DISMISSED } from "../ServerEventNames";
 const redis = require('../redis');
 module.exports = async (data, client, io) => {
     const {channelID} = data;
@@ -25,5 +26,5 @@ module.exports = async (data, client, io) => {
     }
     await Notifications.deleteOne({recipient: user.id, channelID});
     
-    io.to(user.id).emit('notification:dismiss', {channelID, serverNotification: !!serverChannel});
+    io.to(user.id).emit(NOTIFICATION_DISMISSED, {channelID, serverNotification: !!serverChannel});
 }

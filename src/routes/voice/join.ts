@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express-serve-static-core";
 import { addUserToVoice, getConnectedUserBySocketID, getUserInVoiceByUserId } from "../../newRedisWrapper";
+import { USER_CALL_JOINED } from "../../ServerEventNames";
 import { getIOInstance } from "../../socket/instance";
 
 export async function joinCall (req: Request, res: Response, next: NextFunction) {
@@ -22,7 +23,7 @@ export async function joinCall (req: Request, res: Response, next: NextFunction)
   await addUserToVoice(req.channel.channelID, req.user.id, data)
   
   if (data.serverId) {
-    getIOInstance().in("server:" + data.serverId).emit("user:joined_call", {channelId: req.channel.channelID, userId: req.user.id})
+    getIOInstance().in("server:" + data.serverId).emit(USER_CALL_JOINED, {channelId: req.channel.channelID, userId: req.user.id})
   }
   res.json({success: true})
 

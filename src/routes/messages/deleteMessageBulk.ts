@@ -2,6 +2,7 @@ import { Message } from '../../models/Messages';
 import { NextFunction, Request, Response } from "express";
 import { Document, FilterQuery, LeanDocument } from "mongoose";
 import { Messages } from "../../models/Messages";
+import { MESSAGE_DELETED_BULK } from '../../ServerEventNames';
 
 
 module.exports = async (req: Request, res: Response, next: NextFunction) => {
@@ -53,11 +54,11 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
   if (!messageIds.length) return;
 
   if (!server) {
-    io.in(req.user.id).emit("delete_message_bulk", response);
-    io.in(channel.recipients[0].id).emit("delete_message_bulk", response);
+    io.in(req.user.id).emit(MESSAGE_DELETED_BULK, response);
+    io.in(channel.recipients[0].id).emit(MESSAGE_DELETED_BULK, response);
   }
   if (server) {
-    io.in("server:" + server.server_id).emit("delete_message_bulk", response);
+    io.in("server:" + server.server_id).emit(MESSAGE_DELETED_BULK, response);
   }
 };
 

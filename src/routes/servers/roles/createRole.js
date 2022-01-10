@@ -1,5 +1,6 @@
 const flake = require('../../../utils/genFlakeId').default;
 import { ServerRoles } from '../../../models/ServerRoles';
+import { SERVER_ROLE_CREATED } from '../../../ServerEventNames';
 const { matchedData } = require('express-validator');
 const rolePerms = require("../../../utils/rolePermConstants");
 
@@ -40,7 +41,7 @@ module.exports = async (req, res, next) => {
     data.color = doc.color;
   }
   const io = req.io;
-  io.in("server:" + req.server.server_id).emit("server:create_role", data);
+  io.in("server:" + req.server.server_id).emit(SERVER_ROLE_CREATED, data);
 
   res.json(data);
 };

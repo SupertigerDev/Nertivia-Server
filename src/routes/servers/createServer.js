@@ -5,6 +5,7 @@ import {Channels} from "../../models/Channels";
 import {Servers} from "../../models/Servers";
 import { Users } from "../../models/Users";
 import { ServerRoles } from "../../models/ServerRoles";
+import { SERVER_JOINED, SERVER_ROLE_CREATED } from "../../ServerEventNames";
 const rolePerms = require("../../utils/rolePermConstants");
 const { AddFCMUserToServer } = require("../../utils/sendPushNotification");
 
@@ -102,9 +103,9 @@ module.exports = async (req, res, next) => {
   };
   serverMember.server_id = createServer.server_id;
 
-  io.in(req.user.id).emit("server:joined", createServerObj);
-  io.in(req.user.id).emit("server:create_role", roleData);
-  io.in(req.user.id).emit("server:member_add", {
+  io.in(req.user.id).emit(SERVER_JOINED, createServerObj);
+  io.in(req.user.id).emit(SERVER_ROLE_CREATED, roleData);
+  io.in(req.user.id).emit(SERVER_MEMBER_ADDED, {
     serverMember: serverMember
   });
   // join room

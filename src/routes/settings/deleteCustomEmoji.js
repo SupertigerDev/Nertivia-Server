@@ -1,4 +1,5 @@
 import {CustomEmojis} from '../../models/CustomEmojis';
+import { CUSTOM_EMOJI_DELETED } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
   const { id } = req.body;
@@ -26,7 +27,7 @@ module.exports = async (req, res, next) => {
     });
     const io = req.io;
     // send owns status to every connected device
-    io.in(req.user.id).emit("customEmoji:remove", {
+    io.in(req.user.id).emit(CUSTOM_EMOJI_DELETED, {
       emoji: item
     });
   });

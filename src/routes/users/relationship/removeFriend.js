@@ -1,5 +1,6 @@
 import { Users } from "../../../models/Users";
 import {Friends} from '../../../models/Friends';
+import { RELATIONSHIP_DELETED } from "../../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id; 
@@ -27,9 +28,9 @@ module.exports = async (req, res, next) => {
   const updateUserB = await Users.findOneAndUpdate({ _id: recipient },{ $pull: { friends: docB._id }});
 
   const io = req.io
-  io.in(decliner.id).emit('relationshipRemove', recipient.id);
+  io.in(decliner.id).emit(RELATIONSHIP_DELETED, recipient.id);
 
-  io.in(recipient.id).emit('relationshipRemove', decliner.id);
+  io.in(recipient.id).emit(RELATIONSHIP_DELETED, decliner.id);
 
   return res.json({ status: true, message: `Request deleted` })
 }

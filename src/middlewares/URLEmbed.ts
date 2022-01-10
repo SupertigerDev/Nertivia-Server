@@ -5,6 +5,7 @@ import cheerio from 'cheerio';
 import {Messages} from '../models/Messages'
 import sharp from 'sharp';
 import fetch from 'node-fetch';
+import { MESSAGE_UPDATED } from '../ServerEventNames';
 
 interface RequestCustom extends Request {
   message_status?: boolean;
@@ -89,10 +90,10 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
     messageID: message_id
   }
   if (req.channel.server) {
-    io.in('server:' + req.channel.server.server_id).emit('update_message', {...emitData, replace: false})
+    io.in('server:' + req.channel.server.server_id).emit(MESSAGE_UPDATED, {...emitData, replace: false})
   } else {
-    io.in(req.channel.recipients[0].id).emit('update_message', {...emitData, replace: false})
-    io.in(req.user.id).emit('update_message', {...emitData, replace: false})
+    io.in(req.channel.recipients[0].id).emit(MESSAGE_UPDATED, {...emitData, replace: false})
+    io.in(req.user.id).emit(MESSAGE_UPDATED, {...emitData, replace: false})
   }
 }
 

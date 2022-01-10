@@ -1,5 +1,6 @@
 const users = require("../../models/Users");
 import { Channels } from "../../models/Channels";
+import { CHANNEL_CREATED } from "../../ServerEventNames";
 
 const flake = require('../../utils/genFlakeId').default;
 
@@ -24,7 +25,7 @@ module.exports = async (req, res, next) => {
     });
   if (channel) {
     await Channels.updateOne({ recipients: recipient._id, creator: req.user._id }, {hide: false});
-    req.io.in(req.user.id).emit("channel:created", { channel });
+    req.io.in(req.user.id).emit(CHANNEL_CREATED, { channel });
     return res.json({ status: true, channel });
   }
 
@@ -59,5 +60,5 @@ module.exports = async (req, res, next) => {
 
   res.json({ status: true, channel: newChannel });
   // sends the open channel to other clients.
-  req.io.in(req.user.id).emit("channel:created", { channel: newChannel });
+  req.io.in(req.user.id).emit(CHANNEL_CREATED, { channel: newChannel });
 };

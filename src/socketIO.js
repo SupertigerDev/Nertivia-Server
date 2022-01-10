@@ -18,6 +18,7 @@ import {Socket} from 'socket.io'
 
 import { getIOInstance } from "./socket/instance";
 import getUsrDetails from './utils/getUserDetails';
+import { AUTHENTICATED, AUTHENTICATION_ERROR, USER_CALL_LEFT, USER_PROGRAM_ACTIVITY_CHANGED, VOICE_RETURN_SIGNAL_RECEIVED, VOICE_SIGNAL_RECEIVED } from "./ServerEventNames";
 
 // nsps = namespaces.
 // disable socket events when not authorized .
@@ -54,7 +55,7 @@ module.exports = async client => {
   //If the socket didn't authenticate(), disconnect it
   let timeout = setTimeout(function () {
     if (!client.auth) {
-      client.emit("auth_err", "Token Timeout!");
+      client.emit(AUTHENTICATION_ERROR, "Token Timeout!");
       client.disconnect(true);
     }
   }, 10000);
@@ -65,7 +66,7 @@ module.exports = async client => {
 
     let decryptedToken = await asyncVerifyJWT(token)
       .catch(e => {
-        client.emit("auth_err", "Invalid Token");
+        client.emit(AUTHENTICATION_ERROR, "Invalid Token");
       })
     if (!decryptedToken) return;
 
@@ -88,7 +89,7 @@ module.exports = async client => {
       if (!user) {
         console.log("Disconnect Reason: Users not found in db");
         delete client.auth;
-        client.emit("auth_err", "Invalid Token");
+        client.emit(AUTHENTICATION_ERROR, "Invalid Token");
         client.disconnect(true);
         return;
       }
@@ -96,7 +97,7 @@ module.exports = async client => {
       if (user.banned) {
         console.log("Disconnect Reason: Users is banned", user.username, user.id);
         delete client.auth;
-        client.emit("auth_err", "You are banned.");
+        client.emit(AUTHENTICATION_ERROR, "You are banned.");
         client.disconnect(true);
         clearTimeout(timeout);
         return;
@@ -104,7 +105,7 @@ module.exports = async client => {
       if (user.email_confirm_code) {
         console.log("Disconnect Reason Email not confirmed");
         delete client.auth;
-        client.emit("auth_err", "Email not confirmed");
+        client.emit(AUTHENTICATION_ERROR, "Email not confirmed");
         client.disconnect(true);
         clearTimeout(timeout);
         return;
@@ -115,7 +116,7 @@ module.exports = async client => {
       if (pswdVerNotEmpty || user.passwordVersion !== undefined && user.passwordVersion !== decryptedToken.passwordVersion) {
         console.log("loggedOutReason: Invalid Password Version");
         delete client.auth;
-        client.emit("auth_err", "Token invalidated.");
+        client.emit(AUTHENTICATION_ERROR, "Token invalidated.");
         client.disconnect(true);
         clearTimeout(timeout);
         return;
@@ -128,7 +129,7 @@ module.exports = async client => {
       if (ipBanned) {
         console.log("loggedOutReason: IP is banned.", user.username, user.id);
         delete client.auth;
-        client.emit("auth_err", "IP is Banned.");
+        client.emit(AUTHENTICATION_ERROR, "IP is Banned.");
         client.disconnect(true);
         clearTimeout(timeout);
         return;
@@ -136,7 +137,7 @@ module.exports = async client => {
       if (!user.bot && !user.readTerms) {
         //console.log("Disconnect Reason: Terms not accepted", user.username, user.id);
         delete client.auth;
-        client.emit("auth_err", "terms_not_agreed");
+        client.emit(AUTHENTICATION_ERROR, "terms_not_agreed");
         client.disconnect(true);
         clearTimeout(timeout);
         return;
@@ -305,7 +306,7 @@ module.exports = async client => {
       }
 
       clearTimeout(timeout);
-      client.emit("success", {
+      client.emit(AUTHENTICATED, {
         message: "Logged in!",
         user,
         serverMembers,
@@ -326,7 +327,7 @@ module.exports = async client => {
       });
     } catch (e) {
       delete client.auth;
-      client.emit("auth_err", "Invalid Token");
+      client.emit(AUTHENTICATION_ERROR, "Invalid Token");
       console.log("Error when connecting:")
       console.log(e)
       client.disconnect(true);
@@ -347,7 +348,7 @@ module.exports = async client => {
       console.log("Recipient must join the voice channel.")
       return;
     }
-    getIOInstance().to(userToSignal.socketId).emit("voice:receive_signal", {channelId, requesterId: requester.id, signal})
+    getIOInstance().to(userToSignal.socketId).emit(VOICE_SIGNAL_RECEIVED, {channelId, requesterId: requester.id, signal})
   })
 
   client.on("voice:send_return_signal", async ({channelId, signalToUserId, signal}) => {
@@ -362,7 +363,7 @@ module.exports = async client => {
       console.log("Recipient must join the voice channel.")
       return;
     }
-    getIOInstance().to(userToSignal.socketId).emit("voice:receive_return_signal", {channelId, requesterId: requester.id, signal})
+    getIOInstance().to(userToSignal.socketId).emit(VOICE_RETURN_SIGNAL_RECEIVED, {channelId, requesterId: requester.id, signal})
   })
 
 
@@ -379,7 +380,7 @@ module.exports = async client => {
     if (callingUserDetails && callingUserDetails.socketId === client.id) {
       await removeUserFromVoice(user.id)
       if (callingUserDetails.serverId) {
-        getIOInstance().in("server:" + callingUserDetails.serverId).emit("user:left_call", {channelId: callingUserDetails.channelId, userId: user.id})
+        getIOInstance().in("server:" + callingUserDetails.serverId).emit(USER_CALL_LEFT, {channelId: callingUserDetails.channelId, userId: user.id})
       }
     }
 
@@ -393,7 +394,7 @@ module.exports = async client => {
       const { socketID } = JSON.parse(programActivity);
       if (socketID === client.id) {
         await setProgramActivity(user.id, null);
-        emitToAll("programActivity:changed", user._id, { user_id: user.id }, getIOInstance())
+        emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { user_id: user.id }, getIOInstance())
       }
 
     }
@@ -420,11 +421,11 @@ module.exports = async client => {
       // json is empty
       // json is not the same.
       if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
-        emitToAll("programActivity:changed", user._id, { name: data.name, status: data.status, user_id: user.id }, getIOInstance())
+        emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { name: data.name, status: data.status, user_id: user.id }, getIOInstance())
       }
     } else {
       await setProgramActivity(user.id, null);
-      emitToAll("programActivity:changed", user._id, { user_id: user.id }, getIOInstance())
+      emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { user_id: user.id }, getIOInstance())
     }
   })
 };

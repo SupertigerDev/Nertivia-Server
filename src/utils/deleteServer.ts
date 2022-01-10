@@ -13,6 +13,7 @@ import { Notifications } from '../models/Notifications';
 import {ServerMembers} from "../models/ServerMembers";
 import { ServerRoles } from '../models/ServerRoles';
 import { Users } from "../models/Users";
+import { SERVER_LEFT } from '../ServerEventNames';
 
 
 export default async function deleteServer(io: any, server_id: string, server: any, callback: (err: Error | null, status: Boolean) => void) {
@@ -60,7 +61,7 @@ export default async function deleteServer(io: any, server_id: string, server: a
 
     //EMIT leave event
 
-    io.in("server:" + server.server_id).emit("server:leave", {
+    io.in("server:" + server.server_id).emit(SERVER_LEFT, {
       server_id: server.server_id
     });
     io.in("server:" + server.server_id).socketsLeave("server:" + server.server_id)

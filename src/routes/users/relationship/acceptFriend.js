@@ -1,5 +1,6 @@
 import { Users } from "../../../models/Users";
 import {Friends} from '../../../models/Friends';
+import { RELATIONSHIP_ACCEPTED } from "../../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id;
@@ -39,9 +40,9 @@ module.exports = async (req, res, next) => {
     docRecipient.recipient = accepter
 
   const io = req.io
-  io.in(accepter.id).emit('relationshipAccept', recipient.id);
+  io.in(accepter.id).emit(RELATIONSHIP_ACCEPTED, recipient.id);
 
-  io.in(recipient.id).emit('relationshipAccept', accepter.id);
+  io.in(recipient.id).emit(RELATIONSHIP_ACCEPTED, accepter.id);
 
   return res.json({ status: true, message: `Request accepted` })
 

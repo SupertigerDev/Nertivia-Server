@@ -1,4 +1,5 @@
 import {Messages} from '../../models/Messages'
+import { MESSAGE_BUTTON_CALLBACK } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
   const { channelID, messageID, buttonID } = req.params;
@@ -34,7 +35,7 @@ module.exports = async (req, res, next) => {
     resObj.serverID = server.server_id
   }
 
-  io.in(clickedByID).emit("message_button_click_callback", resObj)
+  io.in(clickedByID).emit(MESSAGE_BUTTON_CALLBACK, resObj)
 
   res.status(200).json({message: "Response Sent!"});
 };

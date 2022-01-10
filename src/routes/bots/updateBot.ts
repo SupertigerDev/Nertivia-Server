@@ -3,6 +3,7 @@ import {Users} from '../../models/Users';
 import { matchedData } from "express-validator";
 import {cropImage} from "../../utils/cropImage";
 import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import { USER_UPDATED } from "../../ServerEventNames";
 const emitToAll = require("../../socketController/emitToAll");
 const flakeId = new (require('flakeid'))();
 
@@ -47,8 +48,8 @@ export default async function updateBot(req: Request, res: Response) {
   }
   data.id = (bot as any).id;
   
-  req.io.in((bot as any).id).emit("update_member", data);
-  emitToAll('update_member', bot._id, data, req.io, false);
+  req.io.in((bot as any).id).emit(USER_UPDATED, data);
+  emitToAll(USER_UPDATED, bot._id, data, req.io, false);
   res.json(data);
 
 }

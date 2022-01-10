@@ -1,5 +1,6 @@
 const redis = require("../../redis");
 import { Users } from "../../models/Users";
+import { SELF_CUSTOM_STATUS_CHANGE } from "../../ServerEventNames";
 const emitAll = require("../../socketController/emitToAll");
 const { changeCustomStatusByUserId } = require("../../newRedisWrapper");
 
@@ -34,7 +35,7 @@ module.exports = async (req, res, next) => {
   // emit status to users.
   emitAll("member:custom_status_change", req.user._id, {user_id: req.user.id, custom_status: customStatus}, io)
 
-  io.in(req.user.id).emit('multiDeviceCustomStatus', { custom_status: customStatus});
+  io.in(req.user.id).emit(SELF_CUSTOM_STATUS_CHANGE, { custom_status: customStatus});
     
 
   res.json({

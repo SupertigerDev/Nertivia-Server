@@ -1,4 +1,5 @@
 import {Channels} from '../../models/Channels';
+import { CHANNEL_DELETED } from '../../ServerEventNames';
 module.exports = async (req, res, next) => {
   const { channel_id } = req.params;
 
@@ -18,5 +19,5 @@ module.exports = async (req, res, next) => {
 
 
   res.json({ status: true, channelID: channel_id });
-  req.io.in(req.user.id).emit("channel:remove", { channelID: channel_id });
+  req.io.in(req.user.id).emit(CHANNEL_DELETED, { channelID: channel_id });
 };

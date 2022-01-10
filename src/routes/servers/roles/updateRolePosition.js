@@ -1,5 +1,6 @@
 
 import {ServerRoles} from '../../../models/ServerRoles'
+import { SERVER_ROLES_UPDATED } from '../../../ServerEventNames';
 module.exports = async (req, res, next) => {
 
   const {roleID, order} = req.body
@@ -58,7 +59,7 @@ module.exports = async (req, res, next) => {
   )
 
   const io = req.io;
-  io.in("server:" + req.server.server_id).emit("server:update_roles", {server_id: req.server.server_id, roles: ordered});
+  io.in("server:" + req.server.server_id).emit(SERVER_ROLES_UPDATED, {server_id: req.server.server_id, roles: ordered});
 
   res.json(ordered);
 };

@@ -1,6 +1,7 @@
 import { Users } from "../../models/Users";
 import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
+import { USER_UNBLOCKED } from "../../ServerEventNames";
 const { deleteDmChannel } = require('../../newRedisWrapper');
 
 module.exports = async (req, res, next) => {
@@ -46,7 +47,7 @@ module.exports = async (req, res, next) => {
 
   const io = req.io
   
-  io.in(requester.id).emit('user:unblock', recipient.id);
+  io.in(requester.id).emit(USER_UNBLOCKED, recipient.id);
 
   return res.json({message: "Users unblocked." })
 }

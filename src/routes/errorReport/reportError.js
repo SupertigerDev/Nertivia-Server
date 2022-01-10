@@ -1,6 +1,7 @@
 import {Messages} from '../../models/Messages'
 import { Users } from "../../models/Users";
 import {Channels} from "../../models/Channels";
+import { MESSAGE_CREATED } from '../../ServerEventNames';
 const sendMessageNotification = require('../../utils/SendMessageNotification')
 // create a bot in nertivia, create a server and copy the channel iDID
 const bot_id = "6768469612037148672"
@@ -33,7 +34,7 @@ res.json({message: "Done!"});
 
   const io = req.io;
 
-  io.to("server:" + server_id).emit("receiveMessage", {
+  io.to("server:" + server_id).emit(MESSAGE_CREATED, {
     message: messageCreated
   })
 

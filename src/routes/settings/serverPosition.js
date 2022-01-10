@@ -1,4 +1,5 @@
 import { Users } from "../../models/Users";
+import { SERVER_POSITION_UPDATED } from "../../ServerEventNames";
 module.exports = async (req, res, next) => {
 
   const io = req.io;
@@ -29,7 +30,7 @@ module.exports = async (req, res, next) => {
       res.json({
         server_position
       });
-      io.in(req.user.id).emit("self:server_position", {server_position} );
+      io.in(req.user.id).emit(SERVER_POSITION_UPDATED, {server_position} );
       return;
   } catch(e) {
     return res.status(403).json({

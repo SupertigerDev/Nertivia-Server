@@ -1,4 +1,5 @@
 import {ServerMembers} from "../../../models/ServerMembers";
+import { CHANNEL_UNMUTED } from "../../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
   const { channel_id, server_id } = req.params;
@@ -23,5 +24,5 @@ module.exports = async (req, res, next) => {
   res.json({ message: "Channel unmuted." });
 
   const io = req.io;
-  io.in(req.user.id).emit("channel:unmute", {channelID: channel_id});
+  io.in(req.user.id).emit(CHANNEL_UNMUTED, {channelID: channel_id});
 };

@@ -2,6 +2,7 @@ import { Users } from "../../models/Users";
 import { Friends } from '../../models/Friends';
 import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
+import { USER_BLOCKED } from "../../ServerEventNames";
 const redis = require('../../redis');
 const { deleteDmChannel } = require('../../newRedisWrapper');
 module.exports = async (req, res, next) => {
@@ -66,11 +67,11 @@ module.exports = async (req, res, next) => {
   const io = req.io
   
   
-  io.in(requester.id).emit('relationshipRemove', recipient.id);
+  io.in(requester.id).emit(RELATIONSHIP_DELETED, recipient.id);
   
-  io.in(recipient.id).emit('relationshipRemove', requester.id);
+  io.in(recipient.id).emit(RELATIONSHIP_DELETED, requester.id);
   
-  io.in(requester.id).emit('user:block', recipient.id);
+  io.in(requester.id).emit(USER_BLOCKED, recipient.id);
  
 
   return res.json({ message: `Users blocked` })
