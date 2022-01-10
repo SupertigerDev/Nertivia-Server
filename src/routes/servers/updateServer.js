@@ -12,6 +12,7 @@ import { deleteServer } from '../../newRedisWrapper';
 const { matchedData } = require("express-validator");
 const flake = require('../../utils/genFlakeId').default;
 import {cropImage} from '../../utils/cropImage'
+import { SERVER_UPDATED } from "../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
   // check if this function is executed by the guild owner.
@@ -58,7 +59,7 @@ module.exports = async (req, res, next) => {
     await Servers.updateOne({ server_id: server.server_id }, data);
     const io = req.io;
     io.in("server:" + req.server.server_id).emit(
-      "server:update_server",
+      SERVER_UPDATED,
       Object.assign(data, { server_id: server.server_id })
     );
     // clear cache

@@ -26,6 +26,7 @@ export const SERVER_CHANNEL_POSITION_UPDATED = "server:channel_position_updated"
 // server events
 export const SERVER_POSITION_UPDATED = "server:position_updated";
 export const SERVER_JOINED = "server:joined";
+export const SERVER_UPDATED = "server:updated";
 export const SERVER_LEFT = "server:left";
 export const SERVER_MEMBER_ADDED = "server:member_added";
 export const SERVER_MEMBER_REMOVED = "server:member_removed";
