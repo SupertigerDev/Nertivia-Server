@@ -1,6 +1,6 @@
 
 import { Users } from "../../../models/Users";
-const Friend = require('../../../models/Friends');
+import { Friends } from "../../../models/Friends";
 import { BlockedUsers } from '../../../models/BlockedUsers';
 import { RELATIONSHIP_ADDED } from "../../../ServerEventNames";
 const redis = require('../../../redis');
@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
     .json({ status: false, errors: [{param: "all", msg: "You cant friend with yourself!"}] });
   
   // check if the request already exists
-  const requestExists = await Friend.findOne({ requester: requester._id, recipient: recipient._id})
+  const requestExists = await Friends.findOne({ requester: requester._id, recipient: recipient._id})
   if (requestExists) {
     if (requestExists.status == 2) {
       // If they are already friended
@@ -54,14 +54,14 @@ module.exports = async (req, res, next) => {
   
   // all checks done above, add to friend model
 
-  const docRequester = await Friend.findOneAndUpdate(
+  const docRequester = await Friends.findOneAndUpdate(
     { requester: requester, recipient: recipient },
     { $set: { status: 0 }},
     { upsert: true, new: true }
   ).lean()
   docRequester.recipient = recipient
 
-  const docRecipient = await Friend.findOneAndUpdate(
+  const docRecipient = await Friends.findOneAndUpdate(
     { requester: recipient, recipient: requester },
     { $set: { status: 1 }},
     { upsert: true, new: true }
