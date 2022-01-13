@@ -26,6 +26,7 @@ module.exports = async (req, res, next) => {
 
   const channelObj = {
     channelID: createChannel.channelID,
+    type: createChannel.type,
     lastMessaged: createChannel.lastMessaged,
     name: createChannel.name,
     server_id: req.server.server_id,
