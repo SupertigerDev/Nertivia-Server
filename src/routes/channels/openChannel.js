@@ -1,4 +1,4 @@
-const users = require("../../models/Users");
+import {Users} from '../../models/Users';
 import { Channels, ChannelType } from "../../models/Channels";
 import { CHANNEL_CREATED } from "../../ServerEventNames";
 
@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
   const { recipient_id } = req.params;
 
   // Check if recipient_id is valid
-  const recipient = await users.findOne({ id: recipient_id });
+  const recipient = await Users.findOne({ id: recipient_id });
   if (!recipient) {
     return res
       .status(403)
