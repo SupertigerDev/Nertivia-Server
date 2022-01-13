@@ -1,5 +1,5 @@
 const flake = require('../../../utils/genFlakeId').default;
-import {Channels} from "../../../models/Channels";
+import {Channels, ChannelType} from "../../../models/Channels";
 import { SERVER_CHANNEL_CREATED } from "../../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
@@ -16,6 +16,7 @@ module.exports = async (req, res, next) => {
 
   const createChannel = await Channels.create({
     name: name,
+    type: ChannelType.SERVER_CHANNEL,
     channelID: flake.gen(),
     server: req.server._id,
     server_id:  req.server.server_id,

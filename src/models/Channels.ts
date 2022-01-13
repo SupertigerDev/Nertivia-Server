@@ -1,3 +1,4 @@
+
 import {Schema, model} from 'mongoose';
 
 
@@ -5,8 +6,15 @@ import {Schema, model} from 'mongoose';
 interface Permissions {
   send_message: boolean
 }
+
+export enum ChannelType {
+  DM_CHANNEL = 0,
+  SERVER_CHANNEL = 1,
+  SERVER_CATEGORY = 2,
+}
 interface Channel {
   name: string,
+  type: ChannelType,
   channelID: string
   visibility: boolean
   creator: any
@@ -27,6 +35,11 @@ const permissionsSchema = new Schema<Permissions>({
 const schema = new Schema<Channel>({
   name: {type: String},
   channelID: { type: String, required: true },
+  type: { type: Number, required: true, enums: [
+    0, // DM Channel
+    1, // Server Channel
+    2  // Server Category
+  ]},
   visibility: {type: Boolean},
   creator: { type: Schema.Types.ObjectId, ref: 'users'},
   recipients: [{type: Schema.Types.ObjectId, ref: 'users'}],

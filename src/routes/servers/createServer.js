@@ -1,7 +1,7 @@
 
 // Models
 import {ServerMembers} from "../../models/ServerMembers";
-import {Channels} from "../../models/Channels";
+import {Channels, ChannelType} from "../../models/Channels";
 import {Servers} from "../../models/Servers";
 import { Users } from "../../models/Users";
 import { ServerRoles } from "../../models/ServerRoles";
@@ -38,6 +38,7 @@ module.exports = async (req, res, next) => {
 
   const createChannel = await Channels.create({
     name: "General",
+    type: ChannelType.SERVER_CHANNEL,
     channelID: channelID,
     server: createServer._id,
     server_id: serverID,

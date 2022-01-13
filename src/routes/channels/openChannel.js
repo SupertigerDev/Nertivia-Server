@@ -1,5 +1,5 @@
 const users = require("../../models/Users");
-import { Channels } from "../../models/Channels";
+import { Channels, ChannelType } from "../../models/Channels";
 import { CHANNEL_CREATED } from "../../ServerEventNames";
 
 const flake = require('../../utils/genFlakeId').default;
@@ -49,6 +49,7 @@ module.exports = async (req, res, next) => {
 
   let newChannel = await Channels.create({
     channelID,
+    type: ChannelType.DM_CHANNEL,
     creator: req.user._id,
     recipients: [recipient._id],
     lastMessaged: Date.now()
