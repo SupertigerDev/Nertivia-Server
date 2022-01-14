@@ -72,6 +72,7 @@ function start() {
 	}
 	function startServer() {
 		if (isListening) return;
+		Log.info("Starting server...");
 		const server = app();
 
 		const socketIO = require('./socketIO');
