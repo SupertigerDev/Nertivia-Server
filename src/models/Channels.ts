@@ -16,6 +16,7 @@ interface Channel {
   name: string,
   type: ChannelType,
   channelID: string
+  categoryId: string;
   visibility: boolean
   creator: any
   recipients: any[]

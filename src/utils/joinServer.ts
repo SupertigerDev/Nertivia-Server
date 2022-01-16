@@ -66,7 +66,7 @@ export default async function join(server: any, user: any, socketID: string | un
   let serverChannels = await Channels.find({
     server: server._id
   })
-  .select("name type channelID server server_id lastMessaged rateLimit icon")
+  .select("name type channelID categoryId server server_id lastMessaged rateLimit icon")
   .lean();
 
   const createServerObj = Object.assign({}, server);
