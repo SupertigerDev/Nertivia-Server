@@ -1,4 +1,4 @@
-const Servers = require('../../../models/Servers');
+import {Servers} from '../../../models/Servers';
 const { SERVER_CHANNEL_POSITION_UPDATED } = require('../../../ServerEventNames');
 module.exports = async (req, res, next) => {
 
