@@ -40,7 +40,7 @@ module.exports = async (req, res, next) => {
         message: 'Category not found.',
       })
     }
-    await channel.update({$set: {categoryId}})
+    await channel.updateOne({$set: {categoryId}})
 
   }
 
