@@ -1,4 +1,4 @@
-import {Channels} from "../models/Channels";
+import {Channels, ChannelType} from "../models/Channels";
 import { ServerRoles } from "../models/ServerRoles";
 import {ServerMembers} from "../models/ServerMembers";
 import {BlockedUsers} from "../models/BlockedUsers";
@@ -24,6 +24,11 @@ module.exports = async (req, res, next) => {
   const [serverChannel] = await getServerChannel(channelID);
   if (serverChannel) {
     const channel = JSON.parse(serverChannel);
+    if (channel.type !== ChannelType.SERVER_CHANNEL) {
+      return res.status(403).json({
+        message: "Channel is not a server channel."
+      });
+    }
     //check if member in server
     let isInServer = await redis.getServerMember(req.user.id, channel.server_id);
     if (isInServer.result) {

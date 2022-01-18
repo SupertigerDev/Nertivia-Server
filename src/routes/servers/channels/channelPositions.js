@@ -1,4 +1,4 @@
-import { Channels } from '../../../models/Channels';
+import { Channels, ChannelType } from '../../../models/Channels';
 import {Servers} from '../../../models/Servers';
 const { SERVER_CHANNEL_POSITION_UPDATED } = require('../../../ServerEventNames');
 module.exports = async (req, res, next) => {
@@ -27,20 +27,27 @@ module.exports = async (req, res, next) => {
     const categoryId = category.id;
     const channelId = category.channelId;
 
-    const channel = await Channels.findOne({channelID: channelId, server_id: req.server.server_id}).select("channelID");
-    const categoryChannel = await Channels.findOne({channelID: categoryId, server_id: req.server.server_id}).select("channelID");
-
+    const channel = await Channels.findOne({channelID: channelId, server_id: req.server.server_id, type: ChannelType.SERVER_CHANNEL}).select("channelID");
     if (!channel) {
       return res.status(404).json({
         message: 'Channel not found.',
       })
     }
-    if (!categoryChannel) {
-      return res.status(404).json({
-        message: 'Category not found.',
-      })
+
+    if (categoryId) {
+      const categoryChannel = await Channels.findOne({channelID: categoryId, server_id: req.server.server_id, type: ChannelType.SERVER_CATEGORY}).select("channelID");
+
+      if (!categoryChannel) {
+        return res.status(404).json({
+          message: 'Category not found.',
+        })
+      }
+      await channel.updateOne({$set: {categoryId}});
+      
     }
-    await channel.updateOne({$set: {categoryId}})
+    if (!categoryId) {
+      await channel.updateOne({$unset: {categoryId: 1}});
+    }
 
   }
 
