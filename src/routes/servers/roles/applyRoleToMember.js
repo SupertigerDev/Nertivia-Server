@@ -1,6 +1,6 @@
 
 import { ServerRoles } from '../../../models/ServerRoles';
-const ServerMembers = require('../../../models/ServerMembers');
+import { ServerMembers } from '../../../models/ServerMembers';
 import { Users } from "../../../models/Users";
 import { SERVER_ROLE_ADDED_TO_MEMBER } from '../../../ServerEventNames';
 const redis = require("../../../redis");
