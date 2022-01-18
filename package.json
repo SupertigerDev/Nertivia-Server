@@ -9,7 +9,7 @@
     "copyEnv": "copyfiles -f ./.env dist",
     "runCompiled": "node dist",
     "watch": "tsc-watch --onSuccess \"npm run runCompiled\"",
-    "dev": "npm run dev"
+    "dev": "npm run watch"
   },
   "keywords": [],
   "author": "",
