@@ -1,4 +1,4 @@
-import {Channels} from "../../../models/Channels";
+import {Channels, ChannelType} from "../../../models/Channels";
 import {Messages} from '../../../models/Messages'
 
 import {MessageQuotes} from '../../../models/MessageQuotes'
@@ -19,6 +19,9 @@ module.exports = async (req, res, next) => {
     await MessageQuotes.deleteMany({quotedChannel: req.channel._id})
     await Notifications.deleteMany({ channelID });
     await Channels.deleteOne({ channelID });
+    if (req.channel.type === ChannelType.SERVER_CATEGORY) {
+      await Channels.updateMany({server_id: server.server_id, categoryId: channelID}, {$unset: {categoryId: 1}})
+    }
     await Messages.deleteMany({ channelID });
     await deleteServerChannel(channelID);
     const io = req.io;
