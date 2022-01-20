@@ -1,10 +1,11 @@
-const Servers = require('../../../models/Servers');
+import { Channels, ChannelType } from '../../../models/Channels';
+import {Servers} from '../../../models/Servers';
 const { SERVER_CHANNEL_POSITION_UPDATED } = require('../../../ServerEventNames');
 module.exports = async (req, res, next) => {
 
 
   const io = req.io;
-  const { channel_position } = req.body;
+  const { channel_position, category } = req.body;
 
   // check if there are more than 200 entries
   if (channel_position.length >= 200) {
@@ -22,6 +23,34 @@ module.exports = async (req, res, next) => {
     } 
   }
 
+  if (category) {
+    const categoryId = category.id;
+    const channelId = category.channelId;
+
+    const channel = await Channels.findOne({channelID: channelId, server_id: req.server.server_id, type: ChannelType.SERVER_CHANNEL}).select("channelID");
+    if (!channel) {
+      return res.status(404).json({
+        message: 'Channel not found.',
+      })
+    }
+
+    if (categoryId) {
+      const categoryChannel = await Channels.findOne({channelID: categoryId, server_id: req.server.server_id, type: ChannelType.SERVER_CATEGORY}).select("channelID");
+
+      if (!categoryChannel) {
+        return res.status(404).json({
+          message: 'Category not found.',
+        })
+      }
+      await channel.updateOne({$set: {categoryId}});
+      
+    }
+    if (!categoryId) {
+      await channel.updateOne({$unset: {categoryId: 1}});
+    }
+
+  }
+
   try {
     const update = await Servers.updateOne(
       { _id: req.server._id },
@@ -31,7 +60,7 @@ module.exports = async (req, res, next) => {
       res.json({
         channel_position
       });
-      io.in('server:' + req.server.server_id).emit(SERVER_CHANNEL_POSITION_UPDATED, {serverID: req.server.server_id, channel_position} );
+      io.in('server:' + req.server.server_id).emit(SERVER_CHANNEL_POSITION_UPDATED, {serverID: req.server.server_id, channel_position, category} );
       return;
   } catch(e) {
     return res.status(403).json({

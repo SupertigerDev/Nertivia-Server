@@ -16,6 +16,7 @@ interface Channel {
   name: string,
   type: ChannelType,
   channelID: string
+  categoryId: string;
   visibility: boolean
   creator: any
   recipients: any[]
@@ -35,6 +36,7 @@ const permissionsSchema = new Schema<Permissions>({
 const schema = new Schema<Channel>({
   name: {type: String},
   channelID: { type: String, required: true },
+  categoryId: {type: String, required: false},
   type: { type: Number, required: true, enums: [
     0, // DM Channel
     1, // Server Channel
@@ -47,7 +49,7 @@ const schema = new Schema<Channel>({
   server: {type: Schema.Types.ObjectId, ref: 'servers'},
   server_id: {type: String, required: false},
   icon: {type: String, required: false},
-  lastMessaged: {type: Number},
+  lastMessaged: {type: Number, required: false},
   // in seconds
   rateLimit: {type: Number, required: false},
   status: {

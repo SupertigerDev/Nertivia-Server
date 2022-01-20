@@ -20,6 +20,11 @@ const policies = {
       .withMessage("Invalid Format.")
       .isLength({ min: 0, max: 30 })
       .withMessage("Name must be shorter than 30 characters"),
+    check("type")
+      .isInt({min: 1, max: 2})
+      .withMessage("type must be 1 or 2.")
+      .optional()
+    ,
     policyHandler
   ],
   createServer: [
