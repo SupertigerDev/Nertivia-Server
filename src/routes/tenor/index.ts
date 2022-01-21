@@ -23,4 +23,4 @@ TenorRouter.route("/search/:value").get(
 
 
 
-export default TenorRouter;
+export {TenorRouter};

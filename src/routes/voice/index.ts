@@ -30,4 +30,4 @@ VoiceRouter.route("/leave").post(
 
 
 
-export default VoiceRouter;
+export {VoiceRouter};
