@@ -1,7 +1,7 @@
 const htmlProfileRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../../middlewares/authenticate");
+const { authenticate } = require("../../../middlewares/authenticate");
 
 import {addHtmlProfile} from './addHtmlProfile';
 import {getHtmlProfile} from './getHtmlProfile';

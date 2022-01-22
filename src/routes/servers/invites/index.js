@@ -1,7 +1,7 @@
 const MainInviteRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../../middlewares/authenticate");
+const { authenticate } = require("../../../middlewares/authenticate");
 const UserPresentVerification = require("../../../middlewares/UserPresentVerification");
 const rateLimit = require("../../../middlewares/rateLimit");
 

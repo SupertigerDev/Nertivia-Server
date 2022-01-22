@@ -1,7 +1,7 @@
 const MainThemesRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../../middlewares/authenticate");
+const { authenticate } = require("../../../middlewares/authenticate");
 const policies = require('../../../policies/publicThemePolicies');
 const rateLimit = require('../../../middlewares/rateLimit');
 

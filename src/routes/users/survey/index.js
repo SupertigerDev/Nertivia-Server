@@ -1,7 +1,7 @@
 const MainSurveyRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../../middlewares/authenticate");
+const { authenticate } = require("../../../middlewares/authenticate");
 
 // Policies
 const surveyPolicy = require("../../../policies/surveyPolicies");

@@ -3,7 +3,7 @@ import {BannedIPs} from "../models/BannedIPs";
 
 const JWT = require("jsonwebtoken");
 
-export default function authenticate (allowBot = false, allowInvalid = false, allowNonTerms = false) {
+export function authenticate (allowBot = false, allowInvalid = false, allowNonTerms = false) {
   return async function (req, res, next) {
 
     const token = process.env.JWT_HEADER + req.headers.authorization;

@@ -1,5 +1,5 @@
 import { Router } from "express";
-const authenticate = require("../../middlewares/authenticate");
+const { authenticate } = require("../../middlewares/authenticate");
 const ChannelVerification = require( "../../middlewares/ChannelVerification");
 
 import rateLimit from "../../middlewares/rateLimit";

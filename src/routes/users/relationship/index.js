@@ -1,7 +1,7 @@
 const MainRelationshipRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../../middlewares/authenticate");
+const { authenticate } = require("../../../middlewares/authenticate");
 
 // Policies
 const relationshipPolicy = require("../../../policies/relationshipPolicies");

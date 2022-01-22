@@ -2,7 +2,7 @@ const MainSettingsRouter = require("express").Router();
 const busboy = require("connect-busboy");
 
 // Middleware
-const authenticate = require("../../middlewares/authenticate");
+const { authenticate } = require("../../middlewares/authenticate");
 const GDriveOauthClient = require("../../middlewares/GDriveOauthClient");
 
 // Policies

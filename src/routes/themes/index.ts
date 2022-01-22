@@ -8,7 +8,7 @@ import { saveTheme } from './saveTheme';
 import { updateTheme } from './updateTheme';
 
 // Middleware
-import authenticate from "../../middlewares/authenticate";
+import { authenticate } from "../../middlewares/authenticate";
 import { Router } from 'express';
 
 

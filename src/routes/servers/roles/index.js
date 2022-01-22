@@ -1,7 +1,7 @@
 const MainRolesRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../../middlewares/authenticate");
+const { authenticate } = require("../../../middlewares/authenticate");
 const UserPresentVerification = require("../../../middlewares/UserPresentVerification");
 const checkRolePerms = require('../../../middlewares/checkRolePermissions');
 

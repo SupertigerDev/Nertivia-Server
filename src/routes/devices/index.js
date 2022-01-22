@@ -1,7 +1,7 @@
 const MainDevicesRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../middlewares/authenticate");
+const { authenticate } = require("../../middlewares/authenticate");
 
 
 // register device

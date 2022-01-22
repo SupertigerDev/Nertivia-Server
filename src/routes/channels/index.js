@@ -1,7 +1,7 @@
 const MainChannelRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../middlewares/authenticate");
+const { authenticate } = require("../../middlewares/authenticate");
 const channelVerification = require("../../middlewares/ChannelVerification");
 const rateLimit = require("../../middlewares/rateLimit");
 

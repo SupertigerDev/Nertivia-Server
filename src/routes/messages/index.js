@@ -4,7 +4,7 @@ const MainMessageRouter = require("express").Router();
 const messagePolicy = require('../../policies/messagePolicies');
 
 // Middleware
-const authenticate = require("../../middlewares/authenticate");
+const { authenticate } = require("../../middlewares/authenticate");
 const channelVerification = require('../../middlewares/ChannelVerification');
 const GDriveOauthClient = require('../../middlewares/GDriveOauthClient');
 import URLEmbed from '../../middlewares/URLEmbed';

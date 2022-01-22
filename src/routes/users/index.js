@@ -1,7 +1,7 @@
 const MainUserRouter = require("express").Router();
 
 // Middleware
-const authenticate = require("../../middlewares/authenticate");
+const { authenticate } = require("../../middlewares/authenticate");
 const rateLimit = require("../../middlewares/rateLimit");
 const GDriveOauthClient = require("../../middlewares/GDriveOauthClient");
 
