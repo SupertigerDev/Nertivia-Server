@@ -1,12 +1,12 @@
-import { Message } from '../../models/Messages';
-import { NextFunction, Request, Response } from "express";
+import { Message } from '../../../models/Messages';
+import { Request, Response } from "express";
 import { Document, FilterQuery, LeanDocument } from "mongoose";
-import { Messages } from "../../models/Messages";
-import { MESSAGE_DELETED_BULK } from '../../ServerEventNames';
+import { Messages } from "../../../models/Messages";
+import { MESSAGE_DELETED_BULK } from '../../../ServerEventNames';
 
 
-module.exports = async (req: Request, res: Response, next: NextFunction) => {
-  const { channelID } = req.params;
+export async function deleteMessageBulk(req: Request, res: Response) {
+  const { channelId } = req.params;
   const { ids } = req.body;
   const channel = req.channel;
   const server = channel.server;
@@ -29,7 +29,7 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
     messageIds = await findMessages({
       messageID: { $in: ids },
       creator: req.user._id,
-      channelID,
+      channelID: channelId,
     });
   }
 
@@ -37,14 +37,14 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
   if (server && !req.permErrorMessage) {
     messageIds = await findMessages({
       messageID: { $in: ids },
-      channelID,
+      channelID: channelId,
     });
   }
 
   await Messages.deleteMany({messageID: { $in: messageIds}})
 
   const response = {
-    channelId: channelID,
+    channelId,
     messageIds,
   }
 

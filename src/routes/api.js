@@ -39,7 +39,7 @@ router.use('/error_report', require('./errorReport'));
 router.use('/user', require('./users'));
 router.use('/devices', require('./devices'));
 router.use('/servers', require('./servers'));
-router.use('/channels', require('./channels'));
+router.use('/channels', require('./channels/ChannelRouter').ChannelRouter);
 router.use('/themes', require('./themes').ThemeRouter)
 router.use('/bots', require('./bots'))
 router.use('/voice', require('./voice').VoiceRouter)

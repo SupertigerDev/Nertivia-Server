@@ -5,7 +5,7 @@ const messagePolicy = require('../../policies/messagePolicies');
 
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
-const channelVerification = require('../../middlewares/ChannelVerification');
+import { channelVerification } from '../../middlewares/ChannelVerification';
 const GDriveOauthClient = require('../../middlewares/GDriveOauthClient');
 import URLEmbed from '../../middlewares/URLEmbed';
 const serverChannelPermissions = require('../../middlewares/serverChannelPermissions');
@@ -35,50 +35,8 @@ MainMessageRouter.route("/:messageID/channels/:channelID").get(
   require('./getMessage')
 );
 
-// delete message
-MainMessageRouter.route("/:messageID/channels/:channelID").delete(
-  authenticate(true),
-  rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
-  channelVerification,
-  disAllowBlockedUser,
-  checkRolePerms('Admin', permissions.roles.ADMIN, false),
-  require('./deleteMessage')
-);
 
-// delete message bulk
-MainMessageRouter.route("/:channelID/bulk").delete(
-  authenticate(true),
-  rateLimit({name: 'message_delete_bulk', expire: 60, requestsLimit: 10 }),
-  channelVerification,
-  disAllowBlockedUser,
-  checkRolePerms('Admin', permissions.roles.ADMIN, false),
-  require('./deleteMessageBulk')
-);
 
-// add reaction
-MainMessageRouter.route("/:messageID/channels/:channelID/reactions").post(
-  authenticate(true),
-  rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
-  channelVerification,
-  disAllowBlockedUser,
-  require('./addReaction')
-);
-// remove reaction
-MainMessageRouter.route("/:messageID/channels/:channelID/reactions").delete(
-  authenticate(true),
-  rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
-  channelVerification,
-  disAllowBlockedUser,
-  require('./removeReaction')
-);
-// get reacted users
-MainMessageRouter.route("/:messageID/channels/:channelID/reactions/users").get(
-  authenticate(true),
-  rateLimit({name: 'message_react_users', expire: 60, requestsLimit: 120 }),
-  channelVerification,
-  disAllowBlockedUser,
-  require('./getReactedUsers')
-);
 
 // update message
 MainMessageRouter.route("/:messageID/channels/:channelID").patch(

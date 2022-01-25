@@ -19,7 +19,7 @@ interface Channel {
   categoryId: string;
   visibility: boolean
   creator: any
-  recipients: any[]
+  recipients: string[]
   hide: boolean
   server: any
   server_id: any

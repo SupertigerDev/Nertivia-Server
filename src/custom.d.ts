@@ -1,3 +1,4 @@
+import { ChannelType } from "gm";
 import socketio from "socket.io";
 
 declare global {
@@ -63,6 +64,9 @@ interface uploadFile {
 }
 interface Channel {
   _id: string,
+  name?: string
+  type: ChannelType
+  server_id?: string
   channelID: string,
   server: Server
   recipients: any[]

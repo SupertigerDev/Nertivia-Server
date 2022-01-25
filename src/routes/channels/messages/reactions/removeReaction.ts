@@ -1,13 +1,15 @@
-import {MessageReactions} from '../../models/MessageReactions';
-import {Messages} from '../../models/Messages'
-import { MESSAGE_REACTION_UPDATED } from '../../ServerEventNames';
+import { Request, Response } from 'express';
+import { FilterQuery } from 'mongoose';
+import {MessageReaction, MessageReactions} from '../../../../models/MessageReactions';
+import {Messages} from '../../../../models/Messages'
+import { MESSAGE_REACTION_UPDATED } from '../../../../ServerEventNames';
 
-module.exports = async (req, res, next) => {
-  const { channelID, messageID } = req.params;
+export async function removeReaction(req: Request, res: Response) {
+  const { channelId, messageId } = req.params;
   const { emojiID, unicode } = req.body;
 
 
-  const message = await Messages.findOne({ channelID, messageID });
+  const message = await Messages.findOne({ channelID: channelId, messageID: messageId });
   if (!message) {
     return res.status(404).json({ message: "Message was not found." });
   }
@@ -15,7 +17,7 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({ message: "Missing emojiID or unicode." });
   }
 
-  let filter = {messageID};
+  let filter: FilterQuery<MessageReaction> = {messageID: channelId};
   if (emojiID) {
     filter.emojiID = emojiID
   } else {
@@ -43,8 +45,8 @@ module.exports = async (req, res, next) => {
 
   
   const response = {
-    channelID,
-    messageID,
+    channelID: channelId,
+    messageID: messageId,
     unReactedByUserID: req.user.id,
     reaction: {
       emojiID: reaction.emojiID,

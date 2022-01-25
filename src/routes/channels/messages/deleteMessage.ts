@@ -1,13 +1,14 @@
-import {Messages} from '../../models/Messages'
+import {Messages} from '../../../models/Messages'
 
-import {MessageQuotes} from '../../models/MessageQuotes'
-import { MESSAGE_DELETED } from '../../ServerEventNames';
-const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
+import {MessageQuotes} from '../../../models/MessageQuotes'
+import { MESSAGE_DELETED } from '../../../ServerEventNames';
+import { Request, Response } from 'express';
+import * as nertiviaCDN from '../../../utils/uploadCDN/nertiviaCDN'
 
-module.exports = async (req, res, next) => {
-  const { channelID, messageID } = req.params;
+export async function deleteMessage(req: Request, res: Response) {
+  const { channelId, messageId } = req.params;
 
-  const message = await Messages.findOne({ channelID, messageID });
+  const message = await Messages.findOne({ channelID: channelId, messageID: messageId });
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;
@@ -35,7 +36,7 @@ module.exports = async (req, res, next) => {
         }
       })
     }
-    const resObj = { channelID, messageID };
+    const resObj = { channelID: channelId, messageID: messageId };
     res.json(resObj);
     const io = req.io;
     if (server) {
@@ -47,10 +48,10 @@ module.exports = async (req, res, next) => {
 
     // delete image if exists
     const filesExist = message.files && message.files.length;
-    const isImage = filesExist && message.files[0].dimensions;
-    const isNertiviaCDN = filesExist && message.files[0].url.startsWith("https://")
+    const isImage = filesExist && message.files?.[0].dimensions;
+    const isNertiviaCDN = filesExist && message.files?.[0].url.startsWith("https://")
     if (filesExist && isImage && isNertiviaCDN) {
-      const path = (new URL(message.files[0].url)).pathname;
+      const path = (new URL(message.files?.[0].url)).pathname;
       nertiviaCDN.deletePath(path).catch(err => {console.log("Error deleting from CDN", err)})
     }
   } catch (error) {

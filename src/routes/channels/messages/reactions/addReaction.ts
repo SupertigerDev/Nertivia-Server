@@ -1,13 +1,15 @@
-import {MessageReactions} from '../../models/MessageReactions';
-import {Messages} from '../../models/Messages'
-import { MESSAGE_REACTION_UPDATED } from '../../ServerEventNames';
+import { Request, Response } from 'express';
+import { FilterQuery } from 'mongoose';
+import {MessageReaction, MessageReactions} from '../../../../models/MessageReactions';
+import {Messages} from '../../../../models/Messages'
+import { MESSAGE_REACTION_UPDATED } from '../../../../ServerEventNames';
 
 
-module.exports = async (req, res, next) => {
-  const { channelID, messageID } = req.params;
+export async function addReaction(req: Request, res: Response) {
+  const { channelId, messageId } = req.params;
   const { emojiID, gif, unicode } = req.body;
 
-  const message = await Messages.findOne({ channelID, messageID });
+  const message = await Messages.findOne({ channelID: channelId, messageID: messageId });
   if (!message) {
     return res.status(404).json({ message: "Message was not found." });
   }
@@ -17,7 +19,7 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({ message: "Missing emojiID or unicode." });
   }
 
-  let filter = {messageID};
+  let filter: FilterQuery<MessageReaction> = {messageID: messageId};
   if (emojiID) {
     filter.emojiID = emojiID
   } else {
@@ -27,7 +29,7 @@ module.exports = async (req, res, next) => {
   // check if reaction exists
   const reactionExists = await MessageReactions.exists({...filter});
   if (!reactionExists) {
-    const count = await MessageReactions.countDocuments({messageID});
+    const count = await MessageReactions.countDocuments({messageID: messageId});
     if (count > 10) {
       return res.status(403).json({ message: "Maximum reaction limit reached!" });
   
@@ -52,10 +54,13 @@ module.exports = async (req, res, next) => {
   }, {upsert: true})
 
   const doc = await MessageReactions.findOne({...filter, reactedBy: req.user._id});
+  if (!doc) {
+    return res.status(403).json({ message: "Something went wrong. (addReaction.ts)" });
+  }
   
   const response = {
-    channelID,
-    messageID,
+    channelID: channelId,
+    messageID: messageId,
     reactedByUserID: req.user.id,
     reaction: {
       emojiID: doc.emojiID,

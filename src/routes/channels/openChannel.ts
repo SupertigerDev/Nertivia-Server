@@ -1,18 +1,19 @@
 import {Users} from '../../models/Users';
 import { Channels, ChannelType } from "../../models/Channels";
 import { CHANNEL_CREATED } from "../../ServerEventNames";
+import { Request, Response } from 'express';
 
-const flake = require('../../utils/genFlakeId').default;
+import flake from '../../utils/genFlakeId';
 
-module.exports = async (req, res, next) => {
-  const { recipient_id } = req.params;
+export async function openChannel (req: Request, res: Response) {
+  const { userId } = req.params;
 
-  // Check if recipient_id is valid
-  const recipient = await Users.findOne({ id: recipient_id });
+  // Check if userId is valid
+  const recipient = await Users.findOne({ id: userId });
   if (!recipient) {
     return res
       .status(403)
-      .json({ status: false, message: "recipient_id is invalid." });
+      .json({ status: false, message: "userId is invalid." });
   }
 
   // check if channel exists
@@ -47,7 +48,7 @@ module.exports = async (req, res, next) => {
     channelID = flake.gen();
   }
 
-  let newChannel = await Channels.create({
+  let newChannel: any = await Channels.create({
     channelID,
     type: ChannelType.DM_CHANNEL,
     creator: req.user._id,

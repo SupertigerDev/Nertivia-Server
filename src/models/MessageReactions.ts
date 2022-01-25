@@ -1,11 +1,11 @@
 import {model, Schema} from 'mongoose';
 
-interface MessageReaction {
+export interface MessageReaction {
   messageID: string,
   emojiID: string,
   unicode: string,
   gif: boolean,
-  reactedBy: any[]
+  reactedBy: string[]
 }
 
 
