@@ -25,7 +25,7 @@ export const buttonReturned = (Router: Router) => {
   );
 } 
 
-export async function route (req: Request, res: Response){
+async function route (req: Request, res: Response){
   const { channelId, messageId, buttonId } = req.params;
   const { message, clickedById } = req.body; 
   

@@ -26,7 +26,7 @@ export function messageDelete(Router: Router) {
 
 
 
-export async function route(req: Request, res: Response) {
+async function route(req: Request, res: Response) {
   const { channelId, messageId } = req.params;
 
   const message = await Messages.findOne({ channelID: channelId, messageID: messageId });
