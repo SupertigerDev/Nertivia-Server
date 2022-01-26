@@ -1,11 +1,22 @@
 import {Users} from '../../models/Users';
 import { Channels, ChannelType } from "../../models/Channels";
 import { CHANNEL_CREATED } from "../../ServerEventNames";
-import { Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 
 import flake from '../../utils/genFlakeId';
+import { channelVerification } from '../../middlewares/ChannelVerification';
+import { authenticate } from '../../middlewares/authenticate';
 
-export async function openChannel (req: Request, res: Response) {
+
+export function channelOpen(Router: Router) {
+  Router.route("/:userId").get(
+    authenticate(true),
+    route
+  );
+};
+
+
+async function route (req: Request, res: Response) {
   const { userId } = req.params;
 
   // Check if userId is valid

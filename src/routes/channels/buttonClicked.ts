@@ -1,7 +1,10 @@
-import { Request } from 'express';
+import { Request, Router } from 'express';
 import { Response } from 'express-serve-static-core';
-import {Messages} from '../../../../models/Messages'
-import { MESSAGE_BUTTON_CLICKED } from '../../../../ServerEventNames';
+import { authenticate } from '../../middlewares/authenticate';
+import { channelVerification } from '../../middlewares/ChannelVerification';
+import rateLimit from '../../middlewares/rateLimit';
+import {Messages} from '../../models/Messages'
+import { MESSAGE_BUTTON_CLICKED } from '../../ServerEventNames';
 
 interface ResponseObject {
   id: string,
@@ -11,7 +14,16 @@ interface ResponseObject {
   serverId?: string,
 }
 
-export async function buttonClicked (req: Request, res: Response){
+export const buttonClicked = (Router: Router) => {
+  Router.route("/:channelId/messages/:messageId/buttons/:buttonId").post(
+    authenticate(true),
+    channelVerification,
+    rateLimit({name: 'message_button_clicked', expire: 60, requestsLimit: 300 }),
+    route
+  );
+} 
+
+async function route (req: Request, res: Response){
   const { channelId, messageId, buttonId } = req.params;
   
 

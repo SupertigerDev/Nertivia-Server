@@ -1,11 +1,32 @@
-import {Messages} from '../../../models/Messages'
+import {Messages} from '../../models/Messages'
 
-import {MessageQuotes} from '../../../models/MessageQuotes'
-import { MESSAGE_DELETED } from '../../../ServerEventNames';
-import { Request, Response } from 'express';
-import * as nertiviaCDN from '../../../utils/uploadCDN/nertiviaCDN'
+import {MessageQuotes} from '../../models/MessageQuotes'
+import { MESSAGE_DELETED } from '../../ServerEventNames';
+import { Request, Response, Router } from 'express';
+import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import { authenticate } from '../../middlewares/authenticate';
+import rateLimit from '../../middlewares/rateLimit';
+import { channelVerification } from '../../middlewares/ChannelVerification';
+import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
+import checkRolePermissions from '../../middlewares/checkRolePermissions';
+import permissions from '../../utils/rolePermConstants';
 
-export async function deleteMessage(req: Request, res: Response) {
+
+
+export function messageDelete(Router: Router) {
+  Router.route("/:channelId/messages/:messageId").get(
+    authenticate(true),
+    rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
+    channelVerification,
+    disAllowBlockedUser,
+    checkRolePermissions('Admin', permissions.roles.ADMIN, false),
+    route
+  );
+};
+
+
+
+export async function route(req: Request, res: Response) {
   const { channelId, messageId } = req.params;
 
   const message = await Messages.findOne({ channelID: channelId, messageID: messageId });

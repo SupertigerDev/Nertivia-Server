@@ -1,8 +1,25 @@
-import { Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { FilterQuery } from 'mongoose';
-import {MessageReaction, MessageReactions} from '../../../../models/MessageReactions';
+import { authenticate } from '../../middlewares/authenticate';
+import { channelVerification } from '../../middlewares/ChannelVerification';
+import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
+import rateLimit from '../../middlewares/rateLimit';
+import {MessageReaction, MessageReactions} from '../../models/MessageReactions';
 
-export async function getReactions(req: Request, res: Response) {
+
+export const reactionGet = (Router: Router) => {
+  Router.route("/:channelId/messages/:messageId/reactions").get(
+    authenticate(true),
+    rateLimit({name: 'message_react_users', expire: 60, requestsLimit: 120 }),
+    channelVerification,
+    disAllowBlockedUser,
+    route
+  );  
+} 
+
+
+
+async function route (req: Request, res: Response){
   const {channelId, messageId} = req.params;
 
   const {emojiID, unicode} = req.query;

@@ -1,11 +1,28 @@
-import { Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { FilterQuery } from 'mongoose';
-import {MessageReaction, MessageReactions} from '../../../../models/MessageReactions';
-import {Messages} from '../../../../models/Messages'
-import { MESSAGE_REACTION_UPDATED } from '../../../../ServerEventNames';
+import { authenticate } from '../../middlewares/authenticate';
+import { channelVerification } from '../../middlewares/ChannelVerification';
+import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
+import rateLimit from '../../middlewares/rateLimit';
+import {MessageReaction, MessageReactions} from '../../models/MessageReactions';
+import {Messages} from '../../models/Messages'
+import { MESSAGE_REACTION_UPDATED } from '../../ServerEventNames';
 
 
-export async function addReaction(req: Request, res: Response) {
+
+export const reactionAdd = (Router: Router) => {
+  Router.route("/:channelId/messages/:messageId/reactions").post(
+    authenticate(true),
+    rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
+    channelVerification,
+    disAllowBlockedUser,
+    route
+  );
+} 
+
+
+
+async function route (req: Request, res: Response) {
   const { channelId, messageId } = req.params;
   const { emojiID, gif, unicode } = req.body;
 

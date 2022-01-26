@@ -1,42 +1,33 @@
 import { Router } from "express";
 
-// middlewares
-import { authenticate } from "../../middlewares/authenticate";
-import { channelVerification } from "../../middlewares/ChannelVerification";
-const rateLimit = require("../../middlewares/rateLimit");
-
-// routes
-import {getChannel} from './getChannel';
-import {closeChannel} from './closeChannel';
-import {openChannel} from './openChannel';
-import { MessageRouter } from "./messages/MessageRouter";
+import {channelGet} from './channelGet';
+import {channelClose} from './channelClose';
+import {channelOpen} from './channelOpen';
+import { messageDelete } from "./messageDelete";
+import { messageDeleteBulk } from "./messageDeleteBulk";
+import { buttonClicked } from "./buttonClicked";
+import { buttonReturned } from "./buttonReturned";
+import { reactionAdd } from "./reactionAdd";
+import { reactionRemove } from "./reactionRemove";
+import { reactionGet } from "./reactionGet";
 
 
 
 
 const ChannelRouter = Router();
 
+channelClose(ChannelRouter);
+channelGet(ChannelRouter);
+channelOpen(ChannelRouter)
 
+messageDelete(ChannelRouter);
+messageDeleteBulk(ChannelRouter);
 
-ChannelRouter.route("/:userId").post(
-  authenticate(true),
-  openChannel
-);
+buttonClicked(ChannelRouter);
+buttonReturned(ChannelRouter); // click message button callback (only used by (bot) message creator)
 
-ChannelRouter.route("/:channelId").get(
-  authenticate(true),
-  channelVerification,
-  getChannel
-);
-
-// close channel
-ChannelRouter.route("/:channelId").delete(
-  authenticate(true),
-  closeChannel,
-);
-
-
-ChannelRouter.use("/", MessageRouter);
-
+reactionAdd(ChannelRouter)
+reactionRemove(ChannelRouter)
+reactionGet(ChannelRouter)
 
 export { ChannelRouter }

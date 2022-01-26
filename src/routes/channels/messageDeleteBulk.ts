@@ -1,11 +1,30 @@
-import { Message } from '../../../models/Messages';
-import { Request, Response } from "express";
+import { Message } from '../../models/Messages';
+import { Request, Response, Router } from "express";
 import { Document, FilterQuery, LeanDocument } from "mongoose";
-import { Messages } from "../../../models/Messages";
-import { MESSAGE_DELETED_BULK } from '../../../ServerEventNames';
+import { Messages } from "../../models/Messages";
+import { MESSAGE_DELETED_BULK } from '../../ServerEventNames';
+import { authenticate } from '../../middlewares/authenticate';
+import rateLimit from '../../middlewares/rateLimit';
+import { channelVerification } from '../../middlewares/ChannelVerification';
+import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
+import checkRolePermissions from '../../middlewares/checkRolePermissions';
+import permissions from '../../utils/rolePermConstants';
 
 
-export async function deleteMessageBulk(req: Request, res: Response) {
+
+export function messageDeleteBulk(Router: Router) {
+  Router.route("/:channelId/messages/bulk").get(
+    authenticate(true),
+    rateLimit({name: 'message_delete_bulk', expire: 60, requestsLimit: 10 }),
+    channelVerification,
+    disAllowBlockedUser,
+    checkRolePermissions('Admin', permissions.roles.ADMIN, false),
+    route
+  );
+};
+
+
+async function route (req: Request, res: Response) {
   const { channelId } = req.params;
   const { ids } = req.body;
   const channel = req.channel;
