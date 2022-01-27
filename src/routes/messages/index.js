@@ -19,23 +19,6 @@ import fileMessage from './fileMessage';
 import sendMessage from './sendOrUpdateMessage';
 
 
-// get messages
-MainMessageRouter.route("/channels/:channelID").get(
-  authenticate(true),
-  rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
-  channelVerification,
-  require('./getMessages')
-);
-
-// get message
-MainMessageRouter.route("/:messageID/channels/:channelID").get(
-  authenticate(true),
-  rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
-  channelVerification,
-  require('./getMessage')
-);
-
-
 
 
 // update message
@@ -63,20 +46,6 @@ MainMessageRouter.route("/channels/:channelID").post(
   fileMessage,
   sendMessage,
   URLEmbed,
-  //GDriveOauthClient,
-  //busboy(),
- // require('./sendFileMessage'),
-);
-
-// typing
-MainMessageRouter.route("/:channelID/typing").post(
-  authenticate(true),
-  rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
-  channelVerification,
-  disAllowBlockedUser,
-  serverChannelPermissions('send_message', true),
-  checkRolePerms('Send Message', permissions.roles.SEND_MESSAGES),
-  require('./sendTypingIndicator'),
 );
 
 module.exports = MainMessageRouter;

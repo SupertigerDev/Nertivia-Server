@@ -1,13 +1,27 @@
 const mongoose = require("mongoose");
+import { Request, Response, Router } from 'express';
+import { authenticate } from '../../middlewares/authenticate';
+import { channelVerification } from '../../middlewares/ChannelVerification';
+import rateLimit from '../../middlewares/rateLimit';
 import {MessageReactions} from '../../models/MessageReactions';
 
 import {Messages} from '../../models/Messages'
 
-module.exports = async (req, res, next) => {
-  const { channelID } = req.params;
-  const continueMessageID = req.query.continue;
-  const beforeMessageID = req.query.before;
-  const aroundMessageID = req.query.around;
+export const messageGetBulk = (Router: Router) => {
+  Router.route("/channelId/messages").get(
+    authenticate(true),
+    rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
+    channelVerification,
+    route
+  );
+  
+}
+
+async function route (req: Request, res: Response){
+  const { channelId } = req.params;
+  const continueMessageID = req.query.continue as string;
+  const beforeMessageID = req.query.before as string;
+  const aroundMessageID = req.query.around as string;
 
   const populate = [{
     path: "creator",
@@ -41,7 +55,7 @@ module.exports = async (req, res, next) => {
       });
     }
     messages = await Messages.find({
-      channelID,
+      channelID: channelId,
       _id: {
         $lt: continueFromMessage._id
       }
@@ -65,7 +79,7 @@ module.exports = async (req, res, next) => {
       });
     }
     messages = await Messages.find({
-      channelID,
+      channelID: channelId,
       _id: {
         $gt: beforeFromMessage._id
       }
@@ -88,7 +102,7 @@ module.exports = async (req, res, next) => {
     }
 
     let above = await Messages.find({
-      channelID,
+      channelID: channelId,
       _id: {
         $lte: message._id
       }
@@ -97,7 +111,7 @@ module.exports = async (req, res, next) => {
     }).limit(25).populate(populate).select(select).lean();
 
     let bottom = await Messages.find({
-      channelID,
+      channelID: channelId,
       _id: {
         $gt: message._id
       }
@@ -106,7 +120,7 @@ module.exports = async (req, res, next) => {
 
     if (above.length === 25 && bottom.length < 25) {
       above = await Messages.find({
-        channelID,
+        channelID: channelId,
         _id: {
           $lte: message._id
         }
@@ -116,7 +130,7 @@ module.exports = async (req, res, next) => {
 
     } else if (bottom.length === 25 && above.length < 25) {
       bottom = await Messages.find({
-        channelID,
+        channelID: channelId,
         _id: {
           $gt: message._id
         }
@@ -129,7 +143,7 @@ module.exports = async (req, res, next) => {
   } else {
     messages = await Messages.find(
       {
-        channelID
+        channelID: channelId
       },
       "-__v -_id"
     )
@@ -168,7 +182,7 @@ module.exports = async (req, res, next) => {
 
   if (allReactions.length) {
     messages = messages.map(message => {
-    const reactions = [] 
+    const reactions: any = [] 
     allReactions.forEach(reaction => {
         if (reaction.messageID !== message.messageID) return;
         reactions.push({...reaction, messageID: undefined})
@@ -182,7 +196,7 @@ module.exports = async (req, res, next) => {
 
   return res.json({
     status: true,
-    channelID,
+    channelID: channelId,
     messages
   });
 };
