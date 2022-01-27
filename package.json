@@ -31,7 +31,7 @@
     "express-session": "^1.17.1",
     "express-validator": "^6.5.0",
     "fcm-node": "^1.5.2",
-    "firebase-admin": "^9.3.0",
+    "firebase-admin": "^10.0.2",
     "flakeid": "^1.0.0",
     "form-data": "^4.0.0",
     "gm": "^1.23.1",
