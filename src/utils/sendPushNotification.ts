@@ -1,4 +1,4 @@
-import {initializeApp, credential, messaging} from 'firebase-admin'
+import * as admin from 'firebase-admin';
 import {Devices} from '../models/Devices';
 let serverKey: any;
 try {
@@ -10,8 +10,8 @@ import path from 'path';
 import {Servers} from "../models/Servers";
 
 if (serverKey) {
-  initializeApp({
-    credential: credential.cert(serverKey)
+  admin.initializeApp({
+    credential: admin.credential.cert(serverKey)
   });
 }
 
@@ -97,7 +97,7 @@ export async function sendServerPush(args: ServerArgs) {
 
 function sendToDevice(tokenArr: string[], data: any) {
   if (!serverKey) return;
-  messaging().sendToDevice(tokenArr, {data}, {priority: "high"})
+  admin.messaging().sendToDevice(tokenArr, {data}, {priority: "high"})
   .then(async res => {
     const failedTokens = res.results.map((token, index) => token.error && tokenArr[index]).filter(r => r);
     if (failedTokens.length) {
