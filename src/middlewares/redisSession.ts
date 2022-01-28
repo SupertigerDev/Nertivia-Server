@@ -3,7 +3,7 @@ import connectRedis from "connect-redis";
 import session from "express-session";
 import JWT from 'jsonwebtoken';
 import {getRedisInstance} from '../redis/instance'
-import { RequestHandler } from "express-serve-static-core";
+import { RequestHandler } from "express";
 
 const RedisStore = connectRedis(session);
 

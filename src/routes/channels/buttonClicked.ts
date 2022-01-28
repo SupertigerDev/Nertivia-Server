@@ -1,5 +1,5 @@
 import { Request, Router } from 'express';
-import { Response } from 'express-serve-static-core';
+import { Response } from 'express';
 import { authenticate } from '../../middlewares/authenticate';
 import { channelVerification } from '../../middlewares/ChannelVerification';
 import rateLimit from '../../middlewares/rateLimit';

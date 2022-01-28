@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express-serve-static-core";
+import { NextFunction, Request, Response } from "express";
 import {getUserInVoiceByUserId, removeUserFromVoice } from "../../newRedisWrapper";
 import { USER_CALL_LEFT } from "../../ServerEventNames";
 import { getIOInstance } from "../../socket/instance";

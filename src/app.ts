@@ -6,7 +6,6 @@ import http from "http";
 import realIP from "./middlewares/realIP";
 import redisSession from './middlewares/redisSession'
 import cors from "./middlewares/cors";
-import bodyParser from 'body-parser';
 
 
 export default function initServer() {
@@ -25,7 +24,10 @@ export default function initServer() {
   // }));
 
   // middlewares
-  app.use(bodyParser.json({limit: '10mb'}));
+
+  app.use(express.json({limit: '10mb'}));
+  app.use(express.urlencoded({ extended: true }));
+
   app.use(realIP);
   app.use(cors);
   app.use(function(req, res, next){

@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express-serve-static-core";
+import { NextFunction, Request, Response } from "express";
 
 import {checkHTML} from 'html-safe-checker'
 import {Users} from "../../../models/Users";
