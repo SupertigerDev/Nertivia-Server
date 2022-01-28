@@ -35,7 +35,7 @@ async function route (req: Request, res: Response){
     return res.status(403).json({ message: "Missing emojiID or unicode." });
   }
 
-  let filter: FilterQuery<MessageReaction> = {messageID: channelId};
+  let filter: FilterQuery<MessageReaction> = {messageID: messageId};
   if (emojiID) {
     filter.emojiID = emojiID
   } else {
