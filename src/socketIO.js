@@ -76,6 +76,7 @@ module.exports = async client => {
       client.emit(AUTHENTICATION_ERROR, "Rate Limited!");
       client.disconnect(true);
       console.log("rate limited (auth_event)");
+      return;
     }
 
 
