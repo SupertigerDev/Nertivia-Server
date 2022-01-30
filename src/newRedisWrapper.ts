@@ -1,5 +1,33 @@
 import { Multi, RedisClient } from 'redis';
 import { getRedisInstance } from './redis/instance';
+const redis = require('./redis');
+
+
+interface RateLimitData{name: string, userId?: string, userIp?: string, expire: number, requestsLimit: number}
+
+export async function checkRateLimited(data: RateLimitData) {
+  const {name, userId, userIp, expire, requestsLimit} = data;
+
+  const user = userId || userIp?.replace(/:/g, '=');
+  if (!user) return true;
+
+  let key = `${user}-${name}`
+
+  const [count, ttl] = await redis.rateLimitIncr(key, expire);
+
+  const ttlToSeconds = ttl / 1000;
+  if (ttlToSeconds > expire) {
+    // reset if expire time changes (slow down mode)
+    redis.rateLimitSetExpire(key, expire, -1);
+    return false;
+  }
+
+  if (count > requestsLimit) return ttl as number;
+  await redis.rateLimitSetExpire(key, expire, ttl);
+  return false
+
+}
+
 
 export function ipRequestIncrement(ip: string) {
   return wrapper(getRedisInstance()?.batch().hincrby(`requestsSent`, ip, 1))

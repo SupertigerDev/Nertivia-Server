@@ -6,7 +6,7 @@ import {ServerMembers} from "./models/ServerMembers";
 import { ServerRoles } from "./models/ServerRoles";
 import { Channels } from "./models/Channels";
 import {BlockedUsers} from "./models/BlockedUsers";
-import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists } from "./newRedisWrapper";
+import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists, checkRateLimited } from "./newRedisWrapper";
 import { Notifications } from "./models/Notifications";
 import {BannedIPs} from "./models/BannedIPs";
 import {CustomEmojis} from './models/CustomEmojis'
@@ -63,6 +63,24 @@ module.exports = async client => {
 
   client.on("authentication", async data => {
     const { token } = data;
+    
+
+    const ip = (client.handshake.headers["cf-connecting-ip"] || client.handshake.headers["x-forwarded-for"] || client.handshake.address)?.toString();
+
+
+    const ttl = await checkRateLimited({
+      userIp: ip,
+      expire: 120,
+      name: "auth_event",
+      requestsLimit: 20
+    })
+    if (ttl) {
+      client.emit(AUTHENTICATION_ERROR, "Rate Limited!");
+      client.disconnect(true);
+      console.log("rate limited (auth_event)");
+      return;
+    }
+
 
     let decryptedToken = await asyncVerifyJWT(token)
       .catch(e => {
@@ -123,7 +141,7 @@ module.exports = async client => {
       }
 
 
-      const ip = client.handshake.address;
+
       const ipBanned = await BannedIPs.exists({ ip: ip });
 
       if (ipBanned) {
