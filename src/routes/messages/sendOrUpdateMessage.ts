@@ -14,11 +14,18 @@ const sendMessageNotification = require('../../utils/SendMessageNotification');
 
 import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
 import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../../ServerEventNames';
+import { createMessage } from '../../services/Messages';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
   const { channelID, messageID } = req.params;
   let { tempID, socketID, color, buttons, htmlEmbed } = req.body;
   let message = req.body.message;
+
+
+  await createMessage({
+    channelId: channelID,
+    content: message
+  })
 
 
   // If messageID exists, message wants to update.

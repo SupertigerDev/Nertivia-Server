@@ -13,7 +13,7 @@ import permissions from '../../utils/rolePermConstants';
 
 
 export function messageDeleteBulk(Router: Router) {
-  Router.route("/:channelId/messages/bulk").get(
+  Router.route("/:channelId/messages/bulk").delete(
     authenticate(true),
     rateLimit({name: 'message_delete_bulk', expire: 60, requestsLimit: 10 }),
     channelVerification,

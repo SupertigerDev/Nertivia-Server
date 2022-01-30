@@ -24,7 +24,7 @@ interface Settings {
   server_position: string[]
 }
 
-interface User {
+export interface User {
   email: string
   banned: boolean
   email_confirm_code: string
