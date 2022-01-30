@@ -65,7 +65,9 @@ module.exports = async client => {
     const { token } = data;
     
 
-    const ip = client.handshake.address;
+    const ip = (client.handshake.headers["cf-connecting-ip"] || client.handshake.headers["x-forwarded-for"] || client.handshake.address)?.toString();
+
+
     const ttl = await checkRateLimited({
       userIp: ip,
       expire: 120,
