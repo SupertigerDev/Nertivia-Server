@@ -22,10 +22,14 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   let message = req.body.message;
 
 
+  const t1 = performance.now();
   await createMessage({
+    userObjectId: req.user._id,
     channelId: channelID,
     content: message
   })
+  const t2 = performance.now();
+  console.log(`Message took ${Math.round(t2 - t1)}ms to send.`);
 
 
   // If messageID exists, message wants to update.

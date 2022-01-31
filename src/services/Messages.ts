@@ -13,34 +13,44 @@ import { getUsersByIds } from './Users';
 type OneOf<T extends Record<string, unknown>> = { [K in keyof T]: Record<K, T[K]> & { [U in Exclude<keyof T, K>]?: T[U] } }[keyof T]
 
 
+const messageSelect = 'creator message messageID quotes';
+const messagePopulate = [
+  {
+    path: "quotes",
+    select: "creator message messageID",
+    populate: {
+      path: "creator",
+      select: "avatar username id tag admin -_id",
+      model: "users"
+    }
+  },
+  {
+    path: "creator",
+    select: "username id avatar"
+  }
+];
+
 export const getMessagesByIds = async (messageIds: string[], channelId?: string) => {
   if (!messageIds.length) return [];
   const filter: FilterQuery<Message> = { messageID: { $in: messageIds } }
   if (channelId) filter.channelID = channelId;
   return Messages
     .find(filter)
-    .select('creator message messageID quotes')
-    .populate([
-      {
-        path: "quotes",
-        select: "creator message messageID",
-        populate: {
-          path: "creator",
-          select: "avatar username id tag admin -_id",
-          model: "users"
-        }
-      },
-      {
-        path: "creator",
-        select: "username id avatar"
-      }
-    ])
+    .select(messageSelect)
+    .populate(messagePopulate);
+}
+export const getMessageByObjectId = (objectId: string) => {
+  return Messages
+    .findById(objectId)
+    .select(messageSelect)
+    .populate(messagePopulate);
 }
 
 
 interface Button { name: string, id: string };
 
 type CreateMessageArgs = {
+  userObjectId: string;
   channelId: string;
   buttons?: Button[];
 } & OneOf<{
@@ -64,7 +74,23 @@ export const createMessage = async (data: CreateMessageArgs) => {
   const userMentions = await getUsersByIds(userMentionIds);
   const userMentionObjectIds = userMentions.map(user => user._id);
 
-  const messageQuotes = await saveQuoteMentions(content, data.channelId);
+  const quoteObjectIds = await saveQuoteMentions(content, data.channelId);
+
+
+  let message = await Messages.create({
+    channelID: data.channelId,
+    messageID: "placeholder",
+    message: content,
+    creator: data.userObjectId,
+    mentions: userMentionObjectIds,
+    quotes: quoteObjectIds,
+    buttons
+  })
+
+
+  message = await getMessageByObjectId(message._id).lean();
+
+  console.log(message)  
   
   
 }
@@ -145,7 +171,7 @@ function removeDuplicatesFromArray(values: string[]): string[] {
 
 // validates the buttons and returns a clean array of buttons.
 function validateButtons(buttons: Button[] | undefined): [Button[] | null, string | null] {
-  if (!buttons || !buttons?.length) return [null, null];
+  if (!buttons || !buttons?.length) return [[], null];
 
   let validatedButtons: Button[] = [];
 
