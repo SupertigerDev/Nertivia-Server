@@ -57,6 +57,11 @@ type CreateMessageArgs = {
   htmlEmbed: JsonInput;
   content: string;
   file: any;
+}> & OneOf<{
+  channel: any;
+  channelId: any;
+}> & OneOf<{
+  creator: any;
 }>;
 
 export const createMessage = async (data: CreateMessageArgs) => {
@@ -74,42 +79,59 @@ export const createMessage = async (data: CreateMessageArgs) => {
   const userMentions = await getUsersByIds(userMentionIds);
   const userMentionObjectIds = userMentions.map(user => user._id);
 
-  const quoteObjectIds = await saveQuoteMentions(content, data.channelId);
+  const {quoteObjectIds, quotes} = await saveQuoteMentions(content, data);
 
 
-  let message = await Messages.create({
+
+  let message: Partial<Message> = {
     channelID: data.channelId,
     messageID: "placeholder",
-    message: content,
     creator: data.userObjectId,
-    mentions: userMentionObjectIds,
-    quotes: quoteObjectIds,
-    buttons
-  })
+    // add to object if exists.
+    ...(content && {content}),
+    ...(base64HtmlEmbed && {htmlEmbed: base64HtmlEmbed}),
+    ...(data.file && {files: [data.file]}),
+    ...(quoteObjectIds.length && {quotes: quoteObjectIds}),
+    ...(userMentionObjectIds.length && {mentions: userMentionObjectIds}),
+    ...(buttons?.length && {buttons})
+  };
 
+  const createdMessage = await Messages.create(message);
 
-  message = await getMessageByObjectId(message._id).lean();
+  message.quotes = quotes;
+  message.creator = {
+    id: data.creator.id,
+    username: data.creator.username,
+    tag: data.creator.tag,
+    avatar: data.creator.avatar,
+    badges: data.creator.badges,
+    bot: data.creator.bot,
+  };
+  message.created = createdMessage.created;
 
-  console.log(message)  
+  message.mentions = userMentions;
+
+  console.log(message);
   
   
 }
 
-async function saveQuoteMentions(content: string | null, channelId: string) {
-  if (!content) return [];
+async function saveQuoteMentions(content: string | null, data: CreateMessageArgs) {
+  if (!content) return {quoteObjectIds: [], quotes: []};
   const messageMentionIds = extractQuoteMentionIds(content);
-  const messages = await getMessagesByIds(messageMentionIds, channelId);
-  if (!messages.length) return [];
-  const channel = await getChannelById(channelId);
+  const channel = data.channelId ? await getChannelById(data.channelId) : data.channel;
+  const messages = await getMessagesByIds(messageMentionIds, channel.channelID);
+  if (!messages.length) return {quoteObjectIds: [], quotes: []};
   const quotes: MessageQuote[] = messages.map(message => {
     return {
       creator: message.creator,
       message: message.message,
       messageID: message.messageID,
-      quotedChannel: channel
+      quotedChannel: channel._id
     }
   })
-  return await MessageQuotes.insertQuotes(quotes);
+  const quoteObjectIds = await MessageQuotes.insertQuotes(quotes);
+  return {quoteObjectIds, quotes}
 } 
 
 // validates the message content and returns a validated message content.
@@ -150,7 +172,6 @@ function extractQuoteMentionIds(content: string | null): string[] {
   const uniqueMentionIds = removeDuplicatesFromArray(mentionIds)
   return uniqueMentionIds;
 }
-
 
 
 // match groups of regular expressions and return an array of strings.
@@ -205,5 +226,3 @@ function validateHtmlEmbed(htmlEmbed: any) {
     return [null, err.message];
   }
 }
-
-(createMessage as any)({ channelId: "1234" }).catch((err: any) => { console.log("yay", err) });
