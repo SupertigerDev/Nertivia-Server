@@ -8,8 +8,9 @@ import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../ServerEventNames';
 import { getIOInstance } from '../socket/instance';
 import { createURLEmbed } from '../utils/URLEmbed';
 import { zip } from '../utils/zip';
-import { getChannelById } from './Channels';
+import { getChannelById, updateLastMessaged as updateLastMessagedChannel } from './Channels';
 import * as MessageQuotes from './MessageQuotes';
+import { updateMemberLastSeen } from './ServerMembers';
 import { getUsersByIds } from './Users';
 
 
@@ -130,6 +131,14 @@ export const createMessage = async (data: CreateMessageArgs) => {
       excludedSocketId: data.socketId,
       excludeSavedNotes: true,
     })
+
+
+    await updateLastSeen({
+      channelId: data.channelId,
+      memberObjectId: data.creator._id,
+      serverObjectId: data.channel?.server?._id
+    });
+
     const embed = await addEmbedIfExists(message);
     if (!embed) return;
 
@@ -140,6 +149,7 @@ export const createMessage = async (data: CreateMessageArgs) => {
       messageID: message.messageID,
       replace: false
     }
+
     emitToChannel({
       channel: data.channel,
       user: data.creator,
@@ -149,8 +159,24 @@ export const createMessage = async (data: CreateMessageArgs) => {
       excludeSavedNotes: true,
     })
   })
-  
-  
+}
+
+
+
+interface UpdateLastSeenOptions {
+  serverObjectId?: string
+  memberObjectId?: string
+  channelId: string
+}
+async function updateLastSeen(options: UpdateLastSeenOptions ) {
+  const date = await updateLastMessagedChannel(options.channelId);
+  if (!options.serverObjectId || !options.memberObjectId) return;
+  await updateMemberLastSeen({
+    serverObjectId: options.serverObjectId,
+    memberObjectId: options.memberObjectId,
+    channelId: options.channelId,
+    date,
+  })
 }
 
 interface EmitOptions {
