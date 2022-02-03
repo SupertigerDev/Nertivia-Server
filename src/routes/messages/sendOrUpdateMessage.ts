@@ -23,13 +23,16 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
 
   const t1 = performance.now();
-  await createMessage({
+  const test = await createMessage({
     userObjectId: req.user._id,
     channelId: channelID,
     content: message,
     channel: req.channel,
-    creator: req.user
+    creator: req.user,
+    socketId: socketID
   })
+
+
   const t2 = performance.now();
   console.log(`Message took ${Math.round(t2 - t1)}ms to send.`);
 

@@ -15,7 +15,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@socket.io/redis-adapter": "^7.0.0",
+    "@socket.io/redis-adapter": "^7.1.0",
     "abort-controller": "^3.0.0",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.3",
@@ -47,7 +47,7 @@
     "pako": "^1.0.11",
     "redis": "^3.1.2",
     "sharp": "^0.25.4",
-    "socket.io": "^4.1.2",
+    "socket.io": "^4.4.1",
     "vhost": "^3.0.2"
   },
   "devDependencies": {

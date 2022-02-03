@@ -17,7 +17,7 @@ function main() {
 		start();
 		return;
 	}
-	if (cluster.isMaster) {
+	if (cluster.isPrimary) {
 		console.log("Master PID: ", process.pid);
 	
 		for (let i = 0; i < numCPUs; i++) {

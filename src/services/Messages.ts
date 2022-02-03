@@ -1,13 +1,16 @@
 import { jsonToHtml, JsonInput } from 'jsonhtmlfyer';
 import { FilterQuery } from 'mongoose';
+import { Channel } from '../custom';
 import { MessageQuote } from '../models/MessageQuotes';
 import { Message, Messages } from '../models/Messages';
 import { User } from '../models/Users';
+import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../ServerEventNames';
+import { getIOInstance } from '../socket/instance';
+import { createURLEmbed } from '../utils/URLEmbed';
 import { zip } from '../utils/zip';
 import { getChannelById } from './Channels';
 import * as MessageQuotes from './MessageQuotes';
 import { getUsersByIds } from './Users';
-
 
 
 type OneOf<T extends Record<string, unknown>> = { [K in keyof T]: Record<K, T[K]> & { [U in Exclude<keyof T, K>]?: T[U] } }[keyof T]
@@ -46,13 +49,13 @@ export const getMessageByObjectId = (objectId: string) => {
     .populate(messagePopulate);
 }
 
-
 interface Button { name: string, id: string };
 
 type CreateMessageArgs = {
   userObjectId: string;
   channelId: string;
   buttons?: Button[];
+  socketId?: string;
 } & OneOf<{
   htmlEmbed: JsonInput;
   content: string;
@@ -63,6 +66,8 @@ type CreateMessageArgs = {
 }> & OneOf<{
   creator: any;
 }>;
+
+
 
 export const createMessage = async (data: CreateMessageArgs) => {
 
@@ -88,7 +93,7 @@ export const createMessage = async (data: CreateMessageArgs) => {
     messageID: "placeholder",
     creator: data.userObjectId,
     // add to object if exists.
-    ...(content && {content}),
+    ...(content && {message: content}),
     ...(base64HtmlEmbed && {htmlEmbed: base64HtmlEmbed}),
     ...(data.file && {files: [data.file]}),
     ...(quoteObjectIds.length && {quotes: quoteObjectIds}),
@@ -98,6 +103,7 @@ export const createMessage = async (data: CreateMessageArgs) => {
 
   const createdMessage = await Messages.create(message);
 
+  message.messageID = createdMessage.messageID;
   message.quotes = quotes;
   message.creator = {
     id: data.creator.id,
@@ -111,11 +117,89 @@ export const createMessage = async (data: CreateMessageArgs) => {
 
   message.mentions = userMentions;
 
-  console.log(message);
+  return new Promise(async resolve => {
+    
+    resolve(message);
+
+    // emit message to channel
+    emitToChannel({
+      channel: data.channel,
+      user: data.creator,
+      eventName: MESSAGE_CREATED,
+      data: {message},
+      excludedSocketId: data.socketId,
+      excludeSavedNotes: true,
+    })
+    const embed = await addEmbedIfExists(message);
+    if (!embed) return;
+
+    // emit embed to channel
+    const embedResponseData = {
+      embed,
+      channelID: message.channelID,
+      messageID: message.messageID,
+      replace: false
+    }
+    emitToChannel({
+      channel: data.channel,
+      user: data.creator,
+      eventName: MESSAGE_UPDATED,
+      data: embedResponseData,
+      excludedSocketId: data.socketId,
+      excludeSavedNotes: true,
+    })
+  })
   
   
 }
 
+interface EmitOptions {
+  channel: Channel,
+  user: User,
+  eventName: string,
+  data: any,
+  excludedSocketId?: string
+  excludeSavedNotes?: boolean // default: false
+}
+
+// emit to channel (EG: message sent)
+async function emitToChannel(options: EmitOptions) {
+  const io = getIOInstance();
+
+  // if server channel
+  if (options.channel.server) {
+    let room = io.in('server:' + options.channel.server.server_id)
+    if (options.excludedSocketId) room = room.except(options.excludedSocketId);
+    room.emit(options.eventName, options.data)
+    return;
+  }
+
+  // if dm channel
+  const isNotesChannel = options.user.id === options.channel.recipients[0].id;
+
+  const shouldExcludeSavedNotes = options.excludeSavedNotes ? isNotesChannel : false; 
+
+  if (!shouldExcludeSavedNotes) io.in(options.channel.recipients[0].id).emit(options.eventName, options.data);
+  let room = io.in(options.user.id);
+  if (options.excludedSocketId) room = room.except(options.excludedSocketId);
+  room.emit(options.eventName, options.data)
+}
+
+const urlRegex = new RegExp(
+  "(^|[ \t\r\n])((http|https):(([A-Za-z0-9$_.+!*(),;/?:@&~=-])|%[A-Fa-f0-9]{2}){2,}(#([a-zA-Z0-9][a-zA-Z0-9$_.+!*(),;/?:@&~=%-]*))?([A-Za-z0-9$_+!*();/?:~-]))");
+
+// update message with the embed if it exists.
+async function addEmbedIfExists(message: Partial<Message>)  {
+  if (!message.message) return;
+  const url = message.message.match(urlRegex)?.[0].trim();
+  if (!url) return;
+  const [embed, error] = await createURLEmbed(url);
+  if (error || !embed) return;
+  await Messages.updateOne({messageID: message.messageID}, {embed: embed});
+  return embed;
+}
+
+// insert quotes to database.
 async function saveQuoteMentions(content: string | null, data: CreateMessageArgs) {
   if (!content) return {quoteObjectIds: [], quotes: []};
   const messageMentionIds = extractQuoteMentionIds(content);
