@@ -168,6 +168,9 @@ interface UpdateLastSeenOptions {
   memberObjectId?: string
   channelId: string
 }
+// update last seen in timestamp.
+// for dm channels: this is used to move the user to the top of the list when sending a message.
+// for server channels, this is used to determine whether the user has a notification or not by comparing the "lastMessaged" in the channel and "lastSeen" in the server member.
 async function updateLastSeen(options: UpdateLastSeenOptions ) {
   const date = await updateLastMessagedChannel(options.channelId);
   if (!options.serverObjectId || !options.memberObjectId) return;
