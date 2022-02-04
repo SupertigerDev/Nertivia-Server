@@ -9,7 +9,7 @@ interface ServerMember {
   type: string
   roles: any[]
   muted: number
-  muted_channels: any[]
+  muted_channels: string[]
   last_seen_channels: any
 }
 

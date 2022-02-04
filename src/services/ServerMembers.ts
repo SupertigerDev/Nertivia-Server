@@ -14,3 +14,26 @@ export const updateMemberLastSeen = (options: LastSeenOptions) => {
     }
   })
 }
+
+
+interface UnmutedServerChannelMembers {
+  serverObjectId: string,
+  channelId: string,
+  userObjectIds: string[]
+}
+
+// filter out members that have muted notifications from the channel or the server and return the id.
+export const unmutedServerChannelMembers = async (opts: UnmutedServerChannelMembers): Promise<string[]> => {
+  let serverMembers = await ServerMembers.find({ 
+    muted_channels: { 
+      $ne: opts.channelId
+    }, 
+    muted: { $ne: 2 }, 
+    server: opts.serverObjectId, 
+    member: {
+      $in: opts.userObjectIds
+    }
+  }).select("member").populate("member", "id")
+  const memberIds = serverMembers.map(serverMember => serverMember.member.id)
+  return memberIds;
+}

@@ -10,6 +10,7 @@ import { createURLEmbed } from '../utils/URLEmbed';
 import { zip } from '../utils/zip';
 import { getChannelById, updateLastMessaged as updateLastMessagedChannel } from './Channels';
 import * as MessageQuotes from './MessageQuotes';
+import { insertNotification } from './Notifications';
 import { updateMemberLastSeen } from './ServerMembers';
 import { getUsersByIds } from './Users';
 
@@ -138,6 +139,17 @@ export const createMessage = async (data: CreateMessageArgs) => {
       memberObjectId: data.creator._id,
       serverObjectId: data.channel?.server?._id
     });
+
+    // for DM channels, they are notifications
+    // for Server channels, these are used for mentions.
+    insertNotification({
+      channelId: data.channelId,
+      messageId: message.messageID!,
+      senderObjectId: data.creator._id,
+      mentionUserObjectIds: userMentionObjectIds,
+      recipientUserId: data.channel.recipients?.[0]?.id,
+      serverObjectId: data.channel.server?._id
+    })
 
     const embed = await addEmbedIfExists(message);
     if (!embed) return;
