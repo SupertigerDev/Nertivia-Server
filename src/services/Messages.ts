@@ -6,6 +6,7 @@ import { Message, Messages } from '../models/Messages';
 import { User } from '../models/Users';
 import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../ServerEventNames';
 import { getIOInstance } from '../socket/instance';
+import { sendPushNotification } from '../utils/sendPushNotification';
 import { createURLEmbed } from '../utils/URLEmbed';
 import { zip } from '../utils/zip';
 import { getChannelById, updateLastMessaged as updateLastMessagedChannel } from './Channels';
@@ -54,6 +55,7 @@ export const getMessageByObjectId = (objectId: string) => {
 interface Button { name: string, id: string };
 
 type CreateMessageArgs = {
+  tempId?: string,
   userObjectId: string;
   channelId: string;
   buttons?: Button[];
@@ -69,8 +71,99 @@ type CreateMessageArgs = {
   creator: any;
 }>;
 
+type EditMessageArgs = Partial<CreateMessageArgs> & {messageId: string};
+
+export const editMessage = async (data: EditMessageArgs) => {
+
+  const oldMessage = await Messages.findOne({messageID: data.messageId});
+  if (!oldMessage) throw {status: 404, message: "Message not found."}
+  if (oldMessage.creator.toString() !== data.creator.toString()) throw {status: 404, message: "Cannot edit others messages."}
+
+  const [content, contentError] = validateMessageContent(data, false);
+  if (contentError) throw { statusCode: 403, message: contentError };
+
+  const [buttons, buttonError] = validateButtons(data.buttons);
+  const [base64HtmlEmbed, htmlEmbedError] = validateHtmlEmbed(data.htmlEmbed);
+
+  if (buttonError) throw { statusCode: 403, message: buttonError };
+  if (htmlEmbedError) throw { statusCode: 403, message: htmlEmbedError };
+
+  const userMentionIds = extractUserMentionIds(content);
+  const userMentions = await getUsersByIds(userMentionIds);
+  const userMentionObjectIds = userMentions.map(user => user._id);
+
+  const {quoteObjectIds, quotes} = await saveQuoteMentions(content, data);
 
 
+
+  let message: Partial<Message> = {
+    timeEdited: Date.now(),
+    // add to object if exists.
+    ...(content && {message: content}),
+    ...(base64HtmlEmbed && {htmlEmbed: base64HtmlEmbed}),
+    ...(data.file && {files: [data.file]}),
+    ...(quoteObjectIds.length && {quotes: quoteObjectIds}),
+    ...(userMentionObjectIds.length && {mentions: userMentionObjectIds}),
+    ...(buttons?.length && {buttons})
+  };
+
+  await oldMessage.updateOne({
+    $set: message,
+    $unset: {embed: 1}
+  })
+
+
+  message.channelID = oldMessage.channelID
+  message.messageID = oldMessage.messageID;
+  message.quotes = quotes;
+  message.creator = {
+    id: data.creator.id,
+    username: data.creator.username,
+    tag: data.creator.tag,
+    avatar: data.creator.avatar,
+    badges: data.creator.badges,
+    bot: data.creator.bot,
+  };
+  message.created = oldMessage.created;
+
+  message.mentions = userMentions;
+
+  return new Promise(async resolve => {
+    
+    resolve(message);
+
+    // emit message to channel
+    emitToChannel({
+      channel: data.channel,
+      user: data.creator,
+      eventName: MESSAGE_UPDATED,
+      data: {...message, embed: 0},
+      excludedSocketId: data.socketId,
+      excludeSavedNotes: true,
+    })
+
+
+    const embed = await addEmbedIfExists(message);
+    if (!embed) return;
+
+    // emit embed to channel
+    const embedResponseData = {
+      embed,
+      channelID: message.channelID,
+      messageID: message.messageID,
+      replace: false
+    }
+
+    emitToChannel({
+      channel: data.channel,
+      user: data.creator,
+      eventName: MESSAGE_UPDATED,
+      data: embedResponseData,
+      excludedSocketId: data.socketId,
+      excludeSavedNotes: true,
+    })
+  })
+}
 export const createMessage = async (data: CreateMessageArgs) => {
 
   const [content, contentError] = validateMessageContent(data);
@@ -120,15 +213,16 @@ export const createMessage = async (data: CreateMessageArgs) => {
   message.mentions = userMentions;
 
   return new Promise(async resolve => {
+    const messageWithTempId = {...message, tempID: data.tempId}
     
-    resolve(message);
+    resolve(messageWithTempId);
 
     // emit message to channel
     emitToChannel({
       channel: data.channel,
       user: data.creator,
       eventName: MESSAGE_CREATED,
-      data: {message},
+      data: messageWithTempId,
       excludedSocketId: data.socketId,
       excludeSavedNotes: true,
     })
@@ -140,15 +234,25 @@ export const createMessage = async (data: CreateMessageArgs) => {
       serverObjectId: data.channel?.server?._id
     });
 
+    const isSavedNotes = data.creator.id === data.channel.recipients?.[0]?.id;
     // for DM channels, they are notifications
     // for Server channels, these are used for mentions.
-    insertNotification({
+    !isSavedNotes && insertNotification({
       channelId: data.channelId,
       messageId: message.messageID!,
       senderObjectId: data.creator._id,
       mentionUserObjectIds: userMentionObjectIds,
       recipientUserId: data.channel.recipients?.[0]?.id,
       serverObjectId: data.channel.server?._id
+    })
+
+    // Sends firebase push notification.
+    !isSavedNotes && sendPushNotification({
+      channel: data.channel,
+      message: message as Message,
+      sender: data.creator,
+      recipient: data.channel.recipients?.[0]?.id,
+      serverId: data.channel.server?.server_id
     })
 
     const embed = await addEmbedIfExists(message);
@@ -216,9 +320,8 @@ async function emitToChannel(options: EmitOptions) {
   }
 
   // if dm channel
-  const isNotesChannel = options.user.id === options.channel.recipients[0].id;
-
-  const shouldExcludeSavedNotes = options.excludeSavedNotes ? isNotesChannel : false; 
+  const isSavedNotes = options.user.id === options.channel.recipients[0].id;
+  const shouldExcludeSavedNotes = options.excludeSavedNotes ? isSavedNotes : false; 
 
   if (!shouldExcludeSavedNotes) io.in(options.channel.recipients[0].id).emit(options.eventName, options.data);
   let room = io.in(options.user.id);
@@ -241,7 +344,7 @@ async function addEmbedIfExists(message: Partial<Message>)  {
 }
 
 // insert quotes to database.
-async function saveQuoteMentions(content: string | null, data: CreateMessageArgs) {
+async function saveQuoteMentions(content: string | null, data: Partial<CreateMessageArgs>) {
   if (!content) return {quoteObjectIds: [], quotes: []};
   const messageMentionIds = extractQuoteMentionIds(content);
   const channel = data.channelId ? await getChannelById(data.channelId) : data.channel;
@@ -260,8 +363,8 @@ async function saveQuoteMentions(content: string | null, data: CreateMessageArgs
 } 
 
 // validates the message content and returns a validated message content.
-function validateMessageContent(data: CreateMessageArgs): [string | null, string | null] {
-  if (!data.content && !data.file && !data.htmlEmbed) return [null, "Content is required."];
+function validateMessageContent(data: Partial<CreateMessageArgs>, isContentRequired = true): [string | null, string | null] {
+  if (isContentRequired && !data.content?.trim() && !data.file && !data.htmlEmbed) return [null, "Content is required."];
   if (!data.content) return [null, null];
   if (data.content.length > 5000) return [null, "Message content must contain less than 5,000 characters."]
   return [data.content.trim(), null];

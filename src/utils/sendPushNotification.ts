@@ -54,9 +54,33 @@ interface ServerArgs {
   channel: any;
 }
 
+interface SendPushOpts {
+  sender: User,
+  message: Message,
+  channel: any,
+  serverId?: string
+  recipient?: User
+
+}
+export async function sendPushNotification(opts: SendPushOpts) {
+  if (opts.serverId) {
+    return sendServerPush({
+      sender: opts.sender,
+      message: opts.message,
+      channel: opts.channel,
+      server_id: opts.serverId
+    })  
+  }
+  sendDMPush({
+    sender: opts.sender,
+    message: opts.message,
+    recipient: opts.recipient!,
+  })  
+}
+
 export async function sendDMPush(args: DMArgs) {
   if (!serverKey) return;
-  const devices = (await Devices.find({user: args.recipient._id}) as any) as Devices[];
+  const devices = await Devices.find({user: args.recipient._id})
   if (!devices.length) return;
   const tokensArr = devices.map(t => t.token);
 
@@ -64,10 +88,8 @@ export async function sendDMPush(args: DMArgs) {
     username: args.sender.username,
     channel_id: args.message.channelID,
     user_id: args.sender.id,
-    message: contentBuilder(args.message)
-  }
-  if (args.sender.avatar) {
-    data.avatar = args.sender.avatar;
+    message: contentBuilder(args.message),
+    ...(args.sender.avatar && {avatar: args.sender.avatar})
   }
 
   sendToDevice(tokensArr, data);
@@ -100,13 +122,14 @@ function sendToDevice(tokenArr: string[], data: any) {
   admin.messaging().sendToDevice(tokenArr, {data}, {priority: "high"})
   .then(async res => {
     const failedTokens = res.results.map((token, index) => token.error && tokenArr[index]).filter(r => r);
-    if (failedTokens.length) {
-      const devices = (await Devices.find({ token: { $in: failedTokens as string[] } }).select("_id") as any);
-      const devicesIDArr = devices.map((d: any) => d._id);
-      // delete from servers
-      await Servers.updateMany({FCM_devices: {$in: devicesIDArr}}, {$pullAll: {FCM_devices: devicesIDArr}})
-      await Devices.deleteMany({ _id: { $in: devicesIDArr } });
-    }
+    if (!failedTokens.length) return;
+    
+    const devices = await Devices.find({ token: { $in: failedTokens as string[] } }).select("_id")
+    const deviceObjectIds = devices.map((d: any) => d._id);
+    // delete from servers
+    await Servers.updateMany({FCM_devices: {$in: deviceObjectIds}}, {$pullAll: {FCM_devices: deviceObjectIds}})
+    await Devices.deleteMany({ _id: { $in: deviceObjectIds } });
+    
   })
   .catch(err => {
     console.log("FCM> Something went wrong");
@@ -120,8 +143,8 @@ export async function AddFCMUserToServer(server_id: string, user_id: string) {
   if (!serverKey) return;
   const devices = await Devices.find({user_id});
   if (!devices.length) return;
-  const deviceIDArr = devices.map((d: any) => d._id)
-  await Servers.updateOne({server_id}, {$addToSet: {FCM_devices: deviceIDArr}});
+  const deviceObjectIds = devices.map(d => d._id)
+  await Servers.updateOne({server_id}, {$addToSet: {FCM_devices: deviceObjectIds}});
 }
 
 // leave, kick, banned from server
@@ -129,8 +152,8 @@ export async function deleteFCMFromServer(server_id: string, user_id: string) {
   if (!serverKey) return;
   const devices = await Devices.find({user_id});
   if (!devices.length) return;
-  const deviceIDArr = devices.map((d: any) => d._id)
-  await Servers.updateOne({server_id}, {$pullAll: {FCM_devices: deviceIDArr}});
+  const deviceObjectIds = devices.map(d => d._id)
+  await Servers.updateOne({server_id}, {$pullAll: {FCM_devices: deviceObjectIds}});
 }
 
 // suspended / account deleted from nertivia
@@ -138,9 +161,9 @@ export async function deleteAllUserFCM(user_id: string) {
   if (!serverKey) return;
   const devices = await Devices.find({user_id});
   if (!devices.length) return;
-  const deviceIDArr = devices.map((d: any) => d._id)
-  await Servers.updateMany({FCM_devices: {$in: deviceIDArr}}, {$pullAll: {FCM_devices: deviceIDArr}});
-  await Devices.deleteMany({ _id: { $in: deviceIDArr } });
+  const deviceObjectIds = devices.map(d => d._id)
+  await Servers.updateMany({FCM_devices: {$in: deviceObjectIds}}, {$pullAll: {FCM_devices: deviceObjectIds}});
+  await Devices.deleteMany({ _id: { $in: deviceObjectIds } });
 
 }
 
