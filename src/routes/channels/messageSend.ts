@@ -57,35 +57,52 @@ enum CDN {
   GOOGLE_DRIVE = 0,
   NERTIVIA_CDN = 1 
 }
+interface FileData {
+  message: null | string;
+  uploadCdn: null | CDN;
+  compress: null | number;
+  file: null | Readable;
+}
 
 const handleFile = (req: Request): Promise<[null | any, null | string]> => new Promise(resolve => {
   if (!req.busboy) {
     resolve([null, null])
     return;
   }
-  // fields: message, upload_cdn, compress file;
-  let message = null;
-  let upload_cdn = null;
-  let compress = null;
-  let file: null | Readable = null;
+  const fileData: FileData = {
+    message: null,
+    uploadCdn: null,
+    compress: null,
+    file: null,
+  }
   
-  req.busboy.on("field", (field: string, value: string) => {
-    console.log("field")
-    if (file) {
-      req.unpipe(req.busboy);
-      resolve([null, "File must be last in form-data."]);
-      return 
+  req.busboy.on("field", (field, value) => {
+    if (field === 'message') {
+      if (value.length > 5000) {
+        req.unpipe(req.busboy);
+        resolve([null, "Message must contain characters less than 5,000"]);
+        return;
+      }
+      fileData.message = value;
     }
+    if (field === 'upload_cdn') fileData.uploadCdn = parseInt(value);
+    if (field === 'compress') fileData.compress = parseInt(value) || 0;
   })
-  req.busboy.on("file", (name, stream, info) => {
 
+  req.busboy.on("file", (name, stream, info) => {
     if (name !== "file") {
       req.unpipe(req.busboy);
       resolve([null, "File field name must be 'file'."]);
       return 
     }
-    // if (upload_cdn === null || )
-    file = stream;
+    if (fileData.uploadCdn === null) {
+      req.unpipe(req.busboy);
+      resolve([null, "upload_cdn is missing or ordered incorrectly."])
+      return;
+    }
+    console.log(info);
+    fileData.file = stream;
   })
+
   req.pipe(req.busboy)
 });

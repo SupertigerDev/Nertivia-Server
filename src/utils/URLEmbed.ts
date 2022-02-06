@@ -2,6 +2,7 @@ import fetch, { Response } from 'node-fetch';
 import AbortController from "abort-controller"
 import sharp from 'sharp';
 import cheerio from 'cheerio';
+import { getImageDimensions } from './image';
 
 const maxSize = 10485760; // 10MB
 const timeout = 5000; // 5 seconds;
@@ -130,14 +131,11 @@ function getTenorTag(buffer: Buffer, url: string) {
 
 
 async function getImageData(url: string, buffer: Buffer) {
-  const metadata = await sharp(buffer).metadata();
-  if (!metadata) return [null, "Invalid Image."];
+  const dimensions = await getImageDimensions(buffer);
+  if (!dimensions) return [null, "Invalid Image."];
   const data = {
     url: url,
-    dimensions: {
-      height: metadata.height,
-      width: metadata.width
-    }
+    dimensions
   }
   return [data, null]
 }
