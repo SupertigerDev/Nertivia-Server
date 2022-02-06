@@ -55,13 +55,13 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       compress = parseInt(val) || 0;
     }
   })
-  req.busboy.on("file", async (fieldname, file, filename, encoding, mimetype) => {
-    if (fieldname !== 'file') {
+  req.busboy.on("file", async (name, stream, info) => {
+    if (name !== 'file') {
       req.unpipe(req.busboy);
       return res.status(403).json({ message: 'Use field name of "file" to upload files.' })
     }
 
-    file.on("error", function (err) {
+    stream.on("error", function (err) {
       if (cancelRequest) return;
       cancelRequest = true;
       req.unpipe(req.busboy);
@@ -78,13 +78,13 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
 
     // temporarly store file in server.
-    let { dirPath, fileid } = await tempSaveImage(filename, file);
+    let { dirPath, fileid } = await tempSaveImage(info.filename, stream);
 
 
-    if (isImage(filename, mimetype)) {
+    if (isImage(info.filename, info.mimeType)) {
       if (compress) {
 
-        dirPath = (await compressImage(filename, dirPath)
+        dirPath = (await compressImage(info.filename, dirPath)
           .catch(() => { res.status(403).json({ message: "Failed to compress image." }) })) || "";
         if (!dirPath) return;
 
@@ -99,15 +99,15 @@ export default async (req: Request, res: Response, next: NextFunction) => {
       if (cancelRequest) return;
       const data: any = await uploadGoogleDrive({
         file: {
-          fileName: filename,
+          fileName: info.filename,
           dirPath: dirPath,
-          mimeType: mimetype
+          mimeType: info.mimeType
         },
         oauth2Client: req.oauth2Client
       }).catch(_ => { res.status(403).json({ message: "Something went wrong while uploading to Google Drive." }) })
       if (!data) return deleteFile(dirPath);
       const fileObj: { fileName: string, fileID: string, dimensions?: object } = {
-        fileName: filename,
+        fileName: info.filename,
         fileID: data.data.id
       };
       if (metadata) {
@@ -122,11 +122,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     if (upload_cdn === 1) {
 
       if (cancelRequest) return;
-      const success = await nertiviaCDN.uploadFile(fs.createReadStream(dirPath), req.user.id, fileid, filename)
+      const success = await nertiviaCDN.uploadFile(fs.createReadStream(dirPath), req.user.id, fileid, info.filename)
         .catch((err: any) => { res.status(403).json({ message: err }) })
       if (!success) return deleteFile(dirPath);
       const fileObj: { url: string, dimensions?: object } = {
-        url: `https://media.nertivia.net/${req.user.id}/${fileid}/${encodeURIComponent(filename)}`
+        url: `https://media.nertivia.net/${req.user.id}/${fileid}/${encodeURIComponent(info.filename)}`
       };
       if (metadata) {
         fileObj.dimensions = { width: metadata.width, height: metadata.height };

@@ -13,6 +13,7 @@ import { reactionGet } from "./reactionGet";
 import { channelShowTyping } from "./channelShowTyping";
 import { messageGet } from "./messageGet";
 import { messageGetBulk } from "./messageGetBulk";
+import { messageSend } from "./messageSend";
 
 
 const ChannelRouter = Router();
@@ -22,6 +23,7 @@ channelClose(ChannelRouter);
 channelGet(ChannelRouter);
 channelOpen(ChannelRouter)
 
+messageSend(ChannelRouter)
 messageGet(ChannelRouter);
 messageGetBulk(ChannelRouter);
 messageDelete(ChannelRouter);

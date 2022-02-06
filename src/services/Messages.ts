@@ -54,6 +54,12 @@ export const getMessageByObjectId = (objectId: string) => {
 
 interface Button { name: string, id: string };
 
+interface File {
+  fileName: string,
+  fileID: string, 
+  dimensions?: {height: number, width: number}
+}
+
 type CreateMessageArgs = {
   tempId?: string,
   userObjectId: string;
@@ -63,7 +69,7 @@ type CreateMessageArgs = {
 } & OneOf<{
   htmlEmbed: JsonInput;
   content: string;
-  file: any;
+  file: File;
 }> & OneOf<{
   channel: any;
   channelId: any;

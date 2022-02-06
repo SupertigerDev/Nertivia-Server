@@ -59,7 +59,7 @@ interface User {
 }
 
 interface uploadFile {
-  file: object
+  file: any
   message: string
 }
 interface Channel {

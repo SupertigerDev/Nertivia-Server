@@ -13,7 +13,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     userObjectId: req.user._id,
     htmlEmbed,
     buttons,
-    file: req.uploadFile,
+    file: req.uploadFile?.file,
     channelId: channelID,
     content: content,
     channel: req.channel,

@@ -44,6 +44,9 @@ export const Log = {
   info(...args: any) {
     console.log(`${colorCodes.FgCyan}[${getTime()}] ${colorCodes.FgGreen}[INFO]:${colorCodes.Reset}`, ...args)
   },
+  debug(...args: any) {
+    console.log(`${colorCodes.FgCyan}[${getTime()}] ${colorCodes.FgBlue}[INFO]:${colorCodes.Reset}`, ...args)
+  },
   warn(...args: any) {
     console.log(`${colorCodes.FgCyan}[${getTime()}] ${colorCodes.FgYellow}[INFO]:${colorCodes.Reset}`, ...args)
 

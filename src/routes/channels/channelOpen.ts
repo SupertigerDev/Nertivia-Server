@@ -9,7 +9,7 @@ import { authenticate } from '../../middlewares/authenticate';
 
 
 export function channelOpen(Router: Router) {
-  Router.route("/:userId").get(
+  Router.route("/:userId").post(
     authenticate(true),
     route
   );
