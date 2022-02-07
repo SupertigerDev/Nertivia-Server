@@ -3,7 +3,7 @@ const busboy = require("connect-busboy");
 
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
-const GDriveOauthClient = require("../../middlewares/GDriveOauthClient");
+import { GDriveOauthClient } from "../../middlewares/GDriveOauthClient";
 
 // Policies
 const settingsPolicy = require("../../policies/settingsPolicies");

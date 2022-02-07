@@ -77,12 +77,12 @@ module.exports = async (req, res, next) => {
   const emojiId = flake.gen();
 
 
-  const success = await nertiviaCDN.uploadFile(buffer, null, null, `${emojiId}.${type === 'gif' ? 'gif' : 'png'}`, true).catch(err => {
-    res.status(403).json({
+  const error = await nertiviaCDN.uploadFile(buffer, null, null, `${emojiId}.${type === 'gif' ? 'gif' : 'png'}`, true)
+  if (error){
+    return res.status(403).json({
       message: err
     });
-  })
-  if (!success) return;
+  };
 
   const addEmoji = await CustomEmojis.create({
     gif: type === "gif",

@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import gm from 'gm';
 const gmInstance = gm.subClass({ imageMagick: true });
 import { Request, Response, NextFunction } from 'express';
-const oauth2Client = require('../../middlewares/GDriveOauthClient')
+import { GDriveOauthClient } from '../../middlewares/GDriveOauthClient';
 import flake from '../../utils/genFlakeId'
 import compressImage from '../../utils/compressImage';
 import tempSaveImage from '../../utils/tempSaveImage';
@@ -95,14 +95,12 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
     // Upload to Google Drive
     if (upload_cdn === 0) {
-      oauth2Client(req, res, () => { });
+      GDriveOauthClient(req, res, () => { });
       if (cancelRequest) return;
       const data: any = await uploadGoogleDrive({
-        file: {
-          fileName: info.filename,
-          dirPath: dirPath,
-          mimeType: info.mimeType
-        },
+        fileName: info.filename,
+        dirPath: dirPath,
+        mimeType: info.mimeType,
         oauth2Client: req.oauth2Client
       }).catch(_ => { res.status(403).json({ message: "Something went wrong while uploading to Google Drive." }) })
       if (!data) return deleteFile(dirPath);
@@ -122,9 +120,11 @@ export default async (req: Request, res: Response, next: NextFunction) => {
     if (upload_cdn === 1) {
 
       if (cancelRequest) return;
-      const success = await nertiviaCDN.uploadFile(fs.createReadStream(dirPath), req.user.id, fileid, info.filename)
-        .catch((err: any) => { res.status(403).json({ message: err }) })
-      if (!success) return deleteFile(dirPath);
+      const error = await nertiviaCDN.uploadFile(fs.createReadStream(dirPath), req.user.id, fileid, info.filename)
+      if (error) {
+        res.status(403).json({ message: error })
+        return deleteFile(dirPath);
+      }
       const fileObj: { url: string, dimensions?: object } = {
         url: `https://media.nertivia.net/${req.user.id}/${fileid}/${encodeURIComponent(info.filename)}`
       };

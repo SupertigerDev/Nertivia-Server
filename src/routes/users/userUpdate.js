@@ -197,11 +197,13 @@ async function uploadImage(base64, user_id, size, name) {
     const id = flakeId.gen();
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
-      .catch(err => {reject(err)})
+    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
     if (name === "banner") deleteFile(dirPath);
 
-    if (!success) return;
+    if (!error) {
+      reject(error);
+      return
+    };
     resolve(`${user_id}/${id}/${name}.${type}`);
   })
 }

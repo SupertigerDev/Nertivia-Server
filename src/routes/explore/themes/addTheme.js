@@ -114,10 +114,9 @@ async function uploadScreenshot(base64, user_id) {
     }
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
-      .catch(err => { reject(err) })
+    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
     deleteFile(dirPath);
-    if (!success) return;
+    if (error) return reject(error);
     resolve(`${user_id}/${id}/${name}.${type}`);
   })
 }

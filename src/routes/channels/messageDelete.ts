@@ -70,15 +70,13 @@ async function route(req: Request, res: Response) {
     // delete image if exists
     const filesExist = message.files && message.files.length;
     const isImage = filesExist && message.files?.[0].dimensions;
-    const isNertiviaCDN = filesExist && message.files?.[0].url.startsWith("https://")
+    console.log(message.files)
+    const isNertiviaCDN = filesExist && message.files?.[0]?.url?.startsWith("https://")
     if (filesExist && isImage && isNertiviaCDN) {
       const path = (new URL(message.files?.[0].url)).pathname;
       nertiviaCDN.deletePath(path).catch(err => {console.log("Error deleting from CDN", err)})
     }
   } catch (error) {
     console.error(error);
-    res
-      .status(403)
-      .json({ message: "Something went wrong. Please try again later." });
   }
 };

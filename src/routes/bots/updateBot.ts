@@ -78,9 +78,8 @@ async function uploadAvatar(base64: string, user_id: string) {
     const id = flakeId.gen();
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `avatar.${type}`)
-      .catch(err => {reject(err)})
-    if (!success) return;
+    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `avatar.${type}`)
+    if (error) return reject(error);
     resolve(`${user_id}/${id}/avatar.${type}`);
   })
 }

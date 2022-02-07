@@ -10,7 +10,6 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   const t1 = performance.now();
   const message = await createMessage({
     tempId: tempID,
-    userObjectId: req.user._id,
     htmlEmbed,
     buttons,
     file: req.uploadFile?.file,

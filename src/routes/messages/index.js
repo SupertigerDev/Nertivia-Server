@@ -6,7 +6,6 @@ const messagePolicy = require('../../policies/messagePolicies');
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
 import { channelVerification } from '../../middlewares/ChannelVerification';
-const GDriveOauthClient = require('../../middlewares/GDriveOauthClient');
 import URLEmbed from '../../middlewares/URLEmbed';
 const serverChannelPermissions = require('../../middlewares/serverChannelPermissions');
 const busboy = require('connect-busboy');

@@ -1,30 +1,28 @@
 import fetch from "node-fetch";
 import FormData from "form-data";
-export function uploadFile(
-  BufferOrStream: any,
-  userid: string,
-  fileid: string,
+export async function uploadFile(
+  bufferOrStream: any,
+  userId: string,
+  fileId: string,
   filename: string,
   isEmoji?: Boolean
 ) {
-  return new Promise((resolve, reject) => {
-    const form = new FormData();
+  const form = new FormData();
 
-    form.append("secret", process.env.FILE_CDN_SECRET);
-    form.append("userid", userid || "");
-    form.append("fileid", fileid || "");
-    form.append("isemoji", isEmoji ? "1" : "0");
-    form.append("fileToUpload", BufferOrStream, filename);
+  form.append("secret", process.env.FILE_CDN_SECRET);
+  form.append("userid", userId || "");
+  form.append("fileid", fileId || "");
+  form.append("isemoji", isEmoji ? "1" : "0");
+  form.append("fileToUpload", bufferOrStream, filename);
 
-    fetch("https://media.nertivia.net/indexx.php", {
-      method: "POST",
-      body: form,
-    }).then(async (res) => {
-      if (res.status == 200) return resolve(true);
-      const error = await res.text();
-      reject(error);
-    });
-  });
+  const res = await fetch("https://media.nertivia.net/indexx.php", {
+    method: "POST",
+    body: form,
+  })
+  if (res.status == 200) return null;
+  const error = await res.text();
+  return error;
+
 }
 
 export function deletePath(path: string) {

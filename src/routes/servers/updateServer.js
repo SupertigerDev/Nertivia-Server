@@ -136,10 +136,12 @@ async function uploadAvatar(base64, user_id, isBanner) {
     }
 
 
-    const success = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
-      .catch(err => { reject(err) })
+    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
     if (isBanner) deleteFile(dirPath);
-    if (!success) return;
+    if (error) {
+      reject(error);
+      return
+    };
     resolve(`${user_id}/${id}/${name}.${type}`);
   })
 }

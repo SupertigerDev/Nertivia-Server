@@ -60,10 +60,8 @@ interface File {
   dimensions?: {height: number, width: number}
 }
 
-type CreateMessageArgs = {
-  tempId?: string,
-  userObjectId: string;
-  channelId: string;
+export type CreateMessageArgs = {
+  tempId?: string
   buttons?: Button[];
   socketId?: string;
 } & OneOf<{
@@ -170,7 +168,7 @@ export const editMessage = async (data: EditMessageArgs) => {
     })
   })
 }
-export const createMessage = async (data: CreateMessageArgs) => {
+export const createMessage = async (data: CreateMessageArgs): Promise<Message> => {
 
   const [content, contentError] = validateMessageContent(data);
   if (contentError) throw { statusCode: 403, message: contentError };
@@ -190,9 +188,9 @@ export const createMessage = async (data: CreateMessageArgs) => {
 
 
   let message: Partial<Message> = {
-    channelID: data.channelId,
+    channelID: data.channelId || data.channel.channelID,
     messageID: "placeholder",
-    creator: data.userObjectId,
+    creator: data.creator._id,
     // add to object if exists.
     ...(content && {message: content}),
     ...(base64HtmlEmbed && {htmlEmbed: base64HtmlEmbed}),
@@ -221,7 +219,7 @@ export const createMessage = async (data: CreateMessageArgs) => {
   return new Promise(async resolve => {
     const messageWithTempId = {...message, tempID: data.tempId}
     
-    resolve(messageWithTempId);
+    resolve(message as Message);
 
     // emit message to channel
     emitToChannel({
@@ -235,7 +233,7 @@ export const createMessage = async (data: CreateMessageArgs) => {
 
 
     await updateLastSeen({
-      channelId: data.channelId,
+      channelId: data.channelId || data.channel.channelID,
       memberObjectId: data.creator._id,
       serverObjectId: data.channel?.server?._id
     });
@@ -244,7 +242,7 @@ export const createMessage = async (data: CreateMessageArgs) => {
     // for DM channels, they are notifications
     // for Server channels, these are used for mentions.
     !isSavedNotes && insertNotification({
-      channelId: data.channelId,
+      channelId: data.channelId || data.channel.channelID,
       messageId: message.messageID!,
       senderObjectId: data.creator._id,
       mentionUserObjectIds: userMentionObjectIds,

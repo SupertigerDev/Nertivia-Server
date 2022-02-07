@@ -1,15 +1,12 @@
-const { google } = require('googleapis');
+import {google} from 'googleapis';
 const GDriveApi = require('../../API/GDrive');
 import fs from 'fs';
 
 interface Args {
-  file: File,
-  oauth2Client: any
-}
-interface File {
   fileName: string
   mimeType: string
   dirPath: string
+  oauth2Client: any
 }
 
 
@@ -24,35 +21,29 @@ export default async function uploadFile (args: Args) {
   const folderID = requestFolderID.result.id;
 
   //upload file
-  const fileMetadata: any = {
-    name: args.file.fileName,
-    parents: [folderID]
+  const fileMetadata = {
+    name: args.fileName,
+    parents: [folderID],
   };
   const media = {
-    mimeType: args.file.mimeType,
-    body: fs.createReadStream(args.file.dirPath)
+    mimeType: args.mimeType,
+    body: fs.createReadStream(args.dirPath)
   };
   const body = {
-    value: "default",
     type: "anyone",
     role: "reader"
   };
-  return new Promise((resolve, reject) => {
-    drive.files
-      .create({
-        resource: fileMetadata,
-        media: media,
-        fields: "id,webViewLink"
-      })
-      .then((result:any) => {
-        drive.permissions
-          .create({
-            fileId: result.data.id,
-            resource: body
-          })
-          .then(() => resolve(result))
-          .catch((error:any) => reject(error));
-      })
-      .catch((error:any) => resolve(error));
-  });
+
+  const file = await drive.files.create({
+    media,
+    fields: "id,webViewLink",
+    requestBody: fileMetadata
+  })
+  if (!file.data.id) return null;
+  await drive.permissions.create({
+    fileId: file.data.id,
+    requestBody: body
+  })
+
+  return file;
 }
