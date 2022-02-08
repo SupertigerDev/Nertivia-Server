@@ -24,7 +24,7 @@ import sendMessage from './sendOrUpdateMessage';
 MainMessageRouter.route("/:messageID/channels/:channelID").patch(
   authenticate(true),
   messagePolicy.update,
-  rateLimit({name: 'message_update', expire: 60, requestsLimit: 120 }),
+  rateLimit({name: 'message_update', expire: 20, requestsLimit: 15 }),
   channelVerification,
   disAllowBlockedUser,
   fileMessage,

@@ -75,13 +75,13 @@ export type CreateMessageArgs = {
   creator: any;
 }>;
 
-type EditMessageArgs = Partial<CreateMessageArgs> & {messageId: string};
+type UpdateMessageArgs = Partial<CreateMessageArgs> & {messageId: string};
 
-export const editMessage = async (data: EditMessageArgs) => {
+export const updateMessage = async (data: UpdateMessageArgs): Promise<Message> => {
 
   const oldMessage = await Messages.findOne({messageID: data.messageId});
-  if (!oldMessage) throw {status: 404, message: "Message not found."}
-  if (oldMessage.creator.toString() !== data.creator.toString()) throw {status: 404, message: "Cannot edit others messages."}
+  if (!oldMessage) throw {statusCode: 404, message: "Message not found."}
+  if (oldMessage.creator.toString() !== data.creator._id.toString()) throw {statusCode: 404, message: "Cannot edit others messages."}
 
   const [content, contentError] = validateMessageContent(data, false);
   if (contentError) throw { statusCode: 403, message: contentError };
@@ -134,7 +134,7 @@ export const editMessage = async (data: EditMessageArgs) => {
 
   return new Promise(async resolve => {
     
-    resolve(message);
+    resolve(message as Message);
 
     // emit message to channel
     emitToChannel({

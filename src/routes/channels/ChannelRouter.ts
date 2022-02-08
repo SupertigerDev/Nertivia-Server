@@ -14,6 +14,7 @@ import { channelShowTyping } from "./channelShowTyping";
 import { messageGet } from "./messageGet";
 import { messageGetBulk } from "./messageGetBulk";
 import { messageSend } from "./messageSend";
+import { messageUpdate } from "./messageUpdate";
 
 
 const ChannelRouter = Router();
@@ -24,6 +25,7 @@ channelGet(ChannelRouter);
 channelOpen(ChannelRouter)
 
 messageSend(ChannelRouter)
+messageUpdate(ChannelRouter)
 messageGet(ChannelRouter);
 messageGetBulk(ChannelRouter);
 messageDelete(ChannelRouter);
