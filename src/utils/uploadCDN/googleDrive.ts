@@ -6,7 +6,7 @@ interface Args {
   fileName: string
   mimeType: string
   dirPath: string
-  oauth2Client: any
+  oAuth2Client: any
 }
 
 
@@ -14,10 +14,10 @@ export default async function uploadFile (args: Args) {
    
   const drive = google.drive({
     version: "v3",
-    auth: args.oauth2Client
+    auth: args.oAuth2Client
   });
 
-  const requestFolderID = await GDriveApi.findFolder(args.oauth2Client);
+  const requestFolderID = await GDriveApi.findFolder(args.oAuth2Client);
   const folderID = requestFolderID.result.id;
 
   //upload file

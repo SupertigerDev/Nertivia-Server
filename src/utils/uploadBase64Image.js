@@ -1,7 +1,7 @@
 const GDriveApi = require("../API/GDrive");
 const stream = require("stream");
 
-module.exports = (base64, oauth2Client, maxSize, name) => {
+module.exports = (base64, oAuth2Client, maxSize, name) => {
   return new Promise(async resolve => {
     const buffer = Buffer.from(base64.split(",")[1], "base64");
 
@@ -22,7 +22,7 @@ module.exports = (base64, oauth2Client, maxSize, name) => {
     readable.push(null);
 
     // get nertivia_uploads folder id
-    const requestFolderID = await GDriveApi.findFolder(oauth2Client);
+    const requestFolderID = await GDriveApi.findFolder(oAuth2Client);
     if (!requestFolderID.result)
       return resolve({
         ok: false,
@@ -38,7 +38,7 @@ module.exports = (base64, oauth2Client, maxSize, name) => {
         fileStream: readable
       },
       folderID,
-      oauth2Client
+      oAuth2Client
     );
     if (!requestUploadFile.ok) {
       resolve({

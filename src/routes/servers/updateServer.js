@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
       .status(403)
       .json({ message: "You do not have permission to update this server!" });
 
-  const oauth2Client = req.oauth2Client;
+  const oAuth2Client = req.oAuth2Client;
   // filtered data
   const data = matchedData(req);
   if (data && data.default_channel_id) {

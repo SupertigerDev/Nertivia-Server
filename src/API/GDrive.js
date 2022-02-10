@@ -2,10 +2,10 @@ const { google } = require("googleapis");
 const fs = require("fs");
 
 module.exports = {
-  createFolder: oauth2Client => {
+  createFolder: oAuth2Client => {
     const drive = google.drive({
       version: "v3",
-      auth: oauth2Client
+      auth: oAuth2Client
     });
 
     var fileMetadata = {
@@ -32,10 +32,10 @@ module.exports = {
         );
     });
   },
-  findFolder: oauth2Client => {
+  findFolder: oAuth2Client => {
     const drive = google.drive({
       version: "v3",
-      auth: oauth2Client
+      auth: oAuth2Client
     });
 
     return new Promise(resolve => {
@@ -61,11 +61,11 @@ module.exports = {
         );
     });
   },
-  uploadFile: (file, folderId, oauth2Client) => {
+  uploadFile: (file, folderId, oAuth2Client) => {
     const {fileName, mimeType, fileStream} = file;
     const drive = google.drive({
       version: "v3",
-      auth: oauth2Client
+      auth: oAuth2Client
     });
 
     //upload file

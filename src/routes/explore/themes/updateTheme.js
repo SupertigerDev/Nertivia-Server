@@ -15,7 +15,7 @@ const flake = require('../../../utils/genFlakeId').default;
 
 /** @type {Express.RequestHandler} */
 module.exports = async (req, res, next) => {
-  const oauth2Client = req.oauth2Client;
+  const oAuth2Client = req.oAuth2Client;
   const themeID = req.params.id;
   let data = matchedData(req);
 

@@ -221,7 +221,7 @@ async function uploadFileGoogleDrive(req: Request, res: Response, uploadFile: Up
     fileName: uploadFile.fileName,
     dirPath: uploadFile.filePath,
     mimeType: uploadFile.mimeType,
-    oauth2Client: req.oauth2Client
+    oAuth2Client: req.oAuth2Client
   }).catch(() => {})
 
   if (!file?.data.id) return [null, "Something went wrong when uploading to google drive."];

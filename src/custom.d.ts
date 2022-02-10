@@ -12,7 +12,7 @@ declare global {
       channel: Channel,
       permErrorMessage?: string,
       server: Server
-      oauth2Client: any
+      oAuth2Client: any
     }
   }
   namespace NodeJS {
