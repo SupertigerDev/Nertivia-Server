@@ -46,8 +46,6 @@ router.use('/voice', require('./voice').VoiceRouter)
 
 router.use('/explore', require('./explore'))
 
-router.use('/messages', require('./messages'));
-
 router.use('/settings', require('./settings'));
 
 router.use('/files/*', require('./files'));

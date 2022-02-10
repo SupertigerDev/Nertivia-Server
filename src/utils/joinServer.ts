@@ -44,7 +44,7 @@ export default async function join(server: any, user: any, socketID: string | un
   const updatedUser = await Users.updateOne(
     { _id: user._id },
     { $push: { servers: server._id } }
-  ).catch(() => {res.status(403).json({ message: "Something went wrong while upading user." })})
+  ).catch(() => {res.status(403).json({ message: "Something went wrong while updating the user." })})
   if (!updatedUser) return;
 
   const createdServerMember = await ServerMembers.create({
