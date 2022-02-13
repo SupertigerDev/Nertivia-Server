@@ -5,12 +5,13 @@ import {PublicThemes} from '../../../models/PublicThemes'
 
 const { matchedData } = require("express-validator");
 
-import * as nertiviaCDN from '../../../utils/uploadCDN/nertiviaCDN'
+import * as NertiviaCDN from '../../../common/NertiviaCDN'
 import fs from 'fs';
 
 import tempSaveImage from '../../../utils/tempSaveImage';
 import compressImage from '../../../utils/compressImage';
-const flake = require('../../../utils/genFlakeId').default;
+import { base64MimeType, isImageMime } from '../../../utils/image';
+import { deleteFile } from '../../../utils/file';
 
 
 /** @type {Express.RequestHandler} */
@@ -63,30 +64,6 @@ module.exports = async (req, res, next) => {
   })
 };
 
-function base64MimeType(encoded) {
-  var result = null;
-
-  if (typeof encoded !== "string") {
-    return result;
-  }
-
-  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
-
-  if (mime && mime.length) {
-    result = mime[1];
-  }
-
-  return result;
-}
-function checkMimeType(mimeType) {
-  const filetypes = /jpeg|jpg|gif|png/;
-  const mime = filetypes.test(mimeType);
-  if (mime) {
-    return true;
-  }
-  return false;
-}
-
 async function uploadScreenshot(base64, user_id) {
   return new Promise(async (resolve, reject) => {
     let buffer = Buffer.from(base64.split(',')[1], 'base64');
@@ -99,7 +76,7 @@ async function uploadScreenshot(base64, user_id) {
     }
     const mimeType = base64MimeType(base64);
     let type = base64.split(';')[0].split('/')[1];
-    if (!checkMimeType(mimeType)) {
+    if (!isImageMime(mimeType)) {
       return reject("Invalid image.")
 
     }
@@ -117,7 +94,6 @@ async function uploadScreenshot(base64, user_id) {
       deleteFile(dirPath);
       return reject("Something went wrong while compressing image.")
     }
-    const id = flake.gen();
     const name = "screenshot";
 
     if (type !== "gif") {
@@ -125,17 +101,15 @@ async function uploadScreenshot(base64, user_id) {
     }
 
 
-    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
+
+    const [filePath, error] = await NertiviaCDN.uploadFile({
+      file: buffer,
+      userId: user_id,
+      fileName: `${name}.${type}`
+    })
     deleteFile(dirPath);
     if (error) return reject(error);
-    resolve(`${user_id}/${id}/${name}.${type}`);
+    resolve(filePath);
   })
 }
-
-function deleteFile(path) {
-  fs.unlink(path, err => {
-    if (err) console.error(err)
-  });
-}
-
 

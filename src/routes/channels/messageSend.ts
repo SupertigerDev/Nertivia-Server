@@ -17,8 +17,8 @@ import { getImageDimensions, ImageDimension, isImageMime } from '../../utils/ima
 import { deleteFile, saveTempFile } from '../../utils/file';
 import compressImage from '../../utils/compressImage';
 import { GDriveOauthClient } from '../../middlewares/GDriveOauthClient';
-import uploadGoogleDrive from '../../utils/uploadCDN/googleDrive';
-import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN';
+import * as GoogleDrive from '../../common/GoogleDrive';
+import * as NertiviaCDN from '../../common/NertiviaCDN'
 import fs from 'fs';
 import { createMessage, CreateMessageArgs } from '../../services/Messages';
 
@@ -217,14 +217,15 @@ function uploadFile(req: Request, res: Response, uploadFile: UploadFile) {
 async function uploadFileGoogleDrive(req: Request, res: Response, uploadFile: UploadFile): Promise<[any, string | null]> {
   await GDriveOauthClient(req, res, () => {});
 
-  const file = await uploadGoogleDrive({
-    fileName: uploadFile.fileName,
-    dirPath: uploadFile.filePath,
-    mimeType: uploadFile.mimeType,
-    oAuth2Client: req.oAuth2Client
-  }).catch(() => {})
 
-  if (!file?.data.id) return [null, "Something went wrong when uploading to google drive."];
+  const [file, error] = await GoogleDrive.uploadFile(req.oAuth2Client,{
+    fileName: uploadFile.fileName,
+    mimeType: uploadFile.mimeType,
+    fileStream: fs.createReadStream(uploadFile.filePath),
+  })
+
+
+  if (!file?.data.id || error) return [null, error || "Something went wrong when uploading to google drive."];
 
   return [{
     fileName: uploadFile.fileName,
@@ -235,11 +236,17 @@ async function uploadFileGoogleDrive(req: Request, res: Response, uploadFile: Up
 }
 async function uploadFileNertiviaCDN(uploadFile: UploadFile): Promise<[any, string | null]> {
   const stream = fs.createReadStream(uploadFile.filePath);
-  const error = await nertiviaCDN.uploadFile(stream, uploadFile.userId, uploadFile.fileId, uploadFile.fileName)
+
+
+  const [filePath, error] = await NertiviaCDN.uploadFile({
+    file: stream,
+    userId: uploadFile.userId,
+    fileName: uploadFile.fileName
+  })
   if (error) return [null, error];
 
   return [{
-    url: `https://media.nertivia.net/${uploadFile.userId}/${uploadFile.fileId}/${encodeURIComponent(uploadFile.fileName)}`,
+    url: `https://media.nertivia.net/${filePath}`,
     ...(uploadFile.dimensions && {dimensions: uploadFile.dimensions})
   }, null]
 }

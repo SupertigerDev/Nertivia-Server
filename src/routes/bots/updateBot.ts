@@ -2,8 +2,9 @@ import { Request, Response } from "express";
 import {Users} from '../../models/Users';
 import { matchedData } from "express-validator";
 import {cropImage} from "../../utils/cropImage";
-import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { USER_UPDATED } from "../../ServerEventNames";
+import { base64MimeType, isImageMime } from "../../utils/image";
 const emitToAll = require("../../socketController/emitToAll");
 const flakeId = new (require('flakeid'))();
 
@@ -54,7 +55,7 @@ export default async function updateBot(req: Request, res: Response) {
 
 }
 
-async function uploadAvatar(base64: string, user_id: string) {
+async function uploadAvatar(base64: string, userId: string) {
   return new Promise(async (resolve, reject) => {
     let buffer: Buffer | undefined = Buffer.from(base64.split(',')[1], 'base64');
 
@@ -65,8 +66,8 @@ async function uploadAvatar(base64: string, user_id: string) {
 
     }
     const mimeType = base64MimeType(base64);
-    const type = base64.split(';')[0].split('/')[1];
-    if (!mimeType || !checkMimeType(mimeType!!)) {
+    const ext = base64.split(';')[0].split('/')[1];
+    if (!mimeType || !isImageMime(mimeType!!)) {
       return reject("Invalid avatar.")
     }
 
@@ -75,38 +76,13 @@ async function uploadAvatar(base64: string, user_id: string) {
     if (!buffer) {
       return reject("Something went wrong while cropping image.")
     }
-    const id = flakeId.gen();
 
-
-    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `avatar.${type}`)
+    const [filePath, error] = await NertiviaCDN.uploadFile({
+      file: buffer,
+      userId,
+      fileName: `avatar.${ext}`
+    })
     if (error) return reject(error);
-    resolve(`${user_id}/${id}/avatar.${type}`);
+    resolve(filePath);
   })
-}
-
-
-
-function base64MimeType(encoded: string) {
-  var result = null;
-
-  if (typeof encoded !== 'string') {
-    return result;
-  }
-
-  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
-
-  if (mime && mime.length) {
-    result = mime[1];
-  }
-
-  return result;
-}
-
-function checkMimeType(mimeType: string) {
-  const filetypes = /jpeg|jpg|gif|png/;
-  const mime = filetypes.test(mimeType);
-  if (mime) {
-    return true;
-  }
-  return false;
 }

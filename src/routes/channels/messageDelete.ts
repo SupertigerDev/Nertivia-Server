@@ -3,7 +3,7 @@ import {Messages} from '../../models/Messages'
 import {MessageQuotes} from '../../models/MessageQuotes'
 import { MESSAGE_DELETED } from '../../ServerEventNames';
 import { Request, Response, Router } from 'express';
-import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { authenticate } from '../../middlewares/authenticate';
 import rateLimit from '../../middlewares/rateLimit';
 import { channelVerification } from '../../middlewares/ChannelVerification';
@@ -74,7 +74,10 @@ async function route(req: Request, res: Response) {
     const isNertiviaCDN = filesExist && message.files?.[0]?.url?.startsWith("https://")
     if (filesExist && isImage && isNertiviaCDN) {
       const path = (new URL(message.files?.[0].url)).pathname;
-      nertiviaCDN.deletePath(path).catch(err => {console.log("Error deleting from CDN", err)})
+      const error = await NertiviaCDN.deleteFile(path);
+      if (error) {
+        console.log("Error deleting from CDN", error)
+      }
     }
   } catch (error) {
     console.error(error);

@@ -1,7 +1,7 @@
 import {Servers} from "../../models/Servers";
 import {Channels} from "../../models/Channels";
 
-import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import * as NertiviaCDN from '../../common/NertiviaCDN';
 import tempSaveImage from '../../utils/tempSaveImage';
 import compressImage from '../../utils/compressImage';
 import fs from 'fs';
@@ -13,6 +13,8 @@ const { matchedData } = require("express-validator");
 const flake = require('../../utils/genFlakeId').default;
 import {cropImage} from '../../utils/cropImage'
 import { SERVER_UPDATED } from "../../ServerEventNames";
+import { base64MimeType, isImageMime } from "../../utils/image";
+import { deleteFile } from "../../utils/file";
 
 module.exports = async (req, res, next) => {
   // check if this function is executed by the guild owner.
@@ -70,29 +72,6 @@ module.exports = async (req, res, next) => {
   }
 };
 
-function base64MimeType(encoded) {
-  var result = null;
-
-  if (typeof encoded !== "string") {
-    return result;
-  }
-
-  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
-
-  if (mime && mime.length) {
-    result = mime[1];
-  }
-
-  return result;
-}
-function checkMimeType(mimeType) {
-  const filetypes = /jpeg|jpg|gif|png/;
-  const mime = filetypes.test(mimeType);
-  if (mime) {
-    return true;
-  }
-  return false;
-}
 
 async function uploadAvatar(base64, user_id, isBanner) {
   return new Promise(async (resolve, reject) => {
@@ -106,7 +85,7 @@ async function uploadAvatar(base64, user_id, isBanner) {
     }
     const mimeType = base64MimeType(base64);
     let type = base64.split(';')[0].split('/')[1];
-    if (!checkMimeType(mimeType)) {
+    if (!isImageMime(mimeType)) {
       return reject("Invalid image.")
 
     }
@@ -135,19 +114,16 @@ async function uploadAvatar(base64, user_id, isBanner) {
       type = "webp"
     }
 
-
-    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
+    const [filePath, error] = await NertiviaCDN.uploadFile({
+      file: buffer,
+      userId: user_id,
+      fileName: `${name}.${type}`
+    })
     if (isBanner) deleteFile(dirPath);
     if (error) {
       reject(error);
       return
     };
-    resolve(`${user_id}/${id}/${name}.${type}`);
+    resolve(filePath);
   })
-}
-
-function deleteFile(path) {
-  fs.unlink(path, err => {
-    if (err) console.error(err)
-  });
 }

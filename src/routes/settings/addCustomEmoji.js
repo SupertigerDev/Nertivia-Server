@@ -1,8 +1,9 @@
 import {cropImage} from "../../utils/cropImage"
 import { CustomEmojis } from '../../models/CustomEmojis';
 const flake = require('../../utils/genFlakeId').default;
-import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { CUSTOM_EMOJI_UPLOADED } from "../../ServerEventNames";
+import { base64MimeType, isImageMime } from "../../utils/image";
 
 module.exports = async (req, res, next) => {
 
@@ -61,7 +62,7 @@ module.exports = async (req, res, next) => {
   const mimeType = base64MimeType(req.body.avatar);
   const type = mimeType.split("/")[1];
 
-  if (!checkMimeType(mimeType)) {
+  if (!isImageMime(mimeType)) {
     return res.status(403).json({
       message: "Invalid image."
     });
@@ -77,10 +78,17 @@ module.exports = async (req, res, next) => {
   const emojiId = flake.gen();
 
 
-  const error = await nertiviaCDN.uploadFile(buffer, null, null, `${emojiId}.${type === 'gif' ? 'gif' : 'png'}`, true)
-  if (error){
+
+
+
+  const uploadError = await NertiviaCDN.uploadEmoji({
+    file: buffer,
+    fileName: `${emojiId}.${type === 'gif' ? 'gif' : 'png'}`,
+  })
+
+  if (uploadError){
     return res.status(403).json({
-      message: err
+      message: uploadError
     });
   };
 
@@ -137,27 +145,3 @@ function replaceAccents(str) {
   return str;
 }
 
-function base64MimeType(encoded) {
-  var result = null;
-
-  if (typeof encoded !== "string") {
-    return result;
-  }
-
-  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
-
-  if (mime && mime.length) {
-    result = mime[1];
-  }
-
-  return result;
-}
-
-function checkMimeType(mimeType) {
-  const filetypes = /jpeg|jpg|gif|png/;
-  const mime = filetypes.test(mimeType);
-  if (mime) {
-    return true;
-  }
-  return false;
-}

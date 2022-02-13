@@ -1,7 +1,5 @@
 import { Users } from "../../models/Users";
-const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
-
-const redis = require("../../redis");
+import * as NertiviaCDN from '../../common/NertiviaCDN';
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 const { kickUser } = require("../../utils/kickUser");
 
@@ -78,7 +76,10 @@ module.exports = async (req, res, next) => {
 
   
   // delete files from cdn
-  nertiviaCDN.deletePath("/" + req.user.id).catch(err => {console.log("Error deleting from CDN", err)});
+  const error = await NertiviaCDN.deleteFile(path);
+  if (error) {
+    console.log("Error deleting from CDN", error)
+  }
 
   kickUser(req.user.id, "Token outdated.");
   req.session.destroy();

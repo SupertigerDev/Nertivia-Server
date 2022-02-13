@@ -22,6 +22,16 @@ export function deleteFile(path: string) {
   })
 }
 
+export function renameAsync(oldDir: string, newDir: string) {
+  return new Promise((res, rej) => {
+    fs.rename(oldDir, newDir, err => {
+      if (err) return rej(err);
+      res(true);
+    })
+  })
+}
+
+
 export function saveTempFile(file: Buffer | NodeJS.ReadableStream, fileName: string): Promise<[TempFile | null, string | null]> {
   return new Promise(resolve => {
 

@@ -6,8 +6,10 @@ import {cropImage} from '../../utils/cropImage'
 import compressImage from '../../utils/compressImage';
 import { kickUser } from '../../utils/kickUser';
 import tempSaveImage from '../../utils/tempSaveImage';
-import * as nertiviaCDN from '../../utils/uploadCDN/nertiviaCDN'
+import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { USER_UPDATED } from "../../ServerEventNames";
+import { base64MimeType, isImageMime } from "../../utils/image";
+import { deleteFile } from "../../utils/file";
 const flakeId = new (require('flakeid'))();
 const emitToAll = require('../../socketController/emitToAll');
 const sio = require("socket.io");
@@ -174,7 +176,7 @@ async function uploadImage(base64, user_id, size, name) {
     }
     const mimeType = base64MimeType(base64);
     const type = base64.split(';')[0].split('/')[1];
-    if (!checkMimeType(mimeType)) {
+    if (!isImageMime(mimeType)) {
       return reject("Invalid " + name)
 
     }
@@ -194,47 +196,20 @@ async function uploadImage(base64, user_id, size, name) {
       if (name === "banner") deleteFile(dirPath);
       return reject("Something went wrong while cropping image.")
     }
-    const id = flakeId.gen();
 
 
-    const error = await nertiviaCDN.uploadFile(buffer, user_id, id, `${name}.${type}`)
+    const [filePath, error] = await NertiviaCDN.uploadFile({
+      file: buffer,
+      fileName: `${name}.${type}`,
+      userId: user_id,
+    })
+
     if (name === "banner") deleteFile(dirPath);
 
-    if (!error) {
+    if (error) {
       reject(error);
       return
     };
-    resolve(`${user_id}/${id}/${name}.${type}`);
+    resolve(filePath);
   })
-}
-
-
-function deleteFile(path) {
-  fs.unlink(path, err => {
-    if (err) console.error(err)
-  });
-}
-function base64MimeType(encoded) {
-  var result = null;
-
-  if (typeof encoded !== 'string') {
-    return result;
-  }
-
-  var mime = encoded.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
-
-  if (mime && mime.length) {
-    result = mime[1];
-  }
-
-  return result;
-}
-
-function checkMimeType(mimeType) {
-  const filetypes = /jpeg|jpg|gif|png/;
-  const mime = filetypes.test(mimeType);
-  if (mime) {
-    return true;
-  }
-  return false;
 }
