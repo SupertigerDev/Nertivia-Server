@@ -4,8 +4,8 @@ module.exports = function (options) {
     const {name, expire, requestsLimit, useIP, nextIfInvalid} = options;
 
     const ttl = await checkRateLimited({
-      userIp: req.userIP,
-      userId: req.user?.id,
+      ...(useIP && {userIp: req.userIP}),
+      ...(!useIP && {userId: req.user?.id}),
       expire,
       name,
       requestsLimit: requestsLimit
