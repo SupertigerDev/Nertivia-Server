@@ -2,31 +2,16 @@ import fetch, { Response } from 'node-fetch';
 import AbortController from "abort-controller"
 import sharp from 'sharp';
 import cheerio from 'cheerio';
-import { getImageDimensions } from './image';
+import { getImageDimensions } from '../utils/image';
 
 const maxSize = 10485760; // 10MB
 const timeout = 5000; // 5 seconds;
-// console.log("running...")
 
 
-// createURLEmbed("https://avatars.g").then(res => {
-//   console.log(res[0], res[1])
-// });
-// createURLEmbed("https://avatars.githubusercontent.com/u/8193841?v=4").then(res => {
-//   console.log(res[0], res[1])
-// });
 // createURLEmbed("https://github.com/supertiger1234").then(res => {
 //   console.log(res[0], res[1])
 // });
-// createURLEmbed("https://twitter.com/FireCubeStudios/status/1488440600026394626").then(res => {
-//   console.log(res[0], res[1])
-// });
-// createURLEmbed("https://tenor.com/buVVn.gif").then(res => {
-//   console.log(res[0], res[1])
-// })
-// createURLEmbed("https://download.nvidia.com/gfnpc/GeForceNOW-release.exe").then(res => {
-//   console.log(res[0], res[1])
-// })
+
 
 function fetchUrl(url: string): Promise<[null | {buffer: Buffer, res: Response}, null | string]> {
   return new Promise(async resolve => {

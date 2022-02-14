@@ -7,7 +7,7 @@ import { User } from '../models/Users';
 import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../ServerEventNames';
 import { getIOInstance } from '../socket/instance';
 import { sendPushNotification } from '../utils/sendPushNotification';
-import { createURLEmbed } from '../utils/URLEmbed';
+import { createURLEmbed } from '../common/URLEmbed';
 import { zip } from '../utils/zip';
 import { getChannelById, updateLastMessaged as updateLastMessagedChannel } from './Channels';
 import * as MessageQuotes from './MessageQuotes';
