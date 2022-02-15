@@ -1,6 +1,6 @@
 import cluster from 'cluster';
 const numCPUs = require('os').cpus().length;
-import { getRedisInstance, redisInstanceExists } from "./redis/instance";
+import * as redis from './common/redis';
 import { getIOInstance } from "./socket/instance";
 import app from './app';
 import mongoose from "mongoose";
@@ -52,23 +52,10 @@ function start() {
 			connectRedis();
 		})
 	}
-	function connectRedis() {
+	async function connectRedis() {
 		Log.info("Connecting to Redis...")
-		if (redisInstanceExists()) return;
-		const client = getRedisInstance({
-			host: process.env.REDIS_HOST,
-			password: process.env.REDIS_PASS,
-			port: parseInt(process.env.REDIS_PORT)
-		});
-		if (!client) return;
-		client.on("ready", () => {
-			Log.info("Connected!")
-			client.flushall();
-			startServer();
-		});
-		client.on("error", err => {
-			throw err;
-		})
+		await redis.connect();
+		Log.info("Connected!")
 	}
 	function startServer() {
 		if (isListening) return;

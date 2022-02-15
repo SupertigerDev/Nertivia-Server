@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import connectRedis from "connect-redis";
 import session from "express-session";
 import JWT from 'jsonwebtoken';
-import {getRedisInstance} from '../redis/instance'
+import * as redis from '../common/redis'
 import { RequestHandler } from "express";
 
 const RedisStore = connectRedis(session);
@@ -21,7 +21,7 @@ function getSessionInstance() {
   sessionInstance = session({
     secret: process.env.SESSION_SECRET,
     store: new RedisStore({
-      client: getRedisInstance(),
+      client: redis.client,
       ttl: 600
     }),
     genid: req => {

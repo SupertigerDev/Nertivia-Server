@@ -2,7 +2,7 @@ import {Server} from "http";
 import socketIO from "socket.io";
 
 import { createAdapter, RedisAdapter } from '@socket.io/redis-adapter';
-import { getRedisInstance } from "../redis/instance";
+import * as redis from '../common/redis';
 
 let IO_INSTANCE: socketIO.Server | undefined = undefined;
 
@@ -18,7 +18,7 @@ export function getIOInstance(server?: Server) {
         credentials: true,
       }
     })
-    IO_INSTANCE.adapter(createAdapter(getRedisInstance(), getRedisInstance()?.duplicate()))
+    IO_INSTANCE.adapter(createAdapter(redis.client, redis.client.duplicate()))
   
     return IO_INSTANCE;
   }
