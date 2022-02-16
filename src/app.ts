@@ -4,7 +4,6 @@ import express from "express";
 import http from "http";
 // middlewares
 import realIP from "./middlewares/realIP";
-import redisSession from './middlewares/redisSession'
 import cors from "./middlewares/cors";
 
 
@@ -16,15 +15,6 @@ export default function initServer() {
 
   const io = getIOInstance(server);
   
-  //redis://[USER]:[PASSWORD]@[SERVICE-IP]:[PORT]
-  // io.adapter(redisAdapter({
-  //   host: process.env.REDIS_HOST,
-  //   port: process.env.REDIS_PORT,
-  //   auth_pass: process.env.REDIS_PASS
-  // }));
-
-  // middlewares
-
   app.use(express.json({limit: '10mb'}));
   app.use(express.urlencoded({ extended: true }));
 
@@ -34,7 +24,6 @@ export default function initServer() {
     req.io = io;
     next();
   })
-  app.use(redisSession);
 
 
   // routes

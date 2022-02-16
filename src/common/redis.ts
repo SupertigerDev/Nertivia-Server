@@ -1,7 +1,6 @@
 import {createClient} from 'redis';
 
 
-
 export const client = createClient({
   socket: {
     host: process.env.REDIS_HOST,
@@ -17,7 +16,6 @@ export function connect(): Promise<typeof client> {
 
     client.on('connect', async () => {
       await client.flushAll()
-      console.log("Connected to Redis.")
       resolve(client);
     })
     client.on('error', (err) => {

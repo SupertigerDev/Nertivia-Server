@@ -1,9 +1,9 @@
 import { client as redis } from "../common/redis";
+import { User } from "../models/Users";
 import * as keys from './keys.cache';
 
 interface AddConnectedUserOpts {
-  userObjectId: string,
-  userId: string,
+  user: Partial<User> & {id: string, _id: string};
   socketId: string
   presence: number,
   customStatus: string,
@@ -13,11 +13,14 @@ interface AddConnectedUserOpts {
 export async function addConnectedUser(opts: AddConnectedUserOpts) {
   const multi = redis.multi();
 
-  const userKey = keys.user(opts.userId);
-  
-  const connectedKey = keys.connectedSocketId(opts.socketId);
+  const userKey = keys.authenticatedUserString(opts.user.id);
+  const socketIdsKey = keys.userSocketIdSet(opts.user.id)
+  const socketUserIdKey = keys.socketUserIdString(opts.socketId);
 
-  multi.hSet(userKey, 'presence', opts.presence);
+  await redis.set(userKey, JSON.stringify(opts.user));
+  await redis.sAdd(socketIdsKey, opts.socketId);
+  await redis.set(socketUserIdKey, opts.user.id);
+
 
   multi.exec()
 }

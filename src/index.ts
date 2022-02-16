@@ -1,12 +1,12 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import cluster from 'cluster';
 const numCPUs = require('os').cpus().length;
 import * as redis from './common/redis';
 import { getIOInstance } from "./socket/instance";
 import app from './app';
 import mongoose from "mongoose";
-import dotenv from 'dotenv';
 import { Log } from './Log';
-dotenv.config();
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
 

@@ -10,6 +10,7 @@ declare global {
       uploadFile: uploadFile,
       message_id: string,
       channel: Channel,
+      session: any
       permErrorMessage?: string,
       server: Server
       oAuth2Client: any
