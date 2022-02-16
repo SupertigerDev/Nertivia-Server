@@ -1,9 +1,10 @@
 import { client as redis } from "../common/redis";
 import { User } from "../models/Users";
+import { getUserByIdUnsafe } from "../services/Users";
 import * as keys from './keys.cache';
 
 interface AddConnectedUserOpts {
-  user: Partial<User> & {id: string, _id: string};
+  user: Partial<User> & {id: string};
   socketId: string
   presence: number,
   customStatus: string,
@@ -11,20 +12,36 @@ interface AddConnectedUserOpts {
 
 
 export async function addConnectedUser(opts: AddConnectedUserOpts) {
+
+
   const multi = redis.multi();
 
   const userKey = keys.authenticatedUserString(opts.user.id);
   const socketIdsKey = keys.userSocketIdSet(opts.user.id)
   const socketUserIdKey = keys.socketUserIdString(opts.socketId);
 
-  await redis.set(userKey, JSON.stringify(opts.user));
-  await redis.sAdd(socketIdsKey, opts.socketId);
-  await redis.set(socketUserIdKey, opts.user.id);
-
-
-  multi.exec()
+  // Set if not exists.
+  multi.setNX(userKey, JSON.stringify(opts.user));
+  multi.sAdd(socketIdsKey, opts.socketId);
+  multi.set(socketUserIdKey, opts.user.id);
+  await multi.exec()
 }
 
+type ReturnType<T> = [T | null, string | null];
+export async function getUser(userId: string): Promise<ReturnType<Partial<User>>> {
+  // check in cache
+  const userKey = keys.authenticatedUserString(userId);
+  const userStringified = await redis.get(userKey);
+  if (userStringified) return [JSON.parse(userStringified), null];
+  
+  // check in database
+  const dbUser = await getUserByIdUnsafe(userId).lean();
+  if (!dbUser) {
+    return [null, "User not found in the database. (User.cache.ts)"];
+  }
+  await redis.set(userKey, JSON.stringify(dbUser));
+  return [dbUser, null];
+}
 
 
 // export function addConnectedUser(userID: string, _id: string, status: string, customStatus: string, socketID: string) {
