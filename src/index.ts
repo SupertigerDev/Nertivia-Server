@@ -56,6 +56,7 @@ function start() {
 		Log.info("Connecting to Redis...")
 		await redis.connect();
 		Log.info("Connected!")
+		startServer();
 	}
 	function startServer() {
 		if (isListening) return;

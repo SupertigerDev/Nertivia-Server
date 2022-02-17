@@ -20,9 +20,7 @@ import { getIOInstance } from "./socket/instance";
 import getUsrDetails from './utils/getUserDetails';
 import { AUTHENTICATED, AUTHENTICATION_ERROR, USER_CALL_LEFT, USER_PROGRAM_ACTIVITY_CHANGED, VOICE_RETURN_SIGNAL_RECEIVED, VOICE_SIGNAL_RECEIVED } from "./ServerEventNames";
 
-// nsps = namespaces.
-// disable socket events when not authorized .
-disableEvents()
+
 
 const populateFriends = {
   path: "friends",
@@ -53,11 +51,10 @@ const populateServers = {
 module.exports = async client => {
 
   //If the socket didn't authenticate(), disconnect it
-  let timeout = setTimeout(function () {
-    if (!client.auth) {
-      client.emit(AUTHENTICATION_ERROR, "Token Timeout!");
-      client.disconnect(true);
-    }
+  let timeout = setTimeout(() => {
+    if (client.auth) return;
+    client.emit(AUTHENTICATION_ERROR, "Token Timeout!");
+    client.disconnect(true);
   }, 10000);
 
 
@@ -297,17 +294,6 @@ module.exports = async client => {
         emitUserStatus(user.id, user._id, user.status, getIOInstance(), false, user.custom_status, true)
       }
 
-      // nsps = namespaces.
-      // enabled socket events when authorized. (dont think it works on socketio 4.0)
-      for (const key in getIOInstance().nsps) {
-        const nsp = getIOInstance().nsps[key];
-        for (const _key in nsp.sockets) {
-          if (_key === client.id) {
-            nsp.connected[client.id] = client;
-          }
-        }
-      }
-
       let concatedMutedChannels = [];
       for (let i = 0; i < results[3].length; i++) {
         const res = results[3][i].muted_channels;
@@ -448,18 +434,6 @@ module.exports = async client => {
   })
 };
 
-//(dont think it works on socketio 4.0)
-function disableEvents() {
-  const nsps = getIOInstance().nsps;
-  for (let key in nsps) {
-    const nsp = nsps[key];
-    nsp.on("connect", function (socket) {
-      if (!socket.auth) {
-        delete nsp.connected[socket.id];
-      }
-    });
-  }
-}
 
 
 function asyncVerifyJWT(token) {

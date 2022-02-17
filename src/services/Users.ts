@@ -1,8 +1,9 @@
 import { Users } from "../models/Users"
 
+// this function should be used internally.
 export const getUserByIdUnsafe = (userId: string) => {
   // todo: add unsafe fields.
-  return Users.findOne({id: userId}).select('_id id avatar tag username')
+  return Users.findOne({id: userId}).select('_id id avatar tag username bot readTerms passwordVersion ip')
 }
 
 export const getUsersByIds = async (userIds: string[]) => {

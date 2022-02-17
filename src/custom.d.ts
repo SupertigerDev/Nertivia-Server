@@ -1,12 +1,13 @@
 import { ChannelType } from "gm";
 import socketio from "socket.io";
+import { User } from "./models/Users";
 
 declare global {
   namespace Express {
     export interface Request {
       io: socketio.Server,
-      userIP?: string | string[] | undefined,
-      user: User,
+      userIP: string,
+      user: Partial<User> & {id: string},
       uploadFile: uploadFile,
       message_id: string,
       channel: Channel,
@@ -48,16 +49,7 @@ declare global {
     }
   }
 }
-interface User {
-  id: string
-  _id: string
-  username: string
-  tag: string
-  avatar: string
-  admin: string
-  bot?: boolean,
-  badges?: number
-}
+
 
 interface uploadFile {
   file: any
