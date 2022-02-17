@@ -3,8 +3,11 @@ import { User } from "../models/Users";
 import { getUserByIdUnsafe } from "../services/Users";
 import * as keys from './keys.cache';
 
+export type CacheUser = User & {
+  googleDriveCredentials?: any
+}
 
-type PartialUser = Partial<User> & {id: string};
+type PartialUser = Partial<CacheUser> & {id: string};
 interface AddConnectedUserOpts {
   user: PartialUser;
   socketId: string
@@ -53,7 +56,7 @@ export async function getUser(userId: string): Promise<ReturnType<PartialUser>> 
   return [JSON.parse(stringifiedUser), null];
 }
 
-export async function updateUser(userId: string, update: Partial<User>) {
+export async function updateUser(userId: string, update: Partial<CacheUser>) {
   const userKey = keys.authenticatedUserString(userId);
 
   const [user, error] = await getUser(userId);
