@@ -3,7 +3,7 @@ const busboy = require("connect-busboy");
 
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
-import { GDriveOauthClient } from "../../middlewares/GDriveOauthClient";
+import { GoogleDriveOAuth } from "../../middlewares/GoogleDriveOAuth";
 
 // Policies
 const settingsPolicy = require("../../policies/settingsPolicies");
@@ -44,7 +44,7 @@ MainSettingsRouter.route("/server_position")
 // Link Google Drive
 MainSettingsRouter.use(
   "/drive",
-  GDriveOauthClient,
+  GoogleDriveOAuth,
   require("./linkGoogleDrive")
 );
 

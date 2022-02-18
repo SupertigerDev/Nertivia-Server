@@ -11,12 +11,10 @@ import messagePolicy from '../../policies/messagePolicies';
 import serverChannelPermissions from '../../middlewares/serverChannelPermissions'
 import permissions from '../../utils/rolePermConstants';
 import connectBusboy from 'connect-busboy';
-import { Log } from '../../Log';
-import { Readable } from 'form-data';
 import { getImageDimensions, ImageDimension, isImageMime } from '../../utils/image';
 import { deleteFile, saveTempFile } from '../../utils/file';
 import compressImage from '../../utils/compressImage';
-import { GDriveOauthClient } from '../../middlewares/GDriveOauthClient';
+import { GoogleDriveOAuth } from '../../middlewares/GoogleDriveOAuth';
 import * as GoogleDrive from '../../common/GoogleDrive';
 import * as NertiviaCDN from '../../common/NertiviaCDN'
 import fs from 'fs';
@@ -215,7 +213,7 @@ function uploadFile(req: Request, res: Response, uploadFile: UploadFile) {
   return [null, "Invalid CDN provided."]
 }
 async function uploadFileGoogleDrive(req: Request, res: Response, uploadFile: UploadFile): Promise<[any, string | null]> {
-  await GDriveOauthClient(req, res, () => {});
+  await GoogleDriveOAuth(req, res, () => {});
 
 
   const [file, error] = await GoogleDrive.uploadFile(req.oAuth2Client,{
