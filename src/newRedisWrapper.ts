@@ -6,7 +6,7 @@
  
  
  // IMPORTANT NOTE:
- // THIS FILE IS COMPLETELY MESSED. do not use.
+ // THIS FILE IS COMPLETELY MESSED. do not use even as reference. Instead, see master branch newRedisWrapper.ts
  
  
  
