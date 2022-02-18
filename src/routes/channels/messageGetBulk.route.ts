@@ -9,7 +9,7 @@ import {Messages} from '../../models/Messages'
 
 export const messageGetBulk = (Router: Router) => {
   Router.route("/:channelId/messages").get(
-    authenticate(true),
+    authenticate({allowBot: true}),
     rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
     channelVerification,
     route

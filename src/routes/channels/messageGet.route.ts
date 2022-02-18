@@ -7,7 +7,7 @@ import rateLimit from '../../middlewares/rateLimit';
 
 export const messageGet = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId").get(
-    authenticate(true),
+    authenticate({allowBot: true}),
     rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
     channelVerification,
     route

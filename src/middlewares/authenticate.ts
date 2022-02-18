@@ -15,7 +15,7 @@ const defaultOptions: Options = {
   allowNonTerms: false
 }
 
-export function authenticate (_opts: Options) {
+export function authenticate (_opts?: Options) {
   const opts = {...defaultOptions, ..._opts};
   return async (req: Request, res: Response, next: NextFunction) => {
     const token = process.env.JWT_HEADER + req.headers.authorization;

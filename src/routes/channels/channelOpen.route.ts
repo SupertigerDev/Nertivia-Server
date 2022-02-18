@@ -10,7 +10,7 @@ import { authenticate } from '../../middlewares/authenticate';
 
 export function channelOpen(Router: Router) {
   Router.route("/users/:userId").post(
-    authenticate(true),
+    authenticate({allowBot: true}),
     route
   );
 };

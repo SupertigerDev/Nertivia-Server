@@ -1,7 +1,6 @@
 import { Users } from "../../models/Users";
 import {BannedIPs} from "../../models/BannedIPs";
 const bcrypt = require('bcryptjs');
-const sio = require("socket.io");
 import nodemailer from 'nodemailer';
 import { kickUser } from '../../utils/kickUser';
 const transporter = nodemailer.createTransport({
@@ -16,7 +15,6 @@ const transporter = nodemailer.createTransport({
 module.exports = async (req, res, next) => {
   const {id, password} = req.body;
   const code = req.params.code;
-  req.session.destroy();
 
 
   // Find the user given the email

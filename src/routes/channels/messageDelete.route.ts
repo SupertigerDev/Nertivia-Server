@@ -15,7 +15,7 @@ import permissions from '../../utils/rolePermConstants';
 
 export function messageDelete(Router: Router) {
   Router.route("/:channelId/messages/:messageId").delete(
-    authenticate(true),
+    authenticate({allowBot: true}),
     rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
     channelVerification,
     disAllowBlockedUser,

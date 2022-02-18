@@ -13,7 +13,7 @@ const VoiceRouter = Router();
 
 // Join Call
 VoiceRouter.route("/channels/:channelID").post(
-  authenticate(true),
+  authenticate({allowBot: true}),
   rateLimit({name: 'join_voice', expire: 20, requestsLimit: 15 }),
   channelVerification,
   // checkRolePermissions('Send Message', permissions.roles.SEND_MESSAGES),
@@ -22,7 +22,7 @@ VoiceRouter.route("/channels/:channelID").post(
 
 // leave Call
 VoiceRouter.route("/leave").post(
-  authenticate(true),
+  authenticate({allowBot: true}),
   rateLimit({name: 'leave_voice', expire: 20, requestsLimit: 15 }),
   leaveCall
 );

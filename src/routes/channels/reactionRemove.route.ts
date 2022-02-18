@@ -12,7 +12,7 @@ import { MESSAGE_REACTION_UPDATED } from '../../ServerEventNames';
 
 export const reactionRemove = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId/reactions").delete(
-    authenticate(true),
+    authenticate({allowBot: true}),
     rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
     channelVerification,
     disAllowBlockedUser,

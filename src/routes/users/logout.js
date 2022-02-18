@@ -1,5 +1,6 @@
+import * as UserCache from '../../cache/User.cache';
 module.exports = async (req, res, next) => {
-  req.session.destroy();
+  await UserCache.removeUser(req.user.id);
 
   res.status(204).end();
 };

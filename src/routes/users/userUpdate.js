@@ -10,7 +10,7 @@ import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { USER_UPDATED } from "../../ServerEventNames";
 import { base64MimeType, isImageMime } from "../../utils/image";
 import { deleteFile } from "../../utils/file";
-const flakeId = new (require('flakeid'))();
+import * as UserCache from '../../cache/User.cache';
 const emitToAll = require('../../socketController/emitToAll');
 const sio = require("socket.io");
 const fs = require("fs");
@@ -124,8 +124,11 @@ module.exports = async (req, res, next) => {
     delete data.$inc;
     const resObj = Object.assign({}, data);
     delete resObj.password;
-    const updateSession = Object.assign({}, req.session["user"], resObj, {passwordVersion: req.user.passwordVersion});
-    req.session["user"] = updateSession;
+    const updateCache = {
+      ...resObj,
+      passwordVersion: req.user.passwordVersion
+    }
+    await UserCache.updateUser(req.user.id, updateCache)
     resObj.id = user.id;
     const io = req.io;
     if (updatePassword) {

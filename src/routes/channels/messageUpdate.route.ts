@@ -11,7 +11,7 @@ import { updateMessage } from '../../services/Messages';
 
 export const messageUpdate = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId").patch(
-    authenticate(true),
+    authenticate({allowBot: true}),
     messagePolicy.update,
     rateLimit({ name: 'message_update', expire: 20, requestsLimit: 15 }),
     channelVerification,

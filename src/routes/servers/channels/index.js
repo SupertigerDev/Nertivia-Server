@@ -15,7 +15,7 @@ MainChannelRouter.route('/:server_id/channels').get(
 
 // Create
 MainChannelRouter.route('/:server_id/channels').put(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.createChannel,
@@ -24,7 +24,7 @@ MainChannelRouter.route('/:server_id/channels').put(
 
 // Update
 MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.updateChannel,
@@ -33,7 +33,7 @@ MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
 
 // Delete
 MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   require("./deleteServerChannel")

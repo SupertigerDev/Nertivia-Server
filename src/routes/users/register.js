@@ -13,7 +13,6 @@ const transporter = nodemailer.createTransport({
 
 module.exports = async (req, res, next) => {
 
-  req.session.destroy()
   let { username, email, password } = req.body;
 
   username = username.replace(

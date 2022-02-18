@@ -16,7 +16,7 @@ interface ResponseObject {
 
 export const buttonClicked = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId/buttons/:buttonId").post(
-    authenticate(true),
+    authenticate({allowBot: true}),
     channelVerification,
     rateLimit({name: 'message_button_clicked', expire: 60, requestsLimit: 300 }),
     route

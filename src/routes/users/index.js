@@ -27,7 +27,7 @@ MainUserRouter.route('/welcome-done')
 
 // Update
 MainUserRouter.route("/").patch(
-  authenticate(true),
+  authenticate({allowBot: true}),
   userPolicy.updateUser,
   require("./userUpdate")
 );
@@ -47,12 +47,12 @@ MainUserRouter.route("/block").delete(
 
 // User agreeing to the TOS and the privacy policy
 MainUserRouter.route("/agreeingPolicies").post(
-  authenticate(false, false, true),
+  authenticate({allowNonTerms: true}),
   require("./agreeingPolicies")
 );
 
 // Details
-MainUserRouter.route("/:user_id?").get(authenticate(true), require("./userDetails"));
+MainUserRouter.route("/:user_id?").get(authenticate({allowBot: true}), require("./userDetails"));
 
 // Register
 MainUserRouter.route("/register").post(
@@ -99,7 +99,7 @@ MainUserRouter.route("/reset/code/:code").post(
 
 // Logout
 MainUserRouter.route("/logout").delete(
-  authenticate(true),
+  authenticate({allowBot: true}),
   require("./logout")
 );
 

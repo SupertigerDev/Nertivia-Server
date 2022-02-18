@@ -12,7 +12,7 @@ import { MESSAGE_REACTION_UPDATED } from '../../ServerEventNames';
 
 export const reactionAdd = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId/reactions").post(
-    authenticate(true),
+    authenticate({allowBot: true}),
     rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
     channelVerification,
     disAllowBlockedUser,

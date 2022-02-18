@@ -20,7 +20,7 @@ MainServerRouter.route('/').post(
 
 // Update
 MainServerRouter.route('/:server_id').patch(
-  authenticate(true),
+  authenticate({allowBot: true}),
   serverPolicy.updateServer,
   UserPresentVerification,
   require("./updateServer")
@@ -36,7 +36,7 @@ MainServerRouter.route('/:server_id/mute').put(
 
 // Get Server
 MainServerRouter.route('/:server_id').get(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   require("./getServer")
 );
@@ -60,7 +60,7 @@ MainServerRouter.route('/:server_id/delete').post(
 
 // kick member
 MainServerRouter.route('/:server_id/members/:id').delete(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   checkRolePerms('Kick', permissions.roles.KICK_USER),
   require("./kickMember")
@@ -69,7 +69,7 @@ MainServerRouter.route('/:server_id/members/:id').delete(
 // banned members
 //http://192.168.1.8/api/servers/6583302963345756160/bans
 MainServerRouter.route('/:server_id/bans').get(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./bannedMembers")
@@ -78,7 +78,7 @@ MainServerRouter.route('/:server_id/bans').get(
 // ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:id').put(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./banMember")
@@ -87,7 +87,7 @@ MainServerRouter.route('/:server_id/bans/:id').put(
 // un ban member
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:id').delete(
-  authenticate(true),
+  authenticate({allowBot: true}),
   UserPresentVerification,
   checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./unBanMember")

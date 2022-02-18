@@ -22,7 +22,7 @@ import { createMessage, CreateMessageArgs } from '../../services/Messages';
 
 export const messageSend = (Router: Router) => {
   Router.route("/:channelId/messages/").post(
-    authenticate(true),
+    authenticate({allowBot: true}),
     messagePolicy.post,
     rateLimit({name: 'message_send', expire: 20, requestsLimit: 15 }),
     channelVerification,

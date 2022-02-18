@@ -6,7 +6,7 @@ import { CHANNEL_DELETED } from '../../ServerEventNames';
 
 export const channelClose = (Router: Router) =>
   Router.route("/:channelId").delete(
-    authenticate(true),
+    authenticate({allowBot: true}),
     route
   );
 

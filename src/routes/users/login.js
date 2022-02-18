@@ -1,7 +1,6 @@
 import { Users } from "../../models/Users";
 import {BannedIPs} from "../../models/BannedIPs";
 const JWT = require("jsonwebtoken");
-
 function signToken(user_id, pwdVer) {
   if (pwdVer !== undefined) {
     return JWT.sign(`${user_id}-${pwdVer}`, process.env.JWT_SECRET);
@@ -13,7 +12,6 @@ function signToken(user_id, pwdVer) {
 module.exports = async (req, res, next) => {
   // email can be username:tag.
   const {email, password} = req.body;
-  req.session.destroy();
   // Validate information
 
   let obj;

@@ -68,6 +68,10 @@ export async function updateUser(userId: string, update: Partial<CacheUser>) {
   multi.expire(userKey, USER_EXPIRE)
   await multi.exec()
 }
+export async function removeUser(userId: string) {
+  const userKey = keys.authenticatedUserString(userId);
+  await redis.del(userKey)
+}
 
 
 // export function addConnectedUser(userID: string, _id: string, status: string, customStatus: string, socketID: string) {

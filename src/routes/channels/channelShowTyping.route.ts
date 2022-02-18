@@ -11,7 +11,7 @@ import permissions from "../../utils/rolePermConstants";
 
 export const channelShowTyping = (Router: Router) => {
   Router.route("/:channelId/typing").post(
-    authenticate(true),
+    authenticate({allowBot: true}),
     rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
     channelVerification,
     disAllowBlockedUser,

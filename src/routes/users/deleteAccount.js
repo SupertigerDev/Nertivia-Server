@@ -2,7 +2,7 @@ import { Users } from "../../models/Users";
 import * as NertiviaCDN from '../../common/NertiviaCDN';
 const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
 const { kickUser } = require("../../utils/kickUser");
-
+import * as UserCache from '../../cache/User.cache';
 
 
 module.exports = async (req, res, next) => {
@@ -82,7 +82,7 @@ module.exports = async (req, res, next) => {
   }
 
   kickUser(req.user.id, "Token outdated.");
-  req.session.destroy();
+  await UserCache.removeUser(req.user.id);
 
   res
   .status(200)

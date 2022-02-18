@@ -13,8 +13,7 @@ const transporter = nodemailer.createTransport({
 
 module.exports = async (req, res, next) => {
   // email can be username:tag.
-  const {email, password} = req.body;
-  req.session.destroy();
+  const {email} = req.body;
   // Validate information
 
   let obj;

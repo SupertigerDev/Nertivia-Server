@@ -9,7 +9,7 @@ import {MessageReaction, MessageReactions} from '../../models/MessageReactions';
 
 export const reactionGet = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId/reactions").get(
-    authenticate(true),
+    authenticate({allowBot: true}),
     rateLimit({name: 'message_react_users', expire: 60, requestsLimit: 120 }),
     channelVerification,
     disAllowBlockedUser,

@@ -4,7 +4,7 @@ import { channelVerification } from "../../middlewares/ChannelVerification";
 
 export function channelGet(Router: Router) {
   Router.route("/:channelId").get(
-    authenticate(true),
+    authenticate({allowBot: true}),
     channelVerification,
     route
   );

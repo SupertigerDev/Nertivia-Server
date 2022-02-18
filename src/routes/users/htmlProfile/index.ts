@@ -8,7 +8,7 @@ import {getHtmlProfile} from './getHtmlProfile';
 import {deleteHtmlProfile} from './deleteHtmlProfile';
 
 htmlProfileRouter.route('/')
-  .post(authenticate(true), addHtmlProfile);
+  .post(authenticate({allowBot: true}), addHtmlProfile);
 
 htmlProfileRouter.route('/')
   .get(authenticate(), getHtmlProfile);
