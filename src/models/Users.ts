@@ -25,6 +25,7 @@ interface Settings {
 }
 
 export interface User {
+  _id: string
   email: string
   banned: boolean
   email_confirm_code: string

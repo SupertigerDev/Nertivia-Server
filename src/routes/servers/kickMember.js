@@ -51,7 +51,7 @@ module.exports = async (req, res, next) => {
     if (member) {
       const roles = await ServerRoles.find({ id: { $in: member.roles } }, { _id: 0 }).select('order').lean();
       let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
-      if (recipientHighestRolePosition <= req.highestRolePosition) {
+      if (recipientHighestRolePosition <= req.member.highestRolePosition) {
         return res
           .status(403)
           .json({ message: "Your Role priority is the same or lower than the recipient." });

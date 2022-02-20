@@ -2,16 +2,18 @@ import { ChannelType } from "gm";
 import socketio from "socket.io";
 import { CacheUser } from "./cache/User.cache";
 import { OAuth2Client } from 'google-auth-library';
+import { ServerMemberCache } from "./cache/ServerMember.cache";
 
 declare global {
   namespace Express {
     export interface Request {
       io: socketio.Server,
       userIP: string,
-      user: Partial<CacheUser> & {id: string},
+      user: Partial<CacheUser> & {_id: string, id: string},
       uploadFile: uploadFile,
       message_id: string,
       channel: Channel,
+      member: ServerMemberCache
       session: any
       permErrorMessage?: string,
       server: Server

@@ -4,7 +4,7 @@ import { CHANNEL_CREATED } from "../../ServerEventNames";
 import { Request, Response, Router } from 'express';
 
 import flake from '../../utils/genFlakeId';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import { authenticate } from '../../middlewares/authenticate';
 
 

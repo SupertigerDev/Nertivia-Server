@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { FilterQuery } from 'mongoose';
 import { authenticate } from '../../middlewares/authenticate';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
 import rateLimit from '../../middlewares/rateLimit';
 import {MessageReaction, MessageReactions} from '../../models/MessageReactions';
@@ -11,7 +11,7 @@ export const reactionGet = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId/reactions").get(
     authenticate({allowBot: true}),
     rateLimit({name: 'message_react_users', expire: 60, requestsLimit: 120 }),
-    channelVerification,
+    channelVerify,
     disAllowBlockedUser,
     route
   );  

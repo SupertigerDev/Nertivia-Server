@@ -54,7 +54,7 @@ module.exports = async (req, res, next) => {
   // higher role should have higher priority
   const isCreator = req.server.creator === req.user._id
   if (!isCreator) {
-    if (req.highestRolePosition >= role.order) {
+    if (req.member.highestRolePosition >= role.order) {
       return res
       .status(403)
       .json({ message: "Your Role priority is too low to perfom this action." });

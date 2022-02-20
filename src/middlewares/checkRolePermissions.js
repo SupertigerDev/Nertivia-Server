@@ -18,11 +18,11 @@ module.exports = function (name, flag, sendError = true) {
       return next();
     }
 
-    if (req.permissions === undefined) {
+    if (req.member.permissions === undefined) {
       sendErrorMessage(req, res, `Missing permission! (${name})`, sendError, next)
       return;
     }
-    if (containsPerm(req.permissions, flag | ADMIN)) {
+    if (containsPerm(req.member.permissions, flag | ADMIN)) {
       return next();
     } else {
       sendErrorMessage(req, res, `Missing permission! (${name})`, sendError, next)

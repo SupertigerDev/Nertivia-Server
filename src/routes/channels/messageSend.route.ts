@@ -2,7 +2,7 @@ import { Request, Response, Router } from 'express';
 
 import { authenticate } from '../../middlewares/authenticate';
 import channelRateLimit from '../../middlewares/channelRateLimit';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import checkRolePermissions from '../../middlewares/checkRolePermissions';
 import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
 import rateLimit from '../../middlewares/rateLimit';
@@ -25,7 +25,7 @@ export const messageSend = (Router: Router) => {
     authenticate({allowBot: true}),
     messagePolicy.post,
     rateLimit({name: 'message_send', expire: 20, requestsLimit: 15 }),
-    channelVerification,
+    channelVerify,
     channelRateLimit,
     disAllowBlockedUser,
     serverChannelPermissions('send_message', true),

@@ -2,14 +2,14 @@ import { Request, Response, Router } from 'express';
 import { Messages } from '../../models/Messages'
 
 import { authenticate } from '../../middlewares/authenticate';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import rateLimit from '../../middlewares/rateLimit';
 
 export const messageGet = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId").get(
     authenticate({allowBot: true}),
     rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
-    channelVerification,
+    channelVerify,
     route
   );
 }

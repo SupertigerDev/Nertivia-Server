@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 
 import { authenticate } from '../../middlewares/authenticate';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
 import rateLimit from '../../middlewares/rateLimit';
 
@@ -14,7 +14,7 @@ export const messageUpdate = (Router: Router) => {
     authenticate({allowBot: true}),
     messagePolicy.update,
     rateLimit({ name: 'message_update', expire: 20, requestsLimit: 15 }),
-    channelVerification,
+    channelVerify,
     disAllowBlockedUser,
     route
   );

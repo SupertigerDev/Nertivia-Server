@@ -1,7 +1,7 @@
 import { Request, Router } from 'express';
 import { Response } from 'express';
 import { authenticate } from '../../middlewares/authenticate';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import rateLimit from '../../middlewares/rateLimit';
 import {Messages} from '../../models/Messages'
 import { MESSAGE_BUTTON_CLICKED } from '../../ServerEventNames';
@@ -17,7 +17,7 @@ interface ResponseObject {
 export const buttonClicked = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId/buttons/:buttonId").post(
     authenticate({allowBot: true}),
-    channelVerification,
+    channelVerify,
     rateLimit({name: 'message_button_clicked', expire: 60, requestsLimit: 300 }),
     route
   );

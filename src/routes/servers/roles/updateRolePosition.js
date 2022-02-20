@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
   // less = higher priority
   // higher = less priority
   if (!isCreator) {
-    if (order <= req.highestRolePosition) {
+    if (order <= req.member.highestRolePosition) {
       return res
       .status(403)
       .json({ message: "Your Role priority is too low to perfom this action." });

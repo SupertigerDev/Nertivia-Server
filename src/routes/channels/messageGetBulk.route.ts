@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 import { Request, Response, Router } from 'express';
 import { authenticate } from '../../middlewares/authenticate';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import rateLimit from '../../middlewares/rateLimit';
 import {MessageReactions} from '../../models/MessageReactions';
 
@@ -11,7 +11,7 @@ export const messageGetBulk = (Router: Router) => {
   Router.route("/:channelId/messages").get(
     authenticate({allowBot: true}),
     rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
-    channelVerification,
+    channelVerify,
     route
   );
   

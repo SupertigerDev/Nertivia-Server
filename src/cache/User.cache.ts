@@ -7,7 +7,7 @@ export type CacheUser = User & {
   googleDriveCredentials?: any
 }
 
-type PartialUser = Partial<CacheUser> & {id: string};
+type PartialUser = Partial<CacheUser> & {_id: string, id: string};
 interface AddConnectedUserOpts {
   user: PartialUser;
   socketId: string
@@ -68,6 +68,7 @@ export async function updateUser(userId: string, update: Partial<CacheUser>) {
   multi.expire(userKey, USER_EXPIRE)
   await multi.exec()
 }
+
 export async function removeUser(userId: string) {
   const userKey = keys.authenticatedUserString(userId);
   await redis.del(userKey)

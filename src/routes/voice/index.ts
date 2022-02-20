@@ -1,6 +1,6 @@
 import { Router } from "express";
 const { authenticate } = require("../../middlewares/authenticate");
-import { channelVerification } from "../../middlewares/ChannelVerification";
+import { channelVerify } from "../../middlewares/channelVerify.middleware";
 
 import rateLimit from "../../middlewares/rateLimit";
 
@@ -12,10 +12,10 @@ const VoiceRouter = Router();
 
 
 // Join Call
-VoiceRouter.route("/channels/:channelID").post(
+VoiceRouter.route("/channels/:channelId").post(
   authenticate({allowBot: true}),
   rateLimit({name: 'join_voice', expire: 20, requestsLimit: 15 }),
-  channelVerification,
+  channelVerify,
   // checkRolePermissions('Send Message', permissions.roles.SEND_MESSAGES),
   joinCall
 );

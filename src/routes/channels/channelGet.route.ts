@@ -1,11 +1,11 @@
 import { Request, Response, Router } from "express";
 import { authenticate } from "../../middlewares/authenticate";
-import { channelVerification } from "../../middlewares/ChannelVerification";
+import { channelVerify } from "../../middlewares/channelVerify.middleware";
 
 export function channelGet(Router: Router) {
   Router.route("/:channelId").get(
     authenticate({allowBot: true}),
-    channelVerification,
+    channelVerify,
     route
   );
 };

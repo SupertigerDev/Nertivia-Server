@@ -6,7 +6,7 @@ import { Request, Response, Router } from 'express';
 import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { authenticate } from '../../middlewares/authenticate';
 import rateLimit from '../../middlewares/rateLimit';
-import { channelVerification } from '../../middlewares/ChannelVerification';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
 import checkRolePermissions from '../../middlewares/checkRolePermissions';
 import permissions from '../../utils/rolePermConstants';
@@ -17,7 +17,7 @@ export function messageDelete(Router: Router) {
   Router.route("/:channelId/messages/:messageId").delete(
     authenticate({allowBot: true}),
     rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
-    channelVerification,
+    channelVerify,
     disAllowBlockedUser,
     checkRolePermissions('Admin', permissions.roles.ADMIN, false),
     route

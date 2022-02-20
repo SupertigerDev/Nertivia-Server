@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { authenticate } from "../../middlewares/authenticate";
-import { channelVerification } from "../../middlewares/ChannelVerification";
+import { channelVerify } from "../../middlewares/channelVerify.middleware";
 import checkRolePermissions from "../../middlewares/checkRolePermissions";
 import disAllowBlockedUser from "../../middlewares/disAllowBlockedUser";
 import rateLimit from "../../middlewares/rateLimit";
@@ -13,7 +13,7 @@ export const channelShowTyping = (Router: Router) => {
   Router.route("/:channelId/typing").post(
     authenticate({allowBot: true}),
     rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
-    channelVerification,
+    channelVerify,
     disAllowBlockedUser,
     serverChannelPermissions('send_message', true),
     checkRolePermissions('Send Message', permissions.roles.SEND_MESSAGES),
