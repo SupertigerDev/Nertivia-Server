@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { addUserToVoice, getConnectedUserBySocketID, getUserInVoiceByUserId } from "../../newRedisWrapper";
 import { USER_CALL_JOINED } from "../../ServerEventNames";
-import { getIOInstance } from "../../socket/instance";
+import { getIOInstance } from "../../socket/socket";
 
 export async function joinCall (req: Request, res: Response, next: NextFunction) {
   const socketId = req.body.socketId;

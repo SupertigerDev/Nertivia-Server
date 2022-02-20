@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {getUserInVoiceByUserId, removeUserFromVoice } from "../../newRedisWrapper";
 import { USER_CALL_LEFT } from "../../ServerEventNames";
-import { getIOInstance } from "../../socket/instance";
+import { getIOInstance } from "../../socket/socket";
 
 export async function leaveCall (req: Request, res: Response, next: NextFunction) {
 

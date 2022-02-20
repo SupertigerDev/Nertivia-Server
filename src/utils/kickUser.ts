@@ -1,6 +1,6 @@
 import { deleteSession } from "../newRedisWrapper";
 import { AUTHENTICATION_ERROR } from "../ServerEventNames";
-import { getIOAdapter, getIOInstance } from "../socket/instance";
+import { getIOAdapter, getIOInstance } from "../socket/socket";
 const redis = require("../redis");
 
 // excludeSocketID: emit to everyone BUT excludeSocketID

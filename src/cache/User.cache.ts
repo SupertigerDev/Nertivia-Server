@@ -14,6 +14,10 @@ interface AddConnectedUserOpts {
   presence: number,
   customStatus: string,
 }
+interface Presence {
+  status: number;
+  custom: string;
+}
 
 // 1 hour.
 const USER_EXPIRE = 60*60
@@ -24,6 +28,7 @@ export async function addConnectedUser(opts: AddConnectedUserOpts) {
   const multi = redis.multi();
 
   const userKey = keys.authenticatedUserString(opts.user.id);
+  const userPresenceKey = keys.userPresenceString(opts.user.id);
   const socketIdsKey = keys.userSocketIdSet(opts.user.id)
   const socketUserIdKey = keys.socketUserIdString(opts.socketId);
 
@@ -32,8 +37,23 @@ export async function addConnectedUser(opts: AddConnectedUserOpts) {
   multi.expire(userKey, USER_EXPIRE)
   multi.sAdd(socketIdsKey, opts.socketId);
   multi.set(socketUserIdKey, opts.user.id);
+  multi.set(userPresenceKey, JSON.stringify({
+    status: opts.presence,
+    custom: opts.customStatus
+  }));
   await multi.exec();
 }
+
+
+
+export async function updatePresence(userId: string, update: Partial<Presence>) {
+  const key = keys.userPresenceString(userId);
+  const presenceStringified = await redis.get(key);
+  const presence = JSON.parse(presenceStringified || "{}");
+
+  await redis.set(key, JSON.stringify({...presence, ...update}));
+}
+
 
 type ReturnType<T> = [T | null, string | null];
 export async function getUser(userId: string): Promise<ReturnType<PartialUser>> {

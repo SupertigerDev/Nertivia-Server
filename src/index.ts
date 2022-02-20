@@ -3,7 +3,7 @@ dotenv.config();
 import cluster from 'cluster';
 const numCPUs = require('os').cpus().length;
 import * as redis from './common/redis';
-import { getIOInstance } from "./socket/instance";
+import { getIOInstance } from "./socket/socket";
 import app from './app';
 import mongoose from "mongoose";
 import { Log } from './Log';

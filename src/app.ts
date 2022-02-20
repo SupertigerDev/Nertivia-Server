@@ -1,4 +1,4 @@
-import {getIOInstance} from './socket/instance'
+import {getIOInstance} from './socket/socket'
 
 import express from "express";
 import http from "http";

@@ -1,6 +1,10 @@
 
 export const authenticatedUserString = (userId: string) => `user:${userId}`;
 
+export const userPresenceString = (userId: string) => `userPresence:${userId}`;
+
+export const userActivityStatusString = (userId: string) => `userActivityStatus:${userId}`;
+
 // unique array of socket ids by user id.
 export const userSocketIdSet = (userId: string) => `userSocketIds:${userId}`;
 

@@ -5,7 +5,7 @@ import { MessageQuote } from '../models/MessageQuotes';
 import { Message, Messages } from '../models/Messages';
 import { User } from '../models/Users';
 import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../ServerEventNames';
-import { getIOInstance } from '../socket/instance';
+import { getIOInstance } from '../socket/socket';
 import { sendPushNotification } from '../utils/sendPushNotification';
 import { createURLEmbed } from '../common/URLEmbed';
 import { zip } from '../utils/zip';

@@ -16,7 +16,7 @@ const redis = require("./redis");
 // const sio = require("socket.getIOInstance()");
 import {Socket} from 'socket.io'
 
-import { getIOInstance } from "./socket/instance";
+import { getIOInstance } from "./socket/socket";
 import getUsrDetails from './utils/getUserDetails';
 import { AUTHENTICATED, AUTHENTICATION_ERROR, USER_CALL_LEFT, USER_PROGRAM_ACTIVITY_CHANGED, VOICE_RETURN_SIGNAL_RECEIVED, VOICE_SIGNAL_RECEIVED } from "./ServerEventNames";
 
