@@ -3,6 +3,7 @@ import socketIO from "socket.io";
 
 import { createAdapter, RedisAdapter } from '@socket.io/redis-adapter';
 import * as redis from '../common/redis';
+import { onConnection } from "./handlers/connection.event";
 
 let IO_INSTANCE: socketIO.Server | undefined = undefined;
 
@@ -19,6 +20,8 @@ export function getIOInstance(server?: Server) {
     }
   })
   IO_INSTANCE.adapter(createAdapter(redis.client, redis.client.duplicate()))
+
+  IO_INSTANCE.on("connection", onConnection)
 
   return IO_INSTANCE;
 }

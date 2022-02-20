@@ -62,11 +62,6 @@ function start() {
 		if (isListening) return;
 		Log.info("Starting server...");
 		const server = app();
-
-		const socketIO = require('./socketIO');
-
-		getIOInstance().on("connection", socketIO);
-
 		const port = process.env.PORT || 8000;
 		server.listen(port, function () {
 			Log.info("Listening on port", port);
