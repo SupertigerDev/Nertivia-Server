@@ -1,4 +1,4 @@
-enum colorCodes {
+enum color {
   Reset = "\x1b[0m",
   Bright = "\x1b[1m",
   Dim = "\x1b[2m",
@@ -42,13 +42,13 @@ function numberHandler(value: number) {
 
 export const Log = {
   info(...args: any) {
-    console.log(`${colorCodes.FgCyan}[${getTime()}] ${colorCodes.FgGreen}[INFO]:${colorCodes.Reset}`, ...args);
+    console.log(`${color.FgCyan}[${getTime()}] ${color.FgGreen}[INFO]:${color.Reset}`, ...args);
   },
   warn(...args: any) {
-    console.log(`${colorCodes.FgCyan}[${getTime()}] ${colorCodes.FgYellow}[INFO]:${colorCodes.Reset}`, ...args);
+    console.log(`${color.FgCyan}[${getTime()}] ${color.FgYellow}[INFO]:${color.Reset}`, ...args);
 
   },
   error(...args: any) {
-    console.log(`${colorCodes.FgCyan}[${getTime()}] ${colorCodes.FgRed}[INFO]:${colorCodes.Reset}`, ...args);
+    console.log(`${color.FgCyan}[${getTime()}] ${color.FgRed}[INFO]:${color.Reset}`, ...args);
   }
 }
