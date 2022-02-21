@@ -1,4 +1,3 @@
-const events = require("./socketEvents/index");
 const emitUserStatus = require("./socketController/emitUserStatus");
 const emitToAll = require("./socketController/emitToAll");
 import { Users } from "./models/Users";
@@ -405,7 +404,7 @@ module.exports = async client => {
   });
 
   client.on("notification:dismiss", data =>
-    events.notificationDismiss(data, client, getIOInstance())
+    // events.notificationDismiss(data, client, getIOInstance())
   );
 
   client.on("programActivity:set", async data => {

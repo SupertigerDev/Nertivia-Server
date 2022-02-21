@@ -18,6 +18,7 @@ interface Presence {
   status: number;
   custom: string;
 }
+type ReturnType<T> = [T | null, string | null];
 
 // 1 hour.
 const USER_EXPIRE = 60*60
@@ -45,6 +46,14 @@ export async function addConnectedUser(opts: AddConnectedUserOpts) {
 }
 
 
+export async function getUserBySocketId(socketId: string): Promise<ReturnType<PartialUser>> {
+  const key = keys.socketUserIdString(socketId);
+  const userId = await redis.get(key);
+  if (!userId) return [null, "User is not connected."];
+  return await getUser(userId);
+}
+
+
 
 export async function updatePresence(userId: string, update: Partial<Presence>) {
   const key = keys.userPresenceString(userId);
@@ -55,7 +64,6 @@ export async function updatePresence(userId: string, update: Partial<Presence>) 
 }
 
 
-type ReturnType<T> = [T | null, string | null];
 export async function getUser(userId: string): Promise<ReturnType<PartialUser>> {
   // check in cache
   const userKey = keys.authenticatedUserString(userId);
