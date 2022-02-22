@@ -3,6 +3,9 @@ import { User } from "../models/Users";
 import { getUserByIdUnsafe } from "../services/Users";
 import * as keys from './keys.cache';
 
+import {decodeToken} from '../utils/JWT';
+import * as IPAddress from '../services/IPAddress';
+
 export type CacheUser = User & {
   googleDriveCredentials?: any
 }
@@ -119,3 +122,57 @@ export async function removeUser(userId: string) {
 
 //   return multiWrapper(multi)
 // }
+
+
+interface AuthOptions {
+  userIP?: string
+  token?: string
+  allowBot?: boolean,
+  skipTerms?: boolean
+}
+
+const defaultAuthOptions: AuthOptions = {
+  allowBot: false,
+  skipTerms: false
+}
+
+export async function authenticate (_opts?: AuthOptions): Promise<ReturnType<PartialUser>> {
+  const opts = {...defaultAuthOptions, ..._opts};
+    const token = process.env.JWT_HEADER + opts.token;
+    const tokenData = await decodeToken(token).catch(() => {});
+    if (!tokenData) {
+      return [null, "Invalid Token."]
+    }
+    // Checks in the cache and then the database.
+    const [user, error] = await getUser(tokenData.id)
+    if (error || !user) {
+      return [null, error];
+    }
+    const currentPasswordVersion = user.passwordVersion || 0;
+    if (tokenData.passwordVersion !== currentPasswordVersion) {
+      return[null, "Invalid Token."]
+    }
+
+    const isBanned = await checkIPBanned(user.id, opts.userIP!, user.ip);
+    if (isBanned) {
+      return [null, "IP is banned."];
+    }
+    if (user.bot && !opts.allowBot) {
+      return [null, "Bots are not allowed to access this."]
+    }
+    if (!user.bot && !opts.skipTerms && !user.readTerms) {
+      return [null, "You must accept the updated privacy policy and the TOS before continuing."];
+    }
+    return [user, null];
+}
+
+// currentIP: latest IP.
+// savedIP: ip in the database.
+async function checkIPBanned(userId: string, currentIP: string, savedIP?: string) {
+  if (currentIP === savedIP) return false;
+  const isBanned = await IPAddress.checkBanned(currentIP);
+  if (isBanned) return true;
+  await IPAddress.updateAddress(userId, currentIP);
+  await updateUser(userId, {ip: currentIP});
+  return false;
+}

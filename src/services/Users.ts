@@ -1,5 +1,4 @@
 import { Users } from "../models/Users"
-
 // this function should be used internally.
 export const getUserByIdUnsafe = (userId: string) => {
   // todo: add unsafe fields.

@@ -403,9 +403,9 @@ module.exports = async client => {
     }
   });
 
-  client.on("notification:dismiss", data =>
-    // events.notificationDismiss(data, client, getIOInstance())
-  );
+  // client.on("notification:dismiss", data =>
+  //   // events.notificationDismiss(data, client, getIOInstance())
+  // );
 
   client.on("programActivity:set", async data => {
     const [user, error] = await getConnectedUserBySocketID(client.id);

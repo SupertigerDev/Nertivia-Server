@@ -55,7 +55,7 @@ botsRouter.route("/:bot_id").delete(
 
 // get bot. token only visable for creator. (SAFE TO USE FOR OTHER USERS.)
 botsRouter.route("/:bot_id").get(
-  authenticate({allowInvalid: true}),
+  authenticate({optional: true}),
   getBot
 );
 

@@ -14,9 +14,9 @@ import * as MessageQuotes from './MessageQuotes';
 import { insertNotification } from './Notifications';
 import { updateMemberLastSeen } from './ServerMembers';
 import { getUsersByIds } from './Users';
+import { OneOf } from '../utils/OneOf';
 
 
-type OneOf<T extends Record<string, unknown>> = { [K in keyof T]: Record<K, T[K]> & { [U in Exclude<keyof T, K>]?: T[U] } }[keyof T]
 
 
 const messageSelect = 'creator message messageID quotes';

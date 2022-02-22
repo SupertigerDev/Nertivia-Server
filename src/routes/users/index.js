@@ -47,7 +47,7 @@ MainUserRouter.route("/block").delete(
 
 // User agreeing to the TOS and the privacy policy
 MainUserRouter.route("/agreeingPolicies").post(
-  authenticate({allowNonTerms: true}),
+  authenticate({skipTerms: true}),
   require("./agreeingPolicies")
 );
 
