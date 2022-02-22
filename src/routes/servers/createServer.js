@@ -5,7 +5,7 @@ import {Channels, ChannelType} from "../../models/Channels";
 import {Servers} from "../../models/Servers";
 import { Users } from "../../models/Users";
 import { ServerRoles } from "../../models/ServerRoles";
-import { SERVER_JOINED, SERVER_ROLE_CREATED } from "../../ServerEventNames";
+import { SERVER_JOINED, SERVER_ROLE_CREATED, SERVER_MEMBER_ADDED  } from "../../ServerEventNames";
 const rolePerms = require("../../utils/rolePermConstants");
 const { AddFCMUserToServer } = require("../../utils/sendPushNotification");
 
