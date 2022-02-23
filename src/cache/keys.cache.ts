@@ -20,3 +20,5 @@ export const serverChannelString = (channelId: string) => `serverChannel:${chann
 export const serverMemberHash = (serverId: string) => `serverMember:${serverId}`;
 
 export const serverString = (serverId: string) => `server:${serverId}`;
+
+export const routeRateLimitString = (name: string, id: string) => `routeRateLimit:${id}-${name}`;
