@@ -5,7 +5,7 @@ import { MESSAGE_DELETED } from '../../ServerEventNames';
 import { Request, Response, Router } from 'express';
 import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { authenticate } from '../../middlewares/authenticate';
-import rateLimit from '../../middlewares/rateLimit';
+import {rateLimit} from '../../middlewares/rateLimit.middleware';
 import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
 import checkRolePermissions from '../../middlewares/checkRolePermissions';

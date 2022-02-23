@@ -2,7 +2,7 @@ import { Router } from "express";
 const { authenticate } = require("../../middlewares/authenticate");
 import { channelVerify } from "../../middlewares/channelVerify.middleware";
 
-import rateLimit from "../../middlewares/rateLimit";
+import {rateLimit} from "../../middlewares/rateLimit.middleware";
 
 
 import {joinCall} from './join'

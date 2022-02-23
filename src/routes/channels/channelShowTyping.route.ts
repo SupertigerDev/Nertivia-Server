@@ -3,7 +3,7 @@ import { authenticate } from "../../middlewares/authenticate";
 import { channelVerify } from "../../middlewares/channelVerify.middleware";
 import checkRolePermissions from "../../middlewares/checkRolePermissions";
 import disAllowBlockedUser from "../../middlewares/disAllowBlockedUser";
-import rateLimit from "../../middlewares/rateLimit";
+import {rateLimit} from "../../middlewares/rateLimit.middleware";
 import { USER_TYPING } from "../../ServerEventNames";
 const serverChannelPermissions = require('../../middlewares/serverChannelPermissions');
 import permissions from "../../utils/rolePermConstants";

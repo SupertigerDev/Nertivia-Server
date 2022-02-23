@@ -4,8 +4,7 @@ const MainServerRouter = require("express").Router();
 const { authenticate } = require("../../middlewares/authenticate");
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
-const rateLimit = require('../../middlewares/rateLimit');
-
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
 // Policies
 const UserPresentVerification = require ('../../middlewares/UserPresentVerification')
 const serverPolicy = require("../../policies/ServerPolicies");

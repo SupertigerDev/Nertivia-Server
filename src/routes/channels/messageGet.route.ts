@@ -3,7 +3,7 @@ import { Messages } from '../../models/Messages'
 
 import { authenticate } from '../../middlewares/authenticate';
 import { channelVerify } from '../../middlewares/channelVerify.middleware';
-import rateLimit from '../../middlewares/rateLimit';
+import {rateLimit} from '../../middlewares/rateLimit.middleware';
 
 export const messageGet = (Router: Router) => {
   Router.route("/:channelId/messages/:messageId").get(

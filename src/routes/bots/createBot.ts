@@ -13,6 +13,6 @@ export default async function createBot(req: Request, res: Response) {
   }
 
 
-  const newBot = await Users.create({ username: botUsername, bot: true, createdBy: req.user._id, ip: req.userIP })
+  const newBot = await Users.create({ username: botUsername, bot: true, createdBy: req.user._id, ip: req.userIp })
   res.send(newBot)
 }

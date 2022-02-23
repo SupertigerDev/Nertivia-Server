@@ -1,11 +1,11 @@
 import { Request, Response, Router } from 'express';
 
 import { authenticate } from '../../middlewares/authenticate';
-import channelRateLimit from '../../middlewares/channelRateLimit';
+import {channelRateLimit} from '../../middlewares/channelRateLimit';
 import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import checkRolePermissions from '../../middlewares/checkRolePermissions';
 import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
-import rateLimit from '../../middlewares/rateLimit';
+import {rateLimit} from '../../middlewares/rateLimit.middleware';
 
 import messagePolicy from '../../policies/messagePolicies';
 import serverChannelPermissions from '../../middlewares/serverChannelPermissions'

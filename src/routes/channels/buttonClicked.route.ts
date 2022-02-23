@@ -2,7 +2,7 @@ import { Request, Router } from 'express';
 import { Response } from 'express';
 import { authenticate } from '../../middlewares/authenticate';
 import { channelVerify } from '../../middlewares/channelVerify.middleware';
-import rateLimit from '../../middlewares/rateLimit';
+import {rateLimit} from '../../middlewares/rateLimit.middleware';
 import {Messages} from '../../models/Messages'
 import { MESSAGE_BUTTON_CLICKED } from '../../ServerEventNames';
 

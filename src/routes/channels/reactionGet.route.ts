@@ -3,7 +3,7 @@ import { FilterQuery } from 'mongoose';
 import { authenticate } from '../../middlewares/authenticate';
 import { channelVerify } from '../../middlewares/channelVerify.middleware';
 import disAllowBlockedUser from '../../middlewares/disAllowBlockedUser';
-import rateLimit from '../../middlewares/rateLimit';
+import {rateLimit} from '../../middlewares/rateLimit.middleware';
 import {MessageReaction, MessageReactions} from '../../models/MessageReactions';
 
 

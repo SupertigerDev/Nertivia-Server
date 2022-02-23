@@ -14,7 +14,7 @@ export function authenticate (opts?: Options) {
     const token = req.headers.authorization;
     const [user, error] = await UserCache.authenticate({
       token,
-      userIP: req.userIP,
+      userIp: req.userIp,
       allowBot: opts?.allowBot,
       skipTerms: opts?.skipTerms,
     })

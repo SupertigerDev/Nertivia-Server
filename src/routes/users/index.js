@@ -2,7 +2,7 @@ const MainUserRouter = require("express").Router();
 
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
-const rateLimit = require("../../middlewares/rateLimit");
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
 
 // Policies
 const authPolicy = require("../../policies/authenticationPolicies");
@@ -57,7 +57,7 @@ MainUserRouter.route("/:user_id?").get(authenticate({allowBot: true}), require("
 // Register
 MainUserRouter.route("/register").post(
   authPolicy.register,
-  rateLimit({name: 'register', expire: 600, requestsLimit: 5, useIP: true, nextIfInvalid: true }),
+  rateLimit({name: 'register', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
   // show captcha 
   forceCaptcha,
   reCaptchaPolicy,
@@ -73,7 +73,7 @@ MainUserRouter.route("/register/confirm").post(
 // Login
 MainUserRouter.route("/login").post(
   authPolicy.login,
-  rateLimit({name: 'login', expire: 600, requestsLimit: 5, useIP: true, nextIfInvalid: true }),
+  rateLimit({name: 'login', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
   reCaptchaPolicy,
   require("./login")
 );
@@ -86,7 +86,7 @@ MainUserRouter.route("/delete-account").delete(
 // Reset password request
 MainUserRouter.route("/reset/request").post(
   authPolicy.resetRequest,
-  rateLimit({name: 'reset_password', expire: 600, requestsLimit: 5, useIP: true, nextIfInvalid: true }),
+  rateLimit({name: 'reset_password', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
   reCaptchaPolicy,
   require("./resetRequest")
 );

@@ -26,7 +26,7 @@ setInterval(async () => {
 
 
 // router.use('/*', async (req, res, next) => {
-//   const [count, err] = await ipRequestIncrement(req.userIP);
+//   const [count, err] = await ipRequestIncrement(req.userIp);
 //   if (count >= 150) {
 //     res.status(403).json({message: "You have been rate limited!"})
 //     return;

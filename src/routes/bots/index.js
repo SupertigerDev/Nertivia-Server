@@ -5,7 +5,7 @@ const { authenticate } = require("../../middlewares/authenticate");
 const UserPresentVerification = require("../../middlewares/UserPresentVerification");
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const { roles: {ADMIN} } = require("../../utils/rolePermConstants");
-const rateLimit = require('../../middlewares/rateLimit');
+import { rateLimit } from '../../middlewares/rateLimit.middleware';
 const UserPolicies = require('../../policies/UserPolicies');
 
 // routes

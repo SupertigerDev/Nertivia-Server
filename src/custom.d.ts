@@ -8,9 +8,10 @@ declare global {
   namespace Express {
     export interface Request {
       io: socketio.Server,
-      userIP: string,
+      userIp: string,
       user: Partial<CacheUser> & {_id: string, id: string},
       uploadFile: uploadFile,
+      rateLimited: boolean,
       message_id: string,
       channel: Channel,
       member: ServerMemberCache

@@ -125,7 +125,7 @@ export async function removeUser(userId: string) {
 
 
 interface AuthOptions {
-  userIP?: string
+  userIp?: string
   token?: string
   allowBot?: boolean,
   skipTerms?: boolean
@@ -153,7 +153,7 @@ export async function authenticate (_opts?: AuthOptions): Promise<ReturnType<Par
       return[null, "Invalid Token."]
     }
 
-    const isBanned = await checkIPBanned(user.id, opts.userIP!, user.ip);
+    const isBanned = await checkIPBanned(user.id, opts.userIp!, user.ip);
     if (isBanned) {
       return [null, "IP is banned."];
     }

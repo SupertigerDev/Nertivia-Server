@@ -1,8 +1,8 @@
 const checkRolePermissions = require("./checkRolePermissions");
-const rateLimit = require("./rateLimit");
+import { rateLimit } from "./rateLimit.middleware";
 const permissions = require('../utils/rolePermConstants');
 
-module.exports = function (req, res, next) {
+export function channelRateLimit (req, res, next) {
   if (!req.channel.rateLimit) {
     return next();
   }

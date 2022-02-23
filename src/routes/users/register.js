@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
 
 
   // check if ip is banned
-  const ipBanned = await BannedIPs.exists({ip: req.userIP});
+  const ipBanned = await BannedIPs.exists({ip: req.userIp});
   if (ipBanned) {
     return res
     .status(401)
@@ -61,7 +61,7 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  const newUser = new Users({ username, email: email.toLowerCase(), password, ip: req.userIP });
+  const newUser = new Users({ username, email: email.toLowerCase(), password, ip: req.userIp });
   const created = await newUser.save();
 
   if (process.env.DEV_MODE === "true") {

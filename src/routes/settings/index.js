@@ -4,11 +4,10 @@ const busboy = require("connect-busboy");
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
 import { GoogleDriveOAuth } from "../../middlewares/GoogleDriveOAuth";
+import {rateLimit} from '../../middlewares/rateLimit.middleware'
 
 // Policies
 const settingsPolicy = require("../../policies/settingsPolicies");
-const rateLimit = require("../../middlewares/rateLimit");
-
 // Change Status
 MainSettingsRouter.route("/status").post(
   authenticate({allowBot: true}),

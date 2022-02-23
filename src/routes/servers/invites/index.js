@@ -3,7 +3,7 @@ const MainInviteRouter = require("express").Router();
 // Middleware
 const { authenticate } = require("../../../middlewares/authenticate");
 const UserPresentVerification = require("../../../middlewares/UserPresentVerification");
-const rateLimit = require("../../../middlewares/rateLimit");
+import { rateLimit } from "../../../middlewares/rateLimit.middleware";
 
 const reCaptchaPolicy = require("../../../policies/reCaptchaPolicie");
 const forceCaptcha = require("../../../policies/forceCaptcha");
