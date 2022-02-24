@@ -64,7 +64,7 @@ interface Channel {
   name?: string
   type: ChannelType
   server_id?: string
-  channelID: string,
+  channelId: string,
   server: Server
   recipients: any[]
   rateLimit?: number

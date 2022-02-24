@@ -15,7 +15,7 @@ export enum ChannelType {
 export interface Channel {
   name: string,
   type: ChannelType,
-  channelID: string
+  channelId: string
   categoryId: string;
   visibility: boolean
   creator: any
@@ -35,7 +35,7 @@ const permissionsSchema = new Schema<Permissions>({
 
 const schema = new Schema<Channel>({
   name: {type: String},
-  channelID: { type: String, required: true },
+  channelId: { type: String, required: true },
   categoryId: {type: String, required: false},
   type: { type: Number, required: true, enums: [
     0, // DM Channel
