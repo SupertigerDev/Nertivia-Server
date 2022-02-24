@@ -31,7 +31,7 @@ interface User {
 }
 interface Message {
   message?: string;
-  channelId: string;
+  channelID: string;
   files?: Files[];
 }
 interface Files {
@@ -86,7 +86,7 @@ export async function sendDMPush(args: DMArgs) {
 
   const data: any = {
     username: args.sender.username,
-    channel_id: args.message.channelId,
+    channel_id: args.message.channelID,
     user_id: args.sender.id,
     message: contentBuilder(args.message),
     ...(args.sender.avatar && {avatar: args.sender.avatar})
@@ -103,7 +103,7 @@ export async function sendServerPush(args: ServerArgs) {
   if (!tokensArr.length) return; 
   const data: any = {
     username: args.sender.username,
-    channel_id: args.message.channelId,
+    channel_id: args.message.channelID,
     user_id: args.sender.id,
     server_id: args.channel.server.server_id,
     server_name: args.channel.server.name,

@@ -51,16 +51,16 @@ async function route (req: Request, res: Response) {
     });
 
   // create channel because it doesnt exist.
-  let channelId;
+  let channelID;
 
   if (channel) {
-    channelId = channel.channelId;
+    channelID = channel.channelID;
   } else {
-    channelId = flake.gen();
+    channelID = flake.gen();
   }
 
   let newChannel: any = await Channels.create({
-    channelId,
+    channelID,
     type: ChannelType.DM_CHANNEL,
     creator: req.user._id,
     recipients: [recipient._id],

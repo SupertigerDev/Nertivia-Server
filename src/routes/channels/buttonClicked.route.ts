@@ -27,7 +27,7 @@ async function route (req: Request, res: Response){
   const { channelId, messageId, buttonId } = req.params;
   
 
-  const message = await Messages.findOne({ channelId: channelId, messageID: messageId, "buttons.id": buttonId }).select("creator").populate("creator", "id");
+  const message = await Messages.findOne({ channelID: channelId, messageID: messageId, "buttons.id": buttonId }).select("creator").populate("creator", "id");
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;

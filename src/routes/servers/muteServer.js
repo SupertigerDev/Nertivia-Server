@@ -27,10 +27,10 @@ module.exports = async (req, res, next) => {
   );
 
   if (type === 2) {
-    const serverChannels = (await Channels.find({server_id: req.server.server_id}).select("channelId").lean()).map(c => c.channelId);
+    const serverChannels = (await Channels.find({server_id: req.server.server_id}).select("channelID").lean()).map(c => c.channelID);
 
     await Notifications.deleteOne({
-      channelId: {$in: serverChannels},
+      channelID: {$in: serverChannels},
       recipient: req.user.id
     });
   }

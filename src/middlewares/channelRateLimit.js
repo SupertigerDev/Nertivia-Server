@@ -10,6 +10,6 @@ export function channelRateLimit (req, res, next) {
     if (!req.permErrorMessage) {
       return next();
     }
-    rateLimit({name: 'message-' + req.channel.channelId, expire: req.channel.rateLimit, requestsLimit: 1})(req, res, next);
+    rateLimit({name: 'message-' + req.channel.channelID, expire: req.channel.rateLimit, requestsLimit: 1})(req, res, next);
   })
 }

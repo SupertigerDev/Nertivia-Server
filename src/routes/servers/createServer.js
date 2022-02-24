@@ -25,12 +25,12 @@ module.exports = async (req, res, next) => {
       message: "Reached the maximum limit of servers."
     });
 
-  const channelId = flake.gen();
+  const channelID = flake.gen();
   const serverID = flake.gen();
   const createServer = await Servers.create({
     name: name.trim(),
     creator: userDocID,
-    default_channel_id: channelId,
+    default_channel_id: channelID,
     server_id: serverID,
   });
 
@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
   const createChannel = await Channels.create({
     name: "General",
     type: ChannelType.SERVER_CHANNEL,
-    channelId: channelId,
+    channelID: channelID,
     server: createServer._id,
     server_id: serverID,
     lastMessaged: Date.now()

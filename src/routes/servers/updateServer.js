@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
   if (data && data.default_channel_id) {
     // check if channel id is in the server
     const checkChannel = await Channels.findOne({
-      channelId: data.default_channel_id,
+      channelID: data.default_channel_id,
       server: req.server._id
     });
     if (!checkChannel) {

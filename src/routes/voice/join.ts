@@ -20,10 +20,10 @@ export async function joinCall (req: Request, res: Response, next: NextFunction)
   if (req.channel.server) {
     data.serverId = req.channel.server.server_id
   }
-  await addUserToVoice(req.channel.channelId, req.user.id, data)
+  await addUserToVoice(req.channel.channelID, req.user.id, data)
   
   if (data.serverId) {
-    getIOInstance().in("server:" + data.serverId).emit(USER_CALL_JOINED, {channelId: req.channel.channelId, userId: req.user.id})
+    getIOInstance().in("server:" + data.serverId).emit(USER_CALL_JOINED, {channelId: req.channel.channelID, userId: req.user.id})
   }
   res.json({success: true})
 

@@ -66,7 +66,7 @@ export default async function join(server: any, user: any, socketID: string | un
   let serverChannels = await Channels.find({
     server: server._id
   })
-  .select("name type channelId categoryId server server_id lastMessaged rateLimit icon")
+  .select("name type channelID categoryId server server_id lastMessaged rateLimit icon")
   .lean();
 
   const createServerObj = Object.assign({}, server);
@@ -114,7 +114,7 @@ export default async function join(server: any, user: any, socketID: string | un
   // send join message
 
   const messageCreate = new Messages({
-    channelId: server.default_channel_id,
+    channelID: server.default_channel_id,
     creator: user._id,
     messageID: "placeholder",
     type: 1 // join message
@@ -136,11 +136,11 @@ export default async function join(server: any, user: any, socketID: string | un
     message: messageCreated
   });
 
-  await Channels.updateOne({ channelId: server.default_channel_id }, { $set: {
+  await Channels.updateOne({ channelID: server.default_channel_id }, { $set: {
     lastMessaged: Date.now()
   }})
   
-  const defaultChannel = serverChannels.find((c:any) => c.channelId === server.default_channel_id);
+  const defaultChannel = serverChannels.find((c:any) => c.channelID === server.default_channel_id);
   if (defaultChannel) {
     defaultChannel.server = server;
   }
@@ -151,7 +151,7 @@ export default async function join(server: any, user: any, socketID: string | un
   sendServerPush({
     channel: defaultChannel,
     message: {
-      channelId: server.default_channel_id,
+      channelID: server.default_channel_id,
       message: user.username + " joined the server",
     },
     sender: user,

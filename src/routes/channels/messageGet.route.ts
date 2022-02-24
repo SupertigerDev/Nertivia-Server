@@ -37,7 +37,7 @@ async function route (req: Request, res: Response){
   // Get message
   let message = await Messages.findOne(
     {
-      channelId: channelId,
+      channelID: channelId,
       messageID: messageId
     },
     "-__v -_id"

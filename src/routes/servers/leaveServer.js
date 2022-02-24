@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
   }
 
   const channels = await Channels.find({ server: req.server._id }).lean();
-  const channelIDArray = channels.map(c => c.channelId)
+  const channelIDArray = channels.map(c => c.channelID)
 
   // Leave server
   await deleteFCMFromServer(req.server.server_id, req.user.id);
@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
   // delete all leavers notification from the server 
   if (channelIDArray) {
     await Notifications.deleteMany({
-      channelId: { $in: channelIDArray },
+      channelID: { $in: channelIDArray },
       recipient: req.user.id
     });
   }
@@ -77,7 +77,7 @@ module.exports = async (req, res, next) => {
 
   // send leave message
   const messageCreate = new Messages({
-    channelId: req.server.default_channel_id,
+    channelID: req.server.default_channel_id,
     creator: req.user._id,
     messageID: "placeholder",
     type: 2 // leave message
@@ -102,7 +102,7 @@ module.exports = async (req, res, next) => {
     message: messageCreated
   });
 
-  const defaultChannel = await Channels.findOneAndUpdate({ channelId: req.server.default_channel_id }, { $set: {
+  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, { $set: {
     lastMessaged: Date.now()
   }}).lean();
 
@@ -110,7 +110,7 @@ module.exports = async (req, res, next) => {
   sendServerPush({
     channel: defaultChannel,
     message: {
-      channelId: defaultChannel.channelId,
+      channelID: defaultChannel.channelID,
       message: "left the server",
     },
     sender: user,

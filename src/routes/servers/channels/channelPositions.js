@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
     const element = channel_position[index];
     if (element.length >= 50 || typeof element !== "string") {
       return res.status(403).json({
-        message: 'Invalid channelId format.',
+        message: 'Invalid channelID format.',
       })
     } 
   }
@@ -27,7 +27,7 @@ module.exports = async (req, res, next) => {
     const categoryId = category.id;
     const channelId = category.channelId;
 
-    const channel = await Channels.findOne({channelId: channelId, server_id: req.server.server_id, type: ChannelType.SERVER_CHANNEL}).select("channelId");
+    const channel = await Channels.findOne({channelID: channelId, server_id: req.server.server_id, type: ChannelType.SERVER_CHANNEL}).select("channelID");
     if (!channel) {
       return res.status(404).json({
         message: 'Channel not found.',
@@ -35,7 +35,7 @@ module.exports = async (req, res, next) => {
     }
 
     if (categoryId) {
-      const categoryChannel = await Channels.findOne({channelId: categoryId, server_id: req.server.server_id, type: ChannelType.SERVER_CATEGORY}).select("channelId");
+      const categoryChannel = await Channels.findOne({channelID: categoryId, server_id: req.server.server_id, type: ChannelType.SERVER_CATEGORY}).select("channelID");
 
       if (!categoryChannel) {
         return res.status(404).json({

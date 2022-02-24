@@ -10,26 +10,26 @@ const redis = require("../../../redis");
 module.exports = async (req, res, next) => {
 
   const server = req.server;
-  const channelId = req.params.channelId;
+  const channelID = req.params.channelId;
   // check if its default channel
-  if (req.server.default_channel_id.toString() === channelId.toString()) {
+  if (req.server.default_channel_id.toString() === channelID.toString()) {
     return res.status(403).json({ message: "Cannot delete default channel." });
   }
   try {
     await MessageQuotes.deleteMany({quotedChannel: req.channel._id})
-    await Notifications.deleteMany({ channelId });
-    await Channels.deleteOne({ channelId });
+    await Notifications.deleteMany({ channelID });
+    await Channels.deleteOne({ channelID });
     if (req.channel.type === ChannelType.SERVER_CATEGORY) {
-      await Channels.updateMany({server_id: server.server_id, categoryId: channelId}, {$unset: {categoryId: 1}})
+      await Channels.updateMany({server_id: server.server_id, categoryId: channelID}, {$unset: {categoryId: 1}})
     }
-    await Messages.deleteMany({ channelId });
-    await deleteServerChannel(channelId);
+    await Messages.deleteMany({ channelID });
+    await deleteServerChannel(channelID);
     const io = req.io;
     io.in("server:" + req.server.server_id).emit(SERVER_CHANNEL_DELETED, {
-      channelId,
+      channelID,
       server_id: server.server_id
     });
-    res.json({ channelId, server_id: server.server_id });
+    res.json({ channelID, server_id: server.server_id });
   } catch (e) {
     return res
       .status(403)

@@ -48,7 +48,7 @@ async function route (req: Request, res: Response) {
     messageIds = await findMessages({
       messageID: { $in: ids },
       creator: req.user._id,
-      channelId: channelId,
+      channelID: channelId,
     });
   }
 
@@ -56,7 +56,7 @@ async function route (req: Request, res: Response) {
   if (server && !req.permErrorMessage) {
     messageIds = await findMessages({
       messageID: { $in: ids },
-      channelId: channelId,
+      channelID: channelId,
     });
   }
 

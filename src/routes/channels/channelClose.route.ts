@@ -14,7 +14,7 @@ async function route(req: Request, res: Response) {
   const { channelId } = req.params;
 
 
-  const channel = await Channels.findOne({ channelId: channelId, creator: req.user._id, server_id: { $exists: false } })
+  const channel = await Channels.findOne({ channelID: channelId, creator: req.user._id, server_id: { $exists: false } })
 
   if (!channel) {
     return res
@@ -23,8 +23,8 @@ async function route(req: Request, res: Response) {
   }
 
 
-  await Channels.updateOne({ channelId: channelId, creator: req.user._id }, { hide: true });
+  await Channels.updateOne({ channelID: channelId, creator: req.user._id }, { hide: true });
 
-  res.json({ status: true, channelId: channelId });
-  req.io.in(req.user.id).emit(CHANNEL_DELETED, { channelId: channelId });
+  res.json({ status: true, channelID: channelId });
+  req.io.in(req.user.id).emit(CHANNEL_DELETED, { channelID: channelId });
 }
