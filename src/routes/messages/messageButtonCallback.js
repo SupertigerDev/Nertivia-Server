@@ -2,11 +2,11 @@ import {Messages} from '../../models/Messages'
 import { MESSAGE_BUTTON_CALLBACK } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
-  const { channelID, messageID, buttonID } = req.params;
+  const { channelId, messageID, buttonID } = req.params;
   const { message, clickedByID } = req.body; 
   
 
-  const messageDB = await Messages.findOne({ channelID, messageID, "buttons.id": buttonID }).select("creator");
+  const messageDB = await Messages.findOne({ channelId, messageID, "buttons.id": buttonID }).select("creator");
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;
@@ -27,7 +27,7 @@ module.exports = async (req, res, next) => {
   const io = req.io;
   const resObj = {
     id: buttonID,
-    channelID,
+    channelId,
     messageID,
     message
   }

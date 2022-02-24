@@ -2,10 +2,10 @@ import {Messages} from '../../models/Messages'
 import { MESSAGE_BUTTON_CLICKED } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
-  const { channelID, messageID, buttonID } = req.params;
+  const { channelId, messageID, buttonID } = req.params;
   
 
-  const message = await Messages.findOne({ channelID, messageID, "buttons.id": buttonID }).select("creator").populate("creator", "id");
+  const message = await Messages.findOne({ channelId, messageID, "buttons.id": buttonID }).select("creator").populate("creator", "id");
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;
@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
   const io = req.io;
   const resObj = {
     id: buttonID,
-    channelID,
+    channelId,
     messageID,
     clickedByID: user.id
   }

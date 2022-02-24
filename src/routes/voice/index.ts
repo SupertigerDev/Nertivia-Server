@@ -12,7 +12,7 @@ const VoiceRouter = Router();
 
 
 // Join Call
-VoiceRouter.route("/channels/:channelID").post(
+VoiceRouter.route("/channels/:channelId").post(
   authenticate(true),
   rateLimit({name: 'join_voice', expire: 20, requestsLimit: 15 }),
   ChannelVerification,

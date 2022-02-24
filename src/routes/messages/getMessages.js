@@ -4,7 +4,7 @@ import {MessageReactions} from '../../models/MessageReactions';
 import {Messages} from '../../models/Messages'
 
 module.exports = async (req, res, next) => {
-  const { channelID } = req.params;
+  const { channelId } = req.params;
   const continueMessageID = req.query.continue;
   const beforeMessageID = req.query.before;
   const aroundMessageID = req.query.around;
@@ -41,7 +41,7 @@ module.exports = async (req, res, next) => {
       });
     }
     messages = await Messages.find({
-      channelID,
+      channelId,
       _id: {
         $lt: continueFromMessage._id
       }
@@ -65,7 +65,7 @@ module.exports = async (req, res, next) => {
       });
     }
     messages = await Messages.find({
-      channelID,
+      channelId,
       _id: {
         $gt: beforeFromMessage._id
       }
@@ -88,7 +88,7 @@ module.exports = async (req, res, next) => {
     }
 
     let above = await Messages.find({
-      channelID,
+      channelId,
       _id: {
         $lte: message._id
       }
@@ -97,7 +97,7 @@ module.exports = async (req, res, next) => {
     }).limit(25).populate(populate).select(select).lean();
 
     let bottom = await Messages.find({
-      channelID,
+      channelId,
       _id: {
         $gt: message._id
       }
@@ -106,7 +106,7 @@ module.exports = async (req, res, next) => {
 
     if (above.length === 25 && bottom.length < 25) {
       above = await Messages.find({
-        channelID,
+        channelId,
         _id: {
           $lte: message._id
         }
@@ -116,7 +116,7 @@ module.exports = async (req, res, next) => {
 
     } else if (bottom.length === 25 && above.length < 25) {
       bottom = await Messages.find({
-        channelID,
+        channelId,
         _id: {
           $gt: message._id
         }
@@ -129,7 +129,7 @@ module.exports = async (req, res, next) => {
   } else {
     messages = await Messages.find(
       {
-        channelID
+        channelId
       },
       "-__v -_id"
     )
@@ -182,7 +182,7 @@ module.exports = async (req, res, next) => {
 
   return res.json({
     status: true,
-    channelID,
+    channelId,
     messages
   });
 };

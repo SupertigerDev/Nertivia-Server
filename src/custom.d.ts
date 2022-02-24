@@ -63,7 +63,7 @@ interface uploadFile {
 }
 interface Channel {
   _id: string,
-  channelID: string,
+  channelId: string,
   server: Server
   recipients: any[]
   rateLimit?: number

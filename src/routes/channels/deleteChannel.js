@@ -6,7 +6,7 @@ module.exports = async (req, res, next) => {
 
   // check if channel exists
   let channel = await Channels
-    .findOne({ channelID: channel_id, creator: req.user._id, server_id: { $exists: false } })
+    .findOne({ channelId: channel_id, creator: req.user._id, server_id: { $exists: false } })
   if (!channel) {
     return res
     .status(404)
@@ -14,10 +14,10 @@ module.exports = async (req, res, next) => {
   }
 
 
-   await Channels.updateOne({ channelID: channel_id, creator: req.user._id }, {hide: true});
+   await Channels.updateOne({ channelId: channel_id, creator: req.user._id }, {hide: true});
 
 
 
-  res.json({ status: true, channelID: channel_id });
-  req.io.in(req.user.id).emit(CHANNEL_DELETED, { channelID: channel_id });
+  res.json({ status: true, channelId: channel_id });
+  req.io.in(req.user.id).emit(CHANNEL_DELETED, { channelId: channel_id });
 };

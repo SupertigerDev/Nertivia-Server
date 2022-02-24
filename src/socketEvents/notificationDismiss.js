@@ -6,8 +6,8 @@ import { Notifications } from "../models/Notifications";
 import { NOTIFICATION_DISMISSED } from "../ServerEventNames";
 const redis = require('../redis');
 module.exports = async (data, client, io) => {
-    const {channelID} = data;
-    if (!channelID) return; 
+    const {channelId} = data;
+    if (!channelId) return; 
     
 
     const [user, error] = await getConnectedUserBySocketID(client.id);
@@ -15,16 +15,16 @@ module.exports = async (data, client, io) => {
     if (error || !user) return;
     
     // server channel
-    const serverChannel = await Channels.findOne({channelID, server: {$exists: true, $ne: null}}).select("server");
+    const serverChannel = await Channels.findOne({channelId, server: {$exists: true, $ne: null}}).select("server");
     if (serverChannel) {
        await ServerMembers.updateOne({server: serverChannel.server, member: user._id}, {
             $set: {
-                [`last_seen_channels.${channelID}`] : Date.now()
+                [`last_seen_channels.${channelId}`] : Date.now()
             }
         })
 
     }
-    await Notifications.deleteOne({recipient: user.id, channelID});
+    await Notifications.deleteOne({recipient: user.id, channelId});
     
-    io.to(user.id).emit(NOTIFICATION_DISMISSED, {channelID, serverNotification: !!serverChannel});
+    io.to(user.id).emit(NOTIFICATION_DISMISSED, {channelId, serverNotification: !!serverChannel});
 }

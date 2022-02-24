@@ -3,11 +3,11 @@ import {Messages} from '../../models/Messages'
 import { MESSAGE_REACTION_UPDATED } from '../../ServerEventNames';
 
 module.exports = async (req, res, next) => {
-  const { channelID, messageID } = req.params;
+  const { channelId, messageID } = req.params;
   const { emojiID, unicode } = req.body;
 
 
-  const message = await Messages.findOne({ channelID, messageID });
+  const message = await Messages.findOne({ channelId, messageID });
   if (!message) {
     return res.status(404).json({ message: "Message was not found." });
   }
@@ -43,7 +43,7 @@ module.exports = async (req, res, next) => {
 
   
   const response = {
-    channelID,
+    channelId,
     messageID,
     unReactedByUserID: req.user.id,
     reaction: {

@@ -20,7 +20,7 @@ import sendMessage from './sendOrUpdateMessage';
 
 
 // get messages
-MainMessageRouter.route("/channels/:channelID").get(
+MainMessageRouter.route("/channels/:channelId").get(
   authenticate(true),
   rateLimit({name: 'messages_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -28,7 +28,7 @@ MainMessageRouter.route("/channels/:channelID").get(
 );
 
 // get message
-MainMessageRouter.route("/:messageID/channels/:channelID").get(
+MainMessageRouter.route("/:messageID/channels/:channelId").get(
   authenticate(true),
   rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -36,7 +36,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").get(
 );
 
 // delete message
-MainMessageRouter.route("/:messageID/channels/:channelID").delete(
+MainMessageRouter.route("/:messageID/channels/:channelId").delete(
   authenticate(true),
   rateLimit({name: 'message_delete', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -46,7 +46,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").delete(
 );
 
 // delete message bulk
-MainMessageRouter.route("/:channelID/bulk").delete(
+MainMessageRouter.route("/:channelId/bulk").delete(
   authenticate(true),
   rateLimit({name: 'message_delete_bulk', expire: 60, requestsLimit: 10 }),
   channelVerification,
@@ -56,7 +56,7 @@ MainMessageRouter.route("/:channelID/bulk").delete(
 );
 
 // add reaction
-MainMessageRouter.route("/:messageID/channels/:channelID/reactions").post(
+MainMessageRouter.route("/:messageID/channels/:channelId/reactions").post(
   authenticate(true),
   rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -64,7 +64,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID/reactions").post(
   require('./addReaction')
 );
 // remove reaction
-MainMessageRouter.route("/:messageID/channels/:channelID/reactions").delete(
+MainMessageRouter.route("/:messageID/channels/:channelId/reactions").delete(
   authenticate(true),
   rateLimit({name: 'message_react', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -72,7 +72,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID/reactions").delete(
   require('./removeReaction')
 );
 // get reacted users
-MainMessageRouter.route("/:messageID/channels/:channelID/reactions/users").get(
+MainMessageRouter.route("/:messageID/channels/:channelId/reactions/users").get(
   authenticate(true),
   rateLimit({name: 'message_react_users', expire: 60, requestsLimit: 120 }),
   channelVerification,
@@ -81,7 +81,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID/reactions/users").get(
 );
 
 // update message
-MainMessageRouter.route("/:messageID/channels/:channelID").patch(
+MainMessageRouter.route("/:messageID/channels/:channelId").patch(
   authenticate(true),
   messagePolicy.update,
   rateLimit({name: 'message_update', expire: 60, requestsLimit: 120 }),
@@ -93,7 +93,7 @@ MainMessageRouter.route("/:messageID/channels/:channelID").patch(
 );
 
 // send message
-MainMessageRouter.route("/channels/:channelID").post(
+MainMessageRouter.route("/channels/:channelId").post(
   authenticate(true),
   messagePolicy.post,
   rateLimit({name: 'message_send', expire: 20, requestsLimit: 15 }),
@@ -111,7 +111,7 @@ MainMessageRouter.route("/channels/:channelID").post(
 );
 
 // typing
-MainMessageRouter.route("/:channelID/typing").post(
+MainMessageRouter.route("/:channelId/typing").post(
   authenticate(true),
   rateLimit({name: 'message_typing', expire: 60, requestsLimit: 120 }),
   channelVerification,

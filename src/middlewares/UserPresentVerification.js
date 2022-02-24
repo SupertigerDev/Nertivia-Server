@@ -7,7 +7,7 @@ const { getServerChannel, addServer, getServer, addChannel } = require("../newRe
 //check if user is in the server.
 module.exports = async (req, res, next) => {
   const serverID = req.params.server_id;
-  const channelID = req.params.channel_id || req.params.channelID;
+  const channelId = req.params.channel_id || req.params.channelId;
 
   
 
@@ -22,9 +22,9 @@ module.exports = async (req, res, next) => {
       req.permissions = cacheMember.permissions;
       req.highestRolePosition = cacheMember.highestRolePosition;
       req.server = cacheServer;
-      if (channelID) {
+      if (channelId) {
         // check if channel is in cache
-        const cacheChannel = JSON.parse((await getServerChannel(channelID))[0] || null);
+        const cacheChannel = JSON.parse((await getServerChannel(channelId))[0] || null);
         if (cacheChannel && cacheChannel.server_id && cacheChannel.server_id === serverID) {
           req.channel = cacheChannel;
           return next()
@@ -82,15 +82,15 @@ module.exports = async (req, res, next) => {
   await redis.addServerMember(req.user.id, server.server_id, JSON.stringify({permissions, highestRolePosition}));
   
 
-  if (channelID) {
+  if (channelId) {
     // check if channel exists in the server
-    const channel = await Channels.findOne({server_id: serverID, channelID: channelID}).lean()
+    const channel = await Channels.findOne({server_id: serverID, channelId: channelId}).lean()
     if (!channel) {
       return res.status(404).json({
         message: "ChannelID is invalid or does not exist in the server."
       });
     }
-    await addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: server.server_id}), req.user.id );
+    await addChannel(channelId, Object.assign({}, channel, {server: undefined, server_id: server.server_id}), req.user.id );
     req.channel = channel;
   }
 

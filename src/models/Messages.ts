@@ -12,7 +12,7 @@ interface Embed {
   description: string,
 }
 export interface Message {
-  channelID: string
+  channelId: string
   messageID: string
   files?: any[]
   message: string
@@ -47,7 +47,7 @@ const embedSchema = new Schema<Embed>({
 
 
 const messagesSchema = new Schema<Message>({
-  channelID: { type: String, required: true },
+  channelId: { type: String, required: true },
   messageID: { type: String, required: true, unique: true },
   files: { type: Array, required: false },
   message: { type: String, required: false  },

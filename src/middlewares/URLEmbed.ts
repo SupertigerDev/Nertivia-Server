@@ -86,7 +86,7 @@ module.exports = async (req:RequestCustom, res: Response, next: NextFunction) =>
 
   const emitData = {
     embed: resObj, 
-    channelID: req.channel.channelID,
+    channelId: req.channel.channelId,
     messageID: message_id
   }
   if (req.channel.server) {

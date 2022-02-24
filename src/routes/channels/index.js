@@ -12,7 +12,7 @@ MainChannelRouter.route("/:recipient_id").post(
 );
 
 // get channel
-MainChannelRouter.route("/:channelID").get(
+MainChannelRouter.route("/:channelId").get(
   authenticate(true),
   channelVerification,
   require("./getChannel")
@@ -25,8 +25,8 @@ MainChannelRouter.route("/:channel_id").delete(
 );
 
 // click message button 
-//channels/${channelID}/messages/${messageID}/button/${buttonID}
-MainChannelRouter.route("/:channelID/messages/:messageID/button/:buttonID").post(
+//channels/${channelId}/messages/${messageID}/button/${buttonID}
+MainChannelRouter.route("/:channelId/messages/:messageID/button/:buttonID").post(
   authenticate(true),
   channelVerification,
   rateLimit({name: 'click_message_button', expire: 60, requestsLimit: 300 }),
@@ -34,8 +34,8 @@ MainChannelRouter.route("/:channelID/messages/:messageID/button/:buttonID").post
 )
 
 // click message button callback (only used by message creator)
-//channels/${channelID}/messages/${messageID}/button/${buttonID}
-MainChannelRouter.route("/:channelID/messages/:messageID/button/:buttonID").patch(
+//channels/${channelId}/messages/${messageID}/button/${buttonID}
+MainChannelRouter.route("/:channelId/messages/:messageID/button/:buttonID").patch(
   authenticate(true),
   channelVerification,
   rateLimit({name: 'click_message_button_callback', expire: 60, requestsLimit: 300 }),

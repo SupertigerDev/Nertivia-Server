@@ -1,7 +1,7 @@
 import {MessageReactions} from '../../models/MessageReactions';
 
 module.exports = async (req, res, next) => {
-  const {channelID, messageID} = req.params;
+  const {channelId, messageID} = req.params;
 
   const {emojiID, unicode} = req.query;
   

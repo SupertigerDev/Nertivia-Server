@@ -23,10 +23,10 @@ module.exports = async (req, res, next) => {
     channel_id,
     message: message_string,
     creator: bot._id,
-    channelID: channel_id,
+    channelId: channel_id,
     messageID: "placeholder",
   })
-  await Channels.updateOne({ channelID: channel_id }, { $set: {
+  await Channels.updateOne({ channelId: channel_id }, { $set: {
     lastMessaged: Date.now()
   }})
 
@@ -41,7 +41,7 @@ res.json({message: "Done!"});
   //send notification
   await sendMessageNotification({
     message: messageCreated,
-    channelID: channel_id,
+    channelId: channel_id,
     server_id: server_id,
     sender: bot,
   })

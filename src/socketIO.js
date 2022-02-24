@@ -180,7 +180,7 @@ module.exports = async client => {
 
         const serverChannels = await Channels
           .find({ server: { $in: serverObjectIds } })
-          .select("name type channelID categoryId server server_id lastMessaged rateLimit icon")
+          .select("name type channelId categoryId server server_id lastMessaged rateLimit icon")
           .lean();
 
         user.servers = user.servers.map(server => {
@@ -212,7 +212,7 @@ module.exports = async client => {
 
       const dms = Channels
         .find({ creator: user._id, hide: { $ne: true } }, { _id: 0 })
-        .select("recipients channelID lastMessaged")
+        .select("recipients channelId lastMessaged")
         .populate({
           path: "recipients",
           select: "avatar username id tag bot -_id"
@@ -221,7 +221,7 @@ module.exports = async client => {
 
       const notifications = Notifications.find({ recipient: user.id })
         .select(
-          "mentioned type sender lastMessageID count recipient channelID -_id"
+          "mentioned type sender lastMessageID count recipient channelId -_id"
         )
         .populate({
           path: "sender",

@@ -6,7 +6,7 @@ import { MESSAGE_DELETED_BULK } from '../../ServerEventNames';
 
 
 module.exports = async (req: Request, res: Response, next: NextFunction) => {
-  const { channelID } = req.params;
+  const { channelId } = req.params;
   const { ids } = req.body;
   const channel = req.channel;
   const server = channel.server;
@@ -29,7 +29,7 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
     messageIds = await findMessages({
       messageID: { $in: ids },
       creator: req.user._id,
-      channelID,
+      channelId,
     });
   }
 
@@ -37,14 +37,14 @@ module.exports = async (req: Request, res: Response, next: NextFunction) => {
   if (server && !req.permErrorMessage) {
     messageIds = await findMessages({
       messageID: { $in: ids },
-      channelID,
+      channelId,
     });
   }
 
   await Messages.deleteMany({messageID: { $in: messageIds}})
 
   const response = {
-    channelId: channelID,
+    channelId: channelId,
     messageIds,
   }
 

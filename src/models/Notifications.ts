@@ -4,7 +4,7 @@ interface Notification {
   recipient: string
   type: string
   mentioned: boolean
-  channelID: string
+  channelId: string
   lastMessageID: string
   sender: any
   count: number
@@ -16,7 +16,7 @@ const schema = new Schema<Notification>({
   recipient: { type: String, required: true },
   type: { type: String, required: true },
   mentioned: {type: Boolean},
-  channelID: { type: String, required: false },
+  channelId: { type: String, required: false },
   lastMessageID: {type: String, required: false },
   sender: { type: Schema.Types.ObjectId, ref: 'users', required: false},
   count: {type: Number, required: false }

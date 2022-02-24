@@ -1,7 +1,7 @@
 import {Messages} from '../../models/Messages'
 
 module.exports = async (req, res, next) => {
-  const { channelID, messageID } = req.params;
+  const { channelId, messageID } = req.params;
 
   const populate = [{
     path: "creator",
@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
   // Get message
   let message = await Messages.findOne(
     {
-      channelID,
+      channelId,
       messageID
     },
     "-__v -_id"
@@ -33,7 +33,7 @@ module.exports = async (req, res, next) => {
 
   if (!message) {
     return res.status(404).json({
-      message: "Invalid channelID or messageID"
+      message: "Invalid channelId or messageID"
     });
   }
 

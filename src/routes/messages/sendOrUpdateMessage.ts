@@ -16,7 +16,7 @@ import {sendDMPush, sendServerPush} from '../../utils/sendPushNotification'
 import { MESSAGE_CREATED, MESSAGE_UPDATED } from '../../ServerEventNames';
 
 export default async (req: Request, res: Response, next: NextFunction) => {
-  const { channelID, messageID } = req.params;
+  const { channelId, messageID } = req.params;
   let { tempID, socketID, color, buttons, htmlEmbed } = req.body;
   let message = req.body.message;
 
@@ -24,7 +24,7 @@ export default async (req: Request, res: Response, next: NextFunction) => {
   // If messageID exists, message wants to update.
   let messageDoc: Message | null = null;
   if (messageID) {
-    messageDoc = await Messages.findOne({ channelID, messageID });
+    messageDoc = await Messages.findOne({ channelId, messageID });
     if (!messageDoc)
       return res.status(404).json({ message: "Message was not found." });
     if (messageDoc.creator.toString() !== req.user._id)
@@ -132,7 +132,7 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
       return;
     }
 
-    quotedMessages = await Messages.find({channelID, messageID: {$in: messageIds}}, {_id: 0})
+    quotedMessages = await Messages.find({channelId, messageID: {$in: messageIds}}, {_id: 0})
       .select('creator message messageID quotes')
       .populate([
         {
@@ -177,7 +177,7 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
 
 
   let query: any = {
-    channelID,
+    channelId,
     message,
     creator: req.user._id,
     messageID: "placeholder",
@@ -219,7 +219,7 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
   };
 
   messageCreated = {
-    channelID,
+    channelId,
     message,
     color: _color,
     creator: user,
@@ -262,16 +262,16 @@ if ((!message || !message.trim()) && (!req.uploadFile && !htmlEmbed)) {
   if (messageID) {
     updateMessage(req, req.channel.server, messageCreated, io);
   } else if (req.channel.server) {
-    serverMessage(req, io, channelID, messageCreated, socketID);
+    serverMessage(req, io, channelId, messageCreated, socketID);
   } else {
-    directMessage(req, io, channelID, messageCreated, socketID, tempID);
+    directMessage(req, io, channelId, messageCreated, socketID, tempID);
   }
   next();
   
 
 };
 
-async function serverMessage(req: any, io: SocketIO.Server, channelID: any, messageCreated: any, socketID: any) {
+async function serverMessage(req: any, io: SocketIO.Server, channelId: any, messageCreated: any, socketID: any) {
 
   io.in("server:" + req.channel.server.server_id).allSockets().then(sockets => {
     sockets.forEach(socket_id => {
@@ -285,21 +285,21 @@ async function serverMessage(req: any, io: SocketIO.Server, channelID: any, mess
   
 
   const date = Date.now();
-  await Channels.updateOne({ channelID }, { $set: {
+  await Channels.updateOne({ channelId }, { $set: {
     lastMessaged: date
   }})
 
   //send notification
   await sendMessageNotification({
     message: messageCreated,
-    channelID,
+    channelId,
     server_id: req.channel.server._id,
     sender: req.user,
   })
 
   await ServerMembers.updateOne({server: req.channel.server._id, member: req.user._id}, {
     $set: {
-        [`last_seen_channels.${channelID}`] : date + 1
+        [`last_seen_channels.${channelId}`] : date + 1
     }
   })
 
@@ -319,7 +319,7 @@ function filterNestedQuotes(baseQuote: string, quotes: any[]) {
   return quotes.filter(q => quotesIDArr.includes(q.messageID))
 }
 
-async function directMessage(req: any, io: SocketIO.Server, channelID: any, messageCreated: any, socketID: any, tempID: any) {
+async function directMessage(req: any, io: SocketIO.Server, channelId: any, messageCreated: any, socketID: any, tempID: any) {
 
   const isSavedNotes = req.user.id === req.channel.recipients[0].id
 
@@ -328,7 +328,7 @@ async function directMessage(req: any, io: SocketIO.Server, channelID: any, mess
     //change lastMessage timeStamp
     const updateChannelTimeStamp = Channels.updateMany(
       {
-        channelID
+        channelId
       },
       {
         $set: {
@@ -345,7 +345,7 @@ async function directMessage(req: any, io: SocketIO.Server, channelID: any, mess
     const sendNotification = sendMessageNotification({
       message: messageCreated,
       recipientUserID: req.channel.recipients[0].id,
-      channelID,
+      channelId,
       sender: req.user,
     })
     await Promise.all([updateChannelTimeStamp, sendNotification]);

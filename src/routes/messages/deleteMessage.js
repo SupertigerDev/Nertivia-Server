@@ -5,9 +5,9 @@ import { MESSAGE_DELETED } from '../../ServerEventNames';
 const nertiviaCDN = require("../../utils/uploadCDN/nertiviaCDN");
 
 module.exports = async (req, res, next) => {
-  const { channelID, messageID } = req.params;
+  const { channelId, messageID } = req.params;
 
-  const message = await Messages.findOne({ channelID, messageID });
+  const message = await Messages.findOne({ channelId, messageID });
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;
@@ -35,7 +35,7 @@ module.exports = async (req, res, next) => {
         }
       })
     }
-    const resObj = { channelID, messageID };
+    const resObj = { channelId, messageID };
     res.json(resObj);
     const io = req.io;
     if (server) {

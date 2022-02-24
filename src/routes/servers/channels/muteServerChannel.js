@@ -22,12 +22,12 @@ module.exports = async (req, res, next) => {
     { $addToSet: { muted_channels: channel_id } }
   );
   await Notifications.deleteMany({
-    channelID: channel_id,
+    channelId: channel_id,
     recipient: req.user.id
   });
 
   res.json({ message: "Channel muted." });
 
   const io = req.io;
-  io.in(req.user.id).emit(CHANNEL_MUTED, {channelID: channel_id});
+  io.in(req.user.id).emit(CHANNEL_MUTED, {channelId: channel_id});
 };

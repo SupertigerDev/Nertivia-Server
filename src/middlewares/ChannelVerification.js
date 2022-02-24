@@ -8,11 +8,11 @@ const { getDmChannel, getServerChannel, addServer, getServer, addChannel } = req
 
 module.exports = async (req, res, next) => {
 
-  const { channelID } = req.params;
+  const { channelId } = req.params;
 
   // check if exists in redis
   // check dm channel
-  const [dmChannel] = await getDmChannel(channelID, req.user.id);
+  const [dmChannel] = await getDmChannel(channelId, req.user.id);
   
   if (dmChannel) {
     const channel = JSON.parse(dmChannel);
@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
     return;
   }
   // check server
-  const [serverChannel] = await getServerChannel(channelID);
+  const [serverChannel] = await getServerChannel(channelId);
   if (serverChannel) {
     const channel = JSON.parse(serverChannel);
     if (channel.type !== ChannelType.SERVER_CHANNEL) {
@@ -50,7 +50,7 @@ module.exports = async (req, res, next) => {
   // check in database
 
   const channel = await Channels.findOne({
-    channelID,
+    channelId,
     creator: {$in: [null,req.user._id]}
   }).populate([
     {path: 'recipients'},
@@ -103,7 +103,7 @@ module.exports = async (req, res, next) => {
 
   
     	
-    await addChannel(channelID, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.id);
+    await addChannel(channelId, Object.assign({}, channel, {server: undefined, server_id: channel.server.server_id}), req.user.id);
   } else {
 
     // check if blocked by recipient.
@@ -119,6 +119,6 @@ module.exports = async (req, res, next) => {
 
     req.channel = newChannel;
     next();
-    await addChannel(channelID, newChannel, req.user.id);
+    await addChannel(channelId, newChannel, req.user.id);
   }
 };

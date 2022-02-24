@@ -24,5 +24,5 @@ module.exports = async (req, res, next) => {
   res.json({ message: "Channel unmuted." });
 
   const io = req.io;
-  io.in(req.user.id).emit(CHANNEL_UNMUTED, {channelID: channel_id});
+  io.in(req.user.id).emit(CHANNEL_UNMUTED, {channelId: channel_id});
 };

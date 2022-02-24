@@ -39,16 +39,16 @@ module.exports = async (req, res, next) => {
     });
 
   // create channel because it doesnt exist.
-  let channelID;
+  let channelId;
 
   if (channel) {
-    channelID = channel.channelID;
+    channelId = channel.channelId;
   } else {
-    channelID = flake.gen();
+    channelId = flake.gen();
   }
 
   let newChannel = await Channels.create({
-    channelID,
+    channelId,
     type: ChannelType.DM_CHANNEL,
     creator: req.user._id,
     recipients: [recipient._id],

@@ -39,14 +39,14 @@ async function createTextChannel(server, name) {
   const createChannel = await Channels.create({
     name: name,
     type: ChannelType.SERVER_CHANNEL,
-    channelID: flake.gen(),
+    channelId: flake.gen(),
     server: server._id,
     server_id:  server.server_id,
     lastMessaged: Date.now()
   });
   
   const channelObj = {
-    channelID: createChannel.channelID,
+    channelId: createChannel.channelId,
     type: createChannel.type,
     lastMessaged: createChannel.lastMessaged,
     name: createChannel.name,
@@ -58,13 +58,13 @@ async function createCategoryChannel(server, name) {
   const createChannel = await Channels.create({
     name: name,
     type: ChannelType.SERVER_CATEGORY,
-    channelID: flake.gen(),
+    channelId: flake.gen(),
     server: server._id,
     server_id:  server.server_id,
   });
   
   const channelObj = {
-    channelID: createChannel.channelID,
+    channelId: createChannel.channelId,
     type: createChannel.type,
     name: createChannel.name,
     server_id: server.server_id,
