@@ -23,7 +23,7 @@ export async function getChannel(userObjectId: string, userId: string, channelId
 
   // then check in database.
   let channel = await Channels.findOne({
-    channelID: channelId,
+    channelId: channelId,
     creator: {$in: [null, userObjectId]}
   }).populate([
     {path: 'recipients'},

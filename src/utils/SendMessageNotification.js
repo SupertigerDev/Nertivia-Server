@@ -9,13 +9,13 @@ async function sendNotification({
   message,
   server_id,
   recipientUserID,
-  channelID,
+  channelId,
   sender
 }) {
   const bulk = Notifications.collection.initializeUnorderedBulkOp();
   // If messages are to be sent to dm.
   if (recipientUserID) {
-    await addToBulk(bulk, recipientUserID, sender._id, channelID, message, false);
+    await addToBulk(bulk, recipientUserID, sender._id, channelId, message, false);
     bulk.execute();
     return;
   }
@@ -24,31 +24,31 @@ async function sendNotification({
   // TODO: clean the code later on. This is only used for server mentions now.
   if (!message.mentions || !message.mentions.length) return;
   // filter mentions to joined mentioned members
-  let filteredMentions = await ServerMembers.find({ muted_channels: { $ne: channelID }, muted: { $ne: 2 }, server: server_id, member: {$in: message.mentions.map(m => m._id)}}, {_id: 0}).select("member").lean();
+  let filteredMentions = await ServerMembers.find({ muted_channels: { $ne: channelId }, muted: { $ne: 2 }, server: server_id, member: {$in: message.mentions.map(m => m._id)}}, {_id: 0}).select("member").lean();
 
   filteredMentions = message.mentions.filter(({_id}) => filteredMentions.find(({member}) => member.toString() === _id.toString()) && _id.toString() !== sender._id.toString())
   if (!filteredMentions.length) return;
 
   for (let i = 0; i < filteredMentions.length; i++) {
     const member = filteredMentions[i];
-    addServerMentioned(bulk, member.id, sender._id, channelID, message);
+    addServerMentioned(bulk, member.id, sender._id, channelId, message);
   }
   bulk.execute();
   return;
 }
 
 
-function addServerMentioned(bulk, recipientUserID, sender_id, channelID, message, isServer) {
+function addServerMentioned(bulk, recipientUserID, sender_id, channelId, message, isServer) {
   const $set = {
     recipient: recipientUserID,
-    channelID,
+    channelId,
     type: "MESSAGE_CREATED",
     sender: sender_id,
     mentioned: true,
   };
   const find = {
     recipient: recipientUserID,
-    channelID
+    channelId
   }
 
   bulk
@@ -65,10 +65,10 @@ function addServerMentioned(bulk, recipientUserID, sender_id, channelID, message
 
 
 
-function addToBulk(bulk, recipientUserID, sender_id, channelID, message, isServer) {
+function addToBulk(bulk, recipientUserID, sender_id, channelId, message, isServer) {
   const $set = {
     recipient: recipientUserID,
-    channelID,
+    channelId,
     type: "MESSAGE_CREATED",
     sender: sender_id
   };
@@ -80,7 +80,7 @@ function addToBulk(bulk, recipientUserID, sender_id, channelID, message, isServe
   }
   const find = {
     recipient: recipientUserID,
-    channelID
+    channelId
   }
 
   bulk

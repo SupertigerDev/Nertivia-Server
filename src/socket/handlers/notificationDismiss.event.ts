@@ -7,12 +7,12 @@ import { getIOInstance } from "../socket";
 
 import * as UserCache from '../../cache/User.cache';
 interface Data {
-  channelID: string
+  channelId: string
 }
 
 export async function onNotificationDismiss(client: Socket, data: Data) {
 
-  if (!data.channelID) return; 
+  if (!data.channelId) return; 
 
 
   const [user, error] = await UserCache.getUserBySocketId(client.id);
@@ -20,17 +20,17 @@ export async function onNotificationDismiss(client: Socket, data: Data) {
   if (error || !user) return;
 
   // server channel
-  const serverChannel = await Channels.findOne({channelID: data.channelID, server: {$exists: true, $ne: null}}).select("server");
+  const serverChannel = await Channels.findOne({channelId: data.channelId, server: {$exists: true, $ne: null}}).select("server");
   if (serverChannel) {
     await ServerMembers.updateOne({server: serverChannel.server, member: user._id}, {
       $set: {
-        [`last_seen_channels.${data.channelID}`] : Date.now()
+        [`last_seen_channels.${data.channelId}`] : Date.now()
       }
     })
 
   }
-  await Notifications.deleteOne({recipient: user.id, channelID: data.channelID});
+  await Notifications.deleteOne({recipient: user.id, channelId: data.channelId});
 
-  getIOInstance().to(user.id).emit(NOTIFICATION_DISMISSED, {channelID: data.channelID, serverNotification: !!serverChannel});
+  getIOInstance().to(user.id).emit(NOTIFICATION_DISMISSED, {channelId: data.channelId, serverNotification: !!serverChannel});
 
 }

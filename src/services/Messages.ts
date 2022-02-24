@@ -39,7 +39,7 @@ const messagePopulate = [
 export const getMessagesByIds = async (messageIds: string[], channelId?: string) => {
   if (!messageIds.length) return [];
   const filter: FilterQuery<Message> = { messageID: { $in: messageIds } }
-  if (channelId) filter.channelID = channelId;
+  if (channelId) filter.channelId = channelId;
   return Messages
     .find(filter)
     .select(messageSelect)
@@ -117,7 +117,7 @@ export const updateMessage = async (data: UpdateMessageArgs): Promise<Message> =
   })
 
 
-  message.channelID = oldMessage.channelID
+  message.channelId = oldMessage.channelId
   message.messageID = oldMessage.messageID;
   message.quotes = quotes;
   message.creator = {
@@ -153,7 +153,7 @@ export const updateMessage = async (data: UpdateMessageArgs): Promise<Message> =
     // emit embed to channel
     const embedResponseData = {
       embed,
-      channelID: message.channelID,
+      channelId: message.channelId,
       messageID: message.messageID,
       replace: false
     }
@@ -188,7 +188,7 @@ export const createMessage = async (data: CreateMessageArgs): Promise<Message> =
 
 
   let message: Partial<Message> = {
-    channelID: data.channelId || data.channel.channelID,
+    channelId: data.channelId || data.channel.channelId,
     messageID: "placeholder",
     creator: data.creator._id,
     // add to object if exists.
@@ -233,7 +233,7 @@ export const createMessage = async (data: CreateMessageArgs): Promise<Message> =
 
 
     await updateLastSeen({
-      channelId: data.channelId || data.channel.channelID,
+      channelId: data.channelId || data.channel.channelId,
       memberObjectId: data.creator._id,
       serverObjectId: data.channel?.server?._id
     });
@@ -242,7 +242,7 @@ export const createMessage = async (data: CreateMessageArgs): Promise<Message> =
     // for DM channels, they are notifications
     // for Server channels, these are used for mentions.
     !isSavedNotes && insertNotification({
-      channelId: data.channelId || data.channel.channelID,
+      channelId: data.channelId || data.channel.channelId,
       messageId: message.messageID!,
       senderObjectId: data.creator._id,
       mentionUserObjectIds: userMentionObjectIds,
@@ -265,7 +265,7 @@ export const createMessage = async (data: CreateMessageArgs): Promise<Message> =
     // emit embed to channel
     const embedResponseData = {
       embed,
-      channelID: message.channelID,
+      channelId: message.channelId,
       messageID: message.messageID,
       replace: false
     }
@@ -352,7 +352,7 @@ async function saveQuoteMentions(content: string | null, data: Partial<CreateMes
   if (!content) return {quoteObjectIds: [], quotes: []};
   const messageMentionIds = extractQuoteMentionIds(content);
   const channel = data.channelId ? await getChannelById(data.channelId) : data.channel;
-  const messages = await getMessagesByIds(messageMentionIds, channel.channelID);
+  const messages = await getMessagesByIds(messageMentionIds, channel.channelId);
   if (!messages.length) return {quoteObjectIds: [], quotes: []};
   const quotes: MessageQuote[] = messages.map(message => {
     return {

@@ -27,7 +27,7 @@ export default async function deleteServer(io: any, server_id: string, server: a
   }
 
   const channels = await Channels.find({ server: server._id }).lean();
-  const channelIDArray = channels.map((c: any) => c.channelID)
+  const channelIDArray = channels.map((c: any) => c.channelId)
   const channel_idArray = channels.map((c: any) => c._id)
 
   
@@ -47,8 +47,8 @@ export default async function deleteServer(io: any, server_id: string, server: a
           $in: channel_idArray
         }
       })
-      await Messages.deleteMany({ channelID: { $in: channelIDArray } });
-      await Notifications.deleteMany({ channelID: { $in: channelIDArray } });
+      await Messages.deleteMany({ channelId: { $in: channelIDArray } });
+      await Notifications.deleteMany({ channelId: { $in: channelIDArray } });
     }
     await Channels.deleteMany({ server: server._id });
     await ServerMembers.deleteMany({ server: server._id });

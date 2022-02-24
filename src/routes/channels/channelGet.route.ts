@@ -16,13 +16,13 @@ async function route(req: Request, res: Response) {
     res.json({
       name: req.channel.name,
       type: req.channel.type,
-      channelID: req.channel.channelID,
+      channelId: req.channel.channelId,
       server_id: req.channel.server_id,
     });
   } else {
     res.json({
       recipients: req.channel.recipients,
-      channelID: req.channel.channelID,
+      channelId: req.channel.channelId,
     });
   }
 }

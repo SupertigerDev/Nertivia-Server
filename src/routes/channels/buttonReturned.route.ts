@@ -30,7 +30,7 @@ async function route (req: Request, res: Response){
   const { message, clickedById } = req.body; 
   
 
-  const messageDB = await Messages.findOne({ channelID: channelId, messageID: messageId, "buttons.id": buttonId }).select("creator");
+  const messageDB = await Messages.findOne({ channelId: channelId, messageID: messageId, "buttons.id": buttonId }).select("creator");
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;

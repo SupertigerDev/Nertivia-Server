@@ -67,12 +67,12 @@ module.exports = async (req, res, next) => {
 
   // server channels
   const channels = await Channels.find({ server: server._id });
-  const channelIDs = channels.map(channel => channel.channelID)
+  const channelIDs = channels.map(channel => channel.channelId)
 
   // delete all kick-ers notification from the server 
   if (channelIDs) {
     await Notifications.deleteMany({
-      channelID: { $in: channelIDs },
+      channelId: { $in: channelIDs },
       recipient: id
     });
   }
@@ -131,7 +131,7 @@ module.exports = async (req, res, next) => {
 
   // send kick message
   const messageCreate = new Messages({
-    channelID: server.default_channel_id,
+    channelId: server.default_channel_id,
     creator: userToBeBanned._id,
     messageID: "placeholder",
     type: 4 // ban message
@@ -149,7 +149,7 @@ module.exports = async (req, res, next) => {
   });
 
 
-  const defaultChannel = await Channels.findOneAndUpdate({ channelID: req.server.default_channel_id }, {
+  const defaultChannel = await Channels.findOneAndUpdate({ channelId: req.server.default_channel_id }, {
     $set: {
       lastMessaged: Date.now()
     }
@@ -160,7 +160,7 @@ module.exports = async (req, res, next) => {
   sendServerPush({
     channel: defaultChannel,
     message: {
-      channelID: defaultChannel.channelID,
+      channelId: defaultChannel.channelId,
       message: "has been banned",
     },
     sender: userToBeBanned,

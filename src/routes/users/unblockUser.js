@@ -38,11 +38,11 @@ module.exports = async (req, res, next) => {
   const openedChannel = await Channels.findOne({$or: [
     {creator: requester._id, recipients: recipient._id},
     {creator: recipient._id, recipients: requester._id}
-  ]}).select("channelID")
+  ]}).select("channelId")
 
   if (openedChannel) {
-    await deleteDmChannel(requester.id, openedChannel.channelID)
-    await deleteDmChannel(recipient.id, openedChannel.channelID)
+    await deleteDmChannel(requester.id, openedChannel.channelId)
+    await deleteDmChannel(recipient.id, openedChannel.channelId)
   }
 
   const io = req.io

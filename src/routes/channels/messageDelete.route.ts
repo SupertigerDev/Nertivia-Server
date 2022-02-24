@@ -29,7 +29,7 @@ export function messageDelete(Router: Router) {
 async function route(req: Request, res: Response) {
   const { channelId, messageId } = req.params;
 
-  const message = await Messages.findOne({ channelID: channelId, messageID: messageId });
+  const message = await Messages.findOne({ channelId: channelId, messageID: messageId });
   const channel = req.channel;
   const server = channel.server;
   const user = req.user;
@@ -57,7 +57,7 @@ async function route(req: Request, res: Response) {
         }
       })
     }
-    const resObj = { channelID: channelId, messageID: messageId };
+    const resObj = { channelId: channelId, messageID: messageId };
     res.json(resObj);
     const io = req.io;
     if (server) {

@@ -26,7 +26,7 @@ async function route (req: Request, res: Response) {
   const { channelId, messageId } = req.params;
   const { emojiID, gif, unicode } = req.body;
 
-  const message = await Messages.findOne({ channelID: channelId, messageID: messageId });
+  const message = await Messages.findOne({ channelId: channelId, messageID: messageId });
   if (!message) {
     return res.status(404).json({ message: "Message was not found." });
   }
@@ -76,7 +76,7 @@ async function route (req: Request, res: Response) {
   }
   
   const response = {
-    channelID: channelId,
+    channelId: channelId,
     messageID: messageId,
     reactedByUserID: req.user.id,
     reaction: {

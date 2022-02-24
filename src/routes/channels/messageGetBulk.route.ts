@@ -55,7 +55,7 @@ async function route (req: Request, res: Response){
       });
     }
     messages = await Messages.find({
-      channelID: channelId,
+      channelId: channelId,
       _id: {
         $lt: continueFromMessage._id
       }
@@ -79,7 +79,7 @@ async function route (req: Request, res: Response){
       });
     }
     messages = await Messages.find({
-      channelID: channelId,
+      channelId: channelId,
       _id: {
         $gt: beforeFromMessage._id
       }
@@ -102,7 +102,7 @@ async function route (req: Request, res: Response){
     }
 
     let above = await Messages.find({
-      channelID: channelId,
+      channelId: channelId,
       _id: {
         $lte: message._id
       }
@@ -111,7 +111,7 @@ async function route (req: Request, res: Response){
     }).limit(25).populate(populate).select(select).lean();
 
     let bottom = await Messages.find({
-      channelID: channelId,
+      channelId: channelId,
       _id: {
         $gt: message._id
       }
@@ -120,7 +120,7 @@ async function route (req: Request, res: Response){
 
     if (above.length === 25 && bottom.length < 25) {
       above = await Messages.find({
-        channelID: channelId,
+        channelId: channelId,
         _id: {
           $lte: message._id
         }
@@ -130,7 +130,7 @@ async function route (req: Request, res: Response){
 
     } else if (bottom.length === 25 && above.length < 25) {
       bottom = await Messages.find({
-        channelID: channelId,
+        channelId: channelId,
         _id: {
           $gt: message._id
         }
@@ -143,7 +143,7 @@ async function route (req: Request, res: Response){
   } else {
     messages = await Messages.find(
       {
-        channelID: channelId
+        channelId: channelId
       },
       "-__v -_id"
     )
@@ -196,7 +196,7 @@ async function route (req: Request, res: Response){
 
   return res.json({
     status: true,
-    channelID: channelId,
+    channelId: channelId,
     messages
   });
 };

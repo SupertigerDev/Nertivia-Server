@@ -64,14 +64,14 @@ interface ServerMentionOptions {
 function addServerMentionToBulk(bulk: any, opts: ServerMentionOptions) {
   const $set = {
     recipient: opts.userId,
-    channelID: opts.channelId,
+    channelId: opts.channelId,
     type: "MESSAGE_CREATED",
     sender: opts.senderObjectId,
     mentioned: true,
   };
   const find = {
     recipient: opts.userId,
-    channelID: opts.channelId
+    channelId: opts.channelId
   }
 
   bulk
@@ -91,14 +91,14 @@ interface DMNotificationOptions {
 function insertDMNotification(opts: DMNotificationOptions) {  
   const $set = {
     recipient: opts.recipientUserId,
-    channelID: opts.channelId,
+    channelId: opts.channelId,
     type: "MESSAGE_CREATED",
     sender: opts.senderObjectId
   };
   
   const find = {
     recipient: opts.recipientUserId,
-    channelID: opts.channelId
+    channelId: opts.channelId
   }
   return Notifications.updateOne(find, {$set, $setOnInsert: { lastMessageID: opts.messageId}, $inc: { count: 1 }}, {upsert: true})
 }
