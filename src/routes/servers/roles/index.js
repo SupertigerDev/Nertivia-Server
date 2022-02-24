@@ -2,18 +2,18 @@ const MainRolesRouter = require("express").Router();
 
 // Middleware
 const { authenticate } = require("../../../middlewares/authenticate");
-const UserPresentVerification = require("../../../middlewares/UserPresentVerification");
 const checkRolePerms = require('../../../middlewares/checkRolePermissions');
 
 const rolePolicies = require('../../../policies/RolesPolicies');
 const {roles: {MANAGE_ROLES}} = require("../../../utils/rolePermConstants");
+const { serverMemberVerify } = require("../../../middlewares/serverMemberVerify.middleware");
 
 // create role
 MainRolesRouter.route("/:server_id/roles").post(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   rolePolicies.updateRole,
-  // redis and UserPresentVerification needs work in order for this to work.
+  // redis and serverMemberVerify needs work in order for this to work.
   checkRolePerms('Roles', MANAGE_ROLES),
   require("./createRole")
 );
@@ -21,7 +21,7 @@ MainRolesRouter.route("/:server_id/roles").post(
 // update role position
 MainRolesRouter.route("/:server_id/roles").patch(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Roles', MANAGE_ROLES),
   require("./updateRolePosition")
 );
@@ -29,7 +29,7 @@ MainRolesRouter.route("/:server_id/roles").patch(
 // update role
 MainRolesRouter.route("/:server_id/roles/:role_id").patch(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   rolePolicies.updateRole,
   checkRolePerms('Roles', MANAGE_ROLES),
   require("./updateRole")
@@ -38,7 +38,7 @@ MainRolesRouter.route("/:server_id/roles/:role_id").patch(
 // delete role
 MainRolesRouter.route("/:server_id/roles/:role_id").delete(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Roles', MANAGE_ROLES),
   require("./deleteRole")
 );
@@ -47,14 +47,14 @@ MainRolesRouter.route("/:server_id/roles/:role_id").delete(
 // applyRoleToMember
 MainRolesRouter.route("/:server_id/members/:member_id/roles/:role_id").patch(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Roles', MANAGE_ROLES),
   require("./applyRoleToMember")
 );
 // removeRoleFromMember
 MainRolesRouter.route("/:server_id/members/:member_id/roles/:role_id").delete(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Roles', MANAGE_ROLES),
   require("./removeRoleFromMember")
 );

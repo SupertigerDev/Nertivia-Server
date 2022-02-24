@@ -2,7 +2,6 @@ const botsRouter = require("express").Router();
 
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
-const UserPresentVerification = require("../../middlewares/UserPresentVerification");
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 const { roles: {ADMIN} } = require("../../utils/rolePermConstants");
 import { rateLimit } from '../../middlewares/rateLimit.middleware';
@@ -17,6 +16,7 @@ import updateBot from './updateBot';
 import deleteBot from './deleteBot';
 import getCommands from './getCommands';
 import resetBotToken from './resetBotToken';
+import { serverMemberVerify } from '../../middlewares/serverMemberVerify.middleware';
 
 // create a bot
 botsRouter.route("/").post(
@@ -59,11 +59,11 @@ botsRouter.route("/:bot_id").get(
   getBot
 );
 
-// join bot to a server
+// add bot to a server
 botsRouter.route("/:bot_id/servers/:server_id").put(
   authenticate(),
   rateLimit({name: 'bot_join', expire: 60, requestsLimit: 5 }),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Admin', ADMIN),
   botJoin
 );

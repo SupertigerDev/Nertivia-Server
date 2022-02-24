@@ -3,10 +3,10 @@ import {ServerMembers} from "../../../models/ServerMembers";
 import { CHANNEL_MUTED } from "../../../ServerEventNames";
 
 module.exports = async (req, res, next) => {
-  const { channel_id, server_id } = req.params;
+  const { channelId, serverId } = req.params;
 
   // check if channel exists in server.
-  if (req.channel.server_id !== server_id) {
+  if (req.channel.server_id !== serverId) {
     return res.status(404).json({ message: "Channel not found." });
   }
 
@@ -19,15 +19,15 @@ module.exports = async (req, res, next) => {
 
   await ServerMembers.updateOne(
     { member: req.user._id, server_id: req.channel.server_id },
-    { $addToSet: { muted_channels: channel_id } }
+    { $addToSet: { muted_channels: channelId } }
   );
   await Notifications.deleteMany({
-    channelID: channel_id,
+    channelID: channelId,
     recipient: req.user.id
   });
 
   res.json({ message: "Channel muted." });
 
   const io = req.io;
-  io.in(req.user.id).emit(CHANNEL_MUTED, {channelID: channel_id});
+  io.in(req.user.id).emit(CHANNEL_MUTED, {channelID: channelId});
 };

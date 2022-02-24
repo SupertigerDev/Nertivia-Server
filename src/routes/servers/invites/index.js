@@ -2,8 +2,8 @@ const MainInviteRouter = require("express").Router();
 
 // Middleware
 const { authenticate } = require("../../../middlewares/authenticate");
-const UserPresentVerification = require("../../../middlewares/UserPresentVerification");
 import { rateLimit } from "../../../middlewares/rateLimit.middleware";
+import { serverMemberVerify } from "../../../middlewares/serverMemberVerify.middleware";
 
 const reCaptchaPolicy = require("../../../policies/reCaptchaPolicie");
 const forceCaptcha = require("../../../policies/forceCaptcha");
@@ -11,7 +11,7 @@ const forceCaptcha = require("../../../policies/forceCaptcha");
 // Invites
 MainInviteRouter.route("/:server_id/invites").get(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   require("./getInvites")
 );
 
@@ -29,14 +29,14 @@ MainInviteRouter.route("/invite/:invite_code").delete(
 // Create Custom Invite
 MainInviteRouter.route("/:server_id/invites/custom").post(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   require("./createCustomInvite")
 );
 
 // Create Invite
 MainInviteRouter.route("/:server_id/invite").post(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   require("./createInvite")
 );
 

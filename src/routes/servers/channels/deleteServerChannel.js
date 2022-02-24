@@ -10,7 +10,7 @@ const redis = require("../../../redis");
 module.exports = async (req, res, next) => {
 
   const server = req.server;
-  const channelID = req.params.channel_id;
+  const channelID = req.params.channelId;
   // check if its default channel
   if (req.server.default_channel_id.toString() === channelID.toString()) {
     return res.status(403).json({ message: "Cannot delete default channel." });

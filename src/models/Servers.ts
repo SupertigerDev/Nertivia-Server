@@ -5,7 +5,8 @@ interface UserBan {
   reason: string
 }
 
-interface Server {
+export interface Server {
+  _id: string;
   verified: boolean
   name: string
   avatar: string
@@ -57,5 +58,5 @@ schema.pre('save', async function(next) {
   next();
 })
 
-export const Servers = model("servers", schema);
+export const Servers = model<Server>("servers", schema);
 

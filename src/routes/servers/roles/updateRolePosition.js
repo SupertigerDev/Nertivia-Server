@@ -13,7 +13,7 @@ module.exports = async (req, res, next) => {
     if (order <= req.member.highestRolePosition) {
       return res
       .status(403)
-      .json({ message: "Your Role priority is too low to perfom this action." });
+      .json({ message: "Your Role priority is too low to perform this action." });
     }
   }
 

@@ -5,8 +5,8 @@ const { authenticate } = require("../../middlewares/authenticate");
 const permissions = require('../../utils/rolePermConstants');
 const checkRolePerms = require('../../middlewares/checkRolePermissions');
 import { rateLimit } from "../../middlewares/rateLimit.middleware";
+import { serverMemberVerify } from "../../middlewares/serverMemberVerify.middleware";
 // Policies
-const UserPresentVerification = require ('../../middlewares/UserPresentVerification')
 const serverPolicy = require("../../policies/ServerPolicies");
 
 // Create
@@ -21,7 +21,7 @@ MainServerRouter.route('/').post(
 MainServerRouter.route('/:server_id').patch(
   authenticate({allowBot: true}),
   serverPolicy.updateServer,
-  UserPresentVerification,
+  serverMemberVerify,
   require("./updateServer")
 );
 
@@ -29,14 +29,14 @@ MainServerRouter.route('/:server_id').patch(
 // mute server
 MainServerRouter.route('/:server_id/mute').put(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   require("./muteServer")
 );
 
 // Get Server
 MainServerRouter.route('/:server_id').get(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   require("./getServer")
 );
 
@@ -44,7 +44,7 @@ MainServerRouter.route('/:server_id').get(
 // Leave Server
 MainServerRouter.route('/:server_id').delete(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   rateLimit({name: 'leave_server', expire: 60, requestsLimit: 10 }),
   require("./leaveServer")
 );
@@ -52,7 +52,7 @@ MainServerRouter.route('/:server_id').delete(
 // Delete server
 MainServerRouter.route('/:server_id/delete').post(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   rateLimit({name: 'delete_server', expire: 60, requestsLimit: 10 }),
   require("./deleteServer")
 );
@@ -60,7 +60,7 @@ MainServerRouter.route('/:server_id/delete').post(
 // kick member
 MainServerRouter.route('/:server_id/members/:id').delete(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Kick', permissions.roles.KICK_USER),
   require("./kickMember")
 );
@@ -69,7 +69,7 @@ MainServerRouter.route('/:server_id/members/:id').delete(
 //http://192.168.1.8/api/servers/6583302963345756160/bans
 MainServerRouter.route('/:server_id/bans').get(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./bannedMembers")
 )
@@ -78,7 +78,7 @@ MainServerRouter.route('/:server_id/bans').get(
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:id').put(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./banMember")
 )
@@ -87,7 +87,7 @@ MainServerRouter.route('/:server_id/bans/:id').put(
 // http://192.168.1.8/api/servers/6583302963345756160/bans/184288888616859408
 MainServerRouter.route('/:server_id/bans/:id').delete(
   authenticate({allowBot: true}),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Ban', permissions.roles.BAN_USER),
   require("./unBanMember")
 )

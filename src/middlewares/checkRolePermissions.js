@@ -2,32 +2,22 @@ const { containsPerm, roles: {ADMIN} } = require('../utils/rolePermConstants');
 module.exports = function (name, flag, sendError = true) {
   return async function (req, res, next) {
 
+    if (!req.server) next();
 
-    const server = req.server || req.channel.server;
-    if (!req.channel) {
-      if (!req.server) {
-        sendErrorMessage(req, res, `No server!`, sendError, next)
-        return;
-      }
-    } else if (!server) {
-      return next();
-    }
-    // owner always has the permission
-    const isCreator = server.creator === req.user._id
-    if (isCreator) {
-      return next();
-    }
+    const server = req.server;
 
-    if (req.member.permissions === undefined) {
+    // Owner always has the permission.
+    if (server.creator === req.user._id) return next();
+    
+
+    const hasPermission = containsPerm(req.member.permissions || 0, flag | ADMIN);
+    
+    if (!hasPermission) {
       sendErrorMessage(req, res, `Missing permission! (${name})`, sendError, next)
       return;
     }
-    if (containsPerm(req.member.permissions, flag | ADMIN)) {
-      return next();
-    } else {
-      sendErrorMessage(req, res, `Missing permission! (${name})`, sendError, next)
-      return;
-    }
+    
+    next();
   }
 }
 
