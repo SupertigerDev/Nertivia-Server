@@ -1,4 +1,4 @@
-import {getRedisInstance} from './redis/instance';
+import {client} from './common/redis';
 
 module.exports = {
 
@@ -30,7 +30,7 @@ module.exports = {
   },
   rateLimitIncr: async (key) => {
     const response = await multiWrapper(
-      getRedisInstance().multi()
+      client.multi()
       .incr(`rateLimit:${key}`)
       .pttl(`rateLimit:${key}`)
     );
@@ -38,19 +38,6 @@ module.exports = {
     return response.result;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function multiWrapper(multi) {
   return new Promise(resolve => {
@@ -65,7 +52,7 @@ function multiWrapper(multi) {
 
 function wrapper(method, ...args) {
   return new Promise(resolve => {
-    getRedisInstance()[method](args, (error, result)=> {
+    client[method](args, (error, result)=> {
       if (error) {
         return resolve({ok: false, error});
       }
