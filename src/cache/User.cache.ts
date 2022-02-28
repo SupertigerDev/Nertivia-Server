@@ -48,6 +48,13 @@ export async function addConnectedUser(opts: AddConnectedUserOpts) {
   await multi.exec();
 }
 
+// 0: empty
+// 1: 1 connected user
+export async function getSocketCountByUserId(userId: string) {
+  const key = keys.userSocketIdSet(userId);
+  const count = await redis.sCard(key)
+  return count;
+}
 
 export async function getUserBySocketId(socketId: string): Promise<ReturnType<PartialUser>> {
   const key = keys.socketUserIdString(socketId);
@@ -153,8 +160,13 @@ export async function authenticate (_opts?: AuthOptions): Promise<ReturnType<Par
       return[null, "Invalid Token."]
     }
 
-    const isBanned = await checkIPBanned(user.id, opts.userIp!, user.ip);
-    if (isBanned) {
+    const isSuspended = user.banned;
+    if (isSuspended) {
+      return [null, "You are suspended from Nertivia."];
+    }
+
+    const isIPBanned = await checkIPBanned(user.id, opts.userIp!, user.ip);
+    if (isIPBanned) {
       return [null, "IP is banned."];
     }
     if (user.bot && !opts.allowBot) {
