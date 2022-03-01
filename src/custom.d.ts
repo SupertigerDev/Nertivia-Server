@@ -9,7 +9,7 @@ declare global {
     export interface Request {
       io: socketio.Server,
       userIp: string,
-      user: Partial<CacheUser> & {_id: string, id: string},
+      user: CacheUser,
       uploadFile: uploadFile,
       rateLimited: boolean,
       message_id: string,

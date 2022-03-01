@@ -1,18 +1,28 @@
 import { client as redis } from "../common/redis";
-import { User } from "../models/Users";
-import { getUserByIdUnsafe } from "../services/Users";
+import { getUserForCache } from "../services/Users";
 import * as keys from './keys.cache';
 
 import {decodeToken} from '../utils/JWT';
 import * as IPAddress from '../services/IPAddress';
 
-export type CacheUser = User & {
-  googleDriveCredentials?: any
+export type CacheUser = {
+  googleDriveCredentials?: any,
+  GDriveRefreshToken?: string,
+  _id: string,
+  id: string
+  passwordVersion: number;
+  username: string,
+  tag: string,
+  avatar?: string;
+  bot: string
+  ip: string,
+  badges: number,
+  banned: boolean
+  readTerms: boolean
 }
 
-type PartialUser = Partial<CacheUser> & {_id: string, id: string};
 interface AddConnectedUserOpts {
-  user: PartialUser;
+  userId: string;
   socketId: string
   presence: number,
   customStatus: string,
@@ -31,16 +41,12 @@ export async function addConnectedUser(opts: AddConnectedUserOpts) {
 
   const multi = redis.multi();
 
-  const userKey = keys.authenticatedUserString(opts.user.id);
-  const userPresenceKey = keys.userPresenceString(opts.user.id);
-  const socketIdsKey = keys.userSocketIdSet(opts.user.id)
+  const userPresenceKey = keys.userPresenceString(opts.userId);
+  const socketIdsKey = keys.userSocketIdSet(opts.userId);
   const socketUserIdKey = keys.socketUserIdString(opts.socketId);
 
-  // Set if not exists.
-  multi.setNX(userKey, JSON.stringify(opts.user));
-  multi.expire(userKey, USER_EXPIRE)
   multi.sAdd(socketIdsKey, opts.socketId);
-  multi.set(socketUserIdKey, opts.user.id);
+  multi.set(socketUserIdKey, opts.userId);
   multi.set(userPresenceKey, JSON.stringify({
     status: opts.presence,
     custom: opts.customStatus
@@ -56,7 +62,7 @@ export async function getSocketCountByUserId(userId: string) {
   return count;
 }
 
-export async function getUserBySocketId(socketId: string): Promise<ReturnType<PartialUser>> {
+export async function getUserBySocketId(socketId: string): Promise<ReturnType<CacheUser>> {
   const key = keys.socketUserIdString(socketId);
   const userId = await redis.get(key);
   if (!userId) return [null, "User is not connected."];
@@ -74,14 +80,14 @@ export async function updatePresence(userId: string, update: Partial<Presence>) 
 }
 
 
-export async function getUser(userId: string): Promise<ReturnType<PartialUser>> {
+export async function getUser(userId: string): Promise<ReturnType<CacheUser>> {
   // check in cache
   const userKey = keys.authenticatedUserString(userId);
   const userStringified = await redis.get(userKey);
   if (userStringified) return [JSON.parse(userStringified), null];
   
   // check in database
-  const dbUser = await getUserByIdUnsafe(userId).lean();
+  const dbUser = await getUserForCache(userId).lean();
   if (!dbUser) {
     return [null, "User not found in the database. (User.cache.ts)"];
   }
@@ -143,7 +149,7 @@ const defaultAuthOptions: AuthOptions = {
   skipTerms: false
 }
 
-export async function authenticate (_opts?: AuthOptions): Promise<ReturnType<PartialUser>> {
+export async function authenticate (_opts?: AuthOptions): Promise<ReturnType<CacheUser>> {
   const opts = {...defaultAuthOptions, ..._opts};
     const token = process.env.JWT_HEADER + opts.token;
     const tokenData = await decodeToken(token).catch(() => {});

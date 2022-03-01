@@ -5,8 +5,8 @@ import * as rateLimitCache from '../../cache/rateLimit.cache';
 
 
 // emit and disconnect.
-function disconnect(client: Socket, message: string) {
-  client.emit(AUTHENTICATION_ERROR, message);
+function disconnect(client: Socket, message: string | null) {
+  client.emit(AUTHENTICATION_ERROR, message || "Something went wrong. try again later.");
   client.disconnect(true);
 }
 
@@ -21,21 +21,28 @@ export async function onAuthentication(client: Socket, data: Data) {
 
 
   const ttl = await rateLimitCache.incrementAndCheck({
+    name: "auth_event",
     userIp,
     expire: 120,
-    name: "auth_event",
     requestsLimit: 20
   })
   
   if (ttl) return disconnect(client, "You are rate limited.");
 
+  // TODO: fix accept TOS not working in the future.
   const [user, error] = await UserCache.authenticate({
     token: data.token,
     allowBot: true,
     userIp,
   })
-  if (error) return disconnect(client, error);
-
+  if (error || !user) return disconnect(client, error);
+  
+  await UserCache.addConnectedUser({
+    socketId: client.id,
+    userId: user.id,
+    customStatus: "",
+    presence: 0
+  })
 
 
   client.emit(AUTHENTICATED, {

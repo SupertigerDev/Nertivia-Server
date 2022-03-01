@@ -5,7 +5,7 @@ import {ServerMembers} from "./models/ServerMembers";
 import { ServerRoles } from "./models/ServerRoles";
 import { Channels } from "./models/Channels";
 import {BlockedUsers} from "./models/BlockedUsers";
-import { addConnectedUser, getUserInVoiceByUserId, getVoiceUsersFromServerIds, getConnectedUserBySocketID, getConnectedUserCount, getPresenceByUserId, getProgramActivityByUserId, removeConnectedUser, removeConnectedUser, removeUserFromVoice, setProgramActivity, voiceUserExists, checkRateLimited } from "./newRedisWrapper";
+import { addConnectedUser, getConnectedUserCount, checkRateLimited } from "./newRedisWrapper";
 import { Notifications } from "./models/Notifications";
 import {BannedIPs} from "./models/BannedIPs";
 import {CustomEmojis} from './models/CustomEmojis'
@@ -17,7 +17,7 @@ import {Socket} from 'socket.io'
 
 import { getIOInstance } from "./socket/socket";
 import getUsrDetails from './utils/getUserDetails';
-import { AUTHENTICATED, AUTHENTICATION_ERROR, USER_CALL_LEFT, USER_PROGRAM_ACTIVITY_CHANGED, VOICE_RETURN_SIGNAL_RECEIVED, VOICE_SIGNAL_RECEIVED } from "./ServerEventNames";
+import { AUTHENTICATED, AUTHENTICATION_ERROR } from "./ServerEventNames";
 
 
 
@@ -339,98 +339,98 @@ module.exports = async client => {
   });
 
 
-  client.on("voice:send_signal", async ({channelId, signalToUserId, signal}) => {
-    const [requester] = await getConnectedUserBySocketID(client.id);
-    const [isRequesterInVoice] = await voiceUserExists(channelId, requester.id);
-    const [userToSignal] = await getUserInVoiceByUserId(signalToUserId);
-    if (!isRequesterInVoice) {
-      console.log("You must join the voice channel.")
-      return;
-    }
-    if (userToSignal?.channelId !== channelId) {
-      console.log("Recipient must join the voice channel.")
-      return;
-    }
-    getIOInstance().to(userToSignal.socketId).emit(VOICE_SIGNAL_RECEIVED, {channelId, requesterId: requester.id, signal})
-  })
+  // client.on("voice:send_signal", async ({channelId, signalToUserId, signal}) => {
+  //   const [requester] = await getConnectedUserBySocketID(client.id);
+  //   const [isRequesterInVoice] = await voiceUserExists(channelId, requester.id);
+  //   const [userToSignal] = await getUserInVoiceByUserId(signalToUserId);
+  //   if (!isRequesterInVoice) {
+  //     console.log("You must join the voice channel.")
+  //     return;
+  //   }
+  //   if (userToSignal?.channelId !== channelId) {
+  //     console.log("Recipient must join the voice channel.")
+  //     return;
+  //   }
+  //   getIOInstance().to(userToSignal.socketId).emit(VOICE_SIGNAL_RECEIVED, {channelId, requesterId: requester.id, signal})
+  // })
 
-  client.on("voice:send_return_signal", async ({channelId, signalToUserId, signal}) => {
-    const [requester] = await getConnectedUserBySocketID(client.id);
-    const [isRequesterInVoice] = await voiceUserExists(channelId, requester.id);
-    const [userToSignal] = await getUserInVoiceByUserId(signalToUserId);
-    if (!isRequesterInVoice) {
-      console.log("You must join the voice channel.")
-      return;
-    }
-    if (userToSignal?.channelId !== channelId) {
-      console.log("Recipient must join the voice channel.")
-      return;
-    }
-    getIOInstance().to(userToSignal.socketId).emit(VOICE_RETURN_SIGNAL_RECEIVED, {channelId, requesterId: requester.id, signal})
-  })
+  // client.on("voice:send_return_signal", async ({channelId, signalToUserId, signal}) => {
+  //   const [requester] = await getConnectedUserBySocketID(client.id);
+  //   const [isRequesterInVoice] = await voiceUserExists(channelId, requester.id);
+  //   const [userToSignal] = await getUserInVoiceByUserId(signalToUserId);
+  //   if (!isRequesterInVoice) {
+  //     console.log("You must join the voice channel.")
+  //     return;
+  //   }
+  //   if (userToSignal?.channelId !== channelId) {
+  //     console.log("Recipient must join the voice channel.")
+  //     return;
+  //   }
+  //   getIOInstance().to(userToSignal.socketId).emit(VOICE_RETURN_SIGNAL_RECEIVED, {channelId, requesterId: requester.id, signal})
+  // })
 
 
 
-  client.on("disconnect", async () => {
-    if (!client.auth) return;
-    const [user, error] = await getConnectedUserBySocketID(client.id);
-    if (!user || error) return;
-    const [presence] = await getPresenceByUserId(user.id);
+  // client.on("disconnect", async () => {
+  //   if (!client.auth) return;
+  //   const [user, error] = await getConnectedUserBySocketID(client.id);
+  //   if (!user || error) return;
+  //   const [presence] = await getPresenceByUserId(user.id);
 
-    const [response] = await removeConnectedUser(user.id, client.id);
+  //   const [response] = await removeConnectedUser(user.id, client.id);
 
-    const [callingUserDetails] = await getUserInVoiceByUserId(user.id);
-    if (callingUserDetails && callingUserDetails.socketId === client.id) {
-      await removeUserFromVoice(user.id)
-      if (callingUserDetails.serverId) {
-        getIOInstance().in("server:" + callingUserDetails.serverId).emit(USER_CALL_LEFT, {channelId: callingUserDetails.channelId, userId: user.id})
-      }
-    }
+  //   const [callingUserDetails] = await getUserInVoiceByUserId(user.id);
+  //   if (callingUserDetails && callingUserDetails.socketId === client.id) {
+  //     await removeUserFromVoice(user.id)
+  //     if (callingUserDetails.serverId) {
+  //       getIOInstance().in("server:" + callingUserDetails.serverId).emit(USER_CALL_LEFT, {channelId: callingUserDetails.channelId, userId: user.id})
+  //     }
+  //   }
 
-    // if all users have gone offline, emit offline status to friends.
-    if (response === 1 && presence?.[1] !== '0') {
-      emitUserStatus(user.id, user._id, 0, getIOInstance());
-    } else {
-      // remove program activity status if the socket id matches
-      const [programActivity, error] = await getProgramActivityByUserId(user.id);
-      if (!programActivity || error) return;
-      const { socketID } = JSON.parse(programActivity);
-      if (socketID === client.id) {
-        await setProgramActivity(user.id, null);
-        emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { user_id: user.id }, getIOInstance())
-      }
+  //   // if all users have gone offline, emit offline status to friends.
+  //   if (response === 1 && presence?.[1] !== '0') {
+  //     emitUserStatus(user.id, user._id, 0, getIOInstance());
+  //   } else {
+  //     // remove program activity status if the socket id matches
+  //     const [programActivity, error] = await getProgramActivityByUserId(user.id);
+  //     if (!programActivity || error) return;
+  //     const { socketID } = JSON.parse(programActivity);
+  //     if (socketID === client.id) {
+  //       await setProgramActivity(user.id, null);
+  //       emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { user_id: user.id }, getIOInstance())
+  //     }
 
-    }
-  });
+  //   }
+  // });
 
-  // client.on("notification:dismiss", data =>
-  //   // events.notificationDismiss(data, client, getIOInstance())
-  // );
+  // // client.on("notification:dismiss", data =>
+  // //   // events.notificationDismiss(data, client, getIOInstance())
+  // // );
 
-  client.on("programActivity:set", async data => {
-    const [user, error] = await getConnectedUserBySocketID(client.id);
+  // client.on("programActivity:set", async data => {
+  //   const [user, error] = await getConnectedUserBySocketID(client.id);
 
-    if (error || !user) return;
-    if (data) {
-      if (data.name) {
-        data.name = data.name.substring(0, 100)
-      }
-      if (data.status) {
-        data.status = data.status.substring(0, 100)
-      }
-      const [result] = await setProgramActivity(user.id, { name: data.name, status: data.status, socketID: client.id })
-      const json = JSON.parse(result[0])
-      // only emit if: 
-      // json is empty
-      // json is not the same.
-      if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
-        emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { name: data.name, status: data.status, user_id: user.id }, getIOInstance())
-      }
-    } else {
-      await setProgramActivity(user.id, null);
-      emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { user_id: user.id }, getIOInstance())
-    }
-  })
+  //   if (error || !user) return;
+  //   if (data) {
+  //     if (data.name) {
+  //       data.name = data.name.substring(0, 100)
+  //     }
+  //     if (data.status) {
+  //       data.status = data.status.substring(0, 100)
+  //     }
+  //     const [result] = await setProgramActivity(user.id, { name: data.name, status: data.status, socketID: client.id })
+  //     const json = JSON.parse(result[0])
+  //     // only emit if: 
+  //     // json is empty
+  //     // json is not the same.
+  //     if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
+  //       emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { name: data.name, status: data.status, user_id: user.id }, getIOInstance())
+  //     }
+  //   } else {
+  //     await setProgramActivity(user.id, null);
+  //     emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { user_id: user.id }, getIOInstance())
+  //   }
+  // })
 };
 
 

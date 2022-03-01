@@ -1,6 +1,6 @@
 import {Schema, model} from 'mongoose';
 
-interface Friend {
+export interface Friend {
     requester: any;
     recipient: any;
     status: number
