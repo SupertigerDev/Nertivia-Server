@@ -5,7 +5,7 @@ import {ServerMembers} from "./models/ServerMembers";
 import { ServerRoles } from "./models/ServerRoles";
 import { Channels } from "./models/Channels";
 import {BlockedUsers} from "./models/BlockedUsers";
-import { addConnectedUser, getConnectedUserCount, checkRateLimited } from "./newRedisWrapper";
+import { addConnectedUser, getConnectedUserCount, checkRateLimited, getVoiceUsersFromServerIds } from "./newRedisWrapper";
 import { Notifications } from "./models/Notifications";
 import {BannedIPs} from "./models/BannedIPs";
 import {CustomEmojis} from './models/CustomEmojis'

@@ -1,8 +1,8 @@
-import {Schema, model} from 'mongoose';
+import {Schema, model, Types} from 'mongoose';
 
 export interface Friend {
-    requester: any;
-    recipient: any;
+    requester: Types.ObjectId;
+    recipient: Types.ObjectId;
     status: number
 }
 

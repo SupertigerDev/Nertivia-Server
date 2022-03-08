@@ -1,4 +1,4 @@
-import {model, Schema} from 'mongoose';
+import {model, Schema, Types} from 'mongoose';
 
 interface UserBan {
   user: any,
@@ -9,9 +9,9 @@ export interface Server {
   _id: string;
   verified: boolean
   name: string
-  avatar: string
+  avatar?: string
   banner: string
-  creator: any
+  creator: Types.ObjectId
   server_id: string
   created: number
   default_channel_id: string

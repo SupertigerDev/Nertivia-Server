@@ -3,7 +3,7 @@ import {model, Schema} from 'mongoose';
 interface ServerRole {
   name: string;
   id: string
-  color: boolean;
+  color: string;
   hideRole: boolean;
   permissions: number
   server: any

@@ -37,8 +37,8 @@ export interface User {
   passwordVersion: number,
   id: string
   lastSeen: number,
-  avatar: string,
-  banner: string
+  avatar?: string,
+  banner?: string
   custom_status: string
   status: number,
   type: string
@@ -233,7 +233,7 @@ schema.pre('save', async function (next) {
   }
 })
 
-schema.methods.isValidPassword = async function (newPassword) {
+schema.methods.isValidPassword = async function (newPassword: string) {
   try {
     return await bcrypt.compare(newPassword, this.password);
   } catch (error: any) {

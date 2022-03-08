@@ -8,7 +8,7 @@ export interface AdminAction {
   admin: any,
   user: any,
   date: number,
-  expireAt: number
+  expireAt: Date
 }
 
 const schema = new Schema<AdminAction>({

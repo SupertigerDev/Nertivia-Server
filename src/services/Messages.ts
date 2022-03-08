@@ -15,6 +15,7 @@ import { insertNotification } from './Notifications';
 import { updateMemberLastSeen } from './ServerMembers';
 import { getUsersByIds } from './Users';
 import { OneOf } from '../utils/OneOf';
+import removeDuplicatesFromArray from '../utils/removeDuplicatesFromArray';
 
 
 
@@ -414,11 +415,6 @@ function matchAllRegexGroups(regex: RegExp, content: string): string[] {
     matchedArr.push(match[1])
   }
   return matchedArr;
-}
-
-// remove duplicates from string array
-function removeDuplicatesFromArray(values: string[]): string[] {
-  return [...new Set(values)];
 }
 
 

@@ -1,5 +1,22 @@
+import mongoose from "mongoose";
 import { ServerMembers } from "../models/ServerMembers"
 import { ServerRoles } from "../models/ServerRoles"
+import { User } from "../models/Users";
+
+
+
+export const getMembersByServerObjectIds = async (serverObjectIds: mongoose.Types.ObjectId[] | string[]) => {
+  return await ServerMembers.find(
+    { server: { $in: serverObjectIds } },
+    { _id: 0 }
+  )
+    .select("+roles")
+    .populate<{member: User}>({
+      path: "member",
+      select: "username tag avatar id member -_id bot botPrefix"
+    })
+}
+
 
 interface LastSeenOptions {
   channelId: string

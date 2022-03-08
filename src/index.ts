@@ -40,11 +40,8 @@ function start() {
 	
 	function connectMongoDB() {
 		Log.info("Connecting to MongoDB...")
-		const mongoOptions: mongoose.ConnectionOptions = {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-			useFindAndModify: false,
-			useCreateIndex: true
+		const mongoOptions: mongoose.ConnectOptions = {
+			
 		};
 		mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, err => {
 			if (err) throw err;

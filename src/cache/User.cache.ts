@@ -28,6 +28,7 @@ interface AddConnectedUserOpts {
   customStatus: string,
 }
 interface Presence {
+  userId: string;
   status: number;
   custom: string;
 }
@@ -48,6 +49,7 @@ export async function addConnectedUser(opts: AddConnectedUserOpts) {
   multi.sAdd(socketIdsKey, opts.socketId);
   multi.set(socketUserIdKey, opts.userId);
   multi.set(userPresenceKey, JSON.stringify({
+    userId: opts.userId,
     status: opts.presence,
     custom: opts.customStatus
   }));
@@ -76,7 +78,28 @@ export async function updatePresence(userId: string, update: Partial<Presence>) 
   const presenceStringified = await redis.get(key);
   const presence = JSON.parse(presenceStringified || "{}");
 
-  await redis.set(key, JSON.stringify({...presence, ...update}));
+  await redis.set(key, JSON.stringify({...presence, ...update, userId}));
+}
+
+export async function getPresenceByUserIds (userIds: string[]) {
+  const multi = redis.multi();
+  for (let i = 0; i < userIds.length; i++) {
+    const userId = userIds[i];
+    const key = keys.userPresenceString(userId);
+    multi.get(key);
+  }
+  const presenceStringifiedArray = await multi.exec();
+  return parseJSONStringArray<Presence>(presenceStringifiedArray)
+}
+
+function parseJSONStringArray<T>(arr: any[]): T[] {
+  let array: T[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    const stringJSON = arr[i];
+    if (!stringJSON) continue;
+    array.push(JSON.parse(stringJSON));
+  }
+  return array;
 }
 
 
