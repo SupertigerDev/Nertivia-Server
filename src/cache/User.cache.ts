@@ -32,13 +32,16 @@ interface Presence {
   status: number;
   custom: string;
 }
+interface ProgramActivity {
+  status: string;
+  name: string;
+}
 type ReturnType<T> = [T | null, string | null];
 
 // 1 hour.
 const USER_EXPIRE = 60*60
 
 export async function addConnectedUser(opts: AddConnectedUserOpts) {
-
 
   const multi = redis.multi();
 
@@ -80,6 +83,20 @@ export async function updatePresence(userId: string, update: Partial<Presence>) 
 
   await redis.set(key, JSON.stringify({...presence, ...update, userId}));
 }
+export async function updateProgramActivity(userId: string, update: Partial<ProgramActivity> | null) {
+  const key = keys.userProgramActivityString(userId);
+
+  if (!update) {
+    await redis.del(key);
+    return;
+  }
+
+  const programActivityStringified = await redis.get(key);
+  const programActivity = JSON.parse(programActivityStringified || "{}");
+
+  await redis.set(key, JSON.stringify({...programActivity, ...update, userId}));
+  await redis.expire(key, 240); // 4 minutes
+}
 
 export async function getPresenceByUserIds (userIds: string[]) {
   const multi = redis.multi();
@@ -90,6 +107,16 @@ export async function getPresenceByUserIds (userIds: string[]) {
   }
   const presenceStringifiedArray = await multi.exec();
   return parseJSONStringArray<Presence>(presenceStringifiedArray)
+}
+export async function getProgramActivityByUserIds (userIds: string[]) {
+  const multi = redis.multi();
+  for (let i = 0; i < userIds.length; i++) {
+    const userId = userIds[i];
+    const key = keys.userProgramActivityString(userId);
+    multi.get(key);
+  }
+  const programActivityStringifiedArray = await multi.exec();
+  return parseJSONStringArray<ProgramActivity>(programActivityStringifiedArray)
 }
 
 function parseJSONStringArray<T>(arr: any[]): T[] {

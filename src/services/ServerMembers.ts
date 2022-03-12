@@ -4,6 +4,20 @@ import { ServerRoles } from "../models/ServerRoles"
 import { User } from "../models/Users";
 
 
+export const getLastSeenServerChannels = async (userObjectId: mongoose.Types.ObjectId | string) => {
+  const members = await ServerMembers.find({
+    member: userObjectId,
+    last_seen_channels: { $exists: true, $not: { $size: 0 } }
+  }).select("last_seen_channels").lean();
+
+  let lastSeenServerChannels: Record<string, number> = {};
+  for (let index = 0; index < members.length; index++) {
+    const member = members[index];
+    const lastSeenChannels = member.last_seen_channels;
+    lastSeenServerChannels = {...lastSeenServerChannels, ...lastSeenChannels}
+  }
+  return lastSeenServerChannels;
+}
 
 export const getMembersByServerObjectIds = async (serverObjectIds: mongoose.Types.ObjectId[] | string[]) => {
   return await ServerMembers.find(
@@ -88,3 +102,31 @@ export const memberPermissionDetails = async (serverObjectId: string, userObject
   return [{permissions, highestRolePosition}, null];
   
 } 
+
+
+// Muted servers and server channels
+export const mutedServersAndChannels = async (userObjectId: string | mongoose.Types.ObjectId) => {
+  const results = await ServerMembers.find(
+    {
+      member: userObjectId,
+      $or: [
+        { muted_channels: { $exists: true, $not: { $size: 0 } } },
+        { muted: { $exists: true, $ne: 0 } }
+      ]
+    },
+    { _id: 0 }
+  ).select("muted_channels muted server_id");
+  let mutedChannels: string[] = [];
+  let mutedServers = [];
+
+  for (let index = 0; index < results.length; index++) {
+    const member = results[index]
+    if (member.muted_channels?.length) {
+      mutedChannels = [...mutedChannels, ...member.muted_channels]
+    }
+    if (member.muted) {
+      mutedServers.push({ muted: member.muted, server_id: member.server_id });
+    }
+  }
+  return {mutedChannels, mutedServers};
+}

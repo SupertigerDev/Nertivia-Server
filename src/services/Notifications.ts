@@ -1,6 +1,23 @@
 import { Notifications } from "../models/Notifications";
 import { unmutedServerChannelMembers } from "./ServerMembers";
 
+
+
+
+export const getUserNotifications = async (userId: string) => {
+  return await Notifications.find({ recipient: userId })
+  .select(
+    "mentioned type sender lastMessageID count recipient channelId -_id"
+  )
+  .populate({
+    path: "sender",
+    select: "avatar username id tag -_id"
+  })
+  .lean();
+}
+
+
+
 interface InsertNotificationOptions {
   channelId: string,
   messageId: string,

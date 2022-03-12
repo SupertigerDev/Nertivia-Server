@@ -5,10 +5,10 @@ import * as rateLimitCache from '../../cache/rateLimit.cache';
 import { getUserForSocketAuth } from "../../services/Users";
 import { Server } from "../../models/Servers";
 import { getChannelsByServerObjectIds, getOpenedDmChannels } from "../../services/Channels";
-import { getMembersByServerObjectIds } from "../../services/ServerMembers";
+import { getLastSeenServerChannels, getMembersByServerObjectIds, mutedServersAndChannels } from "../../services/ServerMembers";
 import { getRolesByServerObjectIds } from "../../services/Roles";
-import { Friend } from "../../models/Friends";
 import removeDuplicatesFromArray from "../../utils/removeDuplicatesFromArray";
+import { getUserNotifications } from "../../services/Notifications";
 
 
 // emit and disconnect.
@@ -25,7 +25,6 @@ export async function onAuthentication(client: Socket, data: Data) {
   if (!data.token) return disconnect(client, 'Token not provided.')
 
   const userIp = (client.handshake.headers["cf-connecting-ip"] || client.handshake.headers["x-forwarded-for"] || client.handshake.address)?.toString();
-
 
   const ttl = await rateLimitCache.incrementAndCheck({
     name: "auth_event",
@@ -50,30 +49,38 @@ export async function onAuthentication(client: Socket, data: Data) {
     customStatus: "",
     presence: 0
   })
-  client.join(cachedUser.id);
-
+  
   const user = await getUserForSocketAuth(cachedUser.id);
   if (!user) return disconnect(client, "User not found.");
-
-  const dms = await getOpenedDmChannels(user._id)
-
-
+  
+  client.join(cachedUser.id);
   const {servers, serverMembers, serverRoles} = await handleServers(user.servers)
 
+  joinServers(client, servers);
 
 
+  
   // contains friends and server members user Ids.
   const userIds = removeDuplicatesFromArray([
     ...user.friends.map(friend => friend.recipient.id),
     ...serverMembers.map(member => member.member.id)
   ]);
 
-  const presences = await UserCache.getPresenceByUserIds(userIds);
-
-  console.log(presences);
-
-
-
+  const [
+    dms,
+    presences,
+    programActivities,
+    {mutedChannels, mutedServers},
+    notifications,
+    lastSeenServerChannels
+  ] = await Promise.all([
+    getOpenedDmChannels(user._id),
+    UserCache.getPresenceByUserIds(userIds),
+    UserCache.getProgramActivityByUserIds(userIds),
+    mutedServersAndChannels(user._id),
+    getUserNotifications(user.id),
+    getLastSeenServerChannels(user._id)
+  ])
 
   client.emit(AUTHENTICATED, {
     user: {
@@ -91,13 +98,19 @@ export async function onAuthentication(client: Socket, data: Data) {
     },
     serverMembers,
     serverRoles,
+    dms,
+    mutedChannels,
+    mutedServers,
+    notifications,
+    presences,
+    programActivities,
     settings: {
       GDriveLinked: !!user?.GDriveRefreshToken,
     },
-    dms
+    lastSeenServerChannels,
+    // bannedUserIDs,
+    // callingChannelUserIds,
   })
-
-
 }
 
 async function handleServers(servers?: Server[]) {
@@ -121,3 +134,11 @@ async function handleServers(servers?: Server[]) {
   }
 
 }
+function joinServers(client: Socket, servers?: {server_id: string}[]) {
+  if (!servers?.length) return;
+  for (let i = 0; i < servers.length; i++) {
+    const server = servers[i];
+    client.join("server:" + server.server_id);
+  }
+}
+

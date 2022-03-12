@@ -2,6 +2,7 @@
 export const authenticatedUserString = (userId: string) => `user:${userId}`;
 
 export const userPresenceString = (userId: string) => `userPresence:${userId}`;
+export const userProgramActivityString = (userId: string) => `userProgramActivity:${userId}`;
 
 export const userActivityStatusString = (userId: string) => `userActivityStatus:${userId}`;
 

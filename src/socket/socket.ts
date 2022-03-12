@@ -33,3 +33,7 @@ export function getIOAdapter() {
 export function ioInstanceExists() {
   return IO_INSTANCE !== undefined;
 }
+
+export function emitToFriendsAndServers () {
+  
+}

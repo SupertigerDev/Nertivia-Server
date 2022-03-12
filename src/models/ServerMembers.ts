@@ -10,7 +10,7 @@ interface ServerMember {
   roles: any[]
   muted: number
   muted_channels: string[]
-  last_seen_channels: any
+  last_seen_channels: Record<string, number>
 }
 
 const schema = new Schema<ServerMember>({
