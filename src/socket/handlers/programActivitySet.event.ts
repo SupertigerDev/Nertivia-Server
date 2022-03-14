@@ -1,6 +1,7 @@
 import { Socket } from "socket.io";
 import * as UserCache from '../../cache/User.cache';
 import { USER_PROGRAM_ACTIVITY_CHANGED } from "../../ServerEventNames";
+import { emitToFriendsAndServers } from "../socket";
 interface Payload {
   name?: string;
   status?: string;
@@ -12,23 +13,26 @@ export async function onProgramActivitySet(client: Socket, data?: Payload) {
 
   if (!data) {
     await UserCache.updateProgramActivity(user.id, null);
-    emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { user_id: user.id }, getIOInstance())
+    emitToFriendsAndServers({
+      event: USER_PROGRAM_ACTIVITY_CHANGED,
+      data: { user_id: user.id },
+      userObjectId: user._id,
+    })
     return;
   }
 
+  const oldProgramActivity = await UserCache.getUserProgramActivity(user.id);
 
   const name = data.name?.substring(0, 100)
-
   const status = data.status?.substring(0, 100)
 
-  await UserCache.updateProgramActivity(user.id, { name: data.name, status: data.status, socketID: client.id });
+  await UserCache.updateProgramActivity(user.id, { name: data.name, status: data.status, socketId: client.id });
 
-  // only emit if: 
-  // json is empty
-  // json is not the same.
-  if ((json && (json.name !== data.name || json.status !== data.status)) || (!json)) {
-    emitToAll(USER_PROGRAM_ACTIVITY_CHANGED, user._id, { name: data.name, status: data.status, user_id: user.id }, getIOInstance())
+  if (name !== oldProgramActivity?.name || status !== oldProgramActivity?.status) {
+    emitToFriendsAndServers({
+      event: USER_PROGRAM_ACTIVITY_CHANGED,
+      data: { name: data.name, status: data.status, user_id: user.id },
+      userObjectId: user._id,
+    })
   }
-
-
 }

@@ -35,6 +35,7 @@ interface Presence {
 interface ProgramActivity {
   status: string;
   name: string;
+  socketId: string;
 }
 type ReturnType<T> = [T | null, string | null];
 
@@ -59,6 +60,45 @@ export async function addConnectedUser(opts: AddConnectedUserOpts) {
   await multi.exec();
 }
 
+export async function removeConnectedUser(socketId: string, userId: string) {
+
+  const multi = redis.multi();
+
+  const userPresenceKey = keys.userPresenceString(userId);
+  const socketIdsKey = keys.userSocketIdSet(userId);
+  const socketUserIdKey = keys.socketUserIdString(socketId);
+  const userProgramActivityKey = keys.userProgramActivityString(userId);
+
+
+  const [connectedSocketCount, programActivity] = await Promise.all([
+    getSocketCountByUserId(userId),
+    getProgramActivityByUserId(userId)
+  ]);
+  
+  const isProgramActivityBySocket = programActivity?.socketId === socketId;
+  const isLessThanOneConnected = connectedSocketCount <= 1
+
+  if (isLessThanOneConnected) {
+    multi.del(userPresenceKey);
+  }
+
+  if (isLessThanOneConnected && isProgramActivityBySocket) {
+    multi.del(userProgramActivityKey);
+  }
+
+  multi.del(socketUserIdKey)
+  multi.sRem(socketIdsKey, socketId);
+  await multi.exec();
+
+  return {
+    presenceRemoved: isLessThanOneConnected, 
+    programActivityRemoved: isProgramActivityBySocket
+  };
+
+}
+
+
+
 // 0: empty
 // 1: 1 connected user
 export async function getSocketCountByUserId(userId: string) {
@@ -67,9 +107,14 @@ export async function getSocketCountByUserId(userId: string) {
   return count;
 }
 
-export async function getUserBySocketId(socketId: string): Promise<ReturnType<CacheUser>> {
+
+export async function getUserIdBySocketId(socketId: string) {
   const key = keys.socketUserIdString(socketId);
-  const userId = await redis.get(key);
+  return await redis.get(key);
+}
+
+export async function getUserBySocketId(socketId: string): Promise<ReturnType<CacheUser>> {
+  const userId = await getUserIdBySocketId(socketId);
   if (!userId) return [null, "User is not connected."];
   return await getUser(userId);
 }
@@ -83,6 +128,15 @@ export async function updatePresence(userId: string, update: Partial<Presence>) 
 
   await redis.set(key, JSON.stringify({...presence, ...update, userId}));
 }
+
+export async function getUserProgramActivity(userId: string) {
+  const key = keys.userProgramActivityString(userId);
+  const programActivityStringified = await redis.get(key);
+  if (!programActivityStringified) return null;
+  const programActivity = JSON.parse(programActivityStringified);
+  return programActivity as ProgramActivity;
+}
+
 export async function updateProgramActivity(userId: string, update: Partial<ProgramActivity> | null) {
   const key = keys.userProgramActivityString(userId);
 
@@ -108,6 +162,14 @@ export async function getPresenceByUserIds (userIds: string[]) {
   const presenceStringifiedArray = await multi.exec();
   return parseJSONStringArray<Presence>(presenceStringifiedArray)
 }
+
+export async function getProgramActivityByUserId (userId: string) {
+  const key = keys.userProgramActivityString(userId);
+  const stringified = await redis.get(key);
+  if (!stringified) return null;
+  return JSON.parse(stringified) as ProgramActivity;
+}
+
 export async function getProgramActivityByUserIds (userIds: string[]) {
   const multi = redis.multi();
   for (let i = 0; i < userIds.length; i++) {

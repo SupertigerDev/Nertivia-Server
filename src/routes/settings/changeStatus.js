@@ -2,7 +2,7 @@
 
   import { Users } from "../../models/Users";
   const redis = require("../../redis");
-  const emitStatus = require("../../socketController/emitUserStatus");
+  import emitUserStatus from '../../socketController/emitUserStatus'
 const { getCustomStatusByUserId, changeStatusByUserId } = require("../../newRedisWrapper");
   
   module.exports = async (req, res, next) => {
@@ -16,13 +16,25 @@ const { getCustomStatusByUserId, changeStatusByUserId } = require("../../newRedi
     // change the status in redis.
     await changeStatusByUserId(req.user.id, status);
 
+
     // emit status to users.
     if (beforeStatus === 0) {
       const [customStatus] = await getCustomStatusByUserId(req.user.id)
-      emitStatus(req.user.id, req.user._id, status, io, false, customStatus?.[1], true)
+      emitUserStatus({
+        userId: req.user.id,
+        userObjectId: req.user._id,
+        emitOffline: false,
+        status,
+        customStatus: customStatus?.[1],
+        connected: true,
+      })
   
     } else {
-      emitStatus(req.user.id, req.user._id, status, io);
+      emitUserStatus({
+        userId: req.user.id,
+        userObjectId: req.user._id,
+        status,
+      })
     }
     res.json({
       status: true,

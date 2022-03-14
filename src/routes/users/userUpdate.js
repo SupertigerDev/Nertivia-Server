@@ -11,8 +11,7 @@ import { USER_UPDATED } from "../../ServerEventNames";
 import { base64MimeType, isImageMime } from "../../utils/image";
 import { deleteFile } from "../../utils/file";
 import * as UserCache from '../../cache/User.cache';
-const emitToAll = require('../../socketController/emitToAll');
-const sio = require("socket.io");
+import { emitToFriendsAndServers } from "../../socket/socket";
 const fs = require("fs");
 
 
@@ -150,7 +149,12 @@ module.exports = async (req, res, next) => {
     if (data.avatar) publicObj.avatar = data.avatar;
     if (data.username) publicObj.username = data.username;
     if (data.tag) publicObj.tag = data.tag;
-    emitToAll(USER_UPDATED, req.user._id, publicObj, io, false)
+    emitToFriendsAndServers({
+      event: USER_UPDATED,
+      data: publicObj,
+      userObjectId: req.user._id,
+      emitToSelf: false,
+    })
     
   } catch (e) {
     console.log(e);

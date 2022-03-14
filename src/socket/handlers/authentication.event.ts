@@ -9,7 +9,7 @@ import { getLastSeenServerChannels, getMembersByServerObjectIds, mutedServersAnd
 import { getRolesByServerObjectIds } from "../../services/Roles";
 import removeDuplicatesFromArray from "../../utils/removeDuplicatesFromArray";
 import { getUserNotifications } from "../../services/Notifications";
-
+import emitUserStatus from "../../socketController/emitUserStatus";
 
 // emit and disconnect.
 function disconnect(client: Socket, message: string | null) {
@@ -111,6 +111,22 @@ export async function onAuthentication(client: Socket, data: Data) {
     // bannedUserIDs,
     // callingChannelUserIds,
   })
+
+
+  const connectedSockets = await UserCache.getSocketCountByUserId(user.id);
+
+  // Only emit presence event when user is connected with first account to prevent duplicate events.
+  if (connectedSockets === 1) {
+    emitUserStatus({
+      userId: user.id,
+      userObjectId: user._id,
+      status: user.status,
+      customStatus: user.custom_status,
+      emitOffline: false,
+      connected: true,
+    })
+  }
+
 }
 
 async function handleServers(servers?: Server[]) {

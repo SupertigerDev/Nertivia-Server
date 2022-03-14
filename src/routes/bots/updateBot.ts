@@ -5,8 +5,7 @@ import {cropImage} from "../../utils/cropImage";
 import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { USER_UPDATED } from "../../ServerEventNames";
 import { base64MimeType, isImageMime } from "../../utils/image";
-const emitToAll = require("../../socketController/emitToAll");
-const flakeId = new (require('flakeid'))();
+import { emitToFriendsAndServers } from "../../socket/socket";
 
 export default async function updateBot(req: Request, res: Response) {
   const { bot_id } = req.params;
@@ -49,8 +48,11 @@ export default async function updateBot(req: Request, res: Response) {
   }
   data.id = (bot as any).id;
   
-  req.io.in((bot as any).id).emit(USER_UPDATED, data);
-  emitToAll(USER_UPDATED, bot._id, data, req.io, false);
+  emitToFriendsAndServers({
+    event: USER_UPDATED,
+    data,
+    userObjectId: bot._id,
+  })
   res.json(data);
 
 }
