@@ -3,13 +3,15 @@ import {Servers} from "../../models/Servers";
 import { Users } from "../../models/Users";
 import {ServerMembers} from "../../models/ServerMembers";
 import {Messages} from '../../models/Messages'
-import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } from '../../newRedisWrapper';
+import { deleteServerChannels } from '../../newRedisWrapper';
 import { Notifications } from '../../models/Notifications';
 import {Channels} from "../../models/Channels";
 import { ServerRoles } from '../../models/ServerRoles';
 import { MESSAGE_CREATED, SERVER_LEFT, SERVER_MEMBER_REMOVED, SERVER_ROLE_DELETED, USER_CALL_LEFT } from "../../ServerEventNames";
 const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
+import * as VoiceCache from '../../cache/Voice.cache';
+
 
 module.exports = async (req, res, next) => {
   const { server_id, id } = req.params;
@@ -106,10 +108,10 @@ module.exports = async (req, res, next) => {
 
 
   // leave call if inside call
-  const [voiceDetails, err] = await getUserInVoiceByUserId(id);
-  if (voiceDetails?.serverId === server.server_id) {
-    await removeUserFromVoice(id)
-    io.in("server:" + voiceDetails.serverId).emit(USER_CALL_LEFT, {channelId: voiceDetails.channelId, userId: id})
+  const voiceUser = await VoiceCache.getVoiceUserByUserId(id);
+  if (voiceUser?.serverId === server.server_id) {
+    await VoiceCache.removeUser(id)
+    io.in("server:" + voiceUser.serverId).emit(USER_CALL_LEFT, {channelId: voiceUser.channelId, userId: id})
   }
 
 

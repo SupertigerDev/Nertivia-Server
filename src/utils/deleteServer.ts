@@ -7,14 +7,14 @@ import {MessageQuotes} from '../models/MessageQuotes'
 import {ServerInvites} from '../models/ServerInvites'
 
 import {Messages} from '../models/Messages'
-import { deleteServerChannels, deleteServer as deleteServerRedis, deleteAllServerVoice } from '../newRedisWrapper';
+import { deleteServerChannels, deleteServer as deleteServerRedis } from '../newRedisWrapper';
 
 import { Notifications } from '../models/Notifications';
 import {ServerMembers} from "../models/ServerMembers";
 import { ServerRoles } from '../models/ServerRoles';
 import { Users } from "../models/Users";
 import { SERVER_LEFT } from '../ServerEventNames';
-
+import * as VoiceCache from '../cache/Voice.cache';
 
 export default async function deleteServer(io: any, server_id: string, server: any, callback: (err: Error | null, status: Boolean) => void) {
 
@@ -32,7 +32,7 @@ export default async function deleteServer(io: any, server_id: string, server: a
 
   
 
-  await deleteAllServerVoice(server_id);
+  await VoiceCache.removeAllServerUsers(server_id);
 
 
     await deleteServerChannels(channelIDArray)

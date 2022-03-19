@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
+import { emitToFriendsAndServers, getIOInstance } from "../socket/socket";
 
 const { USER_STATUS_CHANGED, SELF_STATUS_CHANGE } = require("../ServerEventNames");
-const { emitToFriendsAndServers } = require("../socket/socket");
 
 
 interface EmitStatusOptions {
@@ -36,4 +36,5 @@ export default function emitUserStatus(_opts: EmitStatusOptions) {
       data: payload,
       userObjectId: opts.userObjectId
     })
+    getIOInstance().in(opts.userId).emit(SELF_STATUS_CHANGE, {status: payload.status});
 }

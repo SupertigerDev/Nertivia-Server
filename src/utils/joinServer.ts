@@ -10,8 +10,10 @@ import {ServerMembers} from "../models/ServerMembers";
 import { ServerRoles } from '../models/ServerRoles';
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
 import getUserDetails from "./getUserDetails";
-import { getCustomStatusByUserId, getPresenceByUserId, getVoiceUsersFromServerIds } from '../newRedisWrapper';
+import { getCustomStatusByUserId, getPresenceByUserId } from '../newRedisWrapper';
 import { MESSAGE_CREATED, SERVER_JOINED, SERVER_MEMBERS, SERVER_MEMBER_ADDED, SERVER_ROLES } from '../ServerEventNames';
+
+import * as VoiceCache from '../cache/Voice.cache';
 
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
@@ -98,7 +100,7 @@ export default async function join(server: any, user: any, socketID: string | un
     presence: presence[1]
   });
   // get joined voice users
-  const [callingChannelUserIds] = await getVoiceUsersFromServerIds([server.server_id])
+  const callingChannelUserIds = await VoiceCache.getVoiceUserIdsByServerIds([server.server_id])
 
   // send owns status to every connected device
   createServerObj.channels = serverChannels;

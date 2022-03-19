@@ -2,6 +2,7 @@ import { User, Users } from "../models/Users"
 import {Server} from '../models/Servers'
 import {Friend} from '../models/Friends'
 import mongoose from "mongoose"
+import { BlockedUsers } from "../models/BlockedUsers"
 
 // This function should be used internally, only in User.cache.ts
 export const getUserForCache = (userId: string) => {
@@ -32,12 +33,19 @@ export const getUserForSocketAuth = async (userId: string) => {
       ],
       select:
         "name creator default_channel_id server_id avatar banner channel_position verified"
-    })
+    }).lean();
 
     
     return user;
 }
 
+
+export const getBlockedUserIds = async(userObjectId: string | mongoose.Types.ObjectId) => {
+  const blockedUsers = await BlockedUsers.find({ requester: userObjectId }).populate<{recipient: User}>("recipient", "id").lean();
+  const bannedUserIDs: string[] = blockedUsers.map(user => user.recipient.id)
+  return bannedUserIDs;
+
+}
 
 export const getUsersByIds = async (userIds: string[]) => {
   if (!userIds.length) return [];

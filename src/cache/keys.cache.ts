@@ -23,3 +23,12 @@ export const serverMemberHash = (serverId: string) => `serverMember:${serverId}`
 export const serverString = (serverId: string) => `server:${serverId}`;
 
 export const routeRateLimitString = (name: string, id: string) => `routeRateLimit:${id}-${name}`;
+
+
+
+// serverUsersInVoice:${serverId}       --> serverVoiceUsers
+// userIdToVoiceChannelId:${userId}     --> userVoiceChannelId
+// voiceChannelIdToUserId:${channelId}  --> VoiceUsers
+export const serverVoiceUsersHash = (serverId: string) => `serverVoiceUsers${serverId}`
+export const userVoiceChannelIdString = (userId: string) => `userVoiceChannelId${userId}`
+export const VoiceUsersHash = (channelId: string) => `VoiceUsers${channelId}`

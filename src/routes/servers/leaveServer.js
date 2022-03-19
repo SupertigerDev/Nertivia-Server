@@ -3,14 +3,13 @@ import {ServerMembers} from "../../models/ServerMembers";
 import {Channels} from "../../models/Channels";
 import { Users } from "../../models/Users";
 import {Messages} from '../../models/Messages'
-import { getUserInVoiceByUserId, removeUserFromVoice, removeUserFromVoice } from '../../newRedisWrapper';
 
 import { Notifications } from '../../models/Notifications';
 const redis = require("../../redis");
 
-import deleteServer from "../../utils/deleteServer";
 import { deleteFCMFromServer, sendServerPush } from "../../utils/sendPushNotification";
 import { MESSAGE_CREATED, SERVER_LEFT, SERVER_MEMBER_REMOVED, USER_CALL_LEFT } from "../../ServerEventNames";
+import * as VoiceCache from '../../cache/Voice.cache';
 module.exports = async (req, res, next) => {
   // check if its the creator and send an error if it is.
   if (req.server.creator === req.user._id) {
@@ -50,10 +49,10 @@ module.exports = async (req, res, next) => {
   const io = req.io;
 
   // leave call if inside call
-  const [voiceDetails, err] = await getUserInVoiceByUserId(req.user.id);
-  if (voiceDetails?.serverId === req.server.server_id) {
-    await removeUserFromVoice(req.user.id)
-    io.in("server:" + voiceDetails.serverId).emit(USER_CALL_LEFT, {channelId: voiceDetails.channelId, userId: req.user.id})
+  const voiceUser = await VoiceCache.getVoiceUserByUserId(req.user.id);
+  if (voiceUser?.serverId === req.server.server_id) {
+    await VoiceCache.removeUser(req.user.id)
+    io.in("server:" + voiceUser.serverId).emit(USER_CALL_LEFT, {channelId: voiceUser.channelId, userId: req.user.id})
   }
 
 
