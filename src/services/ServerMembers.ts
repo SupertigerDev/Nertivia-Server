@@ -113,9 +113,9 @@ export const mutedServersAndChannels = async (userObjectId: string | mongoose.Ty
         { muted_channels: { $exists: true, $not: { $size: 0 } } },
         { muted: { $exists: true, $ne: 0 } }
       ]
-    },
-    { _id: 0 }
+    }
   ).select("muted_channels muted server_id");
+
   let mutedChannels: string[] = [];
   let mutedServers = [];
 

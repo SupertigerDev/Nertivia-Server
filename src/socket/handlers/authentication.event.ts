@@ -107,6 +107,7 @@ export async function onAuthentication(client: Socket, data: Data) {
     programActivities,
     settings: {
       GDriveLinked: !!user?.GDriveRefreshToken,
+      server_position: user?.settings?.server_position || []
     },
     lastSeenServerChannels,
     blockedUserIds,
