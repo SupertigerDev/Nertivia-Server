@@ -72,6 +72,6 @@ export async function getAndRemoveAllGlobal(): Promise<{[keyof: string]: number}
   multi.hGetAll(key)
   multi.del(key)
 
-  const [globalRateLimits, deleteSuccess] = await multi.exec();
+  const [globalRateLimits] = await multi.exec();
   return globalRateLimits as any;
 }

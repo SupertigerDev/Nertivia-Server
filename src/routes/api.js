@@ -1,15 +1,9 @@
 
 const express = require('express');
 const router = express.Router();
-
 const loadMedia = require('../middlewares/loadMedia');
-
-
-// import { getAndRemoveAllRequests, ipRequestIncrement } from '../newRedisWrapper';
-
 import * as RateLimitCache from '../cache/rateLimit.cache';
 import { Log } from '../Log';
-
 
 
 setInterval(async () => {
