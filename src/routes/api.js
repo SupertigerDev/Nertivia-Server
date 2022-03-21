@@ -1,11 +1,13 @@
 
 const express = require('express');
 const router = express.Router();
-const loadMedia = require('../middlewares/loadMedia');
+import loadMedia from '../middlewares/loadMedia';
 import * as RateLimitCache from '../cache/rateLimit.cache';
 import { Log } from '../Log';
 
 
+
+// Global rate limits
 setInterval(async () => {
   const requests = await RateLimitCache.getAndRemoveAllGlobal();
   if (!requests) return;
@@ -17,7 +19,6 @@ setInterval(async () => {
 }, 60000)
 
 
-
 router.use('/*', async (req, res, next) => {
   const count = await RateLimitCache.incrementGlobal(req.userIp);
   if (count > 150) {
@@ -27,6 +28,8 @@ router.use('/*', async (req, res, next) => {
   next();
 })
 
+
+// Routes
 
 router.use('/error_report', require('./errorReport'));
 router.use('/user', require('./users'));
@@ -42,7 +45,7 @@ router.use('/explore', require('./explore'))
 router.use('/settings', require('./settings'));
 
 router.use('/files/*', require('./files'));
-router.use('/media/*', loadMedia.default);
+router.use('/media/*', loadMedia);
 
 router.use('/admin', require('./admin'));
 router.use('/tenor', require('./tenor').TenorRouter);
