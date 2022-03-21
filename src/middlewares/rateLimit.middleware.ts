@@ -20,7 +20,7 @@ export function rateLimit(opts: Options) {
       requestsLimit
     })
 
-    if (!ttl) return next();
+    if (ttl === false || ttl < 0) return next();
 
     if (!nextIfInvalid) {
       res.status(429).json({
