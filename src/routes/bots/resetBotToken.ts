@@ -3,7 +3,8 @@ import {Users} from '../../models/Users';
 const redis = require("../../redis");
 import SocketIO from 'socket.io'
 import JWT from 'jsonwebtoken'
-import { deleteSession } from "../../newRedisWrapper";
+import * as UserCache from '../../cache/User.cache'
+
 import { AUTHENTICATION_ERROR } from "../../ServerEventNames";
 
 export default async function resetBotToken(req: Request, res: Response) {
@@ -25,7 +26,7 @@ export default async function resetBotToken(req: Request, res: Response) {
 
 
 async function kickBot(io: SocketIO.Server, bot_id: string) {
-  await deleteSession(bot_id);
+  await UserCache.removeUser(bot_id);
 
   io.in(bot_id).emit(AUTHENTICATION_ERROR, "Token outdated.");
   io.in(bot_id).disconnectSockets(true);
