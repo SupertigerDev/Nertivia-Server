@@ -5,34 +5,33 @@ const router = express.Router();
 const loadMedia = require('../middlewares/loadMedia');
 
 
-import { getAndRemoveAllRequests, ipRequestIncrement } from '../newRedisWrapper';
+// import { getAndRemoveAllRequests, ipRequestIncrement } from '../newRedisWrapper';
 
-
+import * as RateLimitCache from '../cache/rateLimit.cache';
+import { Log } from '../Log';
 
 
 
 setInterval(async () => {
-  const [requests, err] = await getAndRemoveAllRequests();
-  if (requests) {
-    for (const ip in requests) {
-      const count = requests[ip];
-      if (count >= 100) {
-        console.log(`IP: ${ip} is sending a lot of requests (${count} in 60 seconds)`)
-      }
-    }
+  const requests = await RateLimitCache.getAndRemoveAllGlobal();
+  if (!requests) return;
+  for (const ip in requests) {
+    const count = requests[ip];
+    if (count < 100) continue;
+    Log.warn(`Rate limit ${ip} (${count} in 60 seconds)`)
   }
-}, 60000);
+}, 60000)
 
 
 
-// router.use('/*', async (req, res, next) => {
-//   const [count, err] = await ipRequestIncrement(req.userIp);
-//   if (count >= 150) {
-//     res.status(403).json({message: "You have been rate limited!"})
-//     return;
-//   }
-//   next();
-// })
+router.use('/*', async (req, res, next) => {
+  const count = await RateLimitCache.incrementGlobal(req.userIp);
+  if (count > 150) {
+    res.status(403).json({message: "You have been rate limited!"})
+    return;
+  }
+  next();
+})
 
 
 router.use('/error_report', require('./errorReport'));

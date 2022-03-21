@@ -45,13 +45,13 @@ export const Log = {
     console.log(`${color.FgCyan}[${getTime()}] ${color.FgGreen}[INFO]:${color.Reset}`, ...args);
   },
   debug(...args: any) {
-    console.log(`${color.FgCyan}[${getTime()}] ${color.FgBlue}[INFO]:${color.Reset}`, ...args)
+    console.log(`${color.FgCyan}[${getTime()}] ${color.FgBlue}[DEBUG]:${color.Reset}`, ...args)
   },
   warn(...args: any) {
-    console.log(`${color.FgCyan}[${getTime()}] ${color.FgYellow}[INFO]:${color.Reset}`, ...args);
+    console.log(`${color.FgCyan}[${getTime()}] ${color.FgYellow}[WARN]:${color.Reset}`, ...args);
 
   },
   error(...args: any) {
-    console.log(`${color.FgCyan}[${getTime()}] ${color.FgRed}[INFO]:${color.Reset}`, ...args);
+    console.log(`${color.FgCyan}[${getTime()}] ${color.FgRed}[ERROR]:${color.Reset}`, ...args);
   }
 }

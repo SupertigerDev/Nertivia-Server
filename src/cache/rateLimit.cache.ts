@@ -57,3 +57,21 @@ async function increment(key: string) {
     ttl: ttl as number
   }
 }
+
+
+// Global request rate limit
+
+export function incrementGlobal(ip: string) {
+  return redis.hIncrBy(keys.globalRateLimitsHash(), ip, 1)
+}
+
+export async function getAndRemoveAllGlobal(): Promise<{[keyof: string]: number}> {
+  const key = keys.globalRateLimitsHash();
+
+  const multi = redis.multi();
+  multi.hGetAll(key)
+  multi.del(key)
+
+  const [globalRateLimits, deleteSuccess] = await multi.exec();
+  return globalRateLimits as any;
+}
