@@ -21,6 +21,8 @@ export async function getServer(serverId: string): Promise<Server | null> {
   const serverStringified = JSON.stringify(server);
   await addServer(serverId, serverStringified);
   return JSON.parse(serverStringified);
-
-
+}
+export async function deleteServer(serverId: string) {
+  const key = keys.serverString(serverId)
+  await redis.del(key);
 }

@@ -1,6 +1,5 @@
 import { getCustomStatusByUserIds, getPresenceByUserIds, getProgramActivityByUserIds } from "../newRedisWrapper";
 
-const redis = require('../redis')
 export default async function (userIDArr: string[]){
 
   let [result] = await getPresenceByUserIds(userIDArr);

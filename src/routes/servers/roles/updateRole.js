@@ -1,9 +1,9 @@
 import { ServerRoles } from "../../../models/ServerRoles";
 import { SERVER_ROLE_UPDATED } from "../../../ServerEventNames";
 const { matchedData } = require("express-validator");
-const redis = require("../../../redis");
 const rolePermConstants = require('../../../utils/rolePermConstants');
-const { connection } = require('mongoose');
+import * as ServerMemberCache from '../../../cache/ServerMember.cache.ts';
+
 module.exports = async (req, res, next) => {
   const roleID = req.params.role_id;
 
@@ -52,7 +52,7 @@ module.exports = async (req, res, next) => {
 
   await ServerRoles.updateOne({_id: role._id}, dataMatched);
   
-  redis.delAllServerMembers(req.server.server_id);
+  ServerMemberCache.removeAllServerUsers(req.server.server_id);
 
 
 

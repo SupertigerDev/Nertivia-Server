@@ -3,7 +3,7 @@ import { ServerRoles } from '../../../models/ServerRoles';
 import { ServerMembers } from '../../../models/ServerMembers';
 import { Users } from "../../../models/Users";
 import { SERVER_ROLE_REMOVED_FROM_MEMBER } from '../../../ServerEventNames';
-const redis = require("../../../redis");
+import * as ServerMemberCache from '../../../cache/ServerMember.cache';
 
 
 // /:server_id/members/:member_id/roles/:role_id
@@ -64,7 +64,7 @@ module.exports = async (req, res, next) => {
 
 
   await ServerMembers.updateOne({_id: serverMember._id}, {$pull: { roles: role_id } });
-  redis.remServerMember(member_id, req.server.server_id);
+  await ServerMemberCache.removeServerMember(req.server.server_id, member_id);
 
   const io = req.io;
   io.in("server:" + req.server.server_id).emit(SERVER_ROLE_REMOVED_FROM_MEMBER, {

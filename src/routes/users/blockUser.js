@@ -3,7 +3,6 @@ import { Friends } from '../../models/Friends';
 import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
 import { USER_BLOCKED } from "../../ServerEventNames";
-const redis = require('../../redis');
 const { deleteDmChannel } = require('../../newRedisWrapper');
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id; 

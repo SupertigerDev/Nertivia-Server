@@ -5,9 +5,7 @@ import * as NertiviaCDN from '../../common/NertiviaCDN';
 import tempSaveImage from '../../utils/tempSaveImage';
 import compressImage from '../../utils/compressImage';
 import fs from 'fs';
-import redis from '../../redis'
-import { deleteServer } from '../../newRedisWrapper';
-
+import * as ServerCache from '../../cache/Server.cache';
 
 const { matchedData } = require("express-validator");
 const flake = require('../../utils/genFlakeId').default;
@@ -65,7 +63,7 @@ module.exports = async (req, res, next) => {
       Object.assign(data, { server_id: server.server_id })
     );
     // clear cache
-    await deleteServer(server.server_id)
+    await ServerCache.deleteServer(server.server_id)
     res.json(Object.assign(data, { server_id: server.server_id }));
   } catch (e) {
     res.status(403).json({ message: "Something went wrong. Try again later." });

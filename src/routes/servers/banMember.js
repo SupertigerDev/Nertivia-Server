@@ -3,14 +3,13 @@ import {Servers} from "../../models/Servers";
 import { Users } from "../../models/Users";
 import {ServerMembers} from "../../models/ServerMembers";
 import {Messages} from '../../models/Messages'
-import { deleteServerChannels } from '../../newRedisWrapper';
 import { Notifications } from '../../models/Notifications';
 import {Channels} from "../../models/Channels";
 import { ServerRoles } from '../../models/ServerRoles';
 import { MESSAGE_CREATED, SERVER_LEFT, SERVER_MEMBER_REMOVED, SERVER_ROLE_DELETED, USER_CALL_LEFT } from "../../ServerEventNames";
-const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
 import * as VoiceCache from '../../cache/Voice.cache';
+import * as ServerMemberCache from '../../cache/ServerMember.cache';
 
 
 module.exports = async (req, res, next) => {
@@ -79,8 +78,7 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  await redis.remServerMember(id, server_id);
-  await deleteServerChannels(id, channelIDs)
+  await ServerMemberCache.removeServerMember(server_id, id);
   const io = req.io;
   // remove server from users server list.
   await Users.updateOne(

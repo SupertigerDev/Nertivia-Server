@@ -5,7 +5,6 @@ import {MessageQuotes} from '../../../models/MessageQuotes'
 import { deleteServerChannel } from '../../../newRedisWrapper';
 import { Notifications } from '../../../models/Notifications';
 import { SERVER_CHANNEL_DELETED } from "../../../ServerEventNames";
-const redis = require("../../../redis");
 
 module.exports = async (req, res, next) => {
 

@@ -33,3 +33,12 @@ export async function getServerMember(opts: GetServerMemberOptions): Promise<[Se
   redis.hSet(key, opts.userId, JSON.stringify(member));
   return [member, null];
 }
+
+export async function removeServerMember(serverId: string, userId: string) {
+  const key = keys.serverMemberHash(serverId);
+  await redis.hDel(key, userId);
+}
+export async function deleteAllServerMembers(serverId: string) {
+  const key = keys.serverMemberHash(serverId);
+  await redis.del(key);
+}

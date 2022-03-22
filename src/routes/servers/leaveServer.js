@@ -5,11 +5,12 @@ import { Users } from "../../models/Users";
 import {Messages} from '../../models/Messages'
 
 import { Notifications } from '../../models/Notifications';
-const redis = require("../../redis");
 
 import { deleteFCMFromServer, sendServerPush } from "../../utils/sendPushNotification";
 import { MESSAGE_CREATED, SERVER_LEFT, SERVER_MEMBER_REMOVED, USER_CALL_LEFT } from "../../ServerEventNames";
 import * as VoiceCache from '../../cache/Voice.cache';
+import * as ServerMemberCache from '../../cache/ServerMember.cache';
+
 module.exports = async (req, res, next) => {
   // check if its the creator and send an error if it is.
   if (req.server.creator === req.user._id) {
@@ -31,7 +32,8 @@ module.exports = async (req, res, next) => {
   }
 
 
-  await redis.remServerMember(req.user.id, req.server.server_id);
+  await ServerMemberCache.removeServerMember(req.server.server_id, req.user.id);
+
 
   // remove server from users server list.
   await Users.updateOne(

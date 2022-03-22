@@ -1,4 +1,3 @@
-const redis = require("../../redis");
 import { Users } from "../../models/Users";
 import { SELF_CUSTOM_STATUS_CHANGE } from "../../ServerEventNames";
 import { emitToFriendsAndServers } from "../../socket/socket";

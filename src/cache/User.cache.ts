@@ -98,6 +98,15 @@ export async function removeConnectedUser(socketId: string, userId: string) {
 }
 
 
+// only to be used in the admin panel (keys is not for production)
+export async function getConnectedUserIds() {
+  // key outputs: userSocketIds:*
+  const key = keys.userSocketIdSet("*")
+  const results =  await redis.keys(key);
+  const userIds = results.map(result => result.split(":")[1]);
+  return userIds;
+}
+
 
 // 0: empty
 // 1: 1 connected user
@@ -229,24 +238,6 @@ export async function removeUser(userId: string) {
   const userKey = keys.authenticatedUserString(userId);
   await redis.del(userKey)
 }
-
-
-// export function addConnectedUser(userID: string, _id: string, status: string, customStatus: string, socketID: string) {
-//   const multi = getRedisInstance?.()?.multi()
-//     .hset(`user:${userID}`, 'status', status)
-//     .hset(`user:${userID}`, 'id', _id.toString())
-//     .hset(`user:${userID}`, 'userID', userID)
-
-//     .hset(`connected:${socketID}`, 'id', userID)
-//     .hset(`connected:${socketID}`, '_id', _id.toString())
-//     .sadd(`userID:${userID}`, socketID)
-
-//   if (customStatus) {
-//     multi?.hset(`user:${userID}`, 'customStatus', customStatus)
-//   }
-
-//   return multiWrapper(multi)
-// }
 
 
 interface AuthOptions {

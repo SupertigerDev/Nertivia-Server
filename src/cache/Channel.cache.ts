@@ -88,3 +88,12 @@ export async function getServerChannel(channelId: string) {
   return JSON.parse(stringifiedChannel);
 } 
 
+export async function deleteServerChannelsById(channelIds: string[]) {
+  const multi = redis.multi();
+  for (let i = 0; i < channelIds.length; i++) {
+    const channelId = channelIds[i];
+    const key = keys.serverChannelString(channelId);
+    multi.del(key);    
+  }
+  await multi.exec();
+}

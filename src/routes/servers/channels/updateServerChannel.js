@@ -1,7 +1,6 @@
 import {Channels} from "../../../models/Channels";
 import { SERVER_CHANNEL_UPDATED } from "../../../ServerEventNames";
 const { addChannel, getServerChannel } = require("../../../newRedisWrapper");
-const redis = require("../../../redis");
 
 module.exports = async (req, res, next) => {
 
