@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { emitToFriendsAndServers, getIOInstance } from "../socket/socket";
-
-const { USER_STATUS_CHANGED, SELF_STATUS_CHANGE } = require("../ServerEventNames");
+import { USER_STATUS_CHANGED, SELF_STATUS_CHANGE } from "../ServerEventNames";
 
 
 interface EmitStatusOptions {

@@ -129,7 +129,6 @@ export async function getUserBySocketId(socketId: string): Promise<ReturnType<Ca
 }
 
 
-
 export async function updatePresence(userId: string, update: Partial<Presence>) {
   const key = keys.userPresenceString(userId);
   const presenceStringified = await redis.get(key);
@@ -170,6 +169,13 @@ export async function getPresenceByUserIds (userIds: string[]) {
   }
   const presenceStringifiedArray = await multi.exec();
   return parseJSONStringArray<Presence>(presenceStringifiedArray)
+}
+
+export async function getPresenceByUserId(userId: string): Promise<Presence | null> {
+  const key = keys.userPresenceString(userId);
+  const stringifiedPresence = await redis.get(key)
+  if (!stringifiedPresence) return null;
+  return JSON.parse(stringifiedPresence)
 }
 
 export async function getProgramActivityByUserId (userId: string) {

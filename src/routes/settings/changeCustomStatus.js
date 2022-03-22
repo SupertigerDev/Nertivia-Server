@@ -1,7 +1,7 @@
 import { Users } from "../../models/Users";
 import { SELF_CUSTOM_STATUS_CHANGE } from "../../ServerEventNames";
 import { emitToFriendsAndServers } from "../../socket/socket";
-const { changeCustomStatusByUserId } = require("../../newRedisWrapper");
+import * as UserCache from '../../cache/User.cache';
 
 module.exports = async (req, res, next) => {
   const io = req.io;
@@ -29,7 +29,9 @@ module.exports = async (req, res, next) => {
   await Users.updateOne({_id: req.user._id}, obj)
 
   // change the status in redis.
-  await changeCustomStatusByUserId(req.user.id, customStatus);
+  await UserCache.updatePresence(req.user.id, {
+    custom: customStatus
+  });
 
   // emit status to users.
   emitToFriendsAndServers({

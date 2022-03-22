@@ -3,7 +3,8 @@ import { Friends } from '../../models/Friends';
 import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
 import { USER_BLOCKED } from "../../ServerEventNames";
-const { deleteDmChannel } = require('../../newRedisWrapper');
+import * as ChannelCache from '../../cache/Channel.cache'
+
 module.exports = async (req, res, next) => {
   const recipientUserID = req.body.id; 
 
@@ -59,8 +60,10 @@ module.exports = async (req, res, next) => {
   ]}).select("channelId")
 
   if (openedChannel) {
-    await deleteDmChannel(requester.id, openedChannel.channelId)
-    await deleteDmChannel(recipient.id, openedChannel.channelId)
+    await Promise.all([
+      ChannelCache.deleteDMChannel(requester.id, openedChannel.channelId),
+      ChannelCache.deleteDMChannel(recipient.id, openedChannel.channelId)
+    ])
   }
 
   const io = req.io

@@ -35,7 +35,7 @@ export async function getChannel(userObjectId: string, userId: string, channelId
   
   // DM CHANNEL
   if (!channel.server) {
-    const DmChannelsKey = keys.userDMChannelsHash(userId);
+    const dmChannelsKey = keys.userDMChannelsHash(userId);
 
     const requesterObjectId = userObjectId;
     const recipientObjectId = (channel.recipients[0] as unknown as User)._id;
@@ -45,7 +45,7 @@ export async function getChannel(userObjectId: string, userId: string, channelId
       {requester: recipientObjectId, recipient: requesterObjectId}
     ]})
     const dmChannelStringified = JSON.stringify({...channel, isBlocked});
-    await redis.hSet(DmChannelsKey, channelId, dmChannelStringified);
+    await redis.hSet(dmChannelsKey, channelId, dmChannelStringified);
     return [JSON.parse(dmChannelStringified), null];
   }
 
@@ -71,12 +71,16 @@ export async function getChannel(userObjectId: string, userId: string, channelId
 } 
 
 export async function getDMChannel(userId: string, channelId: string) {
-  const DmChannelsKey = keys.userDMChannelsHash(userId);
+  const dmChannelsKey = keys.userDMChannelsHash(userId);
 
-  const stringifiedChannel = await redis.hGet(DmChannelsKey, channelId);
+  const stringifiedChannel = await redis.hGet(dmChannelsKey, channelId);
   if (!stringifiedChannel) return null;
 
   return JSON.parse(stringifiedChannel);
+} 
+export async function deleteDMChannel(userId: string, channelId: string) {
+  const dmChannelsKey = keys.userDMChannelsHash(userId);
+  await redis.hDel(dmChannelsKey, channelId);
 } 
 
 export async function getServerChannel(channelId: string) {
@@ -86,7 +90,7 @@ export async function getServerChannel(channelId: string) {
   if (!stringifiedChannel) return null;
 
   return JSON.parse(stringifiedChannel);
-} 
+}
 
 export async function deleteServerChannelsById(channelIds: string[]) {
   const multi = redis.multi();
@@ -96,4 +100,8 @@ export async function deleteServerChannelsById(channelIds: string[]) {
     multi.del(key);    
   }
   await multi.exec();
+}
+export async function deleteServerChannel(channelId: string) {
+  const key = keys.serverChannelString(channelId);
+  await redis.del(key);    
 }

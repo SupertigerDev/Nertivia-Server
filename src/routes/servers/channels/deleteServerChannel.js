@@ -2,9 +2,9 @@ import {Channels, ChannelType} from "../../../models/Channels";
 import {Messages} from '../../../models/Messages'
 
 import {MessageQuotes} from '../../../models/MessageQuotes'
-import { deleteServerChannel } from '../../../newRedisWrapper';
 import { Notifications } from '../../../models/Notifications';
 import { SERVER_CHANNEL_DELETED } from "../../../ServerEventNames";
+import * as ChannelCache from '../../../cache/Channel.cache';
 
 module.exports = async (req, res, next) => {
 
@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
       await Channels.updateMany({server_id: server.server_id, categoryId: channelId}, {$unset: {categoryId: 1}})
     }
     await Messages.deleteMany({ channelId });
-    await deleteServerChannel(channelId);
+    await ChannelCache.deleteServerChannel(channelId);
     const io = req.io;
     io.in("server:" + req.server.server_id).emit(SERVER_CHANNEL_DELETED, {
       channelId,

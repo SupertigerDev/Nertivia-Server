@@ -1,6 +1,6 @@
 import {Channels} from "../../../models/Channels";
 import { SERVER_CHANNEL_UPDATED } from "../../../ServerEventNames";
-const { addChannel, getServerChannel } = require("../../../newRedisWrapper");
+import * as ChannelCache from '../../../cache/Channel.cache';
 
 module.exports = async (req, res, next) => {
 
@@ -49,18 +49,9 @@ module.exports = async (req, res, next) => {
     const io = req.io;
     io.in("server:" + req.server.server_id).emit(SERVER_CHANNEL_UPDATED, Object.assign({}, dataFiltered, {channelId}) );
     res.json(Object.assign({}, dataFiltered, {channelId}));
-    // update in cache
-    updateChannelCache(dataFiltered, channelId)
+    // reset cache
+    await ChannelCache.deleteServerChannel(channelId)
   } catch (e) {
     res.status(403).json({ message: "Something went wrong. Try again later." });
   }
 };
-
-async function updateChannelCache(updateData, channelId) {
-  const [result, err] = await getServerChannel(channelId);
-  if (!result) return;
-  let channel = JSON.parse(result);
-  const updateChannel = Object.assign({}, channel, updateData);
-  await addChannel(channelId, updateChannel);
-
-}
