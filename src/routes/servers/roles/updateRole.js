@@ -2,7 +2,7 @@ import { ServerRoles } from "../../../models/ServerRoles";
 import { SERVER_ROLE_UPDATED } from "../../../ServerEventNames";
 const { matchedData } = require("express-validator");
 const rolePermConstants = require('../../../utils/rolePermConstants');
-import * as ServerMemberCache from '../../../cache/ServerMember.cache.ts';
+import * as ServerMemberCache from '../../../cache/ServerMember.cache';
 
 module.exports = async (req, res, next) => {
   const roleID = req.params.role_id;

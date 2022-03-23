@@ -3,7 +3,8 @@ import { Users } from "../../../models/Users";
 import { Friends } from "../../../models/Friends";
 import { BlockedUsers } from '../../../models/BlockedUsers';
 import { RELATIONSHIP_ADDED } from "../../../ServerEventNames";
-const { getProgramActivityByUserIds, getPresenceByUserIds, getCustomStatusByUserIds } = require('../../../newRedisWrapper');
+
+import * as UserCache from '../../../cache/User.cache';
 
 module.exports = async (req, res, next) => {
   const {username, tag} = req.body;
@@ -78,21 +79,21 @@ module.exports = async (req, res, next) => {
   )
   
   const io = req.io
-  
-  const [presence] = await getPresenceByUserIds([docRequester.recipient.id, docRecipient.recipient.id]);
-  const [customStatus] = await getCustomStatusByUserIds([docRequester.recipient.id, docRecipient.recipient.id])
-  const [programActivity] = await getProgramActivityByUserIds([docRequester.recipient.id, docRecipient.recipient.id])
-  
-  docRequester.recipient.status = parseInt(presence[0][1]) || null;
-  docRequester.recipient.custom_status = customStatus[0][1] || null;
-  
-  
-  docRecipient.recipient.status = parseInt(presence[1][1]) || null;
-  docRecipient.recipient.custom_status = customStatus[1][1] || null;
 
 
-  io.in(requester.id).emit(RELATIONSHIP_ADDED, {...docRequester, program_activity: JSON.parse(programActivity[0]) || null});
-  io.in(recipient.id).emit(RELATIONSHIP_ADDED, {...docRecipient, program_activity: JSON.parse(programActivity[1]) || null});
+  const presences = await UserCache.getPresenceByUserIds([docRequester.recipient.id, docRecipient.recipient.id])
+  const programActivities = await UserCache.getProgramActivityByUserIds([docRequester.recipient.id, docRecipient.recipient.id])
+  
+  docRequester.recipient.status = presences[0].status;
+  docRequester.recipient.custom_status = presences[0].custom;
+  
+  
+  docRecipient.recipient.status = presences[1].status;
+  docRecipient.recipient.custom_status = presences[1].custom;
+
+
+  io.in(requester.id).emit(RELATIONSHIP_ADDED, {...docRequester, program_activity: programActivities[0]});
+  io.in(recipient.id).emit(RELATIONSHIP_ADDED, {...docRecipient, program_activity: programActivities[1]});
 
   return res.json({ status: true, message: `Request sent to ${recipient.username}` })
 }

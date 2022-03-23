@@ -36,6 +36,7 @@ interface ProgramActivity {
   status: string;
   name: string;
   socketId: string;
+  userId: string;
 }
 type ReturnType<T> = [T | null, string | null];
 
