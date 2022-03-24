@@ -52,7 +52,7 @@ module.exports = async (req, res, next) => {
 
   await ServerRoles.updateOne({_id: role._id}, dataMatched);
   
-  ServerMemberCache.removeAllServerUsers(req.server.server_id);
+  ServerMemberCache.deleteAllServerMembers(req.server.server_id);
 
 
 

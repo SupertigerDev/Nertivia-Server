@@ -21,22 +21,25 @@ module.exports = async (req, res, next) => {
 
   const roles = await ServerRoles.find({ server: req.server._id }).select("name id color permissions server_id deletable order default hideRole bot").lean();
 
-  // order roles
+  // order the roles.
   let ordered = roles.sort((a, b) => a.order - b.order);
 
+
+  // check if order is valid.
   if (order > roles.length && order < 0) {
     return res.json(ordered);
   }
 
-  // find index of role
+  // find role index to move.
   let index = roles.findIndex(r => r.id == roleID);
 
+  // check if role exists.
   if (index < 0) {
     return res.json(ordered);
   }
 
+  // add role to the end of the index or at specified index.
   ordered.splice(order, 0, ordered.splice(index, 1)[0]);
-
 
   const defaultRole = roles.find(r => r.default);
   ordered = ordered.filter(o => !o.default)
@@ -44,7 +47,7 @@ module.exports = async (req, res, next) => {
   let itemsToUpdate = [];
   ordered = ordered.map((v, i) => {
       itemsToUpdate.push({_id: v._id, order: i})
-      return {...v, ...{order: i}}
+      return {...v, order: i}
   })
   defaultRole.order = ordered.length;
   ordered.push(defaultRole);
