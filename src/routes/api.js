@@ -36,7 +36,7 @@ router.use('/user', require('./users'));
 router.use('/devices', require('./devices'));
 router.use('/servers', require('./servers'));
 router.use('/channels', require('./channels/Channel.router').ChannelRouter);
-router.use('/themes', require('./themes').ThemeRouter)
+router.use('/themes', require('./themes/Theme.router').ThemeRouter)
 router.use('/bots', require('./bots'))
 router.use('/voice', require('./voice').VoiceRouter)
 
