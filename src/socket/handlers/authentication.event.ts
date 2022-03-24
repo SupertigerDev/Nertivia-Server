@@ -11,6 +11,7 @@ import removeDuplicatesFromArray from "../../utils/removeDuplicatesFromArray";
 import { getUserNotifications } from "../../services/Notifications";
 import emitUserStatus from "../../socketController/emitUserStatus";
 import * as VoiceCache from "../../cache/Voice.cache";
+import {CustomEmojis} from '../../models/CustomEmojis';
 
 // emit and disconnect.
 function disconnect(client: Socket, message: string | null) {
@@ -73,6 +74,7 @@ export async function onAuthentication(client: Socket, data: Data) {
     notifications,
     lastSeenServerChannels,
     blockedUserIds,
+    customEmojis
   ] = await Promise.all([
     getOpenedDmChannels(user._id),
     UserCache.getPresenceByUserIds(userIds),
@@ -81,6 +83,7 @@ export async function onAuthentication(client: Socket, data: Data) {
     getUserNotifications(user.id),
     getLastSeenServerChannels(user._id),
     getBlockedUserIds(user._id),
+    CustomEmojis.find({ user: user._id }, { _id: 0 }).select("id gif name")
   ])
 
   client.emit(AUTHENTICATED, {
@@ -107,7 +110,8 @@ export async function onAuthentication(client: Socket, data: Data) {
     programActivities,
     settings: {
       GDriveLinked: !!user?.GDriveRefreshToken,
-      server_position: user?.settings?.server_position || []
+      server_position: user?.settings?.server_position || [],
+      customEmojis
     },
     lastSeenServerChannels,
     blockedUserIds,
