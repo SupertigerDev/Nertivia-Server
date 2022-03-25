@@ -12,7 +12,7 @@ export const themeUpdate = (Router: Router) => {
   );
   
 }
-export const route = async (req: Request, res: Response)  => {
+const route = async (req: Request, res: Response)  => {
   const { name, css, client_version } = req.body;
   const { id } = req.params;
 

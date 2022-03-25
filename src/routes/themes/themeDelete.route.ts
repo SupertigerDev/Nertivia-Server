@@ -9,7 +9,7 @@ export const themeDelete = (Router: Router) => {
   );
 }
 
-export const route = async (req: Request, res: Response)  => {
+const route = async (req: Request, res: Response)  => {
   const { id } = req.params;
 
   const deleted = await Themes.deleteTheme(id, req.user._id).catch(err => {

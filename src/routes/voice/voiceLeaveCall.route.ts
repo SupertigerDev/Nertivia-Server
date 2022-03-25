@@ -1,9 +1,18 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { USER_CALL_LEFT } from "../../ServerEventNames";
 import { getIOInstance } from "../../socket/socket";
 import * as VoiceCache from '../../cache/Voice.cache';
+import { authenticate } from "../../middlewares/authenticate";
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
 
-export async function leaveCall (req: Request, res: Response, next: NextFunction) {
+export async function voiceLeaveCall (Router: Router) { 
+  Router.route("/leave").post(
+    authenticate({allowBot: true}),
+    rateLimit({name: 'leave_voice', expire: 20, requestsLimit: 15 }),
+    route
+  );
+}
+async function route (req: Request, res: Response) {
 
   const voiceUser = await VoiceCache.getVoiceUserByUserId(req.user.id);
   if (!voiceUser) {

@@ -9,7 +9,7 @@ export const themeGetBatch = (Router: Router) => {
   );
 }
 
-export const route = async (req: Request, res: Response)  => {
+const route = async (req: Request, res: Response)  => {
   const themes = await getThemesByCreatorId(req.user._id);
   res.json(themes);
 };

@@ -9,7 +9,7 @@ export const themeGet = (Router: Router) => {
   );
 }
 
-export const route = async (req: Request, res: Response)  => {
+const route = async (req: Request, res: Response)  => {
   const { id } = req.params;
 
   const themes = await Themes.getTheme(id);

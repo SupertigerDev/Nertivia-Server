@@ -38,7 +38,7 @@ router.use('/servers', require('./servers'));
 router.use('/channels', require('./channels/Channel.router').ChannelRouter);
 router.use('/themes', require('./themes/Theme.router').ThemeRouter)
 router.use('/bots', require('./bots'))
-router.use('/voice', require('./voice').VoiceRouter)
+router.use('/voice', require('./voice/Voice.router').VoiceRouter)
 
 router.use('/explore', require('./explore'))
 
@@ -48,6 +48,6 @@ router.use('/files/*', require('./files'));
 router.use('/media/*', loadMedia);
 
 router.use('/admin', require('./admin'));
-router.use('/tenor', require('./tenor').TenorRouter);
+router.use('/tenor', require('./tenor/Tenor.router').TenorRouter);
 
 module.exports = router;
