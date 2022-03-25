@@ -4,11 +4,11 @@ import { createTheme } from '../../services/Themes';
 import themePolicy from '../../policies/ThemePolicies';
 
                                                                   
-export const themeSave = (Router: Router) => { 
+export const themeCreate = (Router: Router) => { 
   Router.route("/").post(
     authenticate(),
     themePolicy.save,
-    themeSave
+    route
   );
 }
 
@@ -23,7 +23,6 @@ export const route = async (req: Request, res: Response)  => {
   })
   .catch(err => {
     res.status(err.statusCode).json({message: err.message});
-
   })
 
   if (!theme) return;

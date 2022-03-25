@@ -8,7 +8,7 @@ export const themeUpdate = (Router: Router) => {
   Router.route("/:id").patch(
     authenticate(),
     themePolicy.save,
-    themeUpdate
+    route
   );
   
 }

@@ -16,5 +16,5 @@ export const route = async (req: Request, res: Response)  => {
     res.status(err.statusCode).json({message: err.message});
   })
   if (!deleted) return;
-
+  res.json({message: 'deleted'});
 };
