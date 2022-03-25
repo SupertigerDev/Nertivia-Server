@@ -1,6 +1,5 @@
 import fetch, { Response } from 'node-fetch';
 import AbortController from "abort-controller"
-import sharp from 'sharp';
 import cheerio from 'cheerio';
 import { getImageDimensions } from '../utils/image';
 
