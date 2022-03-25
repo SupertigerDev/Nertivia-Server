@@ -1,10 +1,18 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import {Users} from "../../models/Users";
 import SocketIO from 'socket.io'
 import * as UserCache from '../../cache/User.cache'
 import { AUTHENTICATION_ERROR } from "../../ServerEventNames";
+import { authenticate } from "../../middlewares/authenticate";
 
-export default async function deleteBot(req: Request, res: Response) {
+export function botDelete (Router: Router) {
+  Router.route("/:bot_id").delete(
+    authenticate(),
+    route
+  );
+}
+
+async function route(req: Request, res: Response) {
   const { bot_id } = req.params;
   try {
     const bot: any = await Users.exists({

@@ -1,12 +1,22 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import {Users} from '../../models/Users';
 import SocketIO from 'socket.io'
 import JWT from 'jsonwebtoken'
 import * as UserCache from '../../cache/User.cache'
 
 import { AUTHENTICATION_ERROR } from "../../ServerEventNames";
+import { authenticate } from "../../middlewares/authenticate";
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
 
-export default async function resetBotToken(req: Request, res: Response) {
+export function botResetToken (Router: Router) {
+  Router.route("/:bot_id/reset-token").post(
+    authenticate(),
+    rateLimit({name: 'reset_bot_token', expire: 60, requestsLimit: 5 }),
+    route
+  );
+}
+
+async function route(req: Request, res: Response) {
   const { bot_id } = req.params;
 
   const bot: any = await Users.findOne({createdBy: req.user._id, id: bot_id}).select("passwordVersion").lean();

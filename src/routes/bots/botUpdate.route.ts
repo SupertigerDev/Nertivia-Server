@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import {Users} from '../../models/Users';
 import { matchedData } from "express-validator";
 import {cropImage} from "../../utils/cropImage";
@@ -6,8 +6,18 @@ import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { USER_UPDATED } from "../../ServerEventNames";
 import { base64MimeType, isImageMime } from "../../utils/image";
 import { emitToFriendsAndServers } from "../../socket/socket";
+import { authenticate } from "../../middlewares/authenticate";
+import UserPolicies from '../../policies/UserPolicies';
 
-export default async function updateBot(req: Request, res: Response) {
+export function botUpdate (Router: Router) {
+  Router.route("/:bot_id").post(
+    authenticate(),
+    UserPolicies.updateBot,
+    route
+  );
+}
+
+async function route(req: Request, res: Response) {
   const { bot_id } = req.params;
 
   const bot = await Users.findOne({createdBy: req.user._id, id: bot_id}).select("avatar bot created tag id username").lean();

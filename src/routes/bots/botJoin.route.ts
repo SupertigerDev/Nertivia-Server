@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { Users } from "../../models/Users";
 import {Servers} from '../../models/Servers';
 import { ServerRoles } from "../../models/ServerRoles";
@@ -6,9 +6,23 @@ import joinServer from "../../utils/joinServer";
 
 import flake from '../../utils/genFlakeId'
 import { SERVER_ROLE_CREATED } from "../../ServerEventNames";
+import checkRolePermissions from "../../middlewares/checkRolePermissions";
+import { serverMemberVerify } from "../../middlewares/serverMemberVerify.middleware";
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
+import { authenticate } from "../../middlewares/authenticate";
+import {roles} from "../../utils/rolePermConstants";
 
+export function botJoin (Router: Router) {
+  Router.route("/:bot_id/servers/:server_id").put(
+    authenticate(),
+    rateLimit({name: 'bot_join', expire: 60, requestsLimit: 5 }),
+    serverMemberVerify,
+    checkRolePermissions('Admin', roles.ADMIN),
+    route
+  );
+}
 
-export default async function createBot(req: Request, res: Response) {
+async function route(req: Request, res: Response) {
   const { bot_id, server_id } = req.params;
   const permissions = parseInt(req.body.permissions) || 0;
 

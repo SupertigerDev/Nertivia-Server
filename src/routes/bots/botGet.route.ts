@@ -1,12 +1,21 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { Users } from "../../models/Users";
 import {Servers} from '../../models/Servers';
 import { sign } from "jsonwebtoken";
 import {ServerMembers} from '../../models/ServerMembers';
 import { ServerRoles } from "../../models/ServerRoles";
 import { roles } from '../../utils/rolePermConstants'
+import { authenticate } from "../../middlewares/authenticate";
 
-export default async function createBot(req: Request, res: Response) {
+export function botGet (Router: Router) {
+  //token only visable for creator. (SAFE TO USE FOR OTHER USERS.)
+  Router.route("/:bot_id").get(
+    authenticate({optional: true}),
+    route
+  );
+}
+
+async function route(req: Request, res: Response) {
   const { bot_id } = req.params;
   const { token, myservers } = req.query;
 
