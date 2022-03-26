@@ -42,7 +42,7 @@ router.use('/voice', require('./voice/Voice.router').VoiceRouter)
 
 router.use('/explore', require('./explore'))
 
-router.use('/settings', require('./settings'));
+router.use('/account', require('./account'));
 
 router.use('/files/*', require('./files'));
 router.use('/media/*', loadMedia);

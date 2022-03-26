@@ -23,12 +23,6 @@ MainSettingsRouter.route("/custom-status").post(
   require("./changeCustomStatus")
 );
 
-// Change appearance
-MainSettingsRouter.route("/apperance").put(
-  //TODO: fix typo in database and client and server.
-  authenticate(),
-  require("./changeAppearance")
-);
 
 // Emoji
 MainSettingsRouter.route("/emoji")

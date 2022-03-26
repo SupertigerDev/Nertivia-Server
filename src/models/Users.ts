@@ -20,7 +20,6 @@ interface Appearance {
 }
 
 interface Settings {
-  apperance: Appearance
   server_position: string[]
 }
 
@@ -78,7 +77,6 @@ const appearanceSchema = new Schema<Appearance>({
 })
 
 const settingsSchema = new Schema<Settings>({
-  apperance: { type: appearanceSchema },
   server_position: [{ type: String, required: false }]
 })
 
