@@ -6,7 +6,7 @@ import { BlockedUsers } from "../models/BlockedUsers"
 
 // This function should be used internally, only in User.cache.ts
 export const getUserForCache = (userId: string) => {
-  return Users.findOne({id: userId}).select('_id id avatar tag badges banned username bot readTerms passwordVersion ip GDriveRefreshToken')
+  return Users.findOne({id: userId}).select('_id id type avatar tag badges banned username bot readTerms passwordVersion ip GDriveRefreshToken')
 }
 
 // this function should only be used internally, only in authentication.event.ts

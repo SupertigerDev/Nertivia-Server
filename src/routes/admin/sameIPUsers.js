@@ -12,7 +12,7 @@ module.exports = async (req, res, next) => {
   }
 
 
-  const users = await Users.find({ip: user.ip}, {_id: 0}).select('avatar email id ip username tag created banned bot banner').sort({_id: -1}).limit(30).lean()
+  const users = await Users.find({ip: user.ip}).select('-_id avatar email id ip username tag created banned bot banner').sort({_id: -1}).limit(30).lean()
   res.json(users)
   
 };

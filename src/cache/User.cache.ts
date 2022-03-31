@@ -11,6 +11,7 @@ export type CacheUser = {
   _id: string,
   id: string
   passwordVersion: number;
+  type: string;
   username: string,
   tag: string,
   avatar?: string;

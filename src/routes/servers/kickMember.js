@@ -51,7 +51,7 @@ module.exports = async (req, res, next) => {
     // check if requesters role is above the recipients
     const member = await ServerMembers.findOne({ server: req.server._id, member: userToBeKicked._id }).select("roles");
     if (member) {
-      const roles = await ServerRoles.find({ id: { $in: member.roles } }, { _id: 0 }).select('order').lean();
+      const roles = await ServerRoles.find({ id: { $in: member.roles } }).select('-_id order').lean();
       let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
       if (recipientHighestRolePosition <= req.member.highestRolePosition) {
         return res

@@ -83,7 +83,7 @@ export async function onAuthentication(client: Socket, data: Data) {
     getUserNotifications(user.id),
     getLastSeenServerChannels(user._id),
     getBlockedUserIds(user._id),
-    CustomEmojis.find({ user: user._id }, { _id: 0 }).select("id gif name")
+    CustomEmojis.find({ user: user._id }).select("-_id id gif name")
   ])
 
   client.emit(AUTHENTICATED, {

@@ -1,6 +1,14 @@
 import { Users } from "../../models/Users";
 import { SERVER_POSITION_UPDATED } from "../../ServerEventNames";
-module.exports = async (req, res, next) => {
+import { Request, Response, Router } from "express";
+import { authenticate } from "../../middlewares/authenticate";
+
+export async function serverPositionUpdate(Router: Router) {
+  Router.route("/server_position")
+  .put(authenticate(), route)
+}
+
+export async function route(req: Request, res: Response) {
 
   const io = req.io;
   const { server_position } = req.body;

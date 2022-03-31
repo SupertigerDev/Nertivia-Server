@@ -1,7 +1,14 @@
 import {CustomEmojis} from '../../models/CustomEmojis';
 import { CUSTOM_EMOJI_RENAMED } from '../../ServerEventNames';
+import { Request, Response, Router } from "express";
+import { authenticate } from '../../middlewares/authenticate';
 
-module.exports = async (req, res, next) => {
+export async function customEmojiRename(Router: Router) {
+  Router.route("/emoji")
+    .put(authenticate(), route)
+}
+
+export async function route(req: Request, res: Response) {
   const { id, name } = req.body;
   const userID = req.user._id;
 
@@ -66,7 +73,7 @@ module.exports = async (req, res, next) => {
   });
 };
 
-function replaceAccents(str) {
+function replaceAccents(str: string) {
   // Verifies if the String has accents and replace them
   if (str.search(/[\xC0-\xFF]/g) > -1) {
     str = str

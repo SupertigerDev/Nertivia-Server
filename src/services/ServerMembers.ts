@@ -22,9 +22,8 @@ export const getLastSeenServerChannels = async (userObjectId: mongoose.Types.Obj
 export const getMembersByServerObjectIds = async (serverObjectIds: mongoose.Types.ObjectId[] | string[]) => {
   return await ServerMembers.find(
     { server: { $in: serverObjectIds } },
-    { _id: 0 }
   )
-    .select("+roles")
+    .select("-_id +roles")
     .populate<{member: User}>({
       path: "member",
       select: "username tag avatar id member -_id bot botPrefix"
@@ -77,7 +76,7 @@ interface PermissionDetails {
 }
 
 export const memberPermissionDetails = async (serverObjectId: string, userObjectId: string): Promise<[PermissionDetails | null, string | null]> => {
-  const member = await ServerMembers.findOne({server: serverObjectId, member: userObjectId}, {_id: 0}).select('roles')
+  const member = await ServerMembers.findOne({server: serverObjectId, member: userObjectId}).select('-_id roles')
   if (!member) {
     return [null, "You are not in that server."]
   }
@@ -88,7 +87,7 @@ export const memberPermissionDetails = async (serverObjectId: string, userObject
   let highestRolePosition = 0;
   
   if (member.roles?.length) {
-    const roles = await ServerRoles.find({id: {$in: member.roles}}, {_id: 0}).select('permissions order').lean();
+    const roles = await ServerRoles.find({id: {$in: member.roles}}).select('-_id permissions order').lean();
     highestRolePosition = Math.min(...roles.map(r => r.order));
     for (let index = 0; index < roles.length; index++) { 
       const perm = roles[index].permissions;
@@ -97,7 +96,7 @@ export const memberPermissionDetails = async (serverObjectId: string, userObject
     }
   }
 
-  const defaultRole = await ServerRoles.findOne({default: true, server: serverObjectId}, {_id: 0}).select('permissions').lean();
+  const defaultRole = await ServerRoles.findOne({default: true, server: serverObjectId}).select('-_id permissions').lean();
   permissions = permissions | defaultRole!.permissions;
   return [{permissions, highestRolePosition}, null];
   

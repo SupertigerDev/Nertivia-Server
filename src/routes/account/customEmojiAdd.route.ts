@@ -4,9 +4,16 @@ const flake = require('../../utils/genFlakeId').default;
 import * as NertiviaCDN from '../../common/NertiviaCDN'
 import { CUSTOM_EMOJI_UPLOADED } from "../../ServerEventNames";
 import { base64MimeType, isImageMime } from "../../utils/image";
+import { Router, Request, Response } from "express";
+import { authenticate } from "../../middlewares/authenticate";
 
-module.exports = async (req, res, next) => {
 
+export async function customEmojiAdd(Router: Router) {
+  Router.route("/emoji")
+  .post(authenticate(), route)
+}
+
+async function route(req: Request, res: Response) {
   if (!req.body.avatar) {
     return res.status(403).json({
       message: "Image is not present."
@@ -25,7 +32,7 @@ module.exports = async (req, res, next) => {
 
 
   //replaceAccents = remove special characters.
-  //replace convert space to underscope
+  //replace convert space to underscore
   let emojiName = replaceAccents(req.body.name).trim();
 
   if (emojiName.length < 1)
@@ -50,7 +57,7 @@ module.exports = async (req, res, next) => {
     });
 
 
-  let buffer = Buffer.from(req.body.avatar.split(",")[1], "base64");
+  const buffer = Buffer.from(req.body.avatar.split(",")[1], "base64");
 
   // 3048576 = 3mb
   const maxSize = 3048576;
@@ -60,29 +67,25 @@ module.exports = async (req, res, next) => {
     });
   }
   const mimeType = base64MimeType(req.body.avatar);
-  const type = mimeType.split("/")[1];
+  const type = mimeType?.split("/")[1];
 
-  if (!isImageMime(mimeType)) {
+  if (!mimeType || !isImageMime(mimeType)) {
     return res.status(403).json({
       message: "Invalid image."
     });
   }
 
-  buffer = await cropImage(buffer, mimeType, 100);
+  const croppedImageBuffer = await cropImage(buffer, mimeType, 100);
 
-  if (!buffer) {
+  if (!croppedImageBuffer) {
     return res.status(403).json({
       message: "Something went wrong while cropping image."
     });
   }
   const emojiId = flake.gen();
 
-
-
-
-
   const uploadError = await NertiviaCDN.uploadEmoji({
-    file: buffer,
+    file: croppedImageBuffer,
     fileName: `${emojiId}.${type === 'gif' ? 'gif' : 'png'}`,
   })
 
@@ -115,7 +118,7 @@ module.exports = async (req, res, next) => {
   });
 };
 
-function replaceAccents(str) {
+function replaceAccents(str: string) {
   // Verifies if the String has accents and replace them
   if (str.search(/[\xC0-\xFF]/g) > -1) {
     str = str

@@ -14,8 +14,8 @@ export const getChannelById = async (id: string) => {
 
 export const getOpenedDmChannels = (userObjectId: mongoose.Types.ObjectId | string) =>  {
   return Channels
-  .find({ creator: userObjectId, hide: { $ne: true } }, { _id: 0 })
-  .select("recipients channelId lastMessaged")
+  .find({ creator: userObjectId, hide: { $ne: true } })
+  .select("-_id recipients channelId lastMessaged")
   .populate<{recipients: User[]}>({
     path: "recipients",
     select: "avatar username id tag bot -_id"

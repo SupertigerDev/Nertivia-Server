@@ -4,7 +4,7 @@ module.exports = async (req, res, next) => {
   const server = req.server;
 
   // get banned list
-  const serversList = await Servers.findById(server._id, {_id: 0}).select('user_bans').populate({
+  const serversList = await Servers.findById(server._id).select('-_id user_bans').populate({
     path: 'user_bans.user',
     select: 'username tag id avatar -_id'
   }).lean()

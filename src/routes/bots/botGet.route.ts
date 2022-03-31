@@ -20,8 +20,8 @@ async function route(req: Request, res: Response) {
   const { token, myservers } = req.query;
 
   let servers: any[] | undefined;
-  const bot: any = await Users.findOne({ id: bot_id, bot: true }, { _id: 0 })
-    .select("avatar tag id username createdBy passwordVersion botPrefix botCommands")
+  const bot: any = await Users.findOne({ id: bot_id, bot: true })
+    .select("-_id avatar tag id username createdBy passwordVersion botPrefix botCommands")
     .populate("createdBy", "username tag avatar id")
     .lean();
 
@@ -42,10 +42,10 @@ async function route(req: Request, res: Response) {
     const myServers = await Servers.find({ creator: req.user._id }).select("name server_id avatar").lean();
     const myServer_ids = myServers.map((ms: any) => ms._id);
 
-    const sm = await ServerMembers.find({ member: req.user._id, roles: { $exists: true, $not: { $size: 0 } } }, { _id: 0 }).select("roles").lean();
+    const sm = await ServerMembers.find({ member: req.user._id, roles: { $exists: true, $not: { $size: 0 } } }).select("-_id roles").lean();
     servers = [...myServers, ...(await ServerRoles
-      .find({ servers: { $nin: myServer_ids }, permissions: { $bitsAllSet: roles.ADMIN }, id: { $in: (sm.map((s: any) => s.roles) as any).flat() } }, { _id: 0 })
-      .select("server").populate("server", "name server_id")
+      .find({ servers: { $nin: myServer_ids }, permissions: { $bitsAllSet: roles.ADMIN }, id: { $in: (sm.map((s: any) => s.roles) as any).flat() } })
+      .select("-_id server").populate("server", "name server_id")
       .lean()).map((s: any) => s.server)]
 
     // filter duplicates

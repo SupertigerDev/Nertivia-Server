@@ -21,7 +21,7 @@ async function route(req: Request, res: Response) {
     return;
   }
 
-  const bot = await Users.find({id: {$in: bot_ids}}, {_id: 0}).select("id botCommands").lean();
+  const bot = await Users.find({id: {$in: bot_ids}}).select("-_id id botCommands").lean();
   res.json(bot);
 
 }

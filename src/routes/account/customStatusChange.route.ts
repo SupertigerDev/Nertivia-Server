@@ -1,9 +1,21 @@
-import { Users } from "../../models/Users";
+import { User, Users } from "../../models/Users";
 import { SELF_CUSTOM_STATUS_CHANGE } from "../../ServerEventNames";
 import { emitToFriendsAndServers } from "../../socket/socket";
 import * as UserCache from '../../cache/User.cache';
+import { Request, Response, Router } from "express";
+import {FilterQuery} from 'mongoose'
+import { authenticate } from "../../middlewares/authenticate";
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
 
-module.exports = async (req, res, next) => {
+export async function customStatusChange(Router: Router) {
+  Router.route("/custom-status").post(
+    authenticate({ allowBot: true }),
+    rateLimit({ name: 'messages_load', expire: 60, requestsLimit: 50 }),
+    route
+  );
+}
+
+export async function route(req: Request, res: Response) {
   const io = req.io;
   const { custom_status } = req.body;
 
@@ -16,7 +28,7 @@ module.exports = async (req, res, next) => {
     customStatus = customStatus.replace(/\n/g, " ")
   }
 
-  const obj = {};
+  const obj: FilterQuery<User> = {};
   if (!customStatus) {
     obj.$unset = {
       custom_status: 1

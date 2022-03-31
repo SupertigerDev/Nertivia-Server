@@ -1,7 +1,14 @@
 import {CustomEmojis} from '../../models/CustomEmojis';
 import { CUSTOM_EMOJI_DELETED } from '../../ServerEventNames';
+import { Router, Request, Response } from "express";
+import { authenticate } from '../../middlewares/authenticate';
 
-module.exports = async (req, res, next) => {
+export async function customEmojiDelete(Router: Router) {
+  Router.route("/emoji")
+    .delete(authenticate(), route);
+}
+
+export async function route(req: Request, res: Response) {
   const { id } = req.body;
   const userID = req.user._id;
 

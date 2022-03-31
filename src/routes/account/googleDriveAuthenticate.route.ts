@@ -1,11 +1,18 @@
-import { Users } from "../../../models/Users";
-import { GOOGLE_DRIVE_LINKED } from "../../../ServerEventNames";
+import { Users } from "../../models/Users";
+import { GOOGLE_DRIVE_LINKED } from "../../ServerEventNames";
 
 const jwt = require('jsonwebtoken')
 
-import * as GoogleDrive from '../../../common/GoogleDrive';
+import * as GoogleDrive from '../../common/GoogleDrive';
+import { Request, Response, Router } from "express";
+import { GoogleDriveOAuth } from "../../middlewares/GoogleDriveOAuth";
 
-module.exports = async (req, res, next) => {
+export async function googleDriveAuthenticate(Router: Router) {
+	Router.route("/drive/auth")
+  .post(GoogleDriveOAuth, route);
+}
+
+export async function route(req: Request, res: Response) {
 	const oAuth2Client = req.oAuth2Client;
 	const {code, token} = req.body;
 	try {

@@ -82,7 +82,7 @@ async function route (req: Request, res: Response) {
 };
 
 async function findMessages(filter: FilterQuery<Message>) {
-  return messagesToIds(await Messages.find(filter, {_id: 0}).limit(200).select("messageID").lean());
+  return messagesToIds(await Messages.find(filter).limit(200).select("-_id messageID").lean());
 }
 
 function messagesToIds(messages: LeanDocument<Message & Document<any, any>>[]) {
