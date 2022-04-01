@@ -7,32 +7,14 @@ import { getIOInstance } from "./socket/socket";
 import app from './app';
 import mongoose from "mongoose";
 import { Log } from './Log';
+import http from 'http';
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
 
-main();
 
-function main() {
-	if (process.env.DEV_MODE === "true") {
-		start();
-		return;
-	}
-	if (cluster.isPrimary) {
-		console.log("Master PID: ", process.pid);
-	
-		for (let i = 0; i < numCPUs; i++) {
-			cluster.fork();
-		}
-		cluster.on('exit', (worker, code, signal) => {
-			console.log(`Worker Died! PID:`, process.pid);
-		});
-		return;
-	}
-	start();
-}
 
-function start() {
-	console.log(`Worker Started! PID:`, process.pid);
+export const start = () => new Promise<http.Server>(resolve => {
+	if (process.env.TEST !== "true") console.log(`Worker Started! PID:`, process.pid);
 
 	let isListening = false;
 
@@ -62,7 +44,29 @@ function start() {
 		const port = process.env.PORT || 8000;
 		server.listen(port, function () {
 			Log.info("Listening on port", port);
+			resolve(server);
 		});
 	}
+});
 
+
+main();
+function main() {
+	if (process.env.TEST === "true") return;
+	if (process.env.DEV_MODE === "true") {
+		start();
+		return;
+	}
+	if (cluster.isPrimary) {
+		console.log("Master PID: ", process.pid);
+	
+		for (let i = 0; i < numCPUs; i++) {
+			cluster.fork();
+		}
+		cluster.on('exit', (worker, code, signal) => {
+			console.log(`Worker Died! PID:`, process.pid);
+		});
+		return;
+	}
+	start();
 }
