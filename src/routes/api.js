@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 import loadMedia from '../middlewares/loadMedia';
 import * as RateLimitCache from '../cache/rateLimit.cache';
-import { Log } from '../Log';
+import { Log } from '../utils/Log';
 
 
 

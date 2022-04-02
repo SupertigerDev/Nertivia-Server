@@ -6,7 +6,7 @@ import * as redis from './common/redis';
 import { getIOInstance } from "./socket/socket";
 import app from './app';
 import mongoose from "mongoose";
-import { Log } from './Log';
+import { Log } from './utils/Log';
 import http from 'http';
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";

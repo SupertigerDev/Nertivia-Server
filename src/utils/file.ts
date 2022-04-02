@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import flake from "./genFlakeId";
-import { Log } from '../Log';
+import { Log } from '../utils/Log';
 
 interface TempFile {
   fileId: string;
