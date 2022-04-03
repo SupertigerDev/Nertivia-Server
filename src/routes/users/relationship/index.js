@@ -9,7 +9,7 @@ const relationshipPolicy = require("../../../policies/relationshipPolicies");
 
 // Add
 MainRelationshipRouter.route('/')
-  .post(authenticate(), relationshipPolicy.post, require('./friendAdd'));
+  .post(authenticate(), relationshipPolicy.post, require('./friendRequest'));
 
 // Accept
 MainRelationshipRouter.route('/')
