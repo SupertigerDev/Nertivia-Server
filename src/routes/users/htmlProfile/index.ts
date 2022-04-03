@@ -3,9 +3,9 @@ const htmlProfileRouter = require("express").Router();
 // Middleware
 const { authenticate } = require("../../../middlewares/authenticate");
 
-import {addHtmlProfile} from './addHtmlProfile';
-import {getHtmlProfile} from './getHtmlProfile';
-import {deleteHtmlProfile} from './deleteHtmlProfile';
+import {addHtmlProfile} from './htmlProfileUpdate';
+import {getHtmlProfile} from './htmlProfileGet';
+import {deleteHtmlProfile} from './htmlProfileDelete';
 
 htmlProfileRouter.route('/')
   .post(authenticate({allowBot: true}), addHtmlProfile);
