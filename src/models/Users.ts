@@ -1,4 +1,4 @@
-import {model, Schema} from 'mongoose';
+import {model, Schema, Types} from 'mongoose';
 import bcrypt from 'bcryptjs';
 import flake from '../utils/genFlakeId'
 
@@ -24,7 +24,7 @@ interface Settings {
 }
 
 export interface User {
-  _id: string
+  _id: Types.ObjectId;
   email: string
   banned: boolean
   email_confirm_code: string
