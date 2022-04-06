@@ -4,7 +4,7 @@ import {checkHTML} from 'html-safe-checker'
 import {Users} from "../../../models/Users";
 import { zip } from "../../../utils/zip";
 
-export const addHtmlProfile = async (req: Request, res: Response, next: NextFunction) => {
+export const htmlProfileUpdate = async (req: Request, res: Response, next: NextFunction) => {
   const {html} = req.body;
 
   if (!html) {

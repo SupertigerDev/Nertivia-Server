@@ -22,7 +22,7 @@ MainUserRouter.use("/html-profile", require("./htmlProfile").htmlProfileRouter);
 
 // welcome popout completed
 MainUserRouter.route('/welcome-done')
-  .post(authenticate(), require('./welcomeDone'));
+  .post(authenticate(), require('./welcomeDone').welcomeDone);
 
 
 // Update
@@ -46,9 +46,9 @@ MainUserRouter.route("/block").delete(
 );
 
 // User agreeing to the TOS and the privacy policy
-MainUserRouter.route("/agreeingPolicies").post(
+MainUserRouter.route("/agree-terms").post(
   authenticate({skipTerms: true}),
-  require("./agreeingPolicies")
+  require("./termsAgree").termsAgree
 );
 
 // Details
@@ -100,7 +100,7 @@ MainUserRouter.route("/reset/code/:code").post(
 // Logout
 MainUserRouter.route("/logout").delete(
   authenticate({allowBot: true}),
-  require("./logout")
+  require("./userLogout").userLogout
 );
 
 

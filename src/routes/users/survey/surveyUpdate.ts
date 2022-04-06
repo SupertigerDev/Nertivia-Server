@@ -1,8 +1,9 @@
 
+import {Request, Response} from 'express';
 import { Users } from "../../../models/Users";
-const { matchedData } = require('express-validator');
+import { matchedData } from 'express-validator';
 
-module.exports = async (req, res, next) => {
+export async function surveyUpdate(req: Request, res: Response) {
   const data = matchedData(req);
   Users.findOneAndUpdate({ _id: req.user._id }, { about_me: data }).exec(
     async function(err, item) {
@@ -19,7 +20,6 @@ module.exports = async (req, res, next) => {
       res.json({
         message: "Saved!"
       });
-
     }
   );
 };

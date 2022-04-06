@@ -1,14 +1,14 @@
 import { Request, Response, Router } from "express";
 import { Users } from "../../models/Users";
 import {Servers} from '../../models/Servers';
-import { sign } from "jsonwebtoken";
 import {ServerMembers} from '../../models/ServerMembers';
 import { ServerRoles } from "../../models/ServerRoles";
 import { roles } from '../../utils/rolePermConstants'
 import { authenticate } from "../../middlewares/authenticate";
+import { signToken } from "../../utils/JWT";
 
 export function botGet (Router: Router) {
-  //token only visable for creator. (SAFE TO USE FOR OTHER USERS.)
+  //token only visible for creator. (SAFE TO USE FOR OTHER USERS.)
   Router.route("/:bot_id").get(
     authenticate({optional: true}),
     route
@@ -31,10 +31,7 @@ async function route(req: Request, res: Response) {
   }
 
   if (token && req.user && bot.createdBy._id.toString() === req.user._id) {
-    bot.token = sign(bot.id + (bot.passwordVersion !== undefined ? `-${bot.passwordVersion}` : ''), process.env.JWT_SECRET)
-      .split(".")
-      .splice(1)
-      .join(".");
+    bot.token = await signToken(bot.id, bot.passwordVersion)
   }
   delete bot.createdBy._id;
 

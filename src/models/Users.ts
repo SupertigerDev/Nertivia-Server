@@ -5,6 +5,7 @@ import flake from '../utils/genFlakeId'
 
 
 interface AboutMe {
+  _id: Types.ObjectId
   name: string;
   gender: string
   age: string

@@ -1,7 +1,6 @@
 import { Users } from "../../models/Users";
 const { matchedData } = require('express-validator');
 const bcrypt = require('bcryptjs');
-const JWT = require('jsonwebtoken');
 import {cropImage} from '../../utils/cropImage'
 import compressImage from '../../utils/compressImage';
 import { kickUser } from '../../utils/kickUser';
@@ -12,6 +11,7 @@ import { base64MimeType, isImageMime } from "../../utils/image";
 import { deleteFile } from "../../utils/file";
 import * as UserCache from '../../cache/User.cache';
 import { emitToFriendsAndServers } from "../../socket/socket";
+import { signToken } from "../../utils/JWT";
 const fs = require("fs");
 
 
@@ -131,7 +131,8 @@ module.exports = async (req, res, next) => {
     resObj.id = user.id;
     const io = req.io;
     if (updatePassword) {
-      res.json({...resObj, token: JWT.sign(`${user.id}-${req.user.passwordVersion}`, process.env.JWT_SECRET).split(".").splice(1).join(".")});
+      const token = await signToken(user.id, req.user.passwordVersion)
+      res.json({...resObj, token: token });
 
       // logout other accounts
       kickUser(user.id, "Password Changed.", socketID)

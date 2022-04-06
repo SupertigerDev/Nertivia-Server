@@ -1,12 +1,12 @@
 import { Request, Response, Router } from "express";
 import {Users} from '../../models/Users';
 import SocketIO from 'socket.io'
-import JWT from 'jsonwebtoken'
 import * as UserCache from '../../cache/User.cache'
 
 import { AUTHENTICATION_ERROR } from "../../ServerEventNames";
 import { authenticate } from "../../middlewares/authenticate";
 import { rateLimit } from "../../middlewares/rateLimit.middleware";
+import { signToken } from "../../utils/JWT";
 
 export function botResetToken (Router: Router) {
   Router.route("/:bot_id/reset-token").post(
@@ -27,7 +27,9 @@ async function route(req: Request, res: Response) {
 
   await Users.updateOne({_id: bot._id}, {$inc: { passwordVersion: 1 }});
 
-  res.json({token: JWT.sign(`${bot_id}-${bot.passwordVersion ? bot.passwordVersion + 1 : 1 }`, process.env.JWT_SECRET).split(".").splice(1).join(".")})
+  const token = await signToken(bot_id, bot.passwordVersion ? bot.passwordVersion + 1 : 1 )
+
+  res.json({token: token })
 
   kickBot(req.io, bot_id);
 }
