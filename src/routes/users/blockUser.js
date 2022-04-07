@@ -2,7 +2,7 @@ import { Users } from "../../models/Users";
 import { Friends } from '../../models/Friends';
 import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
-import { USER_BLOCKED } from "../../ServerEventNames";
+import { RELATIONSHIP_DELETED, USER_BLOCKED } from "../../ServerEventNames";
 import * as ChannelCache from '../../cache/Channel.cache'
 
 module.exports = async (req, res, next) => {
