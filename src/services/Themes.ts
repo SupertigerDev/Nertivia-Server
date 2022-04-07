@@ -28,7 +28,7 @@ export async function createTheme(data: Theme) {
 }
 
 export async function updateTheme(id: string, creatorObjectId: string, data: Partial<Theme>) {
-  const theme = await Themes.findOne({ id, creator: creatorObjectId }, { _id: 0 }).select("name id");
+  const theme = await Themes.findOne({ id, creator: creatorObjectId }).select("-_id name id");
   if (!theme) {
     throw {statusCode: 404, message: "Theme does not exist!"};
   }
@@ -50,7 +50,7 @@ export async function getTheme(id: string) {
   return theme;
 }
 export async function getThemesByCreatorId(id: string) {
-  const themes = await Themes.find({creator: id}, {_id: 0}).select('name id client_version');
+  const themes = await Themes.find({creator: id}).select('-_id name id client_version');
   return themes;
 }
 

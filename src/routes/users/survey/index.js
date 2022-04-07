@@ -9,11 +9,11 @@ const surveyPolicy = require("../../../policies/surveyPolicies");
 
 // Details
 MainSurveyRouter.route('/')
-  .get(authenticate({allowBot: true}), require('./surveyDetails'));
+  .get(authenticate({allowBot: true}), require('./surveyDetails').surveyDetails);
 
 // Update
 MainSurveyRouter.route('/')
-  .put(authenticate({allowBot: true}), surveyPolicy.put, require('./surveyUpdate'));
+  .put(authenticate({allowBot: true}), surveyPolicy.put, require('./surveyUpdate').surveyUpdate);
 
 
 

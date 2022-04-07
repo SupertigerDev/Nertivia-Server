@@ -1,10 +1,11 @@
-import {model, Schema} from 'mongoose';
+import {model, Schema, Types} from 'mongoose';
 import bcrypt from 'bcryptjs';
 import flake from '../utils/genFlakeId'
 
 
 
 interface AboutMe {
+  _id: Types.ObjectId
   name: string;
   gender: string
   age: string
@@ -20,12 +21,11 @@ interface Appearance {
 }
 
 interface Settings {
-  apperance: Appearance
   server_position: string[]
 }
 
 export interface User {
-  _id: string
+  _id: Types.ObjectId;
   email: string
   banned: boolean
   email_confirm_code: string
@@ -78,7 +78,6 @@ const appearanceSchema = new Schema<Appearance>({
 })
 
 const settingsSchema = new Schema<Settings>({
-  apperance: { type: appearanceSchema },
   server_position: [{ type: String, required: false }]
 })
 

@@ -11,6 +11,7 @@ export type CacheUser = {
   _id: string,
   id: string
   passwordVersion: number;
+  type: string;
   username: string,
   tag: string,
   avatar?: string;
@@ -36,6 +37,7 @@ interface ProgramActivity {
   status: string;
   name: string;
   socketId: string;
+  userId: string;
 }
 type ReturnType<T> = [T | null, string | null];
 

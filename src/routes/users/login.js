@@ -1,13 +1,6 @@
 import { Users } from "../../models/Users";
 import {BannedIPs} from "../../models/BannedIPs";
-const JWT = require("jsonwebtoken");
-function signToken(user_id, pwdVer) {
-  if (pwdVer !== undefined) {
-    return JWT.sign(`${user_id}-${pwdVer}`, process.env.JWT_SECRET);
-  } else {
-    return JWT.sign(user_id, process.env.JWT_SECRET);
-  }
-}
+import { signToken } from "../../utils/JWT";
 
 module.exports = async (req, res, next) => {
   // email can be username:tag.
@@ -70,10 +63,7 @@ module.exports = async (req, res, next) => {
   user.password = undefined;
 
   // Generate token without header information
-  const token = signToken(user.id, user.passwordVersion)
-    .split(".")
-    .splice(1)
-    .join(".");
+  const token = await signToken(user.id, user.passwordVersion)
 
   const data = {
     username: user.username,

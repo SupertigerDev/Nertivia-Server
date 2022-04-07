@@ -1,5 +1,4 @@
 import { NextFunction, Request, Response } from "express";
-import {decodeToken} from '../utils/JWT';
 import * as UserCache from '../cache/User.cache';
 interface Options {
   allowBot?: boolean, 

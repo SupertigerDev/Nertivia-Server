@@ -12,12 +12,6 @@ module.exports = async (req, res, next) => {
     filters.compatible_client_version = version;
   }
 
-  // const themes = await PublicThemes.find({ approved: true, ...filters }, { _id: 0 })
-  //   .select("id description screenshot theme creator compatible_client_version")
-  //   .populate([
-  //     { path: "theme", select: "-_id name id" },
-  //     { path: "creator", select: "-_id username tag id" }
-  //   ])
 
 
 

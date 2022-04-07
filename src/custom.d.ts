@@ -48,6 +48,7 @@ declare global {
       DRIVE_KEY: string
       
       DEV_MODE: string
+      TEST: string
     }
   }
 }

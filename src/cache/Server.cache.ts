@@ -19,7 +19,7 @@ export async function getServer(serverId: string): Promise<Server | null> {
   const server = await Servers.findOne({server_id: serverId}).select("+verified")
   if (!server) return null;
   const serverStringified = JSON.stringify(server);
-  await addServer(serverId, serverStringified);
+  await addServer(serverId, server);
   return JSON.parse(serverStringified);
 }
 export async function deleteServer(serverId: string) {

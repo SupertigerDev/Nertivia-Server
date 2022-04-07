@@ -24,7 +24,7 @@ interface InsertNotificationOptions {
   senderObjectId: string,
   // users for servers
   serverObjectId?: string,
-  mentionUserObjectIds?: string[]
+  mentionUserObjectIds?: string[] | any[]
   // used for dms
   recipientUserId?: string
 }

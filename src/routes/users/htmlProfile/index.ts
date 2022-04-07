@@ -3,18 +3,18 @@ const htmlProfileRouter = require("express").Router();
 // Middleware
 const { authenticate } = require("../../../middlewares/authenticate");
 
-import {addHtmlProfile} from './addHtmlProfile';
-import {getHtmlProfile} from './getHtmlProfile';
-import {deleteHtmlProfile} from './deleteHtmlProfile';
+import {htmlProfileUpdate} from './htmlProfileUpdate';
+import {htmlProfileGet} from './htmlProfileGet';
+import {htmlProfileDelete} from './htmlProfileDelete';
 
 htmlProfileRouter.route('/')
-  .post(authenticate({allowBot: true}), addHtmlProfile);
+  .post(authenticate({allowBot: true}), htmlProfileUpdate);
 
 htmlProfileRouter.route('/')
-  .get(authenticate(), getHtmlProfile);
+  .get(authenticate(), htmlProfileGet);
 
 htmlProfileRouter.route('/')
-  .delete(authenticate(), deleteHtmlProfile);
+  .delete(authenticate(), htmlProfileDelete);
 
 
 

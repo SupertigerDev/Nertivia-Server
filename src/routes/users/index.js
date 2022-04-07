@@ -2,12 +2,11 @@ const MainUserRouter = require("express").Router();
 
 // Middleware
 const { authenticate } = require("../../middlewares/authenticate");
+import { checkCaptcha } from "../../middlewares/checkCaptcha.middleware";
 import { rateLimit } from "../../middlewares/rateLimit.middleware";
 
 // Policies
 const authPolicy = require("../../policies/authenticationPolicies");
-const reCaptchaPolicy = require("../../policies/reCaptchaPolicie");
-const forceCaptcha = require("../../policies/forceCaptcha");
 const userPolicy = require("../../policies/UserPolicies");
 
 
@@ -22,7 +21,7 @@ MainUserRouter.use("/html-profile", require("./htmlProfile").htmlProfileRouter);
 
 // welcome popout completed
 MainUserRouter.route('/welcome-done')
-  .post(authenticate(), require('./welcomeDone'));
+  .post(authenticate(), require('./welcomeDone').welcomeDone);
 
 
 // Update
@@ -46,9 +45,9 @@ MainUserRouter.route("/block").delete(
 );
 
 // User agreeing to the TOS and the privacy policy
-MainUserRouter.route("/agreeingPolicies").post(
+MainUserRouter.route("/agree-terms").post(
   authenticate({skipTerms: true}),
-  require("./agreeingPolicies")
+  require("./termsAgree").termsAgree
 );
 
 // Details
@@ -59,8 +58,7 @@ MainUserRouter.route("/register").post(
   authPolicy.register,
   rateLimit({name: 'register', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
   // show captcha 
-  forceCaptcha,
-  reCaptchaPolicy,
+  checkCaptcha({captchaOnRateLimit: false}),
   require("./register")
 );
 
@@ -74,7 +72,7 @@ MainUserRouter.route("/register/confirm").post(
 MainUserRouter.route("/login").post(
   authPolicy.login,
   rateLimit({name: 'login', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
-  reCaptchaPolicy,
+  checkCaptcha({captchaOnRateLimit: true}),
   require("./login")
 );
 // delete my account
@@ -87,7 +85,7 @@ MainUserRouter.route("/delete-account").delete(
 MainUserRouter.route("/reset/request").post(
   authPolicy.resetRequest,
   rateLimit({name: 'reset_password', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
-  reCaptchaPolicy,
+  checkCaptcha({captchaOnRateLimit: true}),
   require("./resetRequest")
 );
 
@@ -100,7 +98,7 @@ MainUserRouter.route("/reset/code/:code").post(
 // Logout
 MainUserRouter.route("/logout").delete(
   authenticate({allowBot: true}),
-  require("./logout")
+  require("./userLogout").userLogout
 );
 
 

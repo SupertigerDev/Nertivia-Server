@@ -24,7 +24,7 @@ async function sendNotification({
   // TODO: clean the code later on. This is only used for server mentions now.
   if (!message.mentions || !message.mentions.length) return;
   // filter mentions to joined mentioned members
-  let filteredMentions = await ServerMembers.find({ muted_channels: { $ne: channelId }, muted: { $ne: 2 }, server: server_id, member: {$in: message.mentions.map(m => m._id)}}, {_id: 0}).select("member").lean();
+  let filteredMentions = await ServerMembers.find({ muted_channels: { $ne: channelId }, muted: { $ne: 2 }, server: server_id, member: {$in: message.mentions.map(m => m._id)}}).select("-_id member").lean();
 
   filteredMentions = message.mentions.filter(({_id}) => filteredMentions.find(({member}) => member.toString() === _id.toString()) && _id.toString() !== sender._id.toString())
   if (!filteredMentions.length) return;
