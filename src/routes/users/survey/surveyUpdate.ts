@@ -1,9 +1,18 @@
 
-import {Request, Response} from 'express';
+import {Request, Response, Router} from 'express';
 import { Users } from "../../../models/Users";
 import { matchedData } from 'express-validator';
+import { authenticate } from '../../../middlewares/authenticate';
 
-export async function surveyUpdate(req: Request, res: Response) {
+import surveyPolicy from '../../../policies/surveyPolicies';
+
+export function surveyUpdate(Router: Router) {
+
+  Router.route('/')
+    .put(authenticate({allowBot: true}), surveyPolicy.put, route);
+}
+
+async function route(req: Request, res: Response) {
   const data = matchedData(req);
   Users.findOneAndUpdate({ _id: req.user._id }, { about_me: data }).exec(
     async function(err, item) {

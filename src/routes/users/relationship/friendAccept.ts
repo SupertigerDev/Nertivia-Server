@@ -1,8 +1,15 @@
-import {Request, Response} from 'express';
+import {Request, Response, Router} from 'express';
+import { authenticate } from '../../../middlewares/authenticate';
 import { acceptRequest } from "../../../services/Friends";
 
+import relationshipPolicy from '../../../policies/relationshipPolicies';
 
-export async function friendAccept(req: Request, res: Response) {
+export const friendAccept = (Router: Router) => {
+  Router.route('/')
+    .put(authenticate(), relationshipPolicy.put, route);
+}
+
+async function route(req: Request, res: Response) {
   const friendId = req.body.id;
 
   acceptRequest(req.user.id, friendId)

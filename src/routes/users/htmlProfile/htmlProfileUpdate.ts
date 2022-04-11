@@ -1,10 +1,16 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, Router } from "express";
 
 import {checkHTML} from 'html-safe-checker'
+import { authenticate } from "../../../middlewares/authenticate";
 import {Users} from "../../../models/Users";
 import { zip } from "../../../utils/zip";
 
-export const htmlProfileUpdate = async (req: Request, res: Response, next: NextFunction) => {
+export const htmlProfileUpdate = (Router: Router) => {
+  Router.route('/')
+  .post(authenticate({allowBot: true}), route);
+}
+
+const route = async (req: Request, res: Response) => {
   const {html} = req.body;
 
   if (!html) {

@@ -1,7 +1,13 @@
-import {Request, Response} from 'express';
+import {Request, Response, Router} from 'express';
+import { authenticate } from '../../../middlewares/authenticate';
 import { Users } from "../../../models/Users";
 
-export async function surveyDetails(req: Request, res: Response) {
+export function surveyDetails(Router: Router) {
+  Router.route('/')
+  .get(authenticate({allowBot: true}), route);
+}
+
+async function route(req: Request, res: Response) {
   const result = await Users.findById(req.user._id, "about_me").lean();
 
   if (!result?.about_me) {

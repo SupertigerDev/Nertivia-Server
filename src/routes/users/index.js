@@ -11,10 +11,10 @@ const userPolicy = require("../../policies/UserPolicies");
 
 
 // Relationship
-MainUserRouter.use("/relationship", require("./relationship"));
+MainUserRouter.use("/relationship", require("./relationship").RelationshipRouter);
 
 // Survey
-MainUserRouter.use("/survey", require("./survey"));
+MainUserRouter.use("/survey", require("./survey").SurveyRouter);
 
 MainUserRouter.use("/html-profile", require("./htmlProfile").htmlProfileRouter);
 

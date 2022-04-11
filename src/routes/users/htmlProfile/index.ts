@@ -1,20 +1,14 @@
-const htmlProfileRouter = require("express").Router();
+import { Router } from 'express';
 
-// Middleware
-const { authenticate } = require("../../../middlewares/authenticate");
+const htmlProfileRouter = Router();
 
-import {htmlProfileUpdate} from './htmlProfileUpdate';
-import {htmlProfileGet} from './htmlProfileGet';
-import {htmlProfileDelete} from './htmlProfileDelete';
+import { htmlProfileUpdate } from './htmlProfileUpdate';
+import { htmlProfileGet } from './htmlProfileGet';
+import { htmlProfileDelete } from './htmlProfileDelete';
 
-htmlProfileRouter.route('/')
-  .post(authenticate({allowBot: true}), htmlProfileUpdate);
-
-htmlProfileRouter.route('/')
-  .get(authenticate(), htmlProfileGet);
-
-htmlProfileRouter.route('/')
-  .delete(authenticate(), htmlProfileDelete);
+htmlProfileUpdate(htmlProfileRouter)
+htmlProfileGet(htmlProfileRouter)
+htmlProfileDelete(htmlProfileRouter)
 
 
 

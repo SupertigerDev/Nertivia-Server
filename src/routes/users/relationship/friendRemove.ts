@@ -1,8 +1,15 @@
-import {Request, Response} from 'express';
+import {Request, Response, Router} from 'express';
+import { authenticate } from '../../../middlewares/authenticate';
 import { removeFriend } from "../../../services/Friends";
 
+import relationshipPolicy from '../../../policies/relationshipPolicies';
 
-export async function friendRemove(req: Request, res: Response) {
+export const friendRemove = (Router: Router) => {
+  Router.route('/')
+    .delete(authenticate(), relationshipPolicy.delete, route);
+}
+
+async function route(req: Request, res: Response) {
   const friendId = req.body.id;
 
   removeFriend(req.user.id, friendId)
