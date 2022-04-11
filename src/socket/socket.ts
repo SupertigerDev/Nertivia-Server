@@ -1,4 +1,4 @@
-import {Server} from "http";
+import http from "http";
 import socketIO from "socket.io";
 
 import { createAdapter, RedisAdapter } from '@socket.io/redis-adapter';
@@ -7,10 +7,11 @@ import { onConnection } from "./handlers/connection.event";
 import mongoose from "mongoose";
 import { Friends } from "../models/Friends";
 import { User, Users } from "../models/Users";
+import { Server } from "../models/Servers";
 
 let IO_INSTANCE: socketIO.Server | undefined = undefined;
 
-export function getIOInstance(server?: Server) {
+export function getIOInstance(server?: http.Server) {
   if (IO_INSTANCE) {
     return IO_INSTANCE;
   }
@@ -50,7 +51,7 @@ export async  function emitToFriendsAndServers (_opts: FriendsAndServersOptions)
   const opts: FriendsAndServersOptions = {emitToSelf: true, ..._opts}
 
   const friends = await Friends.find({requester: opts.userObjectId}).populate<{recipient: User}>('recipient', "id");
-  const user = await Users.findById(opts.userObjectId).populate('servers', "server_id");
+  const user = await Users.findById(opts.userObjectId).populate<{servers: Server[]}>('servers', "server_id");
 
   if (!friends || !user) return;
 

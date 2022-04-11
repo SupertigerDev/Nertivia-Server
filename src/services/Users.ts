@@ -1,5 +1,5 @@
 import { User, Users } from "../models/Users"
-import {Server} from '../models/Servers'
+import {Server, Servers} from '../models/Servers'
 import {Friend} from '../models/Friends'
 import mongoose from "mongoose"
 import { BlockedUsers } from "../models/BlockedUsers"
@@ -50,4 +50,20 @@ export const getBlockedUserIds = async(userObjectId: string | mongoose.Types.Obj
 export const getUsersByIds = async (userIds: string[]) => {
   if (!userIds.length) return [];
   return Users.find({id: {$in: userIds}}).select('_id id avatar tag username')
+}
+
+export const getCommonServerIds = async (userId: string, recipientId: string) => {
+  const user = await Users.findOne({id: userId}).select("servers").lean();
+  if (!user?.servers) return [];
+
+  const recipient = await Users.findOne({id: recipientId}).select("servers").lean();
+  if (!recipient?.servers) return [];
+  const recipientServers = recipient.servers.map(serverObjectId => serverObjectId.toString());
+
+  const commonServerObjectIds = user.servers.filter(serverObjectId => {
+    return recipientServers.includes(serverObjectId.toString());
+  })
+  const commonServers = await Servers.find({_id: {$in: commonServerObjectIds}}).select("server_id");
+  const commonServerIds = commonServers.map(server => server.server_id);
+  return commonServerIds;
 }

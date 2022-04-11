@@ -43,7 +43,7 @@ export interface User {
   status: number,
   type: string
   friends: any[]
-  servers: any[]
+  servers: Types.ObjectId[]
   created: number
   show_welcome: boolean
   badges: number
