@@ -1,10 +1,11 @@
+import { Request, Response } from "express";
 import { Users } from "../../models/Users";
 import {BlockedUsers} from "../../models/BlockedUsers";
 
 import {Friends} from "../../models/Friends";
 import { getCommonServerIds } from "../../services/Users";
 
-module.exports = async (req, res, next) => {
+export const userDetails = async (req: Request, res: Response) => {
   let recipientId = req.params.user_id;
 
   if (!recipientId) {

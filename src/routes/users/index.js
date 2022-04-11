@@ -51,7 +51,7 @@ MainUserRouter.route("/agree-terms").post(
 );
 
 // Details
-MainUserRouter.route("/:user_id?").get(authenticate({allowBot: true}), require("./userDetails"));
+MainUserRouter.route("/:user_id?").get(authenticate({allowBot: true}), require("./userDetails").userDetails);
 
 // Register
 MainUserRouter.route("/register").post(
