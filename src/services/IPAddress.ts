@@ -3,7 +3,7 @@ import { Users } from '../models/Users';
 
 export async function checkBanned(ip: string) {
   const isBanned = await BannedIPs.exists({ip});
-  return isBanned;
+  return isBanned as boolean;
 }
 
 export async function updateAddress(userId: string, ip: string) {

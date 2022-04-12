@@ -1,12 +1,13 @@
 import { Users } from "../../models/Users";
-import {BannedIPs} from "../../models/BannedIPs";
 import { signToken } from "../../utils/JWT";
+import { checkBanned } from "../../services/IPAddress";
+import { Request, Response } from "express";
 
-module.exports = async (req, res, next) => {
+export const confirmEmail = async (req: Request, res: Response) => {
   const { code, email } = req.body;
 
   // check if ip is banned
-  const ipBanned = await BannedIPs.exists({ ip: req.userIp });
+  const ipBanned = await checkBanned(req.userIp);
   if (ipBanned) {
     return res.status(401).json({
       error: "IP is banned."
