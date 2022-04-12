@@ -35,7 +35,7 @@ MainUserRouter.route("/").patch(
 // block user
 MainUserRouter.route("/block").post(
   authenticate(),
-  require("./blockUser")
+  require("./blockUser").blockUser
 );
 
 // unblock user

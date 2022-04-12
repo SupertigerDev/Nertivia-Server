@@ -4,29 +4,30 @@ import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
 import { RELATIONSHIP_DELETED, USER_BLOCKED } from "../../ServerEventNames";
 import * as ChannelCache from '../../cache/Channel.cache'
+import { Request, Response } from "express";
 
-module.exports = async (req, res, next) => {
-  const recipientUserID = req.body.id; 
+export const blockUser = async (req: Request, res: Response) => {
+  const recipientUserId = req.body.id; 
 
-  if (recipientUserID === req.user.id) {
+  if (recipientUserId === req.user.id) {
     return res.status(403)
     .json({ message: "You cannot block yourself ♥" });
   }
 
   // check if the recipient exists
-  const recipient = await Users.findOne({id: recipientUserID});
+  const recipient = await Users.findOne({id: recipientUserId});
   if (!recipient) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Users not found."}] });
 
   // check if the blocker exists
-  const requester = await Users.findOne({id: req.user.id})
-  if (!requester) return res.status(403)
+  const user = await Users.findOne({id: req.user.id})
+  if (!user) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
 
   
   // check if already blocked
   const isBlocked = await BlockedUsers.exists({
-    requester: requester,
+    requester: user,
     recipient: recipient
   })
 
@@ -37,31 +38,31 @@ module.exports = async (req, res, next) => {
 
   
   // check if the request exists
-  const request = await Friends.findOne({ requester: requester, recipient: recipient });
+  const request = await Friends.findOne({ requester: user, recipient: recipient });
   
   if (request) {
     // remove from database
-    const docA = await Friends.findOneAndRemove({ requester: requester, recipient: recipient });
-    const docB = await Friends.findOneAndRemove({ requester: recipient, recipient: requester });
+    const docA = await Friends.findOneAndRemove({ requester: user, recipient: recipient });
+    const docB = await Friends.findOneAndRemove({ requester: recipient, recipient: user });
 
-    await Users.findOneAndUpdate({ _id: requester },{ $pull: { friends: docA._id }});
-    await Users.findOneAndUpdate({ _id: recipient },{ $pull: { friends: docB._id }});
+    await Users.findOneAndUpdate({ _id: user },{ $pull: { friends: docA?._id }});
+    await Users.findOneAndUpdate({ _id: recipient },{ $pull: { friends: docB?._id }});
   }
 
   await BlockedUsers.create({
-    requester: requester,
+    requester: user,
     recipient: recipient
   })
 
   // check if channel is opened
   const openedChannel = await Channels.findOne({$or: [
-    {creator: requester._id, recipients: recipient._id},
-    {creator: recipient._id, recipients: requester._id}
+    {creator: user._id, recipients: recipient._id},
+    {creator: recipient._id, recipients: user._id}
   ]}).select("channelId")
 
   if (openedChannel) {
     await Promise.all([
-      ChannelCache.deleteDMChannel(requester.id, openedChannel.channelId),
+      ChannelCache.deleteDMChannel(user.id, openedChannel.channelId),
       ChannelCache.deleteDMChannel(recipient.id, openedChannel.channelId)
     ])
   }
@@ -69,11 +70,11 @@ module.exports = async (req, res, next) => {
   const io = req.io
   
   
-  io.in(requester.id).emit(RELATIONSHIP_DELETED, recipient.id);
+  io.in(user.id).emit(RELATIONSHIP_DELETED, recipient.id);
   
-  io.in(recipient.id).emit(RELATIONSHIP_DELETED, requester.id);
+  io.in(recipient.id).emit(RELATIONSHIP_DELETED, user.id);
   
-  io.in(requester.id).emit(USER_BLOCKED, recipient.id);
+  io.in(user.id).emit(USER_BLOCKED, recipient.id);
  
 
   return res.json({ message: `Users blocked` })
