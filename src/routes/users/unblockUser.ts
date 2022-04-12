@@ -3,24 +3,25 @@ import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
 import { USER_UNBLOCKED } from "../../ServerEventNames";
 import * as ChannelCache from '../../cache/Channel.cache'
+import { Request, Response } from "express";
 
-module.exports = async (req, res, next) => {
-  const recipientUserID = req.body.id; 
+export const unblockUser = async (req: Request, res: Response) => {
+  const recipientUserId = req.body.id; 
 
   // check if the recipient exists
-  const recipient = await Users.findOne({id: recipientUserID});
+  const recipient = await Users.findOne({id: recipientUserId});
   if (!recipient) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Users not found."}] });
 
   // check if the blocker exists
-  const requester = await Users.findOne({id: req.user.id})
-  if (!requester) return res.status(403)
+  const user = await Users.findOne({id: req.user.id})
+  if (!user) return res.status(403)
     .json({ status: false, errors: [{param: "all", msg: "Something went wrong."}] });
 
   
-  // check if is bit blocked
+  // check if recipient is already unblocked.
   const isBlocked = await BlockedUsers.exists({
-    requester: requester,
+    requester: user,
     recipient: recipient
   })
 
@@ -30,26 +31,26 @@ module.exports = async (req, res, next) => {
   }
 
   await BlockedUsers.deleteOne({
-    requester: requester,
+    requester: user,
     recipient: recipient
   })
 
   // check if channel is opened
   const openedChannel = await Channels.findOne({$or: [
-    {creator: requester._id, recipients: recipient._id},
-    {creator: recipient._id, recipients: requester._id}
+    {creator: user._id, recipients: recipient._id},
+    {creator: recipient._id, recipients: user._id}
   ]}).select("channelId")
 
   if (openedChannel) {
     await Promise.all([
-      ChannelCache.deleteDMChannel(requester.id, openedChannel.channelId),
+      ChannelCache.deleteDMChannel(user.id, openedChannel.channelId),
       ChannelCache.deleteDMChannel(recipient.id, openedChannel.channelId)
     ])
   }
 
   const io = req.io
   
-  io.in(requester.id).emit(USER_UNBLOCKED, recipient.id);
+  io.in(user.id).emit(USER_UNBLOCKED, recipient.id);
 
-  return res.json({message: "Users unblocked." })
+  return res.json({message: "User unblocked." })
 }

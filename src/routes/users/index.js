@@ -41,7 +41,7 @@ MainUserRouter.route("/block").post(
 // unblock user
 MainUserRouter.route("/block").delete(
   authenticate(),
-  require("./unblockUser")
+  require("./unblockUser").unblockUser
 );
 
 // User agreeing to the TOS and the privacy policy
