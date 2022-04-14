@@ -78,7 +78,7 @@ MainUserRouter.route("/login").post(
 // delete my account
 MainUserRouter.route("/delete-account").delete(
   authenticate(),
-  require("./deleteAccount")
+  require("./deleteAccount").deleteAccount
 );
 
 // Reset password request

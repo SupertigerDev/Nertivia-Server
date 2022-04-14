@@ -1,6 +1,7 @@
 import { Users } from "../../models/Users";
 import {BannedIPs} from "../../models/BannedIPs";
 import { signToken } from "../../utils/JWT";
+import bcrypt from 'bcryptjs';
 
 module.exports = async (req, res, next) => {
   // email can be username:tag.
@@ -31,7 +32,7 @@ module.exports = async (req, res, next) => {
     })
   }
   // Check if the password is correct
-  const isMatch = await user.isValidPassword(password);
+  const isMatch = await bcrypt.compare(password, user.password);
 
   if (!isMatch) {
     return res

@@ -1,23 +1,24 @@
+import { Request, Response } from "express";
 import { Users } from "../../models/Users";
 import * as NertiviaCDN from '../../common/NertiviaCDN';
-const { deleteAllUserFCM } = require("../../utils/sendPushNotification");
-const { kickUser } = require("../../utils/kickUser");
+import { deleteAllUserFCM } from "../../utils/sendPushNotification";
+import { kickUser } from "../../utils/kickUser";
 import * as UserCache from '../../cache/User.cache';
+import bcrypt from 'bcryptjs';
 
-
-module.exports = async (req, res, next) => {
+export const deleteAccount = async (req: Request, res: Response) => {
   const { password } = req.body;
 
 
   // validate password
-  const user = await Users.findById(req.user._id).select("password");
+  const user = await Users.findById(req.user._id).select("password servers");
   if (!user){
     return res
     .status(404)
     .json({error: "User could not be found."})
   }
 
-  const passwordMatch = await user.isValidPassword(password);
+  const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
     return res
     .status(403)
@@ -37,8 +38,7 @@ module.exports = async (req, res, next) => {
     .json({error: "You must delete all of your bots before deleting your account."})
   }
 
-  const _user = await Users.findById(req.user._id).select("servers");
-  if (_user && _user.servers && _user.servers.length) {
+  if (user.servers?.length) {
     return res
     .status(403)
     .json({error: "You must leave / Delete all of your servers before deleting your account."})
@@ -76,9 +76,11 @@ module.exports = async (req, res, next) => {
 
   
   // delete files from cdn
-  const error = await NertiviaCDN.deleteFile(path);
-  if (error) {
-    console.log("Error deleting from CDN", error)
+  if (req.user.id) {
+    const error = await NertiviaCDN.deleteFile("/" + req.user.id);
+    if (error) {
+      console.log("Error deleting from CDN", error)
+    }
   }
 
   kickUser(req.user.id, "Token outdated.");

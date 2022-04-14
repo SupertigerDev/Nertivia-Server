@@ -1,7 +1,6 @@
 import {model, Schema, Types} from 'mongoose';
-import bcrypt from 'bcryptjs';
 import flake from '../utils/genFlakeId'
-
+import bcrypt from 'bcryptjs';
 
 
 interface AboutMe {
@@ -232,13 +231,6 @@ schema.pre('save', async function (next) {
   }
 })
 
-schema.methods.isValidPassword = async function (newPassword: string) {
-  try {
-    return await bcrypt.compare(newPassword, this.password);
-  } catch (error: any) {
-    throw new Error(error);
-  }
-}
 
 
 function generateString(n: number) {

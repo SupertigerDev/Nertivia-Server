@@ -76,7 +76,7 @@ module.exports = async (req, res, next) => {
     if (!dbUser) {
       return res.status(403).json({ message: "Something went wrong." });
     }
-    const passwordValid = await dbUser.isValidPassword(data.password);
+    const passwordValid = await bcrypt.compare(data.password, dbUser.password);
     if (!passwordValid) {
       return res
         .status(403)
