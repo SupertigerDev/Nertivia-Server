@@ -282,7 +282,7 @@ export async function authenticate (_opts?: AuthOptions): Promise<ReturnType<Cac
       return [null, "You are suspended from Nertivia."];
     }
 
-    const isIPBanned = await checkIPBanned(user.id, opts.userIp!, user.ip);
+    const isIPBanned = await checkOrUpdateIPBanned(user.id, opts.userIp!, user.ip);
     if (isIPBanned) {
       return [null, "IP is banned."];
     }
@@ -297,7 +297,7 @@ export async function authenticate (_opts?: AuthOptions): Promise<ReturnType<Cac
 
 // currentIP: latest IP.
 // savedIP: ip in the database.
-async function checkIPBanned(userId: string, currentIP: string, savedIP?: string) {
+async function checkOrUpdateIPBanned(userId: string, currentIP: string, savedIP?: string) {
   if (currentIP === savedIP) return false;
   const isBanned = await IPAddress.checkBanned(currentIP);
   if (isBanned) return true;

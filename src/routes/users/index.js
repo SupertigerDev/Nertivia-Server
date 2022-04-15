@@ -73,7 +73,7 @@ MainUserRouter.route("/login").post(
   authPolicy.login,
   rateLimit({name: 'login', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
   checkCaptcha({captchaOnRateLimit: true}),
-  require("./login")
+  require("./login").login
 );
 // delete my account
 MainUserRouter.route("/delete-account").delete(
