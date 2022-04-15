@@ -86,7 +86,7 @@ MainUserRouter.route("/reset/request").post(
   authPolicy.resetRequest,
   rateLimit({name: 'reset_password', expire: 600, requestsLimit: 5, userIp: true, nextIfInvalid: true }),
   checkCaptcha({captchaOnRateLimit: true}),
-  require("./resetRequest")
+  require("./resetRequest").resetRequest
 );
 
 // Reset password

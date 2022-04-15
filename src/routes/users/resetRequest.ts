@@ -1,7 +1,9 @@
 import { Users } from "../../models/Users";
-import {BannedIPs} from "../../models/BannedIPs";
-const crypto = require("crypto")
+import crypto from 'crypto';
 import nodemailer from 'nodemailer';
+import { checkBanned } from "../../services/IPAddress";
+import { Request, Response } from "express";
+
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
   auth: {
@@ -11,18 +13,18 @@ const transporter = nodemailer.createTransport({
 })
 
 
-module.exports = async (req, res, next) => {
+export const resetRequest = async (req: Request, res: Response) => {
   // email can be username:tag.
   const {email} = req.body;
   // Validate information
 
-  let obj;
   const usernameTag = email.split(":");
-  if (usernameTag.length === 2) {
-    obj = {username: usernameTag[0], tag: usernameTag[1]}
-  } else {
-    obj = {email: email.toLowerCase()};
+
+  const obj = {
+    ...(usernameTag.length === 2 && { username: usernameTag[0], tag: usernameTag[1] }),
+    ...(usernameTag.length !== 2 && { email: email.toLowerCase() })
   }
+
   // Find the user given the email
   const user = await Users.findOne(obj).select(
     "avatar status admin _id username id tag created GDriveRefreshToken banned email_confirm_code passwordVersion"
@@ -45,7 +47,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if ip is banned
-  const ipBanned = await BannedIPs.exists({ip: req.userIp});
+  const ipBanned = await checkBanned(req.userIp);
   if (ipBanned) {
     return res
     .status(401)
