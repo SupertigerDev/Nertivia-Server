@@ -7,7 +7,7 @@ const policy = require("../../policies/errorReportPolicies");
 
 // report error
 MainErrorReportRouter.route("/").post(
-  rateLimit({name: 'error_report', expire: 600, requestsLimit: 10, userIp: true}),
+  rateLimit({name: 'error_report', expire: 600, requestsLimit: 10, useIp: true}),
   policy.post,
   require("./reportError")
 );

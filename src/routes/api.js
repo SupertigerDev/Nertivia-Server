@@ -32,7 +32,7 @@ router.use('/*', async (req, res, next) => {
 // Routes
 
 router.use('/error_report', require('./errorReport'));
-router.use('/user', require('./users'));
+router.use('/user', require('./users/User.router').UserRouter);
 router.use('/devices', require('./devices'));
 router.use('/servers', require('./servers'));
 router.use('/channels', require('./channels/Channel.router').ChannelRouter);

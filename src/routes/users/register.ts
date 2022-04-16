@@ -1,8 +1,10 @@
 import { Users } from "../../models/Users";
-import {BannedIPs} from "../../models/BannedIPs";
 import nodemailer from 'nodemailer';
 import validate from 'deep-email-validator'
 import blacklistArr from '../../emailBlacklist.json'
+import { checkBanned } from "../../services/IPAddress";
+import { Request, Response } from "express";
+
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
   auth: {
@@ -11,7 +13,7 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-module.exports = async (req, res, next) => {
+export const register = async (req: Request, res: Response) => {
 
   let { username, email, password } = req.body;
 
@@ -28,7 +30,7 @@ module.exports = async (req, res, next) => {
 
 
   // check if ip is banned
-  const ipBanned = await BannedIPs.exists({ip: req.userIp});
+  const ipBanned = await checkBanned(req.userIp);
   if (ipBanned) {
     return res
     .status(401)

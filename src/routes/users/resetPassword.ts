@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 })
 
 
-export const reset = async (req: Request, res: Response) => {
+export const resetPassword = async (req: Request, res: Response) => {
   const {id, password} = req.body;
   const code = req.params.code;
 

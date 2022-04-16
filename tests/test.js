@@ -1,7 +1,6 @@
 process.env.TEST = true;
 let fs = require('fs');
 const {start} = require('../dist/index');
-const {Log} = require('../dist/Log');
 
 
 describe('Serve Server',() => {

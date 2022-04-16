@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 })
 
 
-export const resetRequest = async (req: Request, res: Response) => {
+export const resetPasswordRequest = async (req: Request, res: Response) => {
   // email can be username:tag.
   const {email} = req.body;
   // Validate information

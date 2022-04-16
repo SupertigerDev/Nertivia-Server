@@ -1,6 +1,6 @@
 import { Users } from "../../models/Users";
-const { matchedData } = require('express-validator');
-const bcrypt = require('bcryptjs');
+import { matchedData } from 'express-validator';
+import bcrypt from 'bcryptjs';
 import {cropImage} from '../../utils/cropImage'
 import compressImage from '../../utils/compressImage';
 import { kickUser } from '../../utils/kickUser';
@@ -12,10 +12,11 @@ import { deleteFile } from "../../utils/file";
 import * as UserCache from '../../cache/User.cache';
 import { emitToFriendsAndServers } from "../../socket/socket";
 import { signToken } from "../../utils/JWT";
-const fs = require("fs");
+import { Request, Response } from "express";
+import fs from "fs";
 
 
-module.exports = async (req, res, next) => {
+export const userUpdate = async (req: Request, res: Response) => {
   let data = matchedData(req);
   if (data.username) {
     data.username = data.username.replace(
@@ -146,7 +147,7 @@ module.exports = async (req, res, next) => {
 
     // emit public data
     if (!data.avatar && !data.username) return;
-    const publicObj = {id: req.user.id}
+    const publicObj: any = {id: req.user.id}
     if (data.avatar) publicObj.avatar = data.avatar;
     if (data.username) publicObj.username = data.username;
     if (data.tag) publicObj.tag = data.tag;
@@ -163,18 +164,18 @@ module.exports = async (req, res, next) => {
   }
 };
 
-async function uploadAvatar(base64, user_id) {
+async function uploadAvatar(base64: string, user_id: string) {
   return uploadImage(base64, user_id, 200, 'avatar')
 }
-async function uploadBanner(base64, user_id) {
+async function uploadBanner(base64: string, user_id: string) {
   return uploadImage(base64, user_id, 1900, 'banner')
 }
 
 
 
-async function uploadImage(base64, user_id, size, name) {
+async function uploadImage(base64: string, user_id: string, size: number, name: string) {
   return new Promise(async (resolve, reject) => {
-    let buffer = Buffer.from(base64.split(',')[1], 'base64');
+    let buffer: Buffer | fs.ReadStream | undefined = Buffer.from(base64.split(',')[1], 'base64');
 
     // 8092000 = 8mb
     const maxSize = 8092000; 
@@ -184,16 +185,16 @@ async function uploadImage(base64, user_id, size, name) {
     }
     const mimeType = base64MimeType(base64);
     const type = base64.split(';')[0].split('/')[1];
-    if (!isImageMime(mimeType)) {
+    if (!mimeType || !isImageMime(mimeType)) {
       return reject("Invalid " + name)
 
     }
 
-    let dirPath = "";
+    let dirPath: string | null = "";
 
     if (name === "banner") {
       dirPath = (await tempSaveImage(`bnr.${type}`, buffer)).dirPath;
-      dirPath = await compressImage(`bnr.${type}`, dirPath).catch(err => {reject("Something went wrong while compressing image.") })
+      dirPath = await compressImage(`bnr.${type}`, dirPath).catch(err => {reject("Something went wrong while compressing image."); return null; })
       if (!dirPath) return;
       buffer = fs.createReadStream(dirPath);
     } else {

@@ -22,7 +22,8 @@ export function base64MimeType(base64: string) {
 }
 
 // mimeType example: 'image/png'
-export function isImageMime(mimeType: string) {
+export function isImageMime(mimeType: string | undefined | null) {
+  if (!mimeType) return false;
   const filetypes = /jpeg|jpg|gif|png|webp/;
   const isImage = filetypes.test(mimeType);
   return isImage;
