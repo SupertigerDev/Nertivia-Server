@@ -1,9 +1,17 @@
 import { Users } from "../../models/Users";
 import { signToken } from "../../utils/JWT";
 import { checkBanned } from "../../services/IPAddress";
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
+import authPolicy from '../../policies/authenticationPolicies';
 
-export const confirmEmail = async (req: Request, res: Response) => {
+export const userConfirmEmail = (Router: Router) => {
+  Router.route("/register/confirm").post(
+    authPolicy.confirm,
+    route
+  );
+}
+
+const route = async (req: Request, res: Response) => {
   const { code, email } = req.body;
 
   // check if ip is banned

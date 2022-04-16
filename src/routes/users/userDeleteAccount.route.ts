@@ -1,12 +1,19 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { Users } from "../../models/Users";
 import * as NertiviaCDN from '../../common/NertiviaCDN';
 import { deleteAllUserFCM } from "../../utils/sendPushNotification";
 import { kickUser } from "../../utils/kickUser";
 import * as UserCache from '../../cache/User.cache';
 import bcrypt from 'bcryptjs';
+import { authenticate } from "../../middlewares/authenticate";
 
-export const deleteAccount = async (req: Request, res: Response) => {
+export const userDeleteAccount = (Router: Router) => {
+  Router.route("/delete-account").delete(
+    authenticate(),
+    route
+  );
+}
+const route = async (req: Request, res: Response) => {
   const { password } = req.body;
 
 

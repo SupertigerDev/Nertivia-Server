@@ -3,7 +3,11 @@ import nodemailer from 'nodemailer';
 import validate from 'deep-email-validator'
 import blacklistArr from '../../emailBlacklist.json'
 import { checkBanned } from "../../services/IPAddress";
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
+import { checkCaptcha } from "../../middlewares/checkCaptcha.middleware";
+import authPolicy from '../../policies/authenticationPolicies';
+
 
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
@@ -13,7 +17,17 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-export const register = async (req: Request, res: Response) => {
+export const userRegister = (Router: Router) => {
+  Router.route("/register").post(
+    authPolicy.register,
+    rateLimit({name: 'register', expire: 600, requestsLimit: 5, useIp: true, nextIfInvalid: true }),
+    // show captcha 
+    checkCaptcha({captchaOnRateLimit: false}),
+    route
+  );
+}
+
+const route = async (req: Request, res: Response) => {
 
   let { username, email, password } = req.body;
 

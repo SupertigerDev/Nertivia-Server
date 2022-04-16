@@ -2,7 +2,10 @@ import { Users } from "../../models/Users";
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import { checkBanned } from "../../services/IPAddress";
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
+import { checkCaptcha } from "../../middlewares/checkCaptcha.middleware";
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
+import authPolicy from '../../policies/authenticationPolicies';
 
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
@@ -13,7 +16,15 @@ const transporter = nodemailer.createTransport({
 })
 
 
-export const resetPasswordRequest = async (req: Request, res: Response) => {
+export const userResetPasswordRequest = (Router: Router) => {
+  Router.route("/reset/request").post(
+    authPolicy.resetRequest,
+    rateLimit({name: 'reset_password', expire: 600, requestsLimit: 5, useIp: true, nextIfInvalid: true }),
+    checkCaptcha({captchaOnRateLimit: true}),
+    route
+  );
+}
+const route = async (req: Request, res: Response) => {
   // email can be username:tag.
   const {email} = req.body;
   // Validate information

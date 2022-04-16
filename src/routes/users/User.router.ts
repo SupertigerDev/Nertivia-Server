@@ -2,17 +2,22 @@
 import { Router } from "express";
 const UserRouter = Router();
 
-// Middleware
-const { authenticate } = require("../../middlewares/authenticate");
-import { checkCaptcha } from "../../middlewares/checkCaptcha.middleware";
-import { rateLimit } from "../../middlewares/rateLimit.middleware";
+import { userRegister } from "./userRegister.route";
+import { termsAgree } from "./termsAgree.route";
+import { userBlock } from "./userBlock.route";
+import { userDetails } from "./userDetails.route";
+import { userUnblock } from "./userUnblock.route";
+import { userUpdate } from "./userUpdate.route";
+import { userWelcomeDone } from "./userWelcomeDone.route";
+import { userLogin } from "./userLogin.route";
+import { userConfirmEmail } from "./userConfirmEmail.route";
+import { userDeleteAccount } from "./userDeleteAccount.route";
+import { userResetPasswordRequest } from "./userResetPasswordRequest.route";
+import { userResetPassword } from "./userResetPassword.route";
+import { userLogout } from "./userLogout.route";
 
 
 
-
-// Policies
-const authPolicy = require("../../policies/authenticationPolicies");
-const userPolicy = require("../../policies/UserPolicies");
 
 
 // Relationship
@@ -24,87 +29,24 @@ UserRouter.use("/survey", require("./survey").SurveyRouter);
 UserRouter.use("/html-profile", require("./htmlProfile").htmlProfileRouter);
 
 
-// welcome popout completed
-UserRouter.route('/welcome-done')
-  .post(authenticate(), require('./welcomeDone').welcomeDone);
+userWelcomeDone(UserRouter);
 
+userUpdate(UserRouter);
 
-// Update
-UserRouter.route("/").patch(
-  authenticate({allowBot: true}),
-  userPolicy.updateUser,
-  require("./userUpdate").userUpdate
-);
+userBlock(UserRouter);
+userUnblock(UserRouter);
 
+termsAgree(UserRouter);
 
-// block user
-UserRouter.route("/block").post(
-  authenticate(),
-  require("./blockUser").blockUser
-);
+userDetails(UserRouter);
 
-// unblock user
-UserRouter.route("/block").delete(
-  authenticate(),
-  require("./unblockUser").unblockUser
-);
-
-// User agreeing to the TOS and the privacy policy
-UserRouter.route("/agree-terms").post(
-  authenticate({skipTerms: true}),
-  require("./termsAgree").termsAgree
-);
-
-// Details
-UserRouter.route("/:user_id?").get(authenticate({allowBot: true}), require("./userDetails").userDetails);
-
-// Register
-UserRouter.route("/register").post(
-  authPolicy.register,
-  rateLimit({name: 'register', expire: 600, requestsLimit: 5, useIp: true, nextIfInvalid: true }),
-  // show captcha 
-  checkCaptcha({captchaOnRateLimit: false}),
-  require("./register").register
-);
-
-// confirm email
-UserRouter.route("/register/confirm").post(
-  authPolicy.confirm,
-  require("./confirmEmail").confirmEmail
-);
-
-// Login
-UserRouter.route("/login").post(
-  authPolicy.login,
-  rateLimit({name: 'login', expire: 600, requestsLimit: 5, useIp: true, nextIfInvalid: true }),
-  checkCaptcha({captchaOnRateLimit: true}),
-  require("./login").login
-);
-// delete my account
-UserRouter.route("/delete-account").delete(
-  authenticate(),
-  require("./deleteAccount").deleteAccount
-);
-
-// Reset password request
-UserRouter.route("/reset/request").post(
-  authPolicy.resetRequest,
-  rateLimit({name: 'reset_password', expire: 600, requestsLimit: 5, useIp: true, nextIfInvalid: true }),
-  checkCaptcha({captchaOnRateLimit: true}),
-  require("./resetPasswordRequest").resetPasswordRequest
-);
-
-// Reset password
-UserRouter.route("/reset/code/:code").post(
-  authPolicy.reset,
-  require("./resetPassword").resetPassword
-);
-
-// Logout
-UserRouter.route("/logout").delete(
-  authenticate({allowBot: true}),
-  require("./userLogout").userLogout
-);
+userRegister(UserRouter);
+userConfirmEmail(UserRouter);
+userLogin(UserRouter);
+userDeleteAccount(UserRouter);
+userResetPasswordRequest(UserRouter);
+userResetPassword(UserRouter);
+userLogout(UserRouter);
 
 
 export { UserRouter };

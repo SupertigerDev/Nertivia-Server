@@ -12,11 +12,20 @@ import { deleteFile } from "../../utils/file";
 import * as UserCache from '../../cache/User.cache';
 import { emitToFriendsAndServers } from "../../socket/socket";
 import { signToken } from "../../utils/JWT";
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import fs from "fs";
+import { authenticate } from "../../middlewares/authenticate";
+import userPolicy from '../../policies/UserPolicies';
 
+export const userUpdate = (Router: Router) => {
+  Router.route("/").patch(
+    authenticate({allowBot: true}),
+    userPolicy.updateUser,
+    route
+  );
 
-export const userUpdate = async (req: Request, res: Response) => {
+}
+const route = async (req: Request, res: Response) => {
   let data = matchedData(req);
   if (data.username) {
     data.username = data.username.replace(

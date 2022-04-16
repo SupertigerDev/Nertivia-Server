@@ -1,11 +1,16 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { Users } from "../../models/Users";
 import {BlockedUsers} from "../../models/BlockedUsers";
 
 import {Friends} from "../../models/Friends";
 import { getCommonServerIds } from "../../services/Users";
+import { authenticate } from "../../middlewares/authenticate";
 
-export const userDetails = async (req: Request, res: Response) => {
+export const userDetails = (Router: Router) => {
+  Router.route("/:user_id?")
+  .get(authenticate({allowBot: true}), route);
+}
+const route = async (req: Request, res: Response) => {
   let recipientId = req.params.user_id;
 
   if (!recipientId) {

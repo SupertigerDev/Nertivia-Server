@@ -4,7 +4,10 @@ const bcrypt = require('bcryptjs');
 import nodemailer from 'nodemailer';
 import { kickUser } from '../../utils/kickUser';
 import { checkBanned } from "../../services/IPAddress";
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
+
+import authPolicy from '../../policies/authenticationPolicies';
+
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
   auth: {
@@ -14,7 +17,14 @@ const transporter = nodemailer.createTransport({
 })
 
 
-export const resetPassword = async (req: Request, res: Response) => {
+export const userResetPassword = (Router: Router) => {
+  Router.route("/reset/code/:code").post(
+    authPolicy.reset,
+    route
+  );
+}
+
+const route = async (req: Request, res: Response) => {
   const {id, password} = req.body;
   const code = req.params.code;
 

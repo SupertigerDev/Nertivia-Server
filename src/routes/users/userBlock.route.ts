@@ -4,9 +4,16 @@ import { BlockedUsers } from '../../models/BlockedUsers';
 import {Channels} from '../../models/Channels';
 import { RELATIONSHIP_DELETED, USER_BLOCKED } from "../../ServerEventNames";
 import * as ChannelCache from '../../cache/Channel.cache'
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
+import { authenticate } from "../../middlewares/authenticate";
 
-export const blockUser = async (req: Request, res: Response) => {
+export const userBlock = (Router: Router) => {
+  Router.route("/block").post(
+    authenticate(),
+    route
+  );
+}
+const route = async (req: Request, res: Response) => {
   const recipientUserId = req.body.id; 
 
   if (recipientUserId === req.user.id) {

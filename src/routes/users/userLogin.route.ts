@@ -2,9 +2,21 @@ import { Users } from "../../models/Users";
 import { signToken } from "../../utils/JWT";
 import bcrypt from 'bcryptjs';
 import { checkBanned } from "../../services/IPAddress";
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
+import { checkCaptcha } from "../../middlewares/checkCaptcha.middleware";
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
+import authPolicy from '../../policies/authenticationPolicies';
 
-export const login  = async (req: Request, res: Response) => {
+export const userLogin = (Router: Router) => {
+  Router.route("/login").post(
+    authPolicy.login,
+    rateLimit({name: 'login', expire: 600, requestsLimit: 5, useIp: true, nextIfInvalid: true }),
+    checkCaptcha({captchaOnRateLimit: true}),
+    route
+  );
+
+}
+const route = async (req: Request, res: Response) => {
   // email can be username:tag.
   const {email, password} = req.body;
   // Validate information
