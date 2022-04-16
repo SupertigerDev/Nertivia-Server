@@ -92,7 +92,7 @@ MainUserRouter.route("/reset/request").post(
 // Reset password
 MainUserRouter.route("/reset/code/:code").post(
   authPolicy.reset,
-  require("./reset")
+  require("./reset").reset
 );
 
 // Logout

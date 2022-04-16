@@ -3,6 +3,8 @@ import {BannedIPs} from "../../models/BannedIPs";
 const bcrypt = require('bcryptjs');
 import nodemailer from 'nodemailer';
 import { kickUser } from '../../utils/kickUser';
+import { checkBanned } from "../../services/IPAddress";
+import { Request, Response } from "express";
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
   auth: {
@@ -12,7 +14,7 @@ const transporter = nodemailer.createTransport({
 })
 
 
-module.exports = async (req, res, next) => {
+export const reset = async (req: Request, res: Response) => {
   const {id, password} = req.body;
   const code = req.params.code;
 
@@ -39,7 +41,7 @@ module.exports = async (req, res, next) => {
   }
 
   // check if ip is banned
-  const ipBanned = await BannedIPs.exists({ip: req.userIp});
+  const ipBanned = await checkBanned(req.userIp)
   if (ipBanned) {
     return res
     .status(401)
