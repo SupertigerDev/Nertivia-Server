@@ -15,18 +15,32 @@ import { userDeleteAccount } from "./userDeleteAccount.route";
 import { userResetPasswordRequest } from "./userResetPasswordRequest.route";
 import { userResetPassword } from "./userResetPassword.route";
 import { userLogout } from "./userLogout.route";
+import { htmlProfileUpdate } from "./htmlProfileUpdate.route";
+import { htmlProfileGet } from "./htmlProfileGet.route";
+import { htmlProfileDelete } from "./htmlProfileDelete.route";
+import { friendRequest } from "./friendRequest.route";
+import { friendAccept } from "./friendAccept.route";
+import { friendRemove } from "./friendRemove.route";
+import { surveyUpdate } from "./surveyUpdate.route";
+import { surveyDetails } from "./surveyDetails.route";
 
 
 
 
 
 // Relationship
-UserRouter.use("/relationship", require("./relationship").RelationshipRouter);
+friendRequest(UserRouter);
+friendAccept(UserRouter);
+friendRemove(UserRouter);
 
 // Survey
-UserRouter.use("/survey", require("./survey").SurveyRouter);
+surveyDetails(UserRouter);
+surveyUpdate(UserRouter);
 
-UserRouter.use("/html-profile", require("./htmlProfile").htmlProfileRouter);
+// HTML Profile
+htmlProfileUpdate(UserRouter)
+htmlProfileGet(UserRouter)
+htmlProfileDelete(UserRouter)
 
 
 userWelcomeDone(UserRouter);

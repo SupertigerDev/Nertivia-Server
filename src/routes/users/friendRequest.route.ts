@@ -1,11 +1,11 @@
 import {Request, Response, Router} from 'express';
-import { authenticate } from '../../../middlewares/authenticate';
-import { sendRequest } from "../../../services/Friends";
+import { authenticate } from '../../middlewares/authenticate';
+import { sendRequest } from "../../services/Friends";
 
-import relationshipPolicy from '../../../policies/relationshipPolicies';
+import relationshipPolicy from '../../policies/relationshipPolicies';
 
 export const friendRequest = (Router: Router) => {
-  Router.route('/')
+  Router.route('/relationship')
   .post(authenticate(), relationshipPolicy.post, route);
 }
 

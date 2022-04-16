@@ -1,12 +1,12 @@
 import { Request, Response, Router } from "express";
 
 import {checkHTML} from 'html-safe-checker'
-import { authenticate } from "../../../middlewares/authenticate";
-import {Users} from "../../../models/Users";
-import { zip } from "../../../utils/zip";
+import { authenticate } from "../../middlewares/authenticate";
+import {Users} from "../../models/Users";
+import { zip } from "../../utils/zip";
 
 export const htmlProfileUpdate = (Router: Router) => {
-  Router.route('/')
+  Router.route('/html-profile')
   .post(authenticate({allowBot: true}), route);
 }
 

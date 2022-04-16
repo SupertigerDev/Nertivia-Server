@@ -1,11 +1,11 @@
 import {Request, Response, Router} from 'express';
-import { authenticate } from '../../../middlewares/authenticate';
-import { acceptRequest } from "../../../services/Friends";
+import { authenticate } from '../../middlewares/authenticate';
+import { acceptRequest } from "../../services/Friends";
 
-import relationshipPolicy from '../../../policies/relationshipPolicies';
+import relationshipPolicy from '../../policies/relationshipPolicies';
 
 export const friendAccept = (Router: Router) => {
-  Router.route('/')
+  Router.route('/relationship')
     .put(authenticate(), relationshipPolicy.put, route);
 }
 

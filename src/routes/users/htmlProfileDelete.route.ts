@@ -1,10 +1,10 @@
 import {  Request, Response, Router } from "express";
-import { authenticate } from "../../../middlewares/authenticate";
+import { authenticate } from "../../middlewares/authenticate";
 
-import {Users} from "../../../models/Users";
+import {Users} from "../../models/Users";
 
 export const htmlProfileDelete = (Router: Router) => {
-  Router.route('/')
+  Router.route('/html-profile')
     .delete(authenticate(), route);
 }
 const route = async (req: Request, res: Response) => {

@@ -1,9 +1,9 @@
 import {Request, Response, Router} from 'express';
-import { authenticate } from '../../../middlewares/authenticate';
-import { Users } from "../../../models/Users";
+import { authenticate } from '../../middlewares/authenticate';
+import { Users } from "../../models/Users";
 
 export function surveyDetails(Router: Router) {
-  Router.route('/')
+  Router.route('/survey')
   .get(authenticate({allowBot: true}), route);
 }
 

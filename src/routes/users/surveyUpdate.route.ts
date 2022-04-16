@@ -1,14 +1,14 @@
 
 import {Request, Response, Router} from 'express';
-import { Users } from "../../../models/Users";
+import { Users } from "../../models/Users";
 import { matchedData } from 'express-validator';
-import { authenticate } from '../../../middlewares/authenticate';
+import { authenticate } from '../../middlewares/authenticate';
 
-import surveyPolicy from '../../../policies/surveyPolicies';
+import surveyPolicy from '../../policies/surveyPolicies';
 
 export function surveyUpdate(Router: Router) {
 
-  Router.route('/')
+  Router.route('/survey')
     .put(authenticate({allowBot: true}), surveyPolicy.put, route);
 }
 
