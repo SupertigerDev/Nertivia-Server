@@ -38,7 +38,7 @@
     "googleapis": "^52.1.0",
     "html-safe-checker": "^1.1.2",
     "ip-range-check": "^0.2.0",
-    "jsdom": "^16.2.2",
+    "jsdom": "^16.5.0",
     "jsonhtmlfyer": "^0.3.3",
     "jsonwebtoken": "^8.5.1",
     "match-all": "^1.2.5",
