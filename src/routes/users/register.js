@@ -74,7 +74,7 @@ module.exports = async (req, res, next) => {
       requestsLimit: 5
     })
     if (ttlEmailLimit) {
-      console.log("Non gmail emails have been blacklisted for a day.");
+      console.log("Non gmail emails have been blacklisted for a day. " + email.split("@")[1].trim().toLowerCase());
       return res.status(403).json({
         errors: [{param: "other", msg: "Non gmail emails have been blacklisted for a day."}]
       });
