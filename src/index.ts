@@ -1,23 +1,63 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import cluster from 'cluster';
 const numCPUs = require('os').cpus().length;
-import { getRedisInstance, redisInstanceExists } from "./redis/instance";
-import { getIOInstance } from "./socket/instance";
+import * as redis from './common/redis';
+import { getIOInstance } from "./socket/socket";
 import app from './app';
 import mongoose from "mongoose";
-import dotenv from 'dotenv';
-import { Log } from './Log';
-dotenv.config();
+import { Log } from './utils/Log';
+import http from 'http';
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
 
-main();
 
+
+export const start = () => new Promise<http.Server>(resolve => {
+	if (process.env.TEST !== "true") console.log(`Worker Started! PID:`, process.pid);
+
+	let isListening = false;
+
+	connectMongoDB();
+	
+	function connectMongoDB() {
+		Log.info("Connecting to MongoDB...")
+		const mongoOptions: mongoose.ConnectOptions = {
+			
+		};
+		mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, err => {
+			if (err) throw err;
+			Log.info("Connected!")
+			connectRedis();
+		})
+	}
+	async function connectRedis() {
+		Log.info("Connecting to Redis...")
+		await redis.connect();
+		Log.info("Connected!")
+		startServer();
+	}
+	function startServer() {
+		if (isListening) return;
+		Log.info("Starting server...");
+		const server = app();
+		const port = process.env.PORT || 8000;
+		server.listen(port, function () {
+			Log.info("Listening on port", port);
+			resolve(server);
+		});
+	}
+});
+
+
+main();
 function main() {
+	if (process.env.TEST === "true") return;
 	if (process.env.DEV_MODE === "true") {
 		start();
 		return;
 	}
-	if (cluster.isMaster) {
+	if (cluster.isPrimary) {
 		console.log("Master PID: ", process.pid);
 	
 		for (let i = 0; i < numCPUs; i++) {
@@ -29,60 +69,4 @@ function main() {
 		return;
 	}
 	start();
-}
-
-function start() {
-	console.log(`Worker Started! PID:`, process.pid);
-
-	let isListening = false;
-
-	connectMongoDB();
-	
-	function connectMongoDB() {
-		Log.info("Connecting to MongoDB...")
-		const mongoOptions: mongoose.ConnectionOptions = {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-			useFindAndModify: false,
-			useCreateIndex: true
-		};
-		mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, err => {
-			if (err) throw err;
-			Log.info("Connected!")
-			connectRedis();
-		})
-	}
-	function connectRedis() {
-		Log.info("Connecting to Redis...")
-		if (redisInstanceExists()) return;
-		const client = getRedisInstance({
-			host: process.env.REDIS_HOST,
-			password: process.env.REDIS_PASS,
-			port: parseInt(process.env.REDIS_PORT)
-		});
-		if (!client) return;
-		client.on("ready", () => {
-			Log.info("Connected!")
-			client.flushall();
-			startServer();
-		});
-		client.on("error", err => {
-			throw err;
-		})
-	}
-	function startServer() {
-		if (isListening) return;
-		Log.info("Starting server...");
-		const server = app();
-
-		const socketIO = require('./socketIO');
-
-		getIOInstance().on("connection", socketIO);
-
-		const port = process.env.PORT || 8000;
-		server.listen(port, function () {
-			Log.info("Listening on port", port);
-		});
-	}
-
 }

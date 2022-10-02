@@ -3,7 +3,7 @@ import { ServerRoles } from '../../../models/ServerRoles';
 import { ServerMembers } from '../../../models/ServerMembers';
 import { Users } from "../../../models/Users";
 import { SERVER_ROLE_ADDED_TO_MEMBER } from '../../../ServerEventNames';
-const redis = require("../../../redis");
+import * as ServerMemberCache from '../../../cache/ServerMember.cache';
 
 // /:server_id/members/:member_id/roles/:role_id
 module.exports = async (req, res, next) => {
@@ -54,17 +54,18 @@ module.exports = async (req, res, next) => {
   // higher role should have higher priority
   const isCreator = req.server.creator === req.user._id
   if (!isCreator) {
-    if (req.highestRolePosition >= role.order) {
+    if (req.member.highestRolePosition >= role.order) {
       return res
       .status(403)
-      .json({ message: "Your Role priority is too low to perfom this action." });
+      .json({ message: "Your Role priority is too low to perform this action." });
     }
   }
 
 
   await ServerMembers.updateOne({_id: serverMember._id}, {$addToSet: { roles: role_id } });
 
-  redis.remServerMember(member_id, req.server.server_id);
+  await ServerMemberCache.removeServerMember(req.server.server_id, member_id);
+
   
   const io = req.io;
   io.in("server:" + req.server.server_id).emit(SERVER_ROLE_ADDED_TO_MEMBER, {

@@ -9,9 +9,10 @@ import {Messages} from '../models/Messages'
 import {ServerMembers} from "../models/ServerMembers";
 import { ServerRoles } from '../models/ServerRoles';
 import { AddFCMUserToServer, sendServerPush } from "./sendPushNotification";
-import getUserDetails from "./getUserDetails";
-import { getCustomStatusByUserId, getPresenceByUserId, getVoiceUsersFromServerIds } from '../newRedisWrapper';
 import { MESSAGE_CREATED, SERVER_JOINED, SERVER_MEMBERS, SERVER_MEMBER_ADDED, SERVER_ROLES } from '../ServerEventNames';
+
+import * as VoiceCache from '../cache/Voice.cache';
+import * as UserCache from '../cache/User.cache';
 
 
 export default async function join(server: any, user: any, socketID: string | undefined, req: Request, res: Response, roleId: string | undefined, type: string = "MEMBER") {
@@ -44,7 +45,7 @@ export default async function join(server: any, user: any, socketID: string | un
   const updatedUser = await Users.updateOne(
     { _id: user._id },
     { $push: { servers: server._id } }
-  ).catch(() => {res.status(403).json({ message: "Something went wrong while upading user." })})
+  ).catch(() => {res.status(403).json({ message: "Something went wrong while updating the user." })})
   if (!updatedUser) return;
 
   const createdServerMember = await ServerMembers.create({
@@ -89,16 +90,15 @@ export default async function join(server: any, user: any, socketID: string | un
       id: user.id
     }
   };
-  // get user presence
-  const [presence] = await getPresenceByUserId(serverMember.member.id);
-  const [customStatus] = await getCustomStatusByUserId(serverMember.member.id);
+  // get own presence
+  const ownPresence = await UserCache.getPresenceByUserId(serverMember.member.id);
   io.in("server:" + server.server_id).emit(SERVER_MEMBER_ADDED, {
     serverMember,
-    custom_status: customStatus[1],
-    presence: presence[1]
+    custom_status: ownPresence?.custom,
+    presence: ownPresence?.status
   });
   // get joined voice users
-  const [callingChannelUserIds] = await getVoiceUsersFromServerIds([server.server_id])
+  const callingChannelUserIds = await VoiceCache.getVoiceUserIdsByServerIds([server.server_id])
 
   // send owns status to every connected device
   createServerObj.channels = serverChannels;
@@ -163,8 +163,7 @@ export default async function join(server: any, user: any, socketID: string | un
   // send roles
   let serverRoles = await ServerRoles.find(
     { server: server._id },
-    { _id: 0 }
-  ).select("name id color permissions server_id deletable order default hideRole");
+  ).select("-_id name id color permissions server_id deletable order default hideRole");
 
   io.to(user.id).emit(SERVER_ROLES, {
     server_id: server.server_id,
@@ -176,7 +175,14 @@ export default async function join(server: any, user: any, socketID: string | un
     .populate("member", "username tag avatar id bot")
     .lean();
 
-  const  {programActivityArr, memberStatusArr, customStatusArr} = await getUserDetails(serverMembers.map((sm: any) => sm.member.id))   
+  
+  const serverMemberIds = serverMembers.map((member: {member: {id: string}}) => member.member.id);
+
+  const [programActivities, presences] = await Promise.all([
+    UserCache.getProgramActivityByUserIds(serverMemberIds),
+    UserCache.getPresenceByUserIds(serverMemberIds)
+  ])
+
 
   serverMembers = serverMembers.map((sm: any) => {
     delete sm.server;
@@ -187,9 +193,8 @@ export default async function join(server: any, user: any, socketID: string | un
   });
   io.to(user.id).emit(SERVER_MEMBERS, {
     serverMembers,
-    memberPresences: memberStatusArr,
-    memberCustomStatusArr: customStatusArr,
-    programActivityArr,
+    programActivities,
+    presences,
     callingChannelUserIds
   });
 

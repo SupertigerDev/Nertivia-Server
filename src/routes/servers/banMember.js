@@ -3,13 +3,14 @@ import {Servers} from "../../models/Servers";
 import { Users } from "../../models/Users";
 import {ServerMembers} from "../../models/ServerMembers";
 import {Messages} from '../../models/Messages'
-import { deleteServerChannels, getUserInVoiceByUserId, removeUserFromVoice } from '../../newRedisWrapper';
 import { Notifications } from '../../models/Notifications';
 import {Channels} from "../../models/Channels";
 import { ServerRoles } from '../../models/ServerRoles';
 import { MESSAGE_CREATED, SERVER_LEFT, SERVER_MEMBER_REMOVED, SERVER_ROLE_DELETED, USER_CALL_LEFT } from "../../ServerEventNames";
-const redis = require("../../redis");
 const { deleteFCMFromServer, sendServerPush } = require("../../utils/sendPushNotification");
+import * as VoiceCache from '../../cache/Voice.cache';
+import * as ServerMemberCache from '../../cache/ServerMember.cache';
+
 
 module.exports = async (req, res, next) => {
   const { server_id, id } = req.params;
@@ -46,9 +47,9 @@ module.exports = async (req, res, next) => {
   const memberToBeBanned = await ServerMembers.findOne({ server: req.server._id, member: userToBeBanned._id }).select("roles");
   if (!isCreator && memberToBeBanned) {
     // check if requesters role is above the recipients
-    const roles = await ServerRoles.find({ id: { $in: memberToBeBanned.roles } }, { _id: 0 }).select('order').lean();
+    const roles = await ServerRoles.find({ id: { $in: memberToBeBanned.roles } }).select('-_id order').lean();
     let recipientHighestRolePosition = Math.min(...roles.map(r => r.order));
-    if (recipientHighestRolePosition <= req.highestRolePosition) {
+    if (recipientHighestRolePosition <= req.member.highestRolePosition) {
       return res
         .status(403)
         .json({ message: "Your Role priority is the same or lower than the recipient." });
@@ -77,8 +78,7 @@ module.exports = async (req, res, next) => {
     });
   }
 
-  await redis.remServerMember(id, server_id);
-  await deleteServerChannels(id, channelIDs)
+  await ServerMemberCache.removeServerMember(server_id, id);
   const io = req.io;
   // remove server from users server list.
   await Users.updateOne(
@@ -106,10 +106,10 @@ module.exports = async (req, res, next) => {
 
 
   // leave call if inside call
-  const [voiceDetails, err] = await getUserInVoiceByUserId(id);
-  if (voiceDetails?.serverId === server.server_id) {
-    await removeUserFromVoice(id)
-    io.in("server:" + voiceDetails.serverId).emit(USER_CALL_LEFT, {channelId: voiceDetails.channelId, userId: id})
+  const voiceUser = await VoiceCache.getVoiceUserByUserId(id);
+  if (voiceUser?.serverId === server.server_id) {
+    await VoiceCache.removeUser(id)
+    io.in("server:" + voiceUser.serverId).emit(USER_CALL_LEFT, {channelId: voiceUser.channelId, userId: id})
   }
 
 

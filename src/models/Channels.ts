@@ -12,14 +12,14 @@ export enum ChannelType {
   SERVER_CHANNEL = 1,
   SERVER_CATEGORY = 2,
 }
-interface Channel {
+export interface Channel {
   name: string,
   type: ChannelType,
   channelId: string
   categoryId: string;
   visibility: boolean
   creator: any
-  recipients: any[]
+  recipients: string[]
   hide: boolean
   server: any
   server_id: any
@@ -52,14 +52,6 @@ const schema = new Schema<Channel>({
   lastMessaged: {type: Number, required: false},
   // in seconds
   rateLimit: {type: Number, required: false},
-  status: {
-    type: Number,
-    default: 0,
-    enums: [
-        0, //'not blocked',
-        1, //'blocked',
-    ]
-  },
   permissions: {type: permissionsSchema, select: true,}
 })
 

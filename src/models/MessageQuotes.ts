@@ -1,4 +1,4 @@
-import {Schema, model} from 'mongoose'
+import {Schema, model, Types} from 'mongoose'
 
 
 
@@ -6,7 +6,7 @@ export interface MessageQuote {
   message: string,
   messageID: string,
   quotedChannel: any
-  creator: any
+  creator?: Types.ObjectId[]
 }
 
 

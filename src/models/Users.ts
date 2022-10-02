@@ -1,10 +1,10 @@
-import {model, Schema} from 'mongoose';
-import bcrypt from 'bcryptjs';
+import {model, Schema, Types} from 'mongoose';
 import flake from '../utils/genFlakeId'
-
+import bcrypt from 'bcryptjs';
 
 
 interface AboutMe {
+  _id: Types.ObjectId
   name: string;
   gender: string
   age: string
@@ -20,11 +20,11 @@ interface Appearance {
 }
 
 interface Settings {
-  apperance: Appearance
   server_position: string[]
 }
 
-interface User {
+export interface User {
+  _id: Types.ObjectId;
   email: string
   banned: boolean
   email_confirm_code: string
@@ -36,13 +36,13 @@ interface User {
   passwordVersion: number,
   id: string
   lastSeen: number,
-  avatar: string,
-  banner: string
+  avatar?: string,
+  banner?: string
   custom_status: string
   status: number,
   type: string
   friends: any[]
-  servers: any[]
+  servers: Types.ObjectId[]
   created: number
   show_welcome: boolean
   badges: number
@@ -77,7 +77,6 @@ const appearanceSchema = new Schema<Appearance>({
 })
 
 const settingsSchema = new Schema<Settings>({
-  apperance: { type: appearanceSchema },
   server_position: [{ type: String, required: false }]
 })
 
@@ -232,13 +231,6 @@ schema.pre('save', async function (next) {
   }
 })
 
-schema.methods.isValidPassword = async function (newPassword) {
-  try {
-    return await bcrypt.compare(newPassword, this.password);
-  } catch (error: any) {
-    throw new Error(error);
-  }
-}
 
 
 function generateString(n: number) {

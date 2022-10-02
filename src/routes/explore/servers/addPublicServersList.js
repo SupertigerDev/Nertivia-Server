@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
   if (publicList) return res.status(404).json({message: 'server is already in the public list.'});
 
   // check if user added other servers
-  const lastTwoCreated = await PublicServers.find({creator: req.user._id}, {_id: 0}).select('created').sort({_id: -1}).limit(6);
+  const lastTwoCreated = await PublicServers.find({creator: req.user._id}).select('-_id created').sort({_id: -1}).limit(6);
   if (lastTwoCreated.length >= 5) {
     return res.status(403).json({message: 'You can only add up to 5 public Servers.'});
   }

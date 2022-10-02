@@ -15,12 +15,12 @@ module.exports = async (req, res, next) => {
     return res.status(404).json({message: 'Invalid theme id.'});
   }
 
-  let select = 'id description screenshot compatible_client_version approved css updatedCss';
+  let select = '-_id id description screenshot compatible_client_version approved css updatedCss';
   if (getCSS === "false") {
-    select = 'id description screenshot compatible_client_version approved updatedCss'
+    select = '-_id id description screenshot compatible_client_version approved updatedCss'
   }  
 
-  const publicTheme = await PublicThemes.findOne({theme: theme._id}, {_id: 0}).select(select).lean();
+  const publicTheme = await PublicThemes.findOne({theme: theme._id}).select(select).lean();
   if (!publicTheme) {
     return res.status(404).json({message: 'Invalid theme id.'});
   }

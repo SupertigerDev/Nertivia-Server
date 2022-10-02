@@ -1,13 +1,12 @@
-import { deleteSession } from "../newRedisWrapper";
+import * as UserCache from '../cache/User.cache';
 import { AUTHENTICATION_ERROR } from "../ServerEventNames";
-import { getIOAdapter, getIOInstance } from "../socket/instance";
-const redis = require("../redis");
+import { getIOAdapter, getIOInstance } from "../socket/socket";
 
 // excludeSocketID: emit to everyone BUT excludeSocketID
 export async function kickUser(userID: string, message: string, excludeSocketID?: string) {
   const io = getIOInstance();
 
-  await deleteSession(userID);
+  await UserCache.removeUser(userID);
   
 
   io.in(userID).allSockets().then(clients => {

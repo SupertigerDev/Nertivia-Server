@@ -1,6 +1,6 @@
 import {model, Schema} from 'mongoose';
 
-interface Device {
+export interface Device {
   user: any
   userId: string,
   token: string,

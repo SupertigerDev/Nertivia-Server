@@ -2,6 +2,7 @@ import path from 'path';
 import fs from 'fs';
 
 import gm from 'gm';
+import { deleteFile, renameAsync } from './file';
 const gmInstance = gm.subClass({ imageMagick: true });
 
 interface Options {
@@ -34,20 +35,4 @@ export default async function compressImage(filename: string, dirPath?: string, 
 
   })
 
-}
-
-function deleteFile(path: string) {
-  fs.unlink(path, err => {
-    if (err) console.error(err)
-  });
-}
-
-
-function renameAsync(oldDir: string, newDir: string) {
-  return new Promise((res, rej) => {
-    fs.rename(oldDir, newDir, err => {
-      if (err) return rej(err);
-      res(true);
-    })
-  })
 }

@@ -42,7 +42,6 @@ export const SERVER_ROLE_REMOVED_FROM_MEMBER = "server:role_removed_from_member"
 export const SERVER_MUTED = "server:muted";
 // user events
 export const SELF_STATUS_CHANGE = "multiDeviceStatus";
-
 export const USER_BLOCKED = "user:blocked";
 export const USER_UNBLOCKED = "user:unblocked";
 

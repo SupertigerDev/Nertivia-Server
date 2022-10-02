@@ -2,21 +2,22 @@ const MainChannelRouter = require("express").Router();
 
 // Middleware
 const { authenticate } = require("../../../middlewares/authenticate");
-const UserPresentVerification = require ('../../../middlewares/UserPresentVerification')
 const serverPolicy = require("../../../policies/ServerPolicies");
 const checkRolePerms = require('../../../middlewares/checkRolePermissions');
 const { roles: {MANAGE_CHANNELS}} = require("../../../utils/rolePermConstants");
+const { serverMemberVerify } = require("../../../middlewares/serverMemberVerify.middleware");
+const { channelVerify } = require("../../../middlewares/channelVerify.middleware");
 // Channels
 MainChannelRouter.route('/:server_id/channels').get(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   require("./getServerChannels")
 );
 
 // Create
 MainChannelRouter.route('/:server_id/channels').put(
-  authenticate(true),
-  UserPresentVerification,
+  authenticate({allowBot: true}),
+  serverMemberVerify,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.createChannel,
   require("./createServerChannel")
@@ -24,39 +25,39 @@ MainChannelRouter.route('/:server_id/channels').put(
 
 // Update
 MainChannelRouter.route('/:server_id/channels/:channel_id').patch(
-  authenticate(true),
-  UserPresentVerification,
+  authenticate({allowBot: true}),
+  serverMemberVerify,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   serverPolicy.updateChannel,
   require("./updateServerChannel")
 );
 
 // Delete
-MainChannelRouter.route('/:server_id/channels/:channel_id').delete(
-  authenticate(true),
-  UserPresentVerification,
+MainChannelRouter.route('/:serverId/channels/:channelId').delete(
+  authenticate({allowBot: true}),
+  channelVerify,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   require("./deleteServerChannel")
 );
 
 // mute server channel
-MainChannelRouter.route('/:server_id/channels/:channel_id/mute').put(
+MainChannelRouter.route('/:serverId/channels/:channelId/mute').put(
   authenticate(),
-  UserPresentVerification,
+  channelVerify,
   require("./muteServerChannel")
 );
 
 // unmute server channel
-MainChannelRouter.route('/:server_id/channels/:channel_id/mute').delete(
+MainChannelRouter.route('/:serverId/channels/:channelId/mute').delete(
   authenticate(),
-  UserPresentVerification,
+  channelVerify,
   require("./unmuteServerChannel")
 );
 
 // position
 MainChannelRouter.route('/:server_id/channels/position').put(
   authenticate(),
-  UserPresentVerification,
+  serverMemberVerify,
   checkRolePerms('Channels', MANAGE_CHANNELS),
   require("./channelPositions")
 );

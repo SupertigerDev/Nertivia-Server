@@ -1,17 +1,22 @@
-import socketio from "socket.io";
+import { ChannelType } from "gm";
+import socketIO from "socket.io";
+import { CacheUser } from "./cache/User.cache";
+import { OAuth2Client } from 'google-auth-library';
+import { ServerMemberCache } from "./cache/ServerMember.cache";
 
 declare global {
   namespace Express {
     export interface Request {
-      io: socketio.Server,
-      userIP?: string | string[] | undefined,
-      user: User,
+      io: socketIO.Server,
+      userIp: string,
+      user: CacheUser,
       uploadFile: uploadFile,
-      message_id: string,
+      rateLimited: boolean,
       channel: Channel,
+      member: ServerMemberCache
       permErrorMessage?: string,
       server: Server
-      oauth2Client: any
+      oAuth2Client: OAuth2Client
     }
   }
   namespace NodeJS {
@@ -43,26 +48,21 @@ declare global {
       DRIVE_KEY: string
       
       DEV_MODE: string
+      TEST: string
     }
   }
 }
-interface User {
-  id: string
-  _id: string
-  username: string
-  tag: string
-  avatar: string
-  admin: string
-  bot?: boolean,
-  badges?: number
-}
+
 
 interface uploadFile {
-  file: object
+  file: any
   message: string
 }
 interface Channel {
   _id: string,
+  name?: string
+  type: ChannelType
+  server_id?: string
   channelId: string,
   server: Server
   recipients: any[]

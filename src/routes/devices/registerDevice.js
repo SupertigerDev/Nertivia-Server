@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
     });
     
 
-    // // add device to servers;
+    // add device to servers;
     const user = await Users.findById(req.user._id).select("servers");
     if (user.servers.length){
       await Servers.updateMany({_id: {$in: user.servers}}, {$addToSet: {FCM_devices: saveDevice._id}})

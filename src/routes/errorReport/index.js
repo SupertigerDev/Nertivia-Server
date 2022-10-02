@@ -1,13 +1,13 @@
 const MainErrorReportRouter = require("express").Router();
 
 // Middleware
-const rateLimit = require("../../middlewares/rateLimit");
+import { rateLimit } from "../../middlewares/rateLimit.middleware";
 const policy = require("../../policies/errorReportPolicies");
 
 
 // report error
 MainErrorReportRouter.route("/").post(
-  rateLimit({name: 'error_report', expire: 600, requestsLimit: 10, useIP: true}),
+  rateLimit({name: 'error_report', expire: 600, requestsLimit: 10, useIp: true}),
   policy.post,
   require("./reportError")
 );

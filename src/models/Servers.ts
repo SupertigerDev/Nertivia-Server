@@ -1,16 +1,17 @@
-import {model, Schema} from 'mongoose';
+import {model, Schema, Types} from 'mongoose';
 
 interface UserBan {
   user: any,
   reason: string
 }
 
-interface Server {
+export interface Server {
+  _id: string;
   verified: boolean
   name: string
-  avatar: string
+  avatar?: string
   banner: string
-  creator: any
+  creator: Types.ObjectId
   server_id: string
   created: number
   default_channel_id: string
@@ -57,5 +58,5 @@ schema.pre('save', async function(next) {
   next();
 })
 
-export const Servers = model("servers", schema);
+export const Servers = model<Server>("servers", schema);
 

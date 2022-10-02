@@ -1,9 +1,9 @@
 import { ServerRoles } from "../../../models/ServerRoles";
 import { SERVER_ROLE_UPDATED } from "../../../ServerEventNames";
 const { matchedData } = require("express-validator");
-const redis = require("../../../redis");
 const rolePermConstants = require('../../../utils/rolePermConstants');
-const { connection } = require('mongoose');
+import * as ServerMemberCache from '../../../cache/ServerMember.cache';
+
 module.exports = async (req, res, next) => {
   const roleID = req.params.role_id;
 
@@ -25,13 +25,13 @@ module.exports = async (req, res, next) => {
   // higher role should have higher priority
   const isCreator = req.server.creator === req.user._id
   if (!isCreator) {
-    if (req.highestRolePosition >= role.order) {
+    if (req.member.highestRolePosition >= role.order) {
       return res
       .status(403)
-      .json({ message: "Your Role priority is too low to perfom this action." });
+      .json({ message: "Your Role priority is too low to perform this action." });
     }
     // only allowed to edit permissions you have.
-    const requesterPermissions = req.permissions;
+    const requesterPermissions = req.member.permissions;
     const isAdmin = rolePermConstants.containsPerm(requesterPermissions, rolePermConstants.roles.ADMIN);
     if (!isAdmin) {
       const oldPermissions = role.permissions;
@@ -52,7 +52,7 @@ module.exports = async (req, res, next) => {
 
   await ServerRoles.updateOne({_id: role._id}, dataMatched);
   
-  redis.delAllServerMembers(req.server.server_id);
+  ServerMemberCache.deleteAllServerMembers(req.server.server_id);
 
 
 

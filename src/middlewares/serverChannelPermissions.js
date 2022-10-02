@@ -7,7 +7,7 @@ function Permission(permission, defaultAllowed) {
 
     if (req.channel.server.creator === req.user._id) return next()
     // if user has admin role.
-    if (containsPerm(req.permissions, ADMIN)) return next()
+    if (containsPerm(req.member.permissions, ADMIN)) return next()
 
     if (defaultAllowed === false) {
       if (!permissions) {

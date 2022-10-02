@@ -2,7 +2,7 @@ import {Schema, model} from 'mongoose';
 
 export interface BannedIP {
   ip: string
-  expireAt: number
+  expireAt: Date
 }
 
 const schema = new Schema<BannedIP>({

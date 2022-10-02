@@ -1,0 +1,55 @@
+import { Request, Response, Router } from 'express';
+import { Messages } from '../../models/Messages'
+
+import { authenticate } from '../../middlewares/authenticate';
+import { channelVerify } from '../../middlewares/channelVerify.middleware';
+import {rateLimit} from '../../middlewares/rateLimit.middleware';
+
+export const messageGet = (Router: Router) => {
+  Router.route("/:channelId/messages/:messageId").get(
+    authenticate({allowBot: true}),
+    rateLimit({name: 'message_load', expire: 60, requestsLimit: 120 }),
+    channelVerify,
+    route
+  );
+}
+
+async function route (req: Request, res: Response){
+  const { channelId, messageId } = req.params;
+
+  const populate = [{
+    path: "creator",
+    select: "avatar username id tag admin -_id bot"
+  }, {
+    path: "mentions",
+    select: "avatar username id tag admin -_id"
+  }, {
+    path: "quotes",
+    select: "creator message -_id",
+    populate: {
+      path: "creator",
+      select: "avatar username id tag admin -_id",
+      model: "users"
+    }
+  }
+  ]
+
+  // Get message
+  let message = await Messages.findOne(
+    {
+      channelId: channelId,
+      messageID: messageId
+    },
+    "-__v -_id"
+  )
+    .populate(populate)
+    .lean();
+
+  if (!message) {
+    return res.status(404).json({
+      message: "Invalid channelId or messageId"
+    });
+  }
+
+  return res.json(message);
+};
