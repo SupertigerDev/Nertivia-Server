@@ -69,7 +69,7 @@ module.exports = async client => {
 
 
     const ttl = await checkRateLimited({
-      userIp: ip,
+      id: ip,
       expire: 120,
       name: "auth_event",
       requestsLimit: 20

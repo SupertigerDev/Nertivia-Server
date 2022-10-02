@@ -3,12 +3,12 @@ import { getRedisInstance } from './redis/instance';
 const redis = require('./redis');
 
 
-interface RateLimitData{name: string, userId?: string, userIp?: string, expire: number, requestsLimit: number}
+interface RateLimitData{name: string, userId?: string, id?: string, expire: number, requestsLimit: number}
 
 export async function checkRateLimited(data: RateLimitData) {
-  const {name, userId, userIp, expire, requestsLimit} = data;
+  const {name, userId, id, expire, requestsLimit} = data;
 
-  const user = userId || userIp?.replace(/:/g, '=');
+  const user = userId || id?.replace(/:/g, '=');
   if (!user) return true;
 
   let key = `${user}-${name}`

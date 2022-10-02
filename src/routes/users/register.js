@@ -3,6 +3,7 @@ import {BannedIPs} from "../../models/BannedIPs";
 import nodemailer from 'nodemailer';
 import validate from 'deep-email-validator'
 import blacklistArr from '../../emailBlacklist.json'
+import { checkRateLimited } from "../../newRedisWrapper";
 const transporter = nodemailer.createTransport({
   service: process.env.SMTP_SERVICE,
   auth: {
@@ -49,6 +50,7 @@ module.exports = async (req, res, next) => {
   // check if email is blacklisted
   const emailBlacklisted = blacklistArr.find(d => d === email.split("@")[1].trim().toLowerCase())
   if (emailBlacklisted) {
+    console.log("Blacklisted email blocked " + email.split("@")[1].trim().toLowerCase());
     return res.status(403).json({
       errors: [{param: "email", msg: "Email is blacklisted."}]
     });
@@ -61,6 +63,24 @@ module.exports = async (req, res, next) => {
         errors: [{param: "email", msg: "Email is already used."}]
     });
   }
+
+
+
+  const ttl = await checkRateLimited({
+    id: email.split("@")[1].trim().toLowerCase(),
+    expire: 86400000, // one day
+    name: "email_temp_blacklist",
+    requestsLimit: 5
+  })
+  if (ttl) {
+    console.log("Email blacklisted for a day " + email.split("@")[1].trim().toLowerCase());
+    return res.status(403).json({
+      errors: [{param: "other", msg: "This email is blacklisted for a day."}]
+    });
+  }
+
+  console.log("Account created with the domain " + email.split("@")[1].trim().toLowerCase());
+
 
   const newUser = new Users({ username, email: email.toLowerCase(), password, ip: req.userIP });
   const created = await newUser.save();
