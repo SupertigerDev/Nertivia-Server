@@ -65,19 +65,38 @@ module.exports = async (req, res, next) => {
   }
 
 
+  if (!["gmail.com", "googlemail.com"].includes(email.split("@")[1].trim().toLowerCase())) {
 
-  const ttl = await checkRateLimited({
+    const ttlEmailLimit = await checkRateLimited({
+      id: "temp",
+      expire: 86400000, // one day
+      name: "non_google_email_limit",
+      requestsLimit: 5
+    })
+    if (ttlEmailLimit) {
+      console.log("Non gmail emails have been blacklisted for a day.");
+      return res.status(403).json({
+        errors: [{param: "other", msg: "Non gmail emails have been blacklisted for a day."}]
+      });
+    }
+  }
+  
+
+  const ttlDomainRateLimit = await checkRateLimited({
     id: email.split("@")[1].trim().toLowerCase(),
     expire: 86400000, // one day
-    name: "email_temp_blacklist",
-    requestsLimit: 5
+    name: "email_domain_blacklist_temp",
+    requestsLimit: 30
   })
-  if (ttl) {
+  if (ttlDomainRateLimit) {
     console.log("Email blacklisted for a day " + email.split("@")[1].trim().toLowerCase());
     return res.status(403).json({
       errors: [{param: "other", msg: "This email is blacklisted for a day."}]
     });
   }
+
+
+
 
   console.log("Account created with the domain " + email.split("@")[1].trim().toLowerCase());
 
