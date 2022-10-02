@@ -91,7 +91,7 @@ module.exports = async (req, res, next) => {
   if (ttlDomainRateLimit) {
     console.log("Email blacklisted for a day " + email.split("@")[1].trim().toLowerCase());
     return res.status(403).json({
-      errors: [{param: "other", msg: "This email is blacklisted for a day."}]
+      errors: [{param: "other", msg: "This domain is blacklisted for a day."}]
     });
   }
 
