@@ -4,13 +4,7 @@ import nodemailer from 'nodemailer';
 import validate from 'deep-email-validator'
 import blacklistArr from '../../emailBlacklist.json'
 import { checkRateLimited } from "../../newRedisWrapper";
-const transporter = nodemailer.createTransport({
-  service: process.env.SMTP_SERVICE,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  }
-})
+const JWT = require("jsonwebtoken");
 
 module.exports = async (req, res, next) => {
 
@@ -47,14 +41,9 @@ module.exports = async (req, res, next) => {
     return res.status(403).json({
       errors: [{param: "email", msg: `Email is Invalid (${emailExists.reason}).`}]})
   }
-  // check if email is blacklisted
-  const emailBlacklisted = blacklistArr.find(d => d === email.split("@")[1].trim().toLowerCase())
-  if (emailBlacklisted) {
-    console.log("Blacklisted email blocked " + email.split("@")[1].trim().toLowerCase());
-    return res.status(403).json({
-      errors: [{param: "email", msg: "Email is blacklisted."}]
-    });
-  }  
+
+
+
   // Check if there is a user with the same email in the db
   const foundUser = await Users.findOne({ email: email.toLowerCase() });
   if (foundUser) { 
@@ -65,69 +54,26 @@ module.exports = async (req, res, next) => {
   }
 
 
-  if (!["gmail.com", "googlemail.com"].includes(email.split("@")[1].trim().toLowerCase())) {
-
-    const ttlEmailLimit = await checkRateLimited({
-      id: "temp",
-      expire: 86400000, // one day
-      name: "non_google_email_limit",
-      requestsLimit: 5
-    })
-    if (ttlEmailLimit) {
-      console.log("Non gmail emails have been blacklisted for a day. " + email.split("@")[1].trim().toLowerCase());
-      return res.status(403).json({
-        errors: [{param: "other", msg: "Non gmail emails have been blacklisted for a day."}]
-      });
-    }
-  }
-  
-
-  const ttlDomainRateLimit = await checkRateLimited({
-    id: email.split("@")[1].trim().toLowerCase(),
-    expire: 86400000, // one day
-    name: "email_domain_blacklist_temp",
-    requestsLimit: 30
-  })
-  if (ttlDomainRateLimit) {
-    console.log("Email blacklisted for a day " + email.split("@")[1].trim().toLowerCase());
-    return res.status(403).json({
-      errors: [{param: "other", msg: "This domain is blacklisted for a day."}]
-    });
-  }
-
-
-
-
   console.log("Account created with the domain " + email.split("@")[1].trim().toLowerCase());
 
 
   const newUser = new Users({ username, email: email.toLowerCase(), password, ip: req.userIP });
   const created = await newUser.save();
 
-  if (process.env.DEV_MODE === "true") {
-    return res.status(403).json({
-      errors: [{param: "other", msg: "Dev mode. email confirm code: " + created.email_confirm_code}]
-    });
-  }
+  const token = signToken(created.id, created.passwordVersion)
+    .split(".")
+    .splice(1)
+    .join(".");
 
-  // send email
-  const mailOptions = {
-    from: process.env.SMTP_FROM,
-    to: email.toLowerCase().trim(), 
-    subject: 'Nertivia - Confirmation Code',
-    html: `<p>Your confirmation code is: <strong>${created.email_confirm_code}</strong></p>`
-  };
-
-  transporter.sendMail(mailOptions, async (err, info) => {
-    if (err) {
-      await Users.deleteOne({_id: created._id})
-      return res.status(403).json({
-        errors: [{param: "other", msg: "Something went wrong while sending email. Try again later."}]
-      });
-    }
-    // Respond with user
-    res.send({
-      message: "confirm email"
-    })
+  res.send({
+    token
   })
+}
+
+function signToken(user_id, pwdVer) {
+  if (pwdVer !== undefined) {
+    return JWT.sign(`${user_id}-${pwdVer}`, process.env.JWT_SECRET);
+  } else {
+    return JWT.sign(user_id, process.env.JWT_SECRET);
+  }
 }

@@ -220,9 +220,6 @@ schema.pre('save', async function (next) {
 
     // generate tag
     this.tag = generateString(4);
-    if (!this.bot) {
-      this.email_confirm_code = generateString(10)
-    }
     // Date created
     this.created = Date.now();
     next();

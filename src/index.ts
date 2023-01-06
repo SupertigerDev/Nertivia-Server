@@ -6,6 +6,7 @@ import app from './app';
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
 import { Log } from './Log';
+import { Users } from './models/Users';
 dotenv.config();
 // header only contains ALGORITHM & TOKEN TYPE (https://jwt.io/)
 process.env.JWT_HEADER = "eyJhbGciOiJIUzI1NiJ9.";
@@ -46,10 +47,16 @@ function start() {
 			useFindAndModify: false,
 			useCreateIndex: true
 		};
-		mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, err => {
+		mongoose.connect(process.env.MONGODB_ADDRESS, mongoOptions, async err => {
 			if (err) throw err;
 			Log.info("Connected!")
-			connectRedis();
+
+
+			// const today = 1664697600000;
+			// await Users.updateMany({created: {$gt: today}}, {$set: {banned: true}});
+			// console.log("done")
+
+			// connectRedis();
 		})
 	}
 	function connectRedis() {
